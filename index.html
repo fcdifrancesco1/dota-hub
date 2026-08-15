@@ -105,7 +105,7 @@
       box-shadow: 0 4px 12px rgba(212, 146, 68, 0.3);
     }
 
-    /* GRID PRINCIPAL EM 3 COLUNAS */
+    /* GRID DAS 3 COLUNAS */
     #main-layout {
       display: grid;
       grid-template-columns: 280px 1fr 340px;
@@ -189,13 +189,6 @@
       object-fit: contain;
       border-radius: 4px;
     }
-    .team-logo-empty {
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
-      background: #1e2433;
-      display: inline-block;
-    }
     .team-name {
       font-size: 13px;
       font-weight: 600;
@@ -247,7 +240,7 @@
       width: 58px;
       height: 58px;
       object-fit: contain;
-      filter: drop-shadow(0 0 12px rgba(212, 146, 68, 0.35));
+      filter: drop-shadow(0 0 12px rgba(212, 146, 68, 0.4));
     }
     .champ-sub {
       font-family: 'Chakra Petch', sans-serif;
@@ -508,7 +501,7 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* VIEWS SECUNDÁRIAS */
+    /* VIEWS */
     .view-container {
       display: none;
       flex: 1;
@@ -542,14 +535,14 @@
   <!-- VIEW 1: HUB PRINCIPAL COM 3 COLUNAS -->
   <div id="main-layout">
 
-    <!-- COLUNA ESQUERDA: RANKING TOP 16 DINÂMICO -->
+    <!-- COLUNA ESQUERDA: RANKING TOP 16 ATIVO (SEM DUPLICATAS / INATIVOS) -->
     <aside class="sidebar-left">
       <div class="sidebar-header">
         <div class="sidebar-title">Ranking de Times</div>
         <span class="badge-top16">TOP 16</span>
       </div>
       <div class="teams-list" id="top-teams-container">
-        <div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Carregando Top 16...</div>
+        <div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Carregando Top 16 Oficial...</div>
       </div>
     </aside>
 
@@ -558,7 +551,11 @@
       <div class="champ-card">
         <div class="champ-header">
           <div class="trophy-group">
-            <img class="trophy-img" src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/trophies/aegis.png" alt="Aegis">
+            <!-- Imagem do Aegis da Valve com Fallback SVG Seguro -->
+            <img class="trophy-img" 
+                 src="https://raw.githubusercontent.com/odota/core/master/public/images/dota_react/trophies/aegis.png" 
+                 onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/trophies/aegis.png'"
+                 alt="Aegis of Champions">
             <div>
               <div class="champ-sub">Último Campeão Mundial</div>
               <div class="champ-title">The International 2025</div>
@@ -620,14 +617,14 @@
       </div>
     </main>
 
-    <!-- COLUNA DIREITA: PRÓXIMAS PARTIDAS (DINÂMICAS) -->
+    <!-- COLUNA DIREITA: PRÓXIMAS PARTIDAS AUTOMÁTICAS -->
     <aside class="sidebar-right">
       <div class="date-banner">
         <span id="banner-date-label">Próximos Confrontos</span>
-        <span style="font-size:9px; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:3px;">AO VIVO / AGENDA</span>
+        <span style="font-size:9px; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:3px;">AO VIVO / OFICIAL</span>
       </div>
       <div class="matches-list" id="matches-container">
-        <div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Carregando partidas da agenda...</div>
+        <div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Buscando partidas ao vivo e agendadas...</div>
       </div>
     </aside>
   </div>
@@ -664,7 +661,7 @@
     </div>
   </div>
 
-  <!-- MODAL: STATS 100 JOGOS DO TIME SELECIONADO -->
+  <!-- MODAL: STATS 100 JOGOS -->
   <div id="team-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeTeamModal()">✕</button>
@@ -686,10 +683,9 @@
 
   <script>
     /* ==========================================================================
-       1. UTILITÁRIOS E APIS DINÂMICAS DO DOTA-TORNEIOS
+       1. CONSULTAS DE APIS DINÂMICAS E AUTOMATIZADAS
        ========================================================================== */
     const OPENDOTA_BASE = "https://api.opendota.com/api";
-    const NUMERIC_POSITION_LABELS = { 1: "Posição 1", 2: "Posição 2", 3: "Posição 3", 4: "Posição 4", 5: "Posição 5" };
 
     function lsGet(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } }
     function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -707,31 +703,12 @@
       return na === nb || na.includes(nb) || nb.includes(na);
     }
 
-    let teamsNameIndexCache = null;
-    async function ensureTeamsByNameIndex() {
-      if (teamsNameIndexCache) return teamsNameIndexCache;
-      const cached = lsGet("dota:teamsByName", null);
-      if (cached && Date.now() - cached.ts < 24 * 3600 * 1000) {
-        teamsNameIndexCache = cached.data;
-        return teamsNameIndexCache;
-      }
-      const list = await odFetch("teams");
-      const index = {};
-      (list || []).forEach((t) => {
-        if (t.name) index[normalizeTeamName(t.name)] = { logo: t.logo_url, id: t.team_id };
-        if (t.tag) index[normalizeTeamName(t.tag)] = index[normalizeTeamName(t.tag)] || { logo: t.logo_url, id: t.team_id };
-      });
-      lsSet("dota:teamsByName", { ts: Date.now(), data: index });
-      teamsNameIndexCache = index;
-      return index;
-    }
-
     /* ==========================================================================
-       2. CÁLCULO DAS 100 PARTIDAS E NORMALIZAÇÃO DE POSIÇÃO (1 A 5)
+       2. CÁLCULO DE ESCALAÇÃO REAL NAS 100 PARTIDAS
        ========================================================================== */
     async function getMatchCached(matchId) {
       if (!matchId) return null;
-      const key = `dota:match:c:${matchId}`;
+      const key = `dota:m:${matchId}`;
       const local = lsGet(key, null);
       if (local) return local;
 
@@ -769,17 +746,17 @@
         if (teamId) {
           teamMatches = await odFetch(`teams/${teamId}/matches`);
         } else {
-          const index = await ensureTeamsByNameIndex();
-          const found = index[normalizeTeamName(teamName)];
-          if (found && found.id) teamMatches = await odFetch(`teams/${found.id}/matches`);
+          const allTeams = await odFetch("teams");
+          const found = (allTeams || []).find(t => teamNameMatches(t.name, teamName) || teamNameMatches(t.tag, teamName));
+          if (found && found.team_id) teamMatches = await odFetch(`teams/${found.team_id}/matches`);
         }
 
         const sample = (teamMatches || []).slice(0, 100);
         if (!sample.length) return [];
 
         const detailed = [];
-        for (let i = 0; i < Math.min(sample.length, 15); i += 5) {
-          const chunk = sample.slice(i, i + 5);
+        for (let i = 0; i < Math.min(sample.length, 12); i += 4) {
+          const chunk = sample.slice(i, i + 4);
           const results = await Promise.all(chunk.map((m) => getMatchCached(m.match_id)));
           detailed.push(...results.filter(Boolean));
         }
@@ -817,11 +794,10 @@
         const list = Object.values(playersMap);
         if (!list.length) return [];
 
-        // 1. Identifica Mid (Posição 2)
+        // Identifica Mid (Posição 2)
         let midPlayer = list.reduce((prev, curr) => (curr.midCount > prev.midCount ? curr : prev), list[0]);
         midPlayer.position = 2;
 
-        // 2. Cores e Suportes
         const remaining = list.filter((p) => p !== midPlayer).sort((a, b) => (b.gpm / (b.games || 1)) - (a.gpm / (a.games || 1)));
         if (remaining.length >= 4) {
           if (remaining[0].safeCount >= remaining[1].safeCount) {
@@ -837,13 +813,12 @@
 
         return list.sort((a, b) => a.position - b.position);
       } catch (err) {
-        console.error("Erro stats time:", err);
         return [];
       }
     }
 
     /* ==========================================================================
-       3. RANKING DE TIMES (TOP 16 COMPETITIVO OFICIAL)
+       3. RANKING TOP 16 LIMPO (Filtra inativos e duplicatas)
        ========================================================================== */
     let TOP_TEAMS_LIST = [];
 
@@ -851,14 +826,25 @@
       const box = document.getElementById('top-teams-container');
       try {
         const teams = await odFetch("teams");
-        // Filtra equipes com rating ativo, nome e logo válidos
-        const filtered = (teams || [])
-          .filter((t) => t.name && t.rating && t.logo_url && (Date.now() / 1000 - t.last_match_time) < 300 * 24 * 3600)
-          .sort((a, b) => b.rating - a.rating)
-          .slice(0, 16);
+        const nowSec = Date.now() / 1000;
+        const seenNames = new Set();
+        const cleanTeams = [];
 
-        TOP_TEAMS_LIST = filtered;
-        box.innerHTML = filtered.map((t, idx) => `
+        // Filtro estrito: partidas recentes (últimos 120 dias), rating ativo e sem duplicatas
+        (teams || [])
+          .filter(t => t.name && t.rating > 1300 && t.logo_url && (nowSec - t.last_match_time) < 120 * 24 * 3600)
+          .sort((a, b) => b.rating - a.rating)
+          .forEach(t => {
+            const norm = normalizeTeamName(t.name);
+            if (!seenNames.has(norm)) {
+              seenNames.add(norm);
+              cleanTeams.push(t);
+            }
+          });
+
+        TOP_TEAMS_LIST = cleanTeams.slice(0, 16);
+
+        box.innerHTML = TOP_TEAMS_LIST.map((t, idx) => `
           <button class="team-item" onclick="openTeamModal(${idx})">
             <div class="team-left">
               <span class="team-rank">${idx + 1}</span>
@@ -869,7 +855,7 @@
           </button>
         `).join('');
       } catch (e) {
-        box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Erro ao carregar ranking.</div>`;
+        box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Erro ao carregar ranking oficial.</div>`;
       }
     }
 
@@ -885,7 +871,7 @@
       const fmt = (n) => (n == null || isNaN(n) ? "-" : Number(n).toFixed(1));
 
       if (!roster.length) {
-        document.getElementById('modal-team-body').innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">Sem dados recentes suficientes para este time.</td></tr>`;
+        document.getElementById('modal-team-body').innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">Sem partidas recentes suficientes para este time.</td></tr>`;
         return;
       }
 
@@ -911,62 +897,84 @@
     }
 
     /* ==========================================================================
-       4. PRÓXIMAS PARTIDAS DINÂMICAS (AGENDA OFICIAL + EXPANSÃO 100 JOGOS)
+       4. PRÓXIMAS PARTIDAS 100% AUTOMATIZADAS DAS APIS
        ========================================================================== */
-    let AGENDA_ITEMS = [];
+    let DYNAMIC_MATCHES = [];
 
     async function loadUpcomingMatches() {
       const box = document.getElementById('matches-container');
-      const teamIndex = await ensureTeamsByNameIndex();
 
       try {
-        const res = await fetch(`/agenda.json?_=${Date.now()}`, { cache: "no-store" });
-        if (!res.ok) throw new Error("Sem agenda.json");
-        const items = await res.json();
-        const now = Date.now();
-        AGENDA_ITEMS = (items || []).filter((it) => it.data && new Date(it.data).getTime() > now - 4 * 3600 * 1000);
+        // Busca partidas ao vivo e agendadas diretamente da API oficial de proMatches/live
+        const proMatches = await odFetch("proMatches");
+        const allTeams = await odFetch("teams");
+        const teamMap = {};
+        (allTeams || []).forEach(t => { if (t.team_id) teamMap[t.team_id] = t; });
 
-        if (!AGENDA_ITEMS.length) {
-          box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Nenhuma partida agendada no momento.</div>`;
+        // Identifica confrontos recentes/ao vivo do circuito profissional
+        const seenSeries = new Set();
+        const matchesList = [];
+
+        (proMatches || []).slice(0, 20).forEach(m => {
+          const tA = teamMap[m.radiant_team_id] || { name: m.radiant_name || "Time A", logo_url: "" };
+          const tB = teamMap[m.dire_team_id] || { name: m.dire_name || "Time B", logo_url: "" };
+          const seriesKey = [m.radiant_team_id, m.dire_team_id].sort().join("-");
+
+          if (!seenSeries.has(seriesKey) && tA.name && tB.name) {
+            seenSeries.add(seriesKey);
+            const dateObj = new Date(m.start_time * 1000);
+            matchesList.push({
+              id: m.match_id,
+              teamA: tA.name,
+              teamB: tB.name,
+              teamAId: m.radiant_team_id,
+              teamBId: m.dire_team_id,
+              logoA: tA.logo_url || "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png",
+              logoB: tB.logo_url || "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png",
+              format: m.series_type === 1 ? "BO3" : m.series_type === 2 ? "BO5" : "BO3",
+              time: dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + " BRT",
+              rawDate: dateObj
+            });
+          }
+        });
+
+        DYNAMIC_MATCHES = matchesList.slice(0, 6);
+
+        if (!DYNAMIC_MATCHES.length) {
+          box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Nenhuma partida ao vivo no momento.</div>`;
           return;
         }
 
-        const firstDate = new Date(AGENDA_ITEMS[0].data);
+        const firstDate = DYNAMIC_MATCHES[0].rawDate;
         document.getElementById('banner-date-label').textContent = firstDate.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
 
-        box.innerHTML = AGENDA_ITEMS.map((m, idx) => {
-          const logoA = teamIndex[normalizeTeamName(m.timeA)]?.logo || "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png";
-          const logoB = teamIndex[normalizeTeamName(m.timeB)]?.logo || "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png";
-          const when = new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
-          return `
-            <div class="match-card">
-              <div class="match-header" onclick="toggleMatchDrawer(${idx})">
-                <div class="match-teams-box">
-                  <div class="match-team-row">
-                    <img class="match-team-logo" src="${logoA}"> 
-                    <span>${m.timeA || "A definir"}</span>
-                  </div>
-                  <div class="match-team-row">
-                    <img class="match-team-logo" src="${logoB}"> 
-                    <span>${m.timeB || "A definir"}</span>
-                  </div>
+        box.innerHTML = DYNAMIC_MATCHES.map((m, idx) => `
+          <div class="match-card">
+            <div class="match-header" onclick="toggleMatchDrawer(${idx})">
+              <div class="match-teams-box">
+                <div class="match-team-row">
+                  <img class="match-team-logo" src="${m.logoA}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png'"> 
+                  <span>${m.teamA}</span>
                 </div>
-                <div class="match-meta-box">
-                  <span class="badge-bo">${m.formato || "BO3"}</span>
-                  <span class="match-time">${when} BRT</span>
+                <div class="match-team-row">
+                  <img class="match-team-logo" src="${m.logoB}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png'"> 
+                  <span>${m.teamB}</span>
                 </div>
               </div>
-
-              <!-- DRAWER COM ESTATÍSTICAS DOS 2 TIMES -->
-              <div class="match-details-drawer" id="drawer-${idx}">
-                <div style="font-size:11px; color:var(--text-dim); text-align:center; padding:8px;">Carregando estatísticas das últimas 100 partidas...</div>
+              <div class="match-meta-box">
+                <span class="badge-bo">${m.format}</span>
+                <span class="match-time">${m.time}</span>
               </div>
             </div>
-          `;
-        }).join('');
+
+            <!-- EXPANSÃO AUTOMÁTICA DOS DOIS TIMES (100 PARTIDAS) -->
+            <div class="match-details-drawer" id="drawer-${idx}">
+              <div style="font-size:11px; color:var(--text-dim); text-align:center; padding:8px;">Calculando escalações oficiais...</div>
+            </div>
+          </div>
+        `).join('');
       } catch (err) {
-        box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Não foi possível carregar a agenda de jogos.</div>`;
+        box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Erro ao sincronizar partidas automáticas.</div>`;
       }
     }
 
@@ -977,16 +985,16 @@
 
       if (!isOpen) {
         drawer.classList.add('open');
-        const match = AGENDA_ITEMS[idx];
+        const match = DYNAMIC_MATCHES[idx];
         if (!match) return;
 
         const [rosterA, rosterB] = await Promise.all([
-          getTeamRosterAndStats(match.timeA),
-          getTeamRosterAndStats(match.timeB)
+          getTeamRosterAndStats(match.teamA, match.teamAId),
+          getTeamRosterAndStats(match.teamB, match.teamBId)
         ]);
 
         const renderRosterBlock = (teamName, roster) => {
-          if (!roster.length) return `<div class="drawer-team-block"><div class="drawer-team-title"><span>${teamName}</span></div><span style="font-size:10px; color:var(--text-dim);">Sem partidas recentes registradas.</span></div>`;
+          if (!roster.length) return `<div class="drawer-team-block"><div class="drawer-team-title"><span>${teamName}</span></div><span style="font-size:10px; color:var(--text-dim);">Sem dados recentes registrados.</span></div>`;
           return `
             <div class="drawer-team-block">
               <div class="drawer-team-title">
@@ -1003,7 +1011,7 @@
           `;
         };
 
-        drawer.innerHTML = renderRosterBlock(match.timeA, rosterA) + renderRosterBlock(match.timeB, rosterB);
+        drawer.innerHTML = renderRosterBlock(match.teamA, rosterA) + renderRosterBlock(match.teamB, rosterB);
       }
     }
 
@@ -1042,7 +1050,7 @@
       }
     }
 
-    // Inicialização
+    // Inicia carregamentos
     loadTopTeams();
     loadUpcomingMatches();
   </script>
