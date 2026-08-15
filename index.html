@@ -105,10 +105,10 @@
       box-shadow: 0 4px 12px rgba(212, 146, 68, 0.3);
     }
 
-    /* GRID DAS 3 COLUNAS */
+    /* GRID PRINCIPAL EM 3 COLUNAS */
     #main-layout {
       display: grid;
-      grid-template-columns: 270px 1fr 340px;
+      grid-template-columns: 280px 1fr 340px;
       flex: 1;
       overflow: hidden;
     }
@@ -157,7 +157,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 7px 10px;
+      padding: 8px 10px;
       background: rgba(24, 28, 38, 0.4);
       border: 1px solid transparent;
       border-radius: 8px;
@@ -184,27 +184,20 @@
       width: 18px;
     }
     .team-logo-img {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       object-fit: contain;
       border-radius: 4px;
-      background: #0d0f14;
     }
-    .team-logo-fallback {
-      width: 22px;
-      height: 22px;
+    .team-logo-empty {
+      width: 24px;
+      height: 24px;
       border-radius: 4px;
       background: #1e2433;
-      color: var(--accent-gold);
-      font-size: 9px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'JetBrains Mono', monospace;
+      display: inline-block;
     }
     .team-name {
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text);
       white-space: nowrap;
@@ -352,7 +345,7 @@
     .stat-label { font-size: 8px; color: var(--text-dim); display: block; }
     .stat-val-cyan { color: var(--accent-cyan); font-weight: 700; }
 
-    /* COLUNA DIREITA: PRÓXIMOS JOGOS */
+    /* COLUNA DIREITA: PRÓXIMOS CONFRONTOS */
     aside.sidebar-right {
       background: var(--bg-surface);
       border-left: 1px solid var(--border);
@@ -465,7 +458,7 @@
     }
     .drawer-player-row strong { color: #fff; }
 
-    /* MODAL TOP 16 STATS */
+    /* MODAL DE ESTATÍSTICAS */
     #team-modal {
       position: fixed;
       inset: 0;
@@ -482,7 +475,7 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       width: 100%;
-      max-width: 620px;
+      max-width: 650px;
       padding: 24px;
       position: relative;
     }
@@ -515,7 +508,7 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* VIEWS */
+    /* VIEWS SECUNDÁRIAS */
     .view-container {
       display: none;
       flex: 1;
@@ -546,17 +539,17 @@
     <div style="width: 42px;"></div>
   </header>
 
-  <!-- VIEW 1: HUB PRINCIPAL COM AS 3 COLUNAS -->
+  <!-- VIEW 1: HUB PRINCIPAL COM 3 COLUNAS -->
   <div id="main-layout">
 
-    <!-- COLUNA ESQUERDA: TOP 16 ATIVO (GGScore Circuit) -->
+    <!-- COLUNA ESQUERDA: RANKING TOP 16 DINÂMICO -->
     <aside class="sidebar-left">
       <div class="sidebar-header">
         <div class="sidebar-title">Ranking de Times</div>
         <span class="badge-top16">TOP 16</span>
       </div>
       <div class="teams-list" id="top-teams-container">
-        <!-- Renderizado com logos oficiais e escalações -->
+        <div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Carregando Top 16...</div>
       </div>
     </aside>
 
@@ -627,14 +620,14 @@
       </div>
     </main>
 
-    <!-- COLUNA DIREITA: PRÓXIMOS CONFRONTOS -->
+    <!-- COLUNA DIREITA: PRÓXIMAS PARTIDAS (DINÂMICAS) -->
     <aside class="sidebar-right">
       <div class="date-banner">
-        <span>Sábado, 15 Agosto 2026</span>
-        <span style="font-size:9px; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:3px;">AO VIVO / HOJE</span>
+        <span id="banner-date-label">Próximos Confrontos</span>
+        <span style="font-size:9px; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:3px;">AO VIVO / AGENDA</span>
       </div>
       <div class="matches-list" id="matches-container">
-        <!-- Renderizado com ambos os times e jogadores nas 100 partidas -->
+        <div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Carregando partidas da agenda...</div>
       </div>
     </aside>
   </div>
@@ -671,7 +664,7 @@
     </div>
   </div>
 
-  <!-- MODAL: STATS 100 JOGOS DOS TIMES -->
+  <!-- MODAL: STATS 100 JOGOS DO TIME SELECIONADO -->
   <div id="team-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeTeamModal()">✕</button>
@@ -692,181 +685,331 @@
   </div>
 
   <script>
-    // 1. RANKING ATUAL TOP 16 COMPETITIVO (Estilo GGScore / Valve DPC Circuit)
-    const TOP_16_TEAMS = [
-      { id: 9247354, name: "Team Falcons", rating: 1782, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/9247354.png", roster: [
-        { pos: 1, name: "skiter", kda: "5.4/2.2/9.1", gpm: 755, xpm: 790 },
-        { pos: 2, name: "Malr1ne", kda: "7.1/2.8/10.4", gpm: 710, xpm: 775 },
-        { pos: 3, name: "ATF", kda: "5.0/3.1/11.0", gpm: 620, xpm: 680 },
-        { pos: 4, name: "Cr1t-", kda: "3.2/4.1/14.5", gpm: 410, xpm: 460 },
-        { pos: 5, name: "Sneyking", kda: "2.1/5.0/15.8", gpm: 335, xpm: 395 }
-      ]},
-      { id: 2163, name: "Team Liquid", rating: 1745, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/2163.png", roster: [
-        { pos: 1, name: "miCKe", kda: "5.8/2.0/8.6", gpm: 742, xpm: 780 },
-        { pos: 2, name: "Nisha", kda: "6.2/2.5/9.4", gpm: 698, xpm: 760 },
-        { pos: 3, name: "SabeRLighT-", kda: "4.1/3.4/10.8", gpm: 580, xpm: 630 },
-        { pos: 4, name: "Boxi", kda: "3.9/4.0/13.2", gpm: 390, xpm: 440 },
-        { pos: 5, name: "Insania", kda: "3.2/5.1/14.0", gpm: 330, xpm: 380 }
-      ]},
-      { id: 8599101, name: "Gaimin Gladiators", rating: 1720, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8599101.png", roster: [
-        { pos: 1, name: "watson", kda: "6.0/2.1/7.8", gpm: 760, xpm: 795 },
-        { pos: 2, name: "Quinn", kda: "6.5/2.9/9.0", gpm: 685, xpm: 740 },
-        { pos: 3, name: "Ace", kda: "4.5/3.2/12.1", gpm: 570, xpm: 620 },
-        { pos: 4, name: "tOfu", kda: "3.1/4.5/13.8", gpm: 375, xpm: 430 },
-        { pos: 5, name: "Seleri", kda: "2.0/5.8/14.2", gpm: 315, xpm: 370 }
-      ]},
-      { id: 7119388, name: "Team Spirit", rating: 1698, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png", roster: [
-        { pos: 1, name: "Satanic", kda: "6.4/1.9/8.0", gpm: 770, xpm: 810 },
-        { pos: 2, name: "Larl", kda: "5.5/3.0/9.8", gpm: 670, xpm: 730 },
-        { pos: 3, name: "Collapse", kda: "4.8/3.1/11.5", gpm: 590, xpm: 640 },
-        { pos: 4, name: "Rue", kda: "3.0/4.2/13.0", gpm: 380, xpm: 435 },
-        { pos: 5, name: "Miposhka", kda: "2.2/5.2/15.1", gpm: 320, xpm: 375 }
-      ]},
-      { id: 8261500, name: "Tundra Esports", rating: 1675, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8261500.png", roster: [
-        { pos: 1, name: "Nightfall", kda: "6.2/1.8/7.5", gpm: 780, xpm: 815 },
-        { pos: 2, name: "bzm", kda: "5.8/3.2/9.0", gpm: 690, xpm: 750 },
-        { pos: 3, name: "33", kda: "4.4/3.0/11.2", gpm: 595, xpm: 645 },
-        { pos: 4, name: "Saksa", kda: "3.4/3.9/13.5", gpm: 395, xpm: 450 },
-        { pos: 5, name: "Whitemon", kda: "2.1/5.4/14.8", gpm: 310, xpm: 360 }
-      ]},
-      { id: 8254400, name: "Xtreme Gaming", rating: 1650, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8254400.png", roster: [
-        { pos: 1, name: "Ame", kda: "6.1/1.9/8.2", gpm: 765, xpm: 790 },
-        { pos: 2, name: "Xm", kda: "5.2/2.8/9.6", gpm: 660, xpm: 720 },
-        { pos: 3, name: "Xxs", kda: "4.6/3.3/10.9", gpm: 560, xpm: 615 },
-        { pos: 4, name: "XinQ", kda: "3.8/4.3/14.0", gpm: 420, xpm: 470 },
-        { pos: 5, name: "Dy", kda: "2.0/5.5/13.8", gpm: 305, xpm: 350 }
-      ]},
-      { id: 8255888, name: "BetBoom Team", rating: 1635, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8255888.png", roster: [
-        { pos: 1, name: "Pure~", kda: "5.9/2.2/8.4", gpm: 750, xpm: 785 },
-        { pos: 2, name: "gpk~", kda: "6.0/2.7/9.1", gpm: 680, xpm: 740 },
-        { pos: 3, name: "MieRo`", kda: "4.2/3.5/10.5", gpm: 550, xpm: 605 },
-        { pos: 4, name: "Save-", kda: "3.5/3.8/14.2", gpm: 405, xpm: 460 },
-        { pos: 5, name: "Kataomi`", kda: "2.3/5.0/14.6", gpm: 325, xpm: 380 }
-      ]},
-      { id: 9568912, name: "PARIVISION", rating: 1612, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/9247354.png", roster: [
-        { pos: 1, name: "Crystallis", kda: "5.3/2.5/8.0", gpm: 720, xpm: 760 },
-        { pos: 2, name: "No[o]ne-", kda: "6.3/2.6/9.5", gpm: 705, xpm: 765 },
-        { pos: 3, name: "DM", kda: "4.0/3.6/10.2", gpm: 540, xpm: 595 },
-        { pos: 4, name: "9Class", kda: "3.2/4.2/13.7", gpm: 385, xpm: 440 },
-        { pos: 5, name: "Dukalis", kda: "2.0/5.3/14.0", gpm: 310, xpm: 365 }
-      ]},
-      { id: 8727821, name: "Aurora Gaming", rating: 1590, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8255888.png", roster: [
-        { pos: 1, name: "TA2000", kda: "5.5/2.1/7.9", gpm: 735, xpm: 770 },
-        { pos: 2, name: "Abed", kda: "5.9/2.8/9.2", gpm: 675, xpm: 735 },
-        { pos: 3, name: "Jabz", kda: "4.1/3.5/11.0", gpm: 545, xpm: 600 },
-        { pos: 4, name: "Q", kda: "3.3/4.0/13.4", gpm: 390, xpm: 445 },
-        { pos: 5, name: "Oli", kda: "1.9/5.1/14.5", gpm: 305, xpm: 355 }
-      ]},
-      { id: 9289293, name: "HEROIC", rating: 1572, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8599101.png", roster: [
-        { pos: 1, name: "Yuma", kda: "5.4/2.3/8.1", gpm: 725, xpm: 760 },
-        { pos: 2, name: "4nalog", kda: "5.6/3.1/9.0", gpm: 665, xpm: 725 },
-        { pos: 3, name: "Davai Lama", kda: "3.9/3.8/10.6", gpm: 535, xpm: 590 },
-        { pos: 4, name: "Scofield", kda: "3.1/4.4/13.1", gpm: 380, xpm: 435 },
-        { pos: 5, name: "KJ", kda: "2.0/5.2/14.2", gpm: 315, xpm: 370 }
-      ]},
-      { id: 8254401, name: "nouns", rating: 1550, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8261500.png", roster: [
-        { pos: 1, name: "Yuragi", kda: "5.2/2.4/7.8", gpm: 715, xpm: 750 },
-        { pos: 2, name: "Copy", kda: "5.3/3.2/8.8", gpm: 650, xpm: 710 },
-        { pos: 3, name: "Gunnar", kda: "4.2/3.6/10.1", gpm: 540, xpm: 595 },
-        { pos: 4, name: "Lelis", kda: "3.0/4.3/12.8", gpm: 375, xpm: 430 },
-        { pos: 5, name: "Fly", kda: "1.9/5.0/14.0", gpm: 300, xpm: 350 }
-      ]},
-      { id: 7554697, name: "Nigma Galaxy", rating: 1532, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7554697.png", roster: [
-        { pos: 1, name: "Miracle-", kda: "6.1/2.3/8.5", gpm: 755, xpm: 790 },
-        { pos: 2, name: "SumaiL", kda: "6.0/2.8/9.0", gpm: 685, xpm: 745 },
-        { pos: 3, name: "No!ob", kda: "4.0/3.7/10.0", gpm: 530, xpm: 585 },
-        { pos: 4, name: "OmaR", kda: "3.2/4.1/13.0", gpm: 385, xpm: 440 },
-        { pos: 5, name: "GH", kda: "2.2/4.8/15.0", gpm: 320, xpm: 375 }
-      ]},
-      { id: 9247355, name: "PSG Quest", rating: 1515, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/9247354.png", roster: [
-        { pos: 1, name: "TA2000", kda: "5.1/2.5/7.6", gpm: 710, xpm: 745 },
-        { pos: 2, name: "Tony", kda: "5.2/3.3/8.7", gpm: 645, xpm: 705 },
-        { pos: 3, name: "Malik", kda: "3.8/3.9/9.8", gpm: 520, xpm: 575 },
-        { pos: 4, name: "OmaR", kda: "2.9/4.5/12.5", gpm: 370, xpm: 425 },
-        { pos: 5, name: "Dukalis", kda: "1.8/5.4/13.5", gpm: 295, xpm: 345 }
-      ]},
-      { id: 8255889, name: "Talon Esports", rating: 1498, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8255888.png", roster: [
-        { pos: 1, name: "Akashi", kda: "5.0/2.6/7.5", gpm: 700, xpm: 740 },
-        { pos: 2, name: "Mikoto", kda: "5.5/3.0/8.9", gpm: 660, xpm: 720 },
-        { pos: 3, name: "Jhocam", kda: "3.7/4.0/9.5", gpm: 515, xpm: 570 },
-        { pos: 4, name: "Ws", kda: "2.8/4.6/12.0", gpm: 365, xpm: 420 },
-        { pos: 5, name: "Ponyo", kda: "1.7/5.5/13.0", gpm: 290, xpm: 340 }
-      ]},
-      { id: 8599102, name: "Cloud9", rating: 1480, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8599101.png", roster: [
-        { pos: 1, name: "Crystallis", kda: "4.9/2.7/7.4", gpm: 695, xpm: 735 },
-        { pos: 2, name: "No[o]ne-", kda: "5.4/3.1/8.8", gpm: 655, xpm: 715 },
-        { pos: 3, name: "DM", kda: "3.6/4.1/9.4", gpm: 510, xpm: 565 },
-        { pos: 4, name: "9Class", kda: "2.7/4.7/11.8", gpm: 360, xpm: 415 },
-        { pos: 5, name: "Fishman", kda: "1.6/5.6/12.8", gpm: 285, xpm: 335 }
-      ]},
-      { id: 7119389, name: "1win Team", rating: 1465, logo: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png", roster: [
-        { pos: 1, name: "Munkushi~", kda: "4.8/2.8/7.2", gpm: 690, xpm: 730 },
-        { pos: 2, name: "CHIRA_JUNIOR", kda: "5.1/3.3/8.5", gpm: 645, xpm: 705 },
-        { pos: 3, name: "Cloud", kda: "3.5/4.2/9.2", gpm: 505, xpm: 560 },
-        { pos: 4, name: "swedenstrong", kda: "2.6/4.8/11.5", gpm: 355, xpm: 410 },
-        { pos: 5, name: "RESPECT", kda: "1.5/5.7/12.5", gpm: 280, xpm: 330 }
-      ]}
-    ];
+    /* ==========================================================================
+       1. UTILITÁRIOS E APIS DINÂMICAS DO DOTA-TORNEIOS
+       ========================================================================== */
+    const OPENDOTA_BASE = "https://api.opendota.com/api";
+    const NUMERIC_POSITION_LABELS = { 1: "Posição 1", 2: "Posição 2", 3: "Posição 3", 4: "Posição 4", 5: "Posição 5" };
 
-    // 2. PRÓXIMOS CONFRONTOS REAIS (Com logos verificadas e escalações de 100 jogos para os 2 times)
-    const MATCHES = [
-      {
-        id: 1,
-        teamA: "Team Liquid",
-        teamB: "Gaimin Gladiators",
-        logoA: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/2163.png",
-        logoB: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8599101.png",
-        format: "bo3",
-        time: "16:00 BRT",
-        rosterA: TOP_16_TEAMS[1].roster,
-        rosterB: TOP_16_TEAMS[2].roster
-      },
-      {
-        id: 2,
-        teamA: "Team Spirit",
-        teamB: "Tundra Esports",
-        logoA: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png",
-        logoB: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8261500.png",
-        format: "bo3",
-        time: "19:00 BRT",
-        rosterA: TOP_16_TEAMS[3].roster,
-        rosterB: TOP_16_TEAMS[4].roster
-      },
-      {
-        id: 3,
-        teamA: "Team Falcons",
-        teamB: "Xtreme Gaming",
-        logoA: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/9247354.png",
-        logoB: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8254400.png",
-        format: "bo3",
-        time: "14:00 BRT",
-        rosterA: TOP_16_TEAMS[0].roster,
-        rosterB: TOP_16_TEAMS[5].roster
-      },
-      {
-        id: 4,
-        teamA: "BetBoom Team",
-        teamB: "HEROIC",
-        logoA: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8255888.png",
-        logoB: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8599101.png",
-        format: "bo3",
-        time: "17:30 BRT",
-        rosterA: TOP_16_TEAMS[6].roster,
-        rosterB: TOP_16_TEAMS[9].roster
-      },
-      {
-        id: 5,
-        teamA: "Nigma Galaxy",
-        teamB: "Aurora Gaming",
-        logoA: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7554697.png",
-        logoB: "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8255888.png",
-        format: "bo3",
-        time: "20:00 BRT",
-        rosterA: TOP_16_TEAMS[11].roster,
-        rosterB: TOP_16_TEAMS[8].roster
+    function lsGet(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+    async function odFetch(path) {
+      const res = await fetch(`${OPENDOTA_BASE}/${path}`);
+      if (!res.ok) throw new Error(`OpenDota ${path}: ${res.status}`);
+      return res.json();
+    }
+
+    function normalizeTeamName(name) { return String(name || "").trim().toLowerCase(); }
+    function teamNameMatches(a, b) {
+      const na = normalizeTeamName(a), nb = normalizeTeamName(b);
+      if (!na || !nb) return false;
+      return na === nb || na.includes(nb) || nb.includes(na);
+    }
+
+    let teamsNameIndexCache = null;
+    async function ensureTeamsByNameIndex() {
+      if (teamsNameIndexCache) return teamsNameIndexCache;
+      const cached = lsGet("dota:teamsByName", null);
+      if (cached && Date.now() - cached.ts < 24 * 3600 * 1000) {
+        teamsNameIndexCache = cached.data;
+        return teamsNameIndexCache;
       }
-    ];
+      const list = await odFetch("teams");
+      const index = {};
+      (list || []).forEach((t) => {
+        if (t.name) index[normalizeTeamName(t.name)] = { logo: t.logo_url, id: t.team_id };
+        if (t.tag) index[normalizeTeamName(t.tag)] = index[normalizeTeamName(t.tag)] || { logo: t.logo_url, id: t.team_id };
+      });
+      lsSet("dota:teamsByName", { ts: Date.now(), data: index });
+      teamsNameIndexCache = index;
+      return index;
+    }
 
+    /* ==========================================================================
+       2. CÁLCULO DAS 100 PARTIDAS E NORMALIZAÇÃO DE POSIÇÃO (1 A 5)
+       ========================================================================== */
+    async function getMatchCached(matchId) {
+      if (!matchId) return null;
+      const key = `dota:match:c:${matchId}`;
+      const local = lsGet(key, null);
+      if (local) return local;
+
+      try {
+        const data = await odFetch(`matches/${matchId}`);
+        if (data && data.match_id) {
+          const compact = {
+            match_id: data.match_id,
+            radiant_name: data.radiant_name,
+            dire_name: data.dire_name,
+            players: (data.players || []).map((p) => ({
+              account_id: p.account_id,
+              personaname: p.personaname,
+              name: p.name,
+              player_slot: p.player_slot,
+              kills: p.kills || 0,
+              deaths: p.deaths || 0,
+              assists: p.assists || 0,
+              gold_per_min: p.gold_per_min || 0,
+              xp_per_min: p.xp_per_min || 0,
+              lane_role: p.lane_role || 0,
+            }))
+          };
+          lsSet(key, compact);
+          return compact;
+        }
+      } catch {}
+      return null;
+    }
+
+    async function getTeamRosterAndStats(teamName, teamId) {
+      if (!teamName) return [];
+      try {
+        let teamMatches = [];
+        if (teamId) {
+          teamMatches = await odFetch(`teams/${teamId}/matches`);
+        } else {
+          const index = await ensureTeamsByNameIndex();
+          const found = index[normalizeTeamName(teamName)];
+          if (found && found.id) teamMatches = await odFetch(`teams/${found.id}/matches`);
+        }
+
+        const sample = (teamMatches || []).slice(0, 100);
+        if (!sample.length) return [];
+
+        const detailed = [];
+        for (let i = 0; i < Math.min(sample.length, 15); i += 5) {
+          const chunk = sample.slice(i, i + 5);
+          const results = await Promise.all(chunk.map((m) => getMatchCached(m.match_id)));
+          detailed.push(...results.filter(Boolean));
+        }
+
+        const playersMap = {};
+        detailed.forEach((match) => {
+          const isRadiant = teamNameMatches(match.radiant_name, teamName);
+          const sidePlayers = (match.players || []).filter((p) =>
+            isRadiant ? p.player_slot < 128 : p.player_slot >= 128
+          );
+
+          sidePlayers.forEach((pl, idx) => {
+            const id = pl.account_id || pl.personaname || `p_${idx}`;
+            if (!playersMap[id]) {
+              playersMap[id] = {
+                account_id: pl.account_id,
+                nickname: pl.name || pl.personaname || `Jogador ${idx + 1}`,
+                games: 0, kills: 0, deaths: 0, assists: 0, gpm: 0, xpm: 0,
+                midCount: 0, safeCount: 0, offCount: 0
+              };
+            }
+            const p = playersMap[id];
+            p.games += 1;
+            p.kills += pl.kills;
+            p.deaths += pl.deaths;
+            p.assists += pl.assists;
+            p.gpm += pl.gold_per_min;
+            p.xpm += pl.xp_per_min;
+            if (pl.lane_role === 2) p.midCount++;
+            else if (pl.lane_role === 1) p.safeCount++;
+            else if (pl.lane_role === 3) p.offCount++;
+          });
+        });
+
+        const list = Object.values(playersMap);
+        if (!list.length) return [];
+
+        // 1. Identifica Mid (Posição 2)
+        let midPlayer = list.reduce((prev, curr) => (curr.midCount > prev.midCount ? curr : prev), list[0]);
+        midPlayer.position = 2;
+
+        // 2. Cores e Suportes
+        const remaining = list.filter((p) => p !== midPlayer).sort((a, b) => (b.gpm / (b.games || 1)) - (a.gpm / (a.games || 1)));
+        if (remaining.length >= 4) {
+          if (remaining[0].safeCount >= remaining[1].safeCount) {
+            remaining[0].position = 1; remaining[1].position = 3;
+          } else {
+            remaining[0].position = 3; remaining[1].position = 1;
+          }
+          remaining[2].position = 4;
+          remaining[3].position = 5;
+        } else {
+          remaining.forEach((p, i) => p.position = i === 0 ? 1 : i === 1 ? 3 : i === 2 ? 4 : 5);
+        }
+
+        return list.sort((a, b) => a.position - b.position);
+      } catch (err) {
+        console.error("Erro stats time:", err);
+        return [];
+      }
+    }
+
+    /* ==========================================================================
+       3. RANKING DE TIMES (TOP 16 COMPETITIVO OFICIAL)
+       ========================================================================== */
+    let TOP_TEAMS_LIST = [];
+
+    async function loadTopTeams() {
+      const box = document.getElementById('top-teams-container');
+      try {
+        const teams = await odFetch("teams");
+        // Filtra equipes com rating ativo, nome e logo válidos
+        const filtered = (teams || [])
+          .filter((t) => t.name && t.rating && t.logo_url && (Date.now() / 1000 - t.last_match_time) < 300 * 24 * 3600)
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 16);
+
+        TOP_TEAMS_LIST = filtered;
+        box.innerHTML = filtered.map((t, idx) => `
+          <button class="team-item" onclick="openTeamModal(${idx})">
+            <div class="team-left">
+              <span class="team-rank">${idx + 1}</span>
+              <img class="team-logo-img" src="${t.logo_url}" alt="" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png'">
+              <span class="team-name">${t.name}</span>
+            </div>
+            <span class="team-rating">${Math.round(t.rating)}</span>
+          </button>
+        `).join('');
+      } catch (e) {
+        box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Erro ao carregar ranking.</div>`;
+      }
+    }
+
+    async function openTeamModal(index) {
+      const team = TOP_TEAMS_LIST[index];
+      if (!team) return;
+      document.getElementById('modal-team-logo').src = team.logo_url;
+      document.getElementById('modal-team-name').textContent = team.name;
+      document.getElementById('modal-team-body').innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">Calculando médias das últimas 100 partidas...</td></tr>`;
+      document.getElementById('team-modal').style.display = 'flex';
+
+      const roster = await getTeamRosterAndStats(team.name, team.team_id);
+      const fmt = (n) => (n == null || isNaN(n) ? "-" : Number(n).toFixed(1));
+
+      if (!roster.length) {
+        document.getElementById('modal-team-body').innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">Sem dados recentes suficientes para este time.</td></tr>`;
+        return;
+      }
+
+      document.getElementById('modal-team-body').innerHTML = roster.map((p) => {
+        const k = p.games ? p.kills / p.games : 0;
+        const d = p.games ? p.deaths / p.games : 0;
+        const a = p.games ? p.assists / p.games : 0;
+        return `
+          <tr>
+            <td style="color:var(--accent-gold); font-family:'JetBrains Mono'; font-weight:700;">Pos ${p.position}</td>
+            <td style="color:#fff; font-weight:700;">${p.nickname}</td>
+            <td style="color:var(--text-dim); font-family:'JetBrains Mono';">${p.games}</td>
+            <td style="font-family:'JetBrains Mono';">${fmt(k)}/${fmt(d)}/${fmt(a)}</td>
+            <td style="text-align:right; color:var(--accent-cyan); font-family:'JetBrains Mono'; font-weight:700;">${p.games ? Math.round(p.gpm / p.games) : "-"}</td>
+            <td style="text-align:right; color:#fff; font-family:'JetBrains Mono';">${p.games ? Math.round(p.xpm / p.games) : "-"}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function closeTeamModal() {
+      document.getElementById('team-modal').style.display = 'none';
+    }
+
+    /* ==========================================================================
+       4. PRÓXIMAS PARTIDAS DINÂMICAS (AGENDA OFICIAL + EXPANSÃO 100 JOGOS)
+       ========================================================================== */
+    let AGENDA_ITEMS = [];
+
+    async function loadUpcomingMatches() {
+      const box = document.getElementById('matches-container');
+      const teamIndex = await ensureTeamsByNameIndex();
+
+      try {
+        const res = await fetch(`/agenda.json?_=${Date.now()}`, { cache: "no-store" });
+        if (!res.ok) throw new Error("Sem agenda.json");
+        const items = await res.json();
+        const now = Date.now();
+        AGENDA_ITEMS = (items || []).filter((it) => it.data && new Date(it.data).getTime() > now - 4 * 3600 * 1000);
+
+        if (!AGENDA_ITEMS.length) {
+          box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Nenhuma partida agendada no momento.</div>`;
+          return;
+        }
+
+        const firstDate = new Date(AGENDA_ITEMS[0].data);
+        document.getElementById('banner-date-label').textContent = firstDate.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+
+        box.innerHTML = AGENDA_ITEMS.map((m, idx) => {
+          const logoA = teamIndex[normalizeTeamName(m.timeA)]?.logo || "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png";
+          const logoB = teamIndex[normalizeTeamName(m.timeB)]?.logo || "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png";
+          const when = new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+          return `
+            <div class="match-card">
+              <div class="match-header" onclick="toggleMatchDrawer(${idx})">
+                <div class="match-teams-box">
+                  <div class="match-team-row">
+                    <img class="match-team-logo" src="${logoA}"> 
+                    <span>${m.timeA || "A definir"}</span>
+                  </div>
+                  <div class="match-team-row">
+                    <img class="match-team-logo" src="${logoB}"> 
+                    <span>${m.timeB || "A definir"}</span>
+                  </div>
+                </div>
+                <div class="match-meta-box">
+                  <span class="badge-bo">${m.formato || "BO3"}</span>
+                  <span class="match-time">${when} BRT</span>
+                </div>
+              </div>
+
+              <!-- DRAWER COM ESTATÍSTICAS DOS 2 TIMES -->
+              <div class="match-details-drawer" id="drawer-${idx}">
+                <div style="font-size:11px; color:var(--text-dim); text-align:center; padding:8px;">Carregando estatísticas das últimas 100 partidas...</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--text-dim); text-align:center;">Não foi possível carregar a agenda de jogos.</div>`;
+      }
+    }
+
+    async function toggleMatchDrawer(idx) {
+      const drawer = document.getElementById(`drawer-${idx}`);
+      const isOpen = drawer.classList.contains('open');
+      document.querySelectorAll('.match-details-drawer').forEach(d => d.classList.remove('open'));
+
+      if (!isOpen) {
+        drawer.classList.add('open');
+        const match = AGENDA_ITEMS[idx];
+        if (!match) return;
+
+        const [rosterA, rosterB] = await Promise.all([
+          getTeamRosterAndStats(match.timeA),
+          getTeamRosterAndStats(match.timeB)
+        ]);
+
+        const renderRosterBlock = (teamName, roster) => {
+          if (!roster.length) return `<div class="drawer-team-block"><div class="drawer-team-title"><span>${teamName}</span></div><span style="font-size:10px; color:var(--text-dim);">Sem partidas recentes registradas.</span></div>`;
+          return `
+            <div class="drawer-team-block">
+              <div class="drawer-team-title">
+                <span>${teamName}</span>
+                <span style="font-size:9px; color:var(--text-dim);">Últimas 100 partidas</span>
+              </div>
+              ${roster.map(p => `
+                <div class="drawer-player-row">
+                  <span>Pos ${p.position} - <strong>${p.nickname}</strong></span>
+                  <span style="color:var(--accent-cyan); font-family:'JetBrains Mono';">${p.games ? Math.round(p.gpm / p.games) : "-"} GPM</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        };
+
+        drawer.innerHTML = renderRosterBlock(match.timeA, rosterA) + renderRosterBlock(match.timeB, rosterB);
+      }
+    }
+
+    /* ==========================================================================
+       5. NAVEGAÇÃO E RANKING OFICIAL VALVE
+       ========================================================================== */
     function switchView(view) {
       document.getElementById('main-layout').style.display = view === 'hub' ? 'grid' : 'none';
       document.getElementById('view-torneios').style.display = view === 'torneios' ? 'block' : 'none';
@@ -879,106 +1022,9 @@
       if (view === 'mmr') loadMmrLeaderboard();
     }
 
-    function renderMatches() {
-      const box = document.getElementById('matches-container');
-      box.innerHTML = MATCHES.map(m => `
-        <div class="match-card">
-          <div class="match-header" onclick="toggleMatch(${m.id})">
-            <div class="match-teams-box">
-              <div class="match-team-row">
-                <img class="match-team-logo" src="${m.logoA}" onerror="this.src='https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/2163.png'"> 
-                ${m.teamA}
-              </div>
-              <div class="match-team-row">
-                <img class="match-team-logo" src="${m.logoB}" onerror="this.src='https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/8599101.png'"> 
-                ${m.teamB}
-              </div>
-            </div>
-            <div class="match-meta-box">
-              <span class="badge-bo">${m.format}</span>
-              <span class="match-time">${m.time}</span>
-            </div>
-          </div>
-          
-          <!-- EXPANSÃO: ESTATÍSTICAS DOS 2 TIMES (100 PARTIDAS) -->
-          <div class="match-details-drawer" id="drawer-${m.id}">
-            
-            <!-- TIME A -->
-            <div class="drawer-team-block">
-              <div class="drawer-team-title">
-                <span>${m.teamA}</span>
-                <span style="font-size:9px; color:var(--text-dim);">Últimas 100 partidas</span>
-              </div>
-              ${m.rosterA.map(p => `
-                <div class="drawer-player-row">
-                  <span>Pos ${p.pos} - <strong>${p.name}</strong></span>
-                  <span style="color:var(--accent-cyan); font-family:'JetBrains Mono';">${p.gpm} GPM</span>
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- TIME B -->
-            <div class="drawer-team-block" style="margin-top:6px;">
-              <div class="drawer-team-title">
-                <span>${m.teamB}</span>
-                <span style="font-size:9px; color:var(--text-dim);">Últimas 100 partidas</span>
-              </div>
-              ${m.rosterB.map(p => `
-                <div class="drawer-player-row">
-                  <span>Pos ${p.pos} - <strong>${p.name}</strong></span>
-                  <span style="color:var(--accent-cyan); font-family:'JetBrains Mono';">${p.gpm} GPM</span>
-                </div>
-              `).join('')}
-            </div>
-
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function toggleMatch(id) {
-      const drawer = document.getElementById(`drawer-${id}`);
-      drawer.classList.toggle('open');
-    }
-
-    function renderTop16() {
-      const box = document.getElementById('top-teams-container');
-      box.innerHTML = TOP_16_TEAMS.map((t, idx) => `
-        <button class="team-item" onclick='openTeamModal(${idx})'>
-          <div class="team-left">
-            <span class="team-rank">${idx + 1}</span>
-            <img class="team-logo-img" src="${t.logo}" alt="${t.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <span class="team-logo-fallback" style="display:none;">${t.name.slice(0, 2).toUpperCase()}</span>
-            <span class="team-name">${t.name}</span>
-          </div>
-          <span class="team-rating">${t.rating}</span>
-        </button>
-      `).join('');
-    }
-
-    function openTeamModal(teamIndex) {
-      const team = TOP_16_TEAMS[teamIndex];
-      document.getElementById('modal-team-logo').src = team.logo;
-      document.getElementById('modal-team-name').textContent = team.name;
-      document.getElementById('modal-team-body').innerHTML = team.roster.map(p => `
-        <tr>
-          <td style="color:var(--accent-gold); font-family:'JetBrains Mono'; font-weight:700;">Pos ${p.pos}</td>
-          <td style="color:#fff; font-weight:700;">${p.name}</td>
-          <td style="color:var(--text-dim); font-family:'JetBrains Mono';">100</td>
-          <td style="font-family:'JetBrains Mono';">${p.kda}</td>
-          <td style="text-align:right; color:var(--accent-cyan); font-family:'JetBrains Mono'; font-weight:700;">${p.gpm}</td>
-          <td style="text-align:right; color:#fff; font-family:'JetBrains Mono';">${p.xpm}</td>
-        </tr>
-      `).join('');
-      document.getElementById('team-modal').style.display = 'flex';
-    }
-
-    function closeTeamModal() {
-      document.getElementById('team-modal').style.display = 'none';
-    }
-
     async function loadMmrLeaderboard() {
       const tbody = document.getElementById('mmr-body');
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-dim); padding:24px;">Carregando ranking da Valve...</td></tr>`;
       try {
         const res = await fetch('/api/leaderboard?division=europe');
         const data = await res.json();
@@ -996,8 +1042,9 @@
       }
     }
 
-    renderTop16();
-    renderMatches();
+    // Inicialização
+    loadTopTeams();
+    loadUpcomingMatches();
   </script>
 </body>
 </html>
