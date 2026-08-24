@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Trophy, Award, X } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
-const AEGIS_IMG_URL = "https://liquipedia.net/commons/images/d/d7/Aegis_of_Champions.png";
 
 const MAP_MIN = -8288, MAP_MAX = 8288;
 function worldToPct(x, y) {
@@ -156,21 +155,32 @@ export default function App() {
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
-                  <img
-                    src={AEGIS_IMG_URL}
-                    alt="Aegis of Champions"
-                    className="aegis-real-img"
-                    onError={(e) => {
-                      e.target.src = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/trophies/aegis.png";
-                    }}
-                  />
+                  {/* AEGIS EMBUTIDO EM SVG VETORIAL */}
+                  <svg className="aegis-real-img" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="46" fill="#1C1814" stroke="#8C6737" strokeWidth="4"/>
+                    <circle cx="50" cy="50" r="41" fill="#120F0D" stroke="#D49244" strokeWidth="2"/>
+                    <path d="M50 14C30.1 14 14 30.1 14 50C14 69.9 30.1 86 50 86C69.9 86 86 69.9 86 50C86 30.1 69.9 14 50 14ZM50 20C61.2 20 71 26.2 76.2 35.3C66.9 33.7 54.7 35.1 43.8 44.2C34.4 52 28.5 64.1 27.2 72.8C22.8 66.8 20 58.8 20 50C20 33.4 33.4 20 50 20ZM50 80C39.5 80 30.3 74.4 24.9 66C33.4 67.2 44.6 65.5 54.8 57.2C64.6 49.3 70.8 37.1 72.4 28.1C77.1 34.3 80 41.8 80 50C80 66.6 66.6 80 50 80Z" fill="#A67B48"/>
+                    <circle cx="50" cy="50" r="14" fill="#241E19" stroke="#E5B26F" strokeWidth="3"/>
+                    <circle cx="50" cy="50" r="8" fill="#D49244"/>
+                  </svg>
+
                   <div>
                     <div className="champ-sub">Último Campeão Mundial</div>
                     <h2 className="champ-name">The International 2026</h2>
                   </div>
                 </div>
+                
+                {/* LOGO TEAM SPIRIT COM FALLBACK SEGURO */}
                 <div className="champ-team-tag">
-                  <img src="https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png" alt="Team Spirit" />
+                  <img 
+                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png" 
+                    alt="Team Spirit" 
+                    style={{ width: 32, height: 32, objectFit: 'contain' }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://raw.githubusercontent.com/odota/core/master/public/images/team_logos/7119388.png";
+                    }}
+                  />
                   <span>Team Spirit</span>
                 </div>
               </div>
