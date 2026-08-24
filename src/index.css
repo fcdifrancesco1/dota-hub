@@ -31,7 +31,6 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-gold); }
 
-/* Layout Geral */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -100,132 +99,37 @@ body {
   box-shadow: 0 4px 12px rgba(212, 146, 68, 0.3);
 }
 
-/* 3 Colunas */
+/* Layout Principal em 2 Colunas (Centro Amplo + Direita) */
 .main-grid {
   display: grid;
-  grid-template-columns: 280px 1fr 340px;
+  grid-template-columns: 1fr 360px;
   flex: 1;
   overflow: hidden;
   height: calc(100vh - 64px);
 }
 
-/* Esquerda: Ranking */
-.sidebar-left {
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.sidebar-header {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.sidebar-title {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--accent-gold);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.badge-top {
-  font-size: 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: var(--text-dim);
-  font-family: monospace;
-}
-.teams-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.team-row-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  background: rgba(24, 28, 38, 0.4);
-  border: 1px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  width: 100%;
-  color: inherit;
-  transition: all 0.15s;
-}
-.team-row-btn:hover {
-  background: var(--bg-card);
-  border-color: var(--border);
-  transform: translateX(2px);
-}
-.team-row-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow: hidden;
-}
-.team-row-rank {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-dim);
-  width: 16px;
-  font-family: monospace;
-}
-.team-row-logo {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-.team-row-name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 130px;
-}
-.team-row-rating {
-  font-size: 11px;
-  color: var(--text-dim);
-  font-family: monospace;
-}
-
 /* Centro: Ao Vivo + Campeão */
 .center-content {
-  padding: 24px;
+  padding: 32px 40px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
 }
 
 .live-block-wrap {
   width: 100%;
-  max-width: 820px;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .live-heading {
   font-size: 12px;
   font-weight: 700;
   color: var(--accent-gold);
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -240,18 +144,18 @@ body {
 }
 .live-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
 }
 .live-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 12px 14px;
+  padding: 14px 18px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   transition: all 0.2s;
 }
 .live-card:hover {
@@ -275,20 +179,20 @@ body {
   justify-content: space-between;
 }
 .live-team-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 90px;
+  max-width: 120px;
 }
 .live-score {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--accent-gold);
   font-family: monospace;
-  padding: 2px 8px;
+  padding: 3px 10px;
   background: var(--bg-card);
   border-radius: 6px;
   border: 1px solid var(--border);
@@ -296,11 +200,11 @@ body {
 
 .champ-card {
   width: 100%;
-  max-width: 820px;
+  max-width: 900px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 18px;
+  padding: 28px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 .champ-header {
@@ -308,18 +212,19 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  margin-bottom: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
 }
 .champ-title-group {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
 }
-.aegis-icon {
-  width: 50px;
-  height: 50px;
-  filter: drop-shadow(0 0 10px rgba(212, 146, 68, 0.4));
+.aegis-real-img {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(212, 146, 68, 0.45));
   flex-shrink: 0;
 }
 .champ-sub {
@@ -330,7 +235,7 @@ body {
   letter-spacing: 1px;
 }
 .champ-name {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #fff;
 }
@@ -340,37 +245,37 @@ body {
   gap: 10px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  padding: 6px 14px;
-  border-radius: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
 }
 .champ-team-tag img {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 .champ-team-tag span {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #fff;
 }
 .players-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 .player-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 8px;
+  border-radius: 12px;
+  padding: 14px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
 .player-pos-badge {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--bg-main);
   color: var(--accent-gold);
@@ -383,7 +288,7 @@ body {
   font-family: monospace;
 }
 .player-nick {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
@@ -396,12 +301,12 @@ body {
   font-weight: 600;
   color: var(--text-dim);
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .player-stat-split {
   width: 100%;
   border-top: 1px solid var(--border);
-  padding-top: 6px;
+  padding-top: 8px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   font-size: 10px;
@@ -413,7 +318,7 @@ body {
   display: block;
 }
 
-/* Direita: Próximos Jogos */
+/* Direita: Próximas Partidas e Resultados */
 .sidebar-right {
   background: var(--bg-surface);
   border-left: 1px solid var(--border);
@@ -424,7 +329,7 @@ body {
 .date-strip {
   background: var(--accent-copper);
   color: #fff;
-  padding: 8px 14px;
+  padding: 9px 14px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -435,7 +340,7 @@ body {
 .matches-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -462,7 +367,7 @@ body {
   text-overflow: ellipsis;
 }
 .match-header-row {
-  padding: 10px 12px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -471,16 +376,16 @@ body {
 .match-teams-col {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 .match-team-single {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;
+  max-width: 160px;
 }
 .match-meta-col {
   display: flex;
