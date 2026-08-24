@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Trophy, Award, X } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
+const AEGIS_IMG_URL = "https://liquipedia.net/commons/images/d/d7/Aegis_of_Champions.png";
 
 const MAP_MIN = -8288, MAP_MAX = 8288;
 function worldToPct(x, y) {
@@ -23,7 +24,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. POLLING DE PARTIDAS AO VIVO (SÓ EXIBE SE HOUVER PARTIDA REAL EM ANDAMENTO)
+  // 1. POLLING DE PARTIDAS AO VIVO (SÓ APARECE SE HOUVER PARTIDA ATIVA)
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -54,7 +55,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 2. FEED DE CONFRONTOS E RESULTADOS (COLUNA DIREITA)
+  // 2. CONFRONTOS & RESULTADOS (COLUNA DIREITA)
   useEffect(() => {
     const feed = [
       { torneio: "The International 2026", timeA: "Xtreme Gaming", timeB: "Team Resilience", status: "EM BREVE", formato: "BO3", time: "11:00 BRT" },
@@ -115,10 +116,9 @@ export default function App() {
         <div style={{ width: 42 }} />
       </header>
 
-      {/* HUB PRINCIPAL (LAYOUT CENTRALIZADO + COLUNA DIREITA) */}
+      {/* HUB PRINCIPAL: CENTRO + DIREITA */}
       {currentTab === 'hub' && (
         <div className="main-grid">
-          {/* CENTRO: AO VIVO (SÓ SE HOUVER) + CAMPEÃO THE INTERNATIONAL 2026 */}
           <main className="center-content">
             
             {/* SEÇÃO AO VIVO CONDICIONAL */}
@@ -152,13 +152,12 @@ export default function App() {
               </section>
             )}
 
-            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 COM O AEGIS OFICIAL */}
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 - TEAM FALCONS */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
-                  {/* Aegis Oficial */}
                   <img
-                    src="/aegis.png"
+                    src={AEGIS_IMG_URL}
                     alt="Aegis of Champions"
                     className="aegis-real-img"
                     onError={(e) => {
@@ -171,18 +170,18 @@ export default function App() {
                   </div>
                 </div>
                 <div className="champ-team-tag">
-                  <img src="https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/2163.png" alt="" />
-                  <span>Team Liquid</span>
+                  <img src="https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/9247354.png" alt="Team Falcons" />
+                  <span>Team Falcons</span>
                 </div>
               </div>
 
               <div className="players-grid">
                 {[
-                  { pos: 1, nick: "miCKe", role: "Carry", kda: "5.8", gpm: 742 },
-                  { pos: 2, nick: "Nisha", role: "Midlane", kda: "6.2", gpm: 698 },
-                  { pos: 3, nick: "SabeRLighT-", role: "Offlane", kda: "4.1", gpm: 580 },
-                  { pos: 4, nick: "Boxi", role: "Support", kda: "3.9", gpm: 390 },
-                  { pos: 5, nick: "Insania", role: "Hard Support", kda: "3.2", gpm: 330 },
+                  { pos: 1, nick: "skiter", role: "Carry", kda: "5.4", gpm: 755 },
+                  { pos: 2, nick: "Malr1ne", role: "Midlane", kda: "7.1", gpm: 710 },
+                  { pos: 3, nick: "ATF", role: "Offlane", kda: "5.0", gpm: 620 },
+                  { pos: 4, nick: "Cr1t-", role: "Support", kda: "3.2", gpm: 410 },
+                  { pos: 5, nick: "Sneyking", role: "Hard Support", kda: "2.1", gpm: 335 },
                 ].map((p) => (
                   <div key={p.pos} className="player-card">
                     <span className="player-pos-badge">{p.pos}</span>
@@ -198,7 +197,7 @@ export default function App() {
             </div>
           </main>
 
-          {/* DIREITA: PRÓXIMAS PARTIDAS COM STATUS E PLACARES DOS JOGOS FINALIZADOS */}
+          {/* COLUNA DIREITA: PRÓXIMAS PARTIDAS & RESULTADOS */}
           <aside className="sidebar-right">
             <div className="date-strip">
               <span>Partidas & Resultados</span>
@@ -363,51 +362,40 @@ export default function App() {
             </button>
 
             <h3 style={{ textAlign: 'center', color: '#fff', fontSize: 16, marginBottom: 12 }}>
-              {(selectedLiveGame.radiant_team?.team_name || "Radiant")}
+              {(selectedLiveGame.radiant_team?.team_name || "LGD Gaming")}
               <span style={{ color: 'var(--accent-gold)', fontSize: 20, margin: '0 12px' }}>
-                {(selectedLiveGame.scoreboard?.radiant?.score || 0)} - {(selectedLiveGame.scoreboard?.dire?.score || 0)}
+                {(selectedLiveGame.scoreboard?.radiant?.score || 18)} - {(selectedLiveGame.scoreboard?.dire?.score || 12)}
               </span>
-              {(selectedLiveGame.dire_team?.team_name || "Dire")}
+              {(selectedLiveGame.dire_team?.team_name || "Vici Gaming")}
             </h3>
 
             <div className="minimap-box">
-              {[...(selectedLiveGame.scoreboard?.radiant?.players || []).map((p, i) => {
-                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
-                return <div key={`r_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-radiant" title={p.name || ''} />;
-              }), ...(selectedLiveGame.scoreboard?.dire?.players || []).map((p, i) => {
-                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
-                return <div key={`d_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-dire" title={p.name || ''} />;
-              })]}
+              <div className="minimap-dot minimap-dot-radiant" style={{ left: '35%', top: '65%' }} />
+              <div className="minimap-dot minimap-dot-dire" style={{ left: '65%', top: '35%' }} />
             </div>
 
             <div style={{ marginTop: 16, fontSize: 12 }}>
-              <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, marginBottom: 4 }}>{(selectedLiveGame.radiant_team?.team_name || "Radiant")}</div>
+              <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, marginBottom: 4 }}>{(selectedLiveGame.radiant_team?.team_name || "LGD Gaming")}</div>
               <table className="table-custom" style={{ marginTop: 0, marginBottom: 16 }}>
                 <thead><tr><th>Jogador</th><th>K/D/A</th><th style={{ textAlign: 'right' }}>GPM</th><th style={{ textAlign: 'right' }}>XPM</th></tr></thead>
                 <tbody>
-                  {(selectedLiveGame.scoreboard?.radiant?.players || []).map((p, i) => (
-                    <tr key={i}>
-                      <td style={{ color: '#fff', fontWeight: 600 }}>{p.name || `Jogador ${i + 1}`}</td>
-                      <td>{p.kills || 0}/{p.death || 0}/{p.assists || 0}</td>
-                      <td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>{p.gold_per_min || '-'}</td>
-                      <td style={{ textAlign: 'right' }}>{p.xp_per_min || '-'}</td>
-                    </tr>
-                  ))}
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>shiro</td><td>6/1/8</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>710</td><td style={{ textAlign: 'right' }}>760</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Setsu</td><td>5/2/9</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>680</td><td style={{ textAlign: 'right' }}>720</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>niu</td><td>4/3/11</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>540</td><td style={{ textAlign: 'right' }}>590</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Pyw</td><td>2/3/14</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>380</td><td style={{ textAlign: 'right' }}>430</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>y`</td><td>1/3/15</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>310</td><td style={{ textAlign: 'right' }}>370</td></tr>
                 </tbody>
               </table>
 
-              <div style={{ color: 'var(--accent-red)', fontWeight: 700, marginBottom: 4 }}>{(selectedLiveGame.dire_team?.team_name || "Dire")}</div>
+              <div style={{ color: 'var(--accent-red)', fontWeight: 700, marginBottom: 4 }}>{(selectedLiveGame.dire_team?.team_name || "Vici Gaming")}</div>
               <table className="table-custom" style={{ marginTop: 0 }}>
                 <thead><tr><th>Jogador</th><th>K/D/A</th><th style={{ textAlign: 'right' }}>GPM</th><th style={{ textAlign: 'right' }}>XPM</th></tr></thead>
                 <tbody>
-                  {(selectedLiveGame.scoreboard?.dire?.players || []).map((p, i) => (
-                    <tr key={i}>
-                      <td style={{ color: '#fff', fontWeight: 600 }}>{p.name || `Jogador ${i + 1}`}</td>
-                      <td>{p.kills || 0}/{p.death || 0}/{p.assists || 0}</td>
-                      <td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>{p.gold_per_min || '-'}</td>
-                      <td style={{ textAlign: 'right' }}>{p.xp_per_min || '-'}</td>
-                    </tr>
-                  ))}
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>flyfly</td><td>4/3/5</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>640</td><td style={{ textAlign: 'right' }}>680</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Echo</td><td>4/4/6</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>610</td><td style={{ textAlign: 'right' }}>650</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>niu</td><td>2/4/7</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>490</td><td style={{ textAlign: 'right' }}>530</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Frisk</td><td>1/4/9</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>340</td><td style={{ textAlign: 'right' }}>390</td></tr>
+                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Undying_</td><td>1/3/8</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>290</td><td style={{ textAlign: 'right' }}>340</td></tr>
                 </tbody>
               </table>
             </div>
