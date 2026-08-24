@@ -63,7 +63,7 @@ export default function App() {
       { torneio: "The International 2026", timeA: "Team Falcons", timeB: "BoomBoys", status: "EM BREVE", formato: "BO3", time: "14:00 BRT" },
       { torneio: "The International 2026", timeA: "LGD Gaming", timeB: "Vici Gaming", status: "AO VIVO", scoreA: 1, scoreB: 0, formato: "BO3", time: "AO VIVO" },
       { torneio: "The International 2026", timeA: "Team Liquid", timeB: "Iron Wing", status: "FINALIZADO", scoreA: 2, scoreB: 0, formato: "BO3", time: "05:40 BRT" },
-      { torneio: "The International 2026", timeA: "TEAM VISION", timeB: "Team Spirit", status: "FINALIZADO", scoreA: 2, scoreB: 1, formato: "BO3", time: "04:38 BRT" },
+      { torneio: "The International 2026", timeA: "TEAM VISION", timeB: "Team Spirit", status: "FINALIZADO", scoreA: 2, scoreB: 3, formato: "BO5", time: "FINAL" },
     ];
     setMatchFeed(feed);
   }, []);
@@ -116,7 +116,7 @@ export default function App() {
         <div style={{ width: 42 }} />
       </header>
 
-      {/* HUB PRINCIPAL: CENTRO + DIREITA */}
+      {/* HUB PRINCIPAL */}
       {currentTab === 'hub' && (
         <div className="main-grid">
           <main className="center-content">
@@ -152,7 +152,7 @@ export default function App() {
               </section>
             )}
 
-            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 - TEAM FALCONS */}
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 - TEAM SPIRIT */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
@@ -170,18 +170,18 @@ export default function App() {
                   </div>
                 </div>
                 <div className="champ-team-tag">
-                  <img src="https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/9247354.png" alt="Team Falcons" />
-                  <span>Team Falcons</span>
+                  <img src="https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png" alt="Team Spirit" />
+                  <span>Team Spirit</span>
                 </div>
               </div>
 
               <div className="players-grid">
                 {[
-                  { pos: 1, nick: "skiter", role: "Carry", kda: "5.4", gpm: 755 },
-                  { pos: 2, nick: "Malr1ne", role: "Midlane", kda: "7.1", gpm: 710 },
-                  { pos: 3, nick: "ATF", role: "Offlane", kda: "5.0", gpm: 620 },
-                  { pos: 4, nick: "Cr1t-", role: "Support", kda: "3.2", gpm: 410 },
-                  { pos: 5, nick: "Sneyking", role: "Hard Support", kda: "2.1", gpm: 335 },
+                  { pos: 1, nick: "Yatoro", role: "Carry", kda: "6.8", gpm: 785 },
+                  { pos: 2, nick: "Larl", role: "Midlane", kda: "5.9", gpm: 690 },
+                  { pos: 3, nick: "Collapse", role: "Offlane", kda: "5.2", gpm: 610 },
+                  { pos: 4, nick: "rue", role: "Support", kda: "3.4", gpm: 405 },
+                  { pos: 5, nick: "not me", role: "Hard Support", kda: "2.4", gpm: 330 },
                 ].map((p) => (
                   <div key={p.pos} className="player-card">
                     <span className="player-pos-badge">{p.pos}</span>
@@ -197,7 +197,7 @@ export default function App() {
             </div>
           </main>
 
-          {/* COLUNA DIREITA: PRÓXIMAS PARTIDAS & RESULTADOS */}
+          {/* COLUNA DIREITA */}
           <aside className="sidebar-right">
             <div className="date-strip">
               <span>Partidas & Resultados</span>
