@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flame, Trophy, Award, History, X, Users } from 'lucide-react';
+import { Flame, Trophy, Award, History, X, Users, Radio } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
@@ -446,41 +446,10 @@ export default function App() {
             </div>
           </aside>
 
-          {/* CENTRO: AO VIVO + CAMPEÃO MUNDIAL */}
+          {/* CENTRO: CARD CAMPEÕES NO TOPO + AO VIVO ABAIXO */}
           <main className="center-content">
             
-            {/* SEÇÃO AO VIVO CONDICIONAL */}
-            {liveGames.length > 0 && (
-              <section className="live-block-wrap">
-                <div className="live-heading">
-                  <span className="live-dot" />
-                  Ao Vivo Agora
-                </div>
-                <div className="live-grid">
-                  {liveGames.map((g, idx) => {
-                    const sb = g.scoreboard || {};
-                    const rScore = sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
-                    const dScore = sb.dire ? sb.dire.score : (g.dire_score ?? 0);
-                    const mins = Math.floor((sb.duration || 0) / 60) || 26;
-                    const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "Radiant";
-                    const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Dire";
-
-                    return (
-                      <div key={idx} onClick={() => setSelectedLiveGame(g)} className="live-card">
-                        <span className="live-badge">AO VIVO · {mins}MIN</span>
-                        <div className="live-teams-row">
-                          <span className="live-team-name">{rName}</span>
-                          <span className="live-score">{rScore} - {dScore}</span>
-                          <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
+            {/* 1. CARD CAMPEÃO THE INTERNATIONAL 2026 */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
@@ -576,6 +545,61 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {/* 2. SEÇÃO AO VIVO (POSICIONADA LOGO ABAIXO DOS CAMPEÕES) */}
+            <section className="live-block-wrap" style={{ marginTop: 8 }}>
+              <div className="live-heading">
+                <span className="live-dot" />
+                Partidas Ao Vivo
+                {liveGames.length > 0 && (
+                  <span style={{ fontSize: 10, background: 'rgba(212,146,68,0.2)', padding: '2px 8px', borderRadius: 10, marginLeft: 6 }}>
+                    {liveGames.length} EM ANDAMENTO
+                  </span>
+                )}
+              </div>
+
+              {liveGames.length === 0 ? (
+                <div style={{
+                  width: '100%',
+                  background: 'var(--bg-surface)',
+                  border: '1px dashed var(--border)',
+                  borderRadius: 14,
+                  padding: '36px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  color: 'var(--text-dim)'
+                }}>
+                  <Radio size={24} style={{ opacity: 0.5, color: 'var(--accent-gold)' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Nenhuma partida oficial ao vivo no momento</span>
+                  <span style={{ fontSize: 11 }}>Acompanhe os próximos confrontos agendados na coluna da direita</span>
+                </div>
+              ) : (
+                <div className="live-grid">
+                  {liveGames.map((g, idx) => {
+                    const sb = g.scoreboard || {};
+                    const rScore = sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
+                    const dScore = sb.dire ? sb.dire.score : (g.dire_score ?? 0);
+                    const mins = Math.floor((sb.duration || 0) / 60) || 26;
+                    const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "Radiant";
+                    const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Dire";
+
+                    return (
+                      <div key={idx} onClick={() => setSelectedLiveGame(g)} className="live-card">
+                        <span className="live-badge">AO VIVO · {mins}MIN</span>
+                        <div className="live-teams-row">
+                          <span className="live-team-name">{rName}</span>
+                          <span className="live-score">{rScore} - {dScore}</span>
+                          <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           </main>
 
           {/* DIREITA: JOGOS A SEREM REALIZADOS */}
@@ -943,6 +967,35 @@ export default function App() {
                 </table>
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETALHE AO VIVO COM MINIMAPA */}
+      {selectedLiveGame && (
+        <div className="modal-backdrop">
+          <div className="modal-box-wide" style={{ maxWidth: 700 }}>
+            <button onClick={() => setSelectedLiveGame(null)} className="modal-close-btn">
+              <X size={18} />
+            </button>
+
+            <h3 style={{ textAlign: 'center', color: '#fff', fontSize: 16, marginBottom: 12 }}>
+              {(selectedLiveGame.radiant_team?.team_name || "Radiant")}
+              <span style={{ color: 'var(--accent-gold)', fontSize: 20, margin: '0 12px' }}>
+                {(selectedLiveGame.scoreboard?.radiant?.score || 0)} - {(selectedLiveGame.scoreboard?.dire?.score || 0)}
+              </span>
+              {(selectedLiveGame.dire_team?.team_name || "Dire")}
+            </h3>
+
+            <div className="minimap-box">
+              {[...(selectedLiveGame.scoreboard?.radiant?.players || []).map((p, i) => {
+                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
+                return <div key={`r_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-radiant" title={p.name || ''} />;
+              }), ...(selectedLiveGame.scoreboard?.dire?.players || []).map((p, i) => {
+                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
+                return <div key={`d_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-dire" title={p.name || ''} />;
+              })]}
+            </div>
           </div>
         </div>
       )}
