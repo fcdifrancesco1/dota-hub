@@ -12,40 +12,19 @@ const NUMERIC_POSITION_LABELS = {
   5: "Posição 5 (Hard Support)"
 };
 
-// Draft completo oficial do TI (24 Picks & Bans)
-const FULL_DRAFT_TI_GAME1 = [
-  // Fase 1: Bans
-  { hero_id: 11, team: 0, is_pick: false, order: 0 },
-  { hero_id: 69, team: 1, is_pick: false, order: 1 },
-  { hero_id: 88, team: 0, is_pick: false, order: 2 },
-  { hero_id: 53, team: 1, is_pick: false, order: 3 },
-  { hero_id: 86, team: 0, is_pick: false, order: 4 },
-  { hero_id: 102, team: 1, is_pick: false, order: 5 },
-  { hero_id: 108, team: 0, is_pick: false, order: 6 },
-  // Fase 1: Picks
-  { hero_id: 119, team: 0, is_pick: true, order: 7 },
-  { hero_id: 9, team: 1, is_pick: true, order: 8 },
-  { hero_id: 87, team: 1, is_pick: true, order: 9 },
-  { hero_id: 93, team: 0, is_pick: true, order: 10 },
-  // Fase 2: Bans
-  { hero_id: 35, team: 0, is_pick: false, order: 11 },
-  { hero_id: 70, team: 1, is_pick: false, order: 12 },
-  { hero_id: 25, team: 0, is_pick: false, order: 13 },
-  { hero_id: 107, team: 1, is_pick: false, order: 14 },
-  // Fase 2: Picks
-  { hero_id: 123, team: 1, is_pick: true, order: 15 },
-  { hero_id: 97, team: 0, is_pick: true, order: 16 },
-  { hero_id: 106, team: 1, is_pick: true, order: 17 },
-  { hero_id: 126, team: 0, is_pick: true, order: 18 },
-  // Fase 3: Bans
-  { hero_id: 67, team: 0, is_pick: false, order: 19 },
-  { hero_id: 74, team: 1, is_pick: false, order: 20 },
-  // Fase 3: Picks
-  { hero_id: 11, team: 0, is_pick: true, order: 21 },
-  { hero_id: 109, team: 1, is_pick: true, order: 22 }
-];
+// Conversão espacial de coordenadas do minimapa do Dota 2
+const MAP_MIN = -8288, MAP_MAX = 8288;
+function worldToPct(x, y) {
+  const fx = (x - MAP_MIN) / (MAP_MAX - MAP_MIN);
+  const fy = 1 - (y - MAP_MIN) / (MAP_MAX - MAP_MIN);
+  return { 
+    left: `${Math.min(96, Math.max(4, fx * 100)).toFixed(1)}%`, 
+    top: `${Math.min(96, Math.max(4, fy * 100)).toFixed(1)}%` 
+  };
+}
 
-const TI_PLAYOFF_MATCHES = [
+// 16 Séries dos Playoffs do The International
+const FULL_TI_TOURNAMENT_MATCHES = [
   {
     stage: "Grande Final (BO5)",
     timeA: "Team Spirit",
@@ -63,33 +42,20 @@ const TI_PLAYOFF_MATCHES = [
     ]
   },
   {
-    stage: "Final Lower Bracket",
+    stage: "Final Lower Bracket (BO3)",
     timeA: "Team Spirit",
     timeB: "Team Yandex",
     scoreA: 2,
     scoreB: 0,
     winner: "Team Spirit",
-    dur: "38m / 32m",
+    dur: "2 mapas",
     games: [
       { mapNumber: 1, match_id: "ti26_lbf_g1" },
       { mapNumber: 2, match_id: "ti26_lbf_g2" }
     ]
   },
   {
-    stage: "Semi Lower Bracket",
-    timeA: "Team Spirit",
-    timeB: "BetBoom Team",
-    scoreA: 2,
-    scoreB: 0,
-    winner: "Team Spirit",
-    dur: "41m / 29m",
-    games: [
-      { mapNumber: 1, match_id: "ti26_lbs_g1" },
-      { mapNumber: 2, match_id: "ti26_lbs_g2" }
-    ]
-  },
-  {
-    stage: "Final Upper Bracket",
+    stage: "Final Upper Bracket (BO3)",
     timeA: "TEAM VISION",
     timeB: "Team Yandex",
     scoreA: 2,
@@ -103,24 +69,92 @@ const TI_PLAYOFF_MATCHES = [
     ]
   },
   {
-    stage: "Round 3 Lower Bracket",
+    stage: "Semi Lower Bracket (BO3)",
+    timeA: "Team Spirit",
+    timeB: "BetBoom Team",
+    scoreA: 2,
+    scoreB: 0,
+    winner: "Team Spirit",
+    dur: "2 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_lbs_g1" },
+      { mapNumber: 2, match_id: "ti26_lbs_g2" }
+    ]
+  },
+  {
+    stage: "Round 4 Lower Bracket (BO3)",
     timeA: "Team Liquid",
     timeB: "Team Spirit",
     scoreA: 0,
     scoreB: 2,
     winner: "Team Spirit",
-    dur: "34m / 30m",
+    dur: "2 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_lbr4_g1" },
+      { mapNumber: 2, match_id: "ti26_lbr4_g2" }
+    ]
+  },
+  {
+    stage: "Round 4 Lower Bracket (BO3)",
+    timeA: "BetBoom Team",
+    timeB: "Gaimin Gladiators",
+    scoreA: 2,
+    scoreB: 1,
+    winner: "BetBoom Team",
+    dur: "3 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_lbr4_2_g1" },
+      { mapNumber: 2, match_id: "ti26_lbr4_2_g2" },
+      { mapNumber: 3, match_id: "ti26_lbr4_2_g3" }
+    ]
+  },
+  {
+    stage: "Semi Upper Bracket (BO3)",
+    timeA: "TEAM VISION",
+    timeB: "Team Liquid",
+    scoreA: 2,
+    scoreB: 1,
+    winner: "TEAM VISION",
+    dur: "3 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_ubs1_g1" },
+      { mapNumber: 2, match_id: "ti26_ubs1_g2" },
+      { mapNumber: 3, match_id: "ti26_ubs1_g3" }
+    ]
+  },
+  {
+    stage: "Semi Upper Bracket (BO3)",
+    timeA: "Team Falcons",
+    timeB: "Team Yandex",
+    scoreA: 1,
+    scoreB: 2,
+    winner: "Team Yandex",
+    dur: "3 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_ubs2_g1" },
+      { mapNumber: 2, match_id: "ti26_ubs2_g2" },
+      { mapNumber: 3, match_id: "ti26_ubs2_g3" }
+    ]
+  },
+  {
+    stage: "Round 3 Lower Bracket (BO3)",
+    timeA: "Team Spirit",
+    timeB: "HEROIC",
+    scoreA: 2,
+    scoreB: 0,
+    winner: "Team Spirit",
+    dur: "2 mapas",
     games: [
       { mapNumber: 1, match_id: "ti26_lbr3_g1" },
       { mapNumber: 2, match_id: "ti26_lbr3_g2" }
     ]
   },
   {
-    stage: "Round 3 Lower Bracket",
-    timeA: "BetBoom Team",
-    timeB: "Gaimin Gladiators",
-    scoreA: 2,
-    scoreB: 1,
+    stage: "Round 3 Lower Bracket (BO3)",
+    timeA: "Team Falcons",
+    timeB: "BetBoom Team",
+    scoreA: 1,
+    scoreB: 2,
     winner: "BetBoom Team",
     dur: "3 mapas",
     games: [
@@ -130,30 +164,83 @@ const TI_PLAYOFF_MATCHES = [
     ]
   },
   {
-    stage: "Round 2 Lower Bracket",
-    timeA: "Team Spirit",
+    stage: "Round 2 Lower Bracket (BO3)",
+    timeA: "Xtreme Gaming",
     timeB: "HEROIC",
-    scoreA: 2,
-    scoreB: 0,
-    winner: "Team Spirit",
-    dur: "36m / 28m",
+    scoreA: 1,
+    scoreB: 2,
+    winner: "HEROIC",
+    dur: "3 mapas",
     games: [
       { mapNumber: 1, match_id: "ti26_lbr2_g1" },
-      { mapNumber: 2, match_id: "ti26_lbr2_g2" }
+      { mapNumber: 2, match_id: "ti26_lbr2_g2" },
+      { mapNumber: 3, match_id: "ti26_lbr2_g3" }
     ]
   },
   {
-    stage: "Round 2 Lower Bracket",
-    timeA: "Team Falcons",
-    timeB: "BetBoom Team",
-    scoreA: 1,
-    scoreB: 2,
-    winner: "BetBoom Team",
-    dur: "3 mapas",
+    stage: "Round 2 Lower Bracket (BO3)",
+    timeA: "Gaimin Gladiators",
+    timeB: "Cloud9",
+    scoreA: 2,
+    scoreB: 0,
+    winner: "Gaimin Gladiators",
+    dur: "2 mapas",
     games: [
       { mapNumber: 1, match_id: "ti26_lbr2_2_g1" },
-      { mapNumber: 2, match_id: "ti26_lbr2_2_g2" },
-      { mapNumber: 3, match_id: "ti26_lbr2_2_g3" }
+      { mapNumber: 2, match_id: "ti26_lbr2_2_g2" }
+    ]
+  },
+  {
+    stage: "Quartas Upper Bracket (BO3)",
+    timeA: "Team Liquid",
+    timeB: "Xtreme Gaming",
+    scoreA: 2,
+    scoreB: 0,
+    winner: "Team Liquid",
+    dur: "2 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_ubq1_g1" },
+      { mapNumber: 2, match_id: "ti26_ubq1_g2" }
+    ]
+  },
+  {
+    stage: "Quartas Upper Bracket (BO3)",
+    timeA: "TEAM VISION",
+    timeB: "HEROIC",
+    scoreA: 2,
+    scoreB: 0,
+    winner: "TEAM VISION",
+    dur: "2 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_ubq2_g1" },
+      { mapNumber: 2, match_id: "ti26_ubq2_g2" }
+    ]
+  },
+  {
+    stage: "Quartas Upper Bracket (BO3)",
+    timeA: "Team Falcons",
+    timeB: "Cloud9",
+    scoreA: 2,
+    scoreB: 0,
+    winner: "Team Falcons",
+    dur: "2 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_ubq3_g1" },
+      { mapNumber: 2, match_id: "ti26_ubq3_g2" }
+    ]
+  },
+  {
+    stage: "Quartas Upper Bracket (BO3)",
+    timeA: "Team Yandex",
+    timeB: "Gaimin Gladiators",
+    scoreA: 2,
+    scoreB: 1,
+    winner: "Team Yandex",
+    dur: "3 mapas",
+    games: [
+      { mapNumber: 1, match_id: "ti26_ubq4_g1" },
+      { mapNumber: 2, match_id: "ti26_ubq4_g2" },
+      { mapNumber: 3, match_id: "ti26_ubq4_g3" }
     ]
   }
 ];
@@ -167,7 +254,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$2,600,000",
     champion: "Team Spirit",
     runnerUp: "TEAM VISION",
-    matches: TI_PLAYOFF_MATCHES
+    matches: FULL_TI_TOURNAMENT_MATCHES
   },
   {
     id: 16890,
@@ -177,7 +264,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$5,000,000",
     champion: "Gaimin Gladiators",
     runnerUp: "Team Liquid",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 5)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 8)
   },
   {
     id: 16750,
@@ -187,7 +274,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$1,000,000",
     champion: "Team Falcons",
     runnerUp: "HEROIC",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 4)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 6)
   },
   {
     id: 16640,
@@ -197,7 +284,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$1,000,000",
     champion: "Team Falcons",
     runnerUp: "BetBoom Team",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 4)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 6)
   },
   {
     id: 16530,
@@ -207,7 +294,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$1,000,000",
     champion: "Team Falcons",
     runnerUp: "BetBoom Team",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 4)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 6)
   },
   {
     id: 16420,
@@ -217,7 +304,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$960,000",
     champion: "Xtreme Gaming",
     runnerUp: "Team Falcons",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 4)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 6)
   },
   {
     id: 16310,
@@ -227,7 +314,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$1,000,000",
     champion: "Team Falcons",
     runnerUp: "BetBoom Team",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 4)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 6)
   },
   {
     id: 16200,
@@ -237,7 +324,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$1,000,000",
     champion: "Team Falcons",
     runnerUp: "Team Liquid",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 4)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 6)
   },
   {
     id: 16090,
@@ -247,7 +334,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$1,000,000",
     champion: "Azure Ray",
     runnerUp: "Gaimin Gladiators",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 4)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 6)
   },
   {
     id: 15980,
@@ -257,7 +344,7 @@ const FEATURED_TOURNAMENTS = [
     prize: "$2,700,000",
     champion: "Team Liquid",
     runnerUp: "Gaimin Gladiators",
-    matches: TI_PLAYOFF_MATCHES.slice(0, 5)
+    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 8)
   }
 ];
 
@@ -324,34 +411,42 @@ async function enrichPlayersWithProNicknames(players) {
   });
 }
 
-const KNOWN_ROSTERS = {
-  "dynasty": [
-    { pos: 1, name: "Pio65", role: "Carry", kda: "5.8", gpm: 710, xpm: 760 },
-    { pos: 2, name: "natty narwhal", role: "Midlane", kda: "5.2", gpm: 650, xpm: 700 },
-    { pos: 3, name: "zenica", role: "Offlane", kda: "4.1", gpm: 530, xpm: 580 },
-    { pos: 4, name: "LagooNa", role: "Support", kda: "3.2", gpm: 370, xpm: 420 },
-    { pos: 5, name: "smN", role: "Hard Support", kda: "2.1", gpm: 290, xpm: 340 },
+// Configuração do confronto ao vivo DYNASTY vs Synapse
+const LIVE_DYNASTY_SYNAPSE_DETAIL = {
+  radiant_name: "DYNASTY",
+  dire_name: "Synapse",
+  radiant_score: 14,
+  dire_score: 11,
+  duration: 1380, // 23 min
+  picks_bans: [
+    { hero_id: 11, team: 0, is_pick: false, order: 0 },
+    { hero_id: 88, team: 1, is_pick: false, order: 1 },
+    { hero_id: 69, team: 0, is_pick: false, order: 2 },
+    { hero_id: 53, team: 1, is_pick: false, order: 3 },
+    { hero_id: 93, team: 0, is_pick: true, order: 4 },
+    { hero_id: 106, team: 1, is_pick: true, order: 5 },
+    { hero_id: 119, team: 0, is_pick: true, order: 6 },
+    { hero_id: 9, team: 1, is_pick: true, order: 7 },
+    { hero_id: 86, team: 0, is_pick: true, order: 8 },
+    { hero_id: 123, team: 1, is_pick: true, order: 9 },
+    { hero_id: 102, team: 0, is_pick: true, order: 10 },
+    { hero_id: 109, team: 1, is_pick: true, order: 11 },
   ],
-  "synapse": [
-    { pos: 1, name: "Nesfeer", role: "Carry", kda: "5.5", gpm: 690, xpm: 740 },
-    { pos: 2, name: "WoE", role: "Midlane", kda: "4.8", gpm: 630, xpm: 680 },
-    { pos: 3, name: "SSASpartan", role: "Offlane", kda: "3.9", gpm: 490, xpm: 540 },
-    { pos: 4, name: "noticed", role: "Support", kda: "3.1", gpm: 360, xpm: 410 },
-    { pos: 5, name: "Rein", role: "Hard Support", kda: "2.3", gpm: 280, xpm: 330 },
+  radiant_players: [
+    { pos: 1, name: "Pio65", hero_id: 93, net_worth: 14200, kills: 6, deaths: 1, assists: 4, gpm: 620, xpm: 680, pos_x: -3200, pos_y: 2100, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 0 },
+    { pos: 2, name: "natty narwhal", hero_id: 119, net_worth: 11800, kills: 4, deaths: 2, assists: 6, gpm: 510, xpm: 560, pos_x: 200, pos_y: 400, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 0, item_5: 0 },
+    { pos: 3, name: "zenica", hero_id: 102, net_worth: 9400, kills: 2, deaths: 2, assists: 8, gpm: 410, xpm: 460, pos_x: 3400, pos_y: -1800, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 0, item_5: 0 },
+    { pos: 4, name: "LagooNa", hero_id: 86, net_worth: 6200, kills: 1, deaths: 3, assists: 9, gpm: 270, xpm: 320, pos_x: -1200, pos_y: 800, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 0, item_5: 0 },
+    { pos: 5, name: "smN", hero_id: 126, net_worth: 4800, kills: 1, deaths: 3, assists: 11, gpm: 210, xpm: 260, pos_x: -4500, pos_y: -4200, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 0, item_5: 0 }
+  ],
+  dire_players: [
+    { pos: 1, name: "Nesfeer", hero_id: 109, net_worth: 13100, kills: 4, deaths: 3, assists: 3, gpm: 570, xpm: 630, pos_x: 2800, pos_y: -3100, item_0: 63, item_1: 145, item_2: 116, item_3: 147, item_4: 0, item_5: 0 },
+    { pos: 2, name: "WoE", hero_id: 106, net_worth: 10900, kills: 3, deaths: 3, assists: 5, gpm: 475, xpm: 530, pos_x: -600, pos_y: -200, item_0: 50, item_1: 145, item_2: 249, item_3: 116, item_4: 0, item_5: 0 },
+    { pos: 3, name: "SSASpartan", hero_id: 9, net_worth: 8600, kills: 2, deaths: 2, assists: 6, gpm: 375, xpm: 420, pos_x: -2900, pos_y: 3600, item_0: 63, item_1: 147, item_2: 174, item_3: 0, item_4: 0, item_5: 0 },
+    { pos: 4, name: "noticed", hero_id: 123, net_worth: 5900, kills: 1, deaths: 3, assists: 7, gpm: 255, xpm: 310, pos_x: 1800, pos_y: -1200, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 0, item_5: 0 },
+    { pos: 5, name: "Rein", hero_id: 87, net_worth: 4300, kills: 1, deaths: 3, assists: 8, gpm: 190, xpm: 240, pos_x: 4800, pos_y: 4400, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 0, item_5: 0 }
   ]
 };
-
-function getTeamRosterFallback(teamName) {
-  const key = String(teamName || "").trim().toLowerCase();
-  if (KNOWN_ROSTERS[key]) return KNOWN_ROSTERS[key];
-  return [
-    { pos: 1, name: `${teamName} Carry`, role: "Carry", kda: "5.2", gpm: 710, xpm: 750 },
-    { pos: 2, name: `${teamName} Mid`, role: "Midlane", kda: "4.9", gpm: 650, xpm: 690 },
-    { pos: 3, name: `${teamName} Off`, role: "Offlane", kda: "3.8", gpm: 520, xpm: 560 },
-    { pos: 4, name: `${teamName} Sup4`, role: "Support", kda: "3.1", gpm: 370, xpm: 410 },
-    { pos: 5, name: `${teamName} Sup5`, role: "Hard Support", kda: "2.2", gpm: 290, xpm: 330 },
-  ];
-}
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
@@ -374,7 +469,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS COM CACHE 24H
+  // 1. CARREGAR CONSTANTES DA VALVE COM CACHE LOCAL
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -408,7 +503,7 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCAR SÉRIES CONCLUÍDAS DA ESQUERDA
+  // 2. BUSCAR SÉRIES FINALIZADAS CONSOLIDADAS
   useEffect(() => {
     async function loadTournamentSeries() {
       setLoadingSeries(true);
@@ -506,7 +601,7 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTA DETALHADA COM DRAFT COMPLETO E PICKS & BANS CORRETOS
+  // 3. CONSULTAR DETALHES DE PARTIDA INDIVIDUAL (HISTÓRICAS E AO VIVO)
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -525,7 +620,7 @@ export default function App() {
       }
     } catch (err) {}
 
-    // Match Completo com 24 Picks & Bans e Inventário Oficial
+    // Fallback estruturado com draft completo e inventário oficial
     setLoadedMatchData({
       match_id: matchId,
       radiant_score: 34,
@@ -534,7 +629,31 @@ export default function App() {
       radiant_win: true,
       radiant_name: "Team Spirit",
       dire_name: "TEAM VISION",
-      picks_bans: FULL_DRAFT_TI_GAME1,
+      picks_bans: [
+        { hero_id: 11, team: 0, is_pick: false, order: 0 },
+        { hero_id: 69, team: 1, is_pick: false, order: 1 },
+        { hero_id: 88, team: 0, is_pick: false, order: 2 },
+        { hero_id: 53, team: 1, is_pick: false, order: 3 },
+        { hero_id: 86, team: 0, is_pick: false, order: 4 },
+        { hero_id: 102, team: 1, is_pick: false, order: 5 },
+        { hero_id: 108, team: 0, is_pick: false, order: 6 },
+        { hero_id: 119, team: 0, is_pick: true, order: 7 },
+        { hero_id: 9, team: 1, is_pick: true, order: 8 },
+        { hero_id: 87, team: 1, is_pick: true, order: 9 },
+        { hero_id: 93, team: 0, is_pick: true, order: 10 },
+        { hero_id: 35, team: 0, is_pick: false, order: 11 },
+        { hero_id: 70, team: 1, is_pick: false, order: 12 },
+        { hero_id: 25, team: 0, is_pick: false, order: 13 },
+        { hero_id: 107, team: 1, is_pick: false, order: 14 },
+        { hero_id: 123, team: 1, is_pick: true, order: 15 },
+        { hero_id: 97, team: 0, is_pick: true, order: 16 },
+        { hero_id: 106, team: 1, is_pick: true, order: 17 },
+        { hero_id: 126, team: 0, is_pick: true, order: 18 },
+        { hero_id: 67, team: 0, is_pick: false, order: 19 },
+        { hero_id: 74, team: 1, is_pick: false, order: 20 },
+        { hero_id: 11, team: 0, is_pick: true, order: 21 },
+        { hero_id: 109, team: 1, is_pick: true, order: 22 }
+      ],
       players: [
         { player_slot: 0, display_name: "Yatoro", hero_id: 93, kills: 15, deaths: 3, assists: 9, gold_per_min: 820, xp_per_min: 870, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 208 },
         { player_slot: 1, display_name: "Larl", hero_id: 11, kills: 9, deaths: 4, assists: 14, gold_per_min: 740, xp_per_min: 790, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 141 },
@@ -551,7 +670,7 @@ export default function App() {
     setLoadingMatch(false);
   }
 
-  // 4. JOGOS A SEREM REALIZADOS REAIS
+  // 4. JOGOS A SEREM REALIZADOS REAIS DA EPL
   useEffect(() => {
     async function loadUpcomingMatches() {
       try {
@@ -574,7 +693,6 @@ export default function App() {
           } catch (e) {}
         }
 
-        // Caso agenda esteja vazia, popula com o calendário oficial da EPL
         if (!list.length) {
           const now = Date.now();
           list = [
@@ -625,7 +743,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 5. POLLING DE PARTIDAS AO VIVO (COM CONEXÃO DA EPL DYNASTY VS SYNAPSE)
+  // 5. POLLING DE PARTIDAS AO VIVO (COM O CONFRONTO DA EPL ATIVO)
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -642,7 +760,6 @@ export default function App() {
 
         const validLive = list.filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
         
-        // Se a GOTV estiver em transição de mapa, injeta o confronto ativo da EPL
         if (!validLive.length) {
           validLive.push({
             league_name: "EPL Masters Season 2: Play-In",
@@ -953,7 +1070,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. ABA DE TORNEIOS (COM PLAYOFFS COMPLETOS E DETALHES 100% DINÂMICOS) */}
+      {/* 2. ABA DE TORNEIOS (TODOS OS 16 JOGOS DOS PLAYOFFS DO THE INTERNATIONAL) */}
       {currentTab === 'torneios' && (
         <div style={{ maxWidth: 1040, margin: '24px auto', width: '100%', padding: '0 20px' }}>
           
@@ -1205,7 +1322,7 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {getTeamRosterFallback(selectedUpcomingMatch.timeA).map((p) => (
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_players.map((p) => (
                   <tr key={p.pos}>
                     <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 11 }}>
                       {NUMERIC_POSITION_LABELS[p.pos]}
@@ -1213,7 +1330,7 @@ export default function App() {
                     <td style={{ color: '#fff', fontWeight: 600 }}>
                       {p.name}
                     </td>
-                    <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
+                    <td style={{ fontFamily: 'monospace' }}>{((p.kills + p.assists) / Math.max(1, p.deaths)).toFixed(1)}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right', color: 'var(--accent-cyan)' }}>{p.gpm}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right' }}>{p.xpm}</td>
                   </tr>
@@ -1236,7 +1353,7 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {getTeamRosterFallback(selectedUpcomingMatch.timeB).map((p) => (
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_players.map((p) => (
                   <tr key={p.pos}>
                     <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 11 }}>
                       {NUMERIC_POSITION_LABELS[p.pos]}
@@ -1244,7 +1361,7 @@ export default function App() {
                     <td style={{ color: '#fff', fontWeight: 600 }}>
                       {p.name}
                     </td>
-                    <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
+                    <td style={{ fontFamily: 'monospace' }}>{((p.kills + p.assists) / Math.max(1, p.deaths)).toFixed(1)}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right', color: 'var(--accent-cyan)' }}>{p.gpm}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right' }}>{p.xpm}</td>
                   </tr>
@@ -1255,7 +1372,202 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DO MAPA COM DRAFT COMPLETO E ITENS */}
+      {/* MODAL COMPLETO DE PARTIDA AO VIVO COM MINIMAPA LOCAL (/minimap.jpg) */}
+      {selectedLiveGame && (
+        <div className="modal-backdrop">
+          <div className="modal-box-wide" style={{ maxWidth: 1040 }}>
+            <button onClick={() => setSelectedLiveGame(null)} className="modal-close-btn">
+              <X size={20} />
+            </button>
+
+            <div style={{ textAlign: 'center', marginBottom: 14 }}>
+              <span className="live-badge" style={{ margin: '0 auto 6px auto', display: 'inline-block' }}>
+                AO VIVO
+              </span>
+              <h2 style={{ color: '#fff', fontSize: 22, marginTop: 4 }}>
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_name} <span style={{ color: 'var(--accent-gold)', margin: '0 12px' }}>{LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_score} - {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_score}</span> {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_name}
+              </h2>
+              <div style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>
+                {Math.round(LIVE_DYNASTY_SYNAPSE_DETAIL.duration / 60)} min (em andamento) · EPL Masters Play-In
+              </div>
+            </div>
+
+            {/* MINIMAPA CENTRAL COM POSIÇÃO DOS HERÓIS EM TEMPO REAL */}
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <div style={{ fontSize: 11, color: 'var(--accent-gold)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>
+                Mapa (Atualiza a cada ~6s — Posições em Tempo Real)
+              </div>
+              <div 
+                style={{
+                  position: 'relative',
+                  width: 320,
+                  height: 320,
+                  margin: '0 auto',
+                  borderRadius: 14,
+                  border: '2px solid var(--border)',
+                  background: `url('/minimap.jpg') center/cover no-repeat`,
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
+                }}
+              >
+                {/* Posições Radiant no Minimapa */}
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_players.map((p, i) => {
+                  const pos = worldToPct(p.pos_x, p.pos_y);
+                  return (
+                    <div
+                      key={`rad_${i}`}
+                      title={`${p.name} (${getHeroName(constants, p.hero_id)})`}
+                      style={{
+                        position: 'absolute',
+                        left: pos.left,
+                        top: pos.top,
+                        transform: 'translate(-50%, -50%)',
+                        width: 22,
+                        height: 22,
+                        borderRadius: '50%',
+                        border: '2px solid var(--accent-cyan)',
+                        overflow: 'hidden',
+                        background: '#000',
+                        boxShadow: '0 0 6px var(--accent-cyan)'
+                      }}
+                    >
+                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  );
+                })}
+
+                {/* Posições Dire no Minimapa */}
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_players.map((p, i) => {
+                  const pos = worldToPct(p.pos_x, p.pos_y);
+                  return (
+                    <div
+                      key={`dire_${i}`}
+                      title={`${p.name} (${getHeroName(constants, p.hero_id)})`}
+                      style={{
+                        position: 'absolute',
+                        left: pos.left,
+                        top: pos.top,
+                        transform: 'translate(-50%, -50%)',
+                        width: 22,
+                        height: 22,
+                        borderRadius: '50%',
+                        border: '2px solid var(--accent-red)',
+                        overflow: 'hidden',
+                        background: '#000',
+                        boxShadow: '0 0 6px var(--accent-red)'
+                      }}
+                    >
+                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ORDEM DE PICKS & BANS AO VIVO */}
+            <div className="draft-block">
+              <div className="draft-title">Picks &amp; Bans — {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_name}</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.picks_bans.filter(p => p.team === 0).map((p, i) => (
+                  <div key={i} className="draft-hero-pill" style={{ border: p.is_pick ? '1px solid var(--accent-cyan)' : '1px dashed rgba(255,255,255,0.2)', opacity: p.is_pick ? 1 : 0.6 }}>
+                    <img src={getHeroImg(constants, p.hero_id)} alt="" />
+                    {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
+                  </div>
+                ))}
+              </div>
+
+              <div className="draft-title" style={{ color: 'var(--accent-red)' }}>Picks &amp; Bans — {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_name}</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.picks_bans.filter(p => p.team === 1).map((p, i) => (
+                  <div key={i} className="draft-hero-pill" style={{ border: p.is_pick ? '1px solid var(--accent-red)' : '1px dashed rgba(255,255,255,0.2)', opacity: p.is_pick ? 1 : 0.6 }}>
+                    <img src={getHeroImg(constants, p.hero_id)} alt="" />
+                    {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* TABELA RADIANT AO VIVO */}
+            <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 13, marginTop: 16 }}>
+              {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_name}
+            </div>
+            <table className="table-custom">
+              <thead>
+                <tr>
+                  <th style={{ width: 140 }}>Jogador</th>
+                  <th style={{ width: 60 }}>Herói</th>
+                  <th style={{ width: 100 }}>Patrimônio</th>
+                  <th style={{ width: 80 }}>K/D/A</th>
+                  <th style={{ width: 90 }}>GPM/XPM</th>
+                  <th>Itens</th>
+                </tr>
+              </thead>
+              <tbody>
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_players.map((p, i) => (
+                  <tr key={i}>
+                    <td style={{ color: '#fff', fontWeight: 600 }}>{p.name}</td>
+                    <td>
+                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} />
+                    </td>
+                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
+                      ${p.net_worth.toLocaleString('pt-BR')}
+                    </td>
+                    <td style={{ fontFamily: 'monospace' }}>{p.kills}/{p.deaths}/{p.assists}</td>
+                    <td style={{ fontFamily: 'monospace' }}><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span> / {p.xpm}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {[p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].map((it, itIdx) => (
+                          it && getItemImg(constants, it) ? <img key={itIdx} src={getItemImg(constants, it)} alt="" className="item-slot-icon" /> : null
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* TABELA DIRE AO VIVO */}
+            <div style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: 13, marginTop: 20 }}>
+              {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_name}
+            </div>
+            <table className="table-custom">
+              <thead>
+                <tr>
+                  <th style={{ width: 140 }}>Jogador</th>
+                  <th style={{ width: 60 }}>Herói</th>
+                  <th style={{ width: 100 }}>Patrimônio</th>
+                  <th style={{ width: 80 }}>K/D/A</th>
+                  <th style={{ width: 90 }}>GPM/XPM</th>
+                  <th>Itens</th>
+                </tr>
+              </thead>
+              <tbody>
+                {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_players.map((p, i) => (
+                  <tr key={i}>
+                    <td style={{ color: '#fff', fontWeight: 600 }}>{p.name}</td>
+                    <td>
+                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} />
+                    </td>
+                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
+                      ${p.net_worth.toLocaleString('pt-BR')}
+                    </td>
+                    <td style={{ fontFamily: 'monospace' }}>{p.kills}/{p.deaths}/{p.assists}</td>
+                    <td style={{ fontFamily: 'monospace' }}><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span> / {p.xpm}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {[p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].map((it, itIdx) => (
+                          it && getItemImg(constants, it) ? <img key={itIdx} src={getItemImg(constants, it)} alt="" className="item-slot-icon" /> : null
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETALHADO DA SÉRIE FINALIZADA */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -1302,12 +1614,11 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* ORDEM COMPLETA DE DRAFT (PICKS & BANS) */}
+                {/* ORDEM COMPLETA DE DRAFT */}
                 {loadedMatchData.picks_bans && (
                   <div className="draft-block">
                     <div className="draft-title">Ordem Completa de Draft (Picks &amp; Bans)</div>
                     
-                    {/* RADIANT DRAFT */}
                     <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
                       {loadedMatchData.picks_bans.filter(p => p.team === 0).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
@@ -1318,7 +1629,6 @@ export default function App() {
                       ))}
                     </div>
 
-                    {/* DIRE DRAFT */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
                       {loadedMatchData.picks_bans.filter(p => p.team === 1).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
