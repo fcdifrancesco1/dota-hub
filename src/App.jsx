@@ -2,7 +2,84 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Trophy, Award, History, X } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
-const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react";
+
+// Helpers para URLs oficiais das imagens de Heróis e Itens da Valve
+function getHeroImageUrl(heroName) {
+  if (!heroName) return "";
+  const clean = heroName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${clean}.png`;
+}
+
+function getItemImageUrl(itemName) {
+  if (!itemName) return "";
+  const map = {
+    "Power Treads": "power_treads",
+    "Manta Style": "manta",
+    "Butterfly": "butterfly",
+    "Satanic": "satanic",
+    "Eye of Skadi": "skadi",
+    "Black King Bar": "black_king_bar",
+    "Kaya and Sange": "kaya_and_sange",
+    "Orchid Malevolence": "orchid",
+    "Shiva's Guard": "shivas_guard",
+    "Aghanim's Scepter": "ultimate_scepter",
+    "Aghanim's Shard": "aghanims_shard",
+    "Phase Boots": "phase_boots",
+    "Blink Dagger": "blink",
+    "Pipe of Insight": "pipe",
+    "Heart of Tarrasque": "heart",
+    "Crimson Guard": "crimson_guard",
+    "Lotus Orb": "lotus_orb",
+    "Arcane Boots": "arcane_boots",
+    "Aether Lens": "aether_lens",
+    "Gleipnir": "gungir",
+    "Force Staff": "force_staff",
+    "Eul's Scepter": "cyclone",
+    "Solar Crest": "solar_crest",
+    "Tranquil Boots": "tranquil_boots",
+    "Glimmer Cape": "glimmer_cape",
+    "Blade Mail": "blade_mail",
+    "Observer Ward": "ward_observer",
+    "Town Portal Scroll": "tpscroll",
+    "Dragon Lance": "dragon_lance",
+    "Mask of Madness": "mask_of_madness",
+    "Witch Blade": "witch_blade",
+    "Linken's Sphere": "sphere",
+    "Dagon": "dagon",
+    "Refresher Orb": "refresher",
+    "Desolator": "desolator",
+    "Vladmir's Offering": "vladmir",
+    "Ghost Scepter": "ghost",
+    "Wind Lace": "wind_lace",
+    "Bloodstone": "bloodstone",
+    "Boots of Travel": "travel_boots",
+    "Eternal Shroud": "eternal_shroud",
+    "Guardian Greaves": "guardian_greaves",
+    "Holy Locket": "holy_locket",
+    "Urn of Shadows": "urn_of_shadows",
+    "Spirit Vessel": "spirit_vessel",
+    "Echo Sabre": "echo_sabre",
+    "Daedalus": "greater_crit",
+    "Assault Cuirass": "assault",
+    "Radiance": "radiance",
+    "Maelstrom": "maelstrom",
+    "Diffusal Blade": "diffusal_blade",
+    "Abyssal Blade": "abyssal_blade",
+    "Harpoon": "harpoon",
+    "Disperser": "disperser",
+    "Octarine Core": "octarine_core",
+    "Helm of the Overlord": "helm_of_the_overlord",
+    "Boots of Bearing": "boots_of_bearing",
+    "Rod of Atos": "rod_of_atos",
+    "Battle Fury": "bfury",
+    "Mage Slayer": "mage_slayer",
+    "Moon Shard": "moon_shard",
+    "Armlet of Mordiggian": "armlet",
+    "Aeon Disk": "aeon_disk"
+  };
+  const key = map[itemName] || itemName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${key}.png`;
+}
 
 const MAP_MIN = -8288, MAP_MAX = 8288;
 function worldToPct(x, y) {
@@ -26,7 +103,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR JOGOS DO ÚLTIMO TORNEIO FINALIZADO (THE INTERNATIONAL 2026 - PLAYOFFS)
+  // 1. CARREGAR JOGOS DO THE INTERNATIONAL 2026 (PLAYOFFS & DRAFTS)
   useEffect(() => {
     const ti2026Playoffs = [
       {
@@ -179,7 +256,7 @@ export default function App() {
     setTiFinishedMatches(ti2026Playoffs);
   }, []);
 
-  // 2. POLLING DE PARTIDAS AO VIVO (SÓ EXIBE SE HOUVER JOGO EM ANDAMENTO)
+  // 2. POLLING DE PARTIDAS AO VIVO
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -210,7 +287,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 3. JOGOS A SEREM REALIZADOS (VALIDAÇÃO ESTRITA COM A DATA DE HOJE)
+  // 3. JOGOS A SEREM REALIZADOS (VALIDAÇÃO ESTRITA COM A DATA ATUAL)
   useEffect(() => {
     async function loadUpcomingOnly() {
       try {
@@ -218,7 +295,6 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           const now = Date.now();
-          // Validação estrita: só inclui se a data da partida for estritamente maior que agora
           const strictlyFuture = (data || []).filter(m => m.data && new Date(m.data).getTime() > now);
           setUpcomingMatches(strictlyFuture);
         } else {
@@ -283,7 +359,7 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS DO THE INTERNATIONAL 2026 (FINALIZADO) */}
+          {/* ESQUERDA: JOGOS DO THE INTERNATIONAL 2026 */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -363,7 +439,7 @@ export default function App() {
               </section>
             )}
 
-            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 COM O AEGIS OFICIAL */}
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
@@ -525,7 +601,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DO CONFRONTO FINALIZADO (JOGO 1 A 5, DRAFT, ITENS E STATS) */}
+      {/* MODAL DETALHADO DA SÉRIE COM IMAGENS DE HERÓIS E ITENS */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -542,7 +618,7 @@ export default function App() {
               </h2>
             </div>
 
-            {/* ABAS DOS MAPAS DA SÉRIE */}
+            {/* ABAS DOS MAPAS */}
             <div className="map-tabs-row">
               {selectedSeriesDetail.games.map((g, idx) => (
                 <button
@@ -555,31 +631,54 @@ export default function App() {
               ))}
             </div>
 
-            {/* DETALHES DO MAPA ATIVO */}
+            {/* MAPA SELECIONADO */}
             {selectedSeriesDetail.games[activeMapIndex] && (() => {
               const game = selectedSeriesDetail.games[activeMapIndex];
               return (
                 <div>
-                  {/* RESULTADO & DURAÇÃO */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12 }}>
                     <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>Vencedor: {game.vencedor}</span>
                     <span style={{ color: 'var(--text-dim)' }}>Duração: {game.duracao}</span>
                   </div>
 
-                  {/* DRAFT: PICKS & BANS */}
+                  {/* DRAFT COM IMAGENS DOS HERÓIS */}
                   <div className="draft-block">
                     <div className="draft-title">Ordem de Draft (Picks & Bans)</div>
-                    <div style={{ marginBottom: 6 }}>
-                      <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>Radiant Bans: </span>
-                      <span style={{ color: 'var(--text-dim)' }}>{game.draft.radiantBans.join(', ')}</span>
-                      <span style={{ marginLeft: 12, color: 'var(--accent-cyan)', fontWeight: 700 }}>Picks: </span>
-                      <span style={{ color: '#fff' }}>{game.draft.radiantPicks.join(', ')}</span>
+                    
+                    {/* RADIANT DRAFT */}
+                    <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
+                      <span style={{ color: 'var(--text-dim)', fontSize: 10 }}>Bans:</span>
+                      {game.draft.radiantBans.map((h, i) => (
+                        <div key={`rb_${i}`} className="draft-hero-pill" style={{ opacity: 0.6 }}>
+                          <img src={getHeroImageUrl(h)} alt={h} title={`Ban: ${h}`} />
+                        </div>
+                      ))}
+                      <span style={{ color: '#fff', fontSize: 10, marginLeft: 6 }}>Picks:</span>
+                      {game.draft.radiantPicks.map((h, i) => (
+                        <div key={`rp_${i}`} className="draft-hero-pill" style={{ border: '1px solid var(--accent-cyan)' }}>
+                          <img src={getHeroImageUrl(h)} alt={h} title={`Pick: ${h}`} />
+                          <span style={{ color: '#fff', fontWeight: 600 }}>{h}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>Dire Bans: </span>
-                      <span style={{ color: 'var(--text-dim)' }}>{game.draft.direBans.join(', ')}</span>
-                      <span style={{ marginLeft: 12, color: 'var(--accent-red)', fontWeight: 700 }}>Picks: </span>
-                      <span style={{ color: '#fff' }}>{game.draft.direPicks.join(', ')}</span>
+
+                    {/* DIRE DRAFT */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
+                      <span style={{ color: 'var(--text-dim)', fontSize: 10 }}>Bans:</span>
+                      {game.draft.direBans.map((h, i) => (
+                        <div key={`db_${i}`} className="draft-hero-pill" style={{ opacity: 0.6 }}>
+                          <img src={getHeroImageUrl(h)} alt={h} title={`Ban: ${h}`} />
+                        </div>
+                      ))}
+                      <span style={{ color: '#fff', fontSize: 10, marginLeft: 6 }}>Picks:</span>
+                      {game.draft.direPicks.map((h, i) => (
+                        <div key={`dp_${i}`} className="draft-hero-pill" style={{ border: '1px solid var(--accent-red)' }}>
+                          <img src={getHeroImageUrl(h)} alt={h} title={`Pick: ${h}`} />
+                          <span style={{ color: '#fff', fontWeight: 600 }}>{h}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -588,26 +687,42 @@ export default function App() {
                   <table className="table-custom">
                     <thead>
                       <tr>
-                        <th>Jogador</th>
-                        <th>Herói</th>
-                        <th>KDA</th>
-                        <th>GPM/XPM</th>
+                        <th style={{ width: 140 }}>Jogador</th>
+                        <th style={{ width: 60 }}>Herói</th>
+                        <th style={{ width: 80 }}>K/D/A</th>
+                        <th style={{ width: 90 }}>GPM/XPM</th>
                         <th>Itens de Fim de Jogo</th>
                       </tr>
                     </thead>
                     <tbody>
                       {game.radiantRoster.map((p, i) => (
                         <tr key={i}>
-                          <td style={{ color: '#fff', fontWeight: 600 }}>Pos {p.pos} - {p.name}</td>
-                          <td style={{ color: 'var(--accent-gold)' }}>{p.hero}</td>
-                          <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
-                          <td style={{ fontFamily: 'monospace' }}>{p.gpm}/{p.xpm}</td>
+                          <td style={{ color: '#fff', fontWeight: 600 }}>
+                            <span style={{ color: 'var(--accent-gold)', marginRight: 6 }}>Pos {p.pos}</span>
+                            {p.name}
+                          </td>
                           <td>
-                            <div style={{ display: 'flex', gap: 4 }}>
+                            <img 
+                              src={getHeroImageUrl(p.hero)} 
+                              alt={p.hero} 
+                              title={p.hero} 
+                              style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover', verticalAlign: 'middle', border: '1px solid var(--border)' }} 
+                            />
+                          </td>
+                          <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
+                          <td style={{ fontFamily: 'monospace' }}>
+                            <span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span> / {p.xpm}
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                               {p.items.map((item, itIdx) => (
-                                <span key={itIdx} style={{ fontSize: 9, background: 'var(--bg-main)', border: '1px solid var(--border)', padding: '2px 4px', borderRadius: 3, color: 'var(--text-dim)' }}>
-                                  {item}
-                                </span>
+                                <img
+                                  key={itIdx}
+                                  src={getItemImageUrl(item)}
+                                  alt={item}
+                                  title={item}
+                                  className="item-slot-icon"
+                                />
                               ))}
                             </div>
                           </td>
@@ -621,26 +736,42 @@ export default function App() {
                   <table className="table-custom">
                     <thead>
                       <tr>
-                        <th>Jogador</th>
-                        <th>Herói</th>
-                        <th>KDA</th>
-                        <th>GPM/XPM</th>
+                        <th style={{ width: 140 }}>Jogador</th>
+                        <th style={{ width: 60 }}>Herói</th>
+                        <th style={{ width: 80 }}>K/D/A</th>
+                        <th style={{ width: 90 }}>GPM/XPM</th>
                         <th>Itens de Fim de Jogo</th>
                       </tr>
                     </thead>
                     <tbody>
                       {game.direRoster.map((p, i) => (
                         <tr key={i}>
-                          <td style={{ color: '#fff', fontWeight: 600 }}>Pos {p.pos} - {p.name}</td>
-                          <td style={{ color: 'var(--accent-gold)' }}>{p.hero}</td>
-                          <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
-                          <td style={{ fontFamily: 'monospace' }}>{p.gpm}/{p.xpm}</td>
+                          <td style={{ color: '#fff', fontWeight: 600 }}>
+                            <span style={{ color: 'var(--accent-gold)', marginRight: 6 }}>Pos {p.pos}</span>
+                            {p.name}
+                          </td>
                           <td>
-                            <div style={{ display: 'flex', gap: 4 }}>
+                            <img 
+                              src={getHeroImageUrl(p.hero)} 
+                              alt={p.hero} 
+                              title={p.hero} 
+                              style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover', verticalAlign: 'middle', border: '1px solid var(--border)' }} 
+                            />
+                          </td>
+                          <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
+                          <td style={{ fontFamily: 'monospace' }}>
+                            <span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span> / {p.xpm}
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                               {p.items.map((item, itIdx) => (
-                                <span key={itIdx} style={{ fontSize: 9, background: 'var(--bg-main)', border: '1px solid var(--border)', padding: '2px 4px', borderRadius: 3, color: 'var(--text-dim)' }}>
-                                  {item}
-                                </span>
+                                <img
+                                  key={itIdx}
+                                  src={getItemImageUrl(item)}
+                                  alt={item}
+                                  title={item}
+                                  className="item-slot-icon"
+                                />
                               ))}
                             </div>
                           </td>
