@@ -23,7 +23,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. POLLING DE PARTIDAS AO VIVO (SÓ APARECE SE HOUVER PARTIDA ATIVA)
+  // 1. Polling de partidas ao vivo (só exibe se houver partida)
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -54,7 +54,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 2. CONFRONTOS & RESULTADOS (COLUNA DIREITA)
+  // 2. Feed de partidas e resultados (Coluna direita)
   useEffect(() => {
     const feed = [
       { torneio: "The International 2026", timeA: "Xtreme Gaming", timeB: "Team Resilience", status: "EM BREVE", formato: "BO3", time: "11:00 BRT" },
@@ -67,7 +67,7 @@ export default function App() {
     setMatchFeed(feed);
   }, []);
 
-  // 3. RANKING MMR OFICIAL
+  // 3. Ranking MMR Oficial
   useEffect(() => {
     if (currentTab === 'mmr') {
       setMmrLoading(true);
@@ -151,59 +151,59 @@ export default function App() {
               </section>
             )}
 
-           {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
-<div className="champ-card">
-  <div className="champ-header">
-    <div className="champ-title-group">
-      {/* Imagem Oficial do Aegis enviada */}
-      <img
-  src="/aegis.png"
-  alt="Aegis of Champions"
-  className="aegis-real-img"
-  style={{
-    width: 72,
-    height: 72,
-    objectFit: 'contain',
-    filter: 'drop-shadow(0 0 14px rgba(212, 146, 68, 0.45))'
-  }}
-/>
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
+            <div className="champ-card">
+              <div className="champ-header">
+                <div className="champ-title-group">
+                  <img
+                    src="/aegis.png"
+                    alt="Aegis of Champions"
+                    className="aegis-real-img"
+                    onError={(e) => {
+                      e.target.src = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/trophies/aegis.png";
+                    }}
+                  />
+                  <div>
+                    <div className="champ-sub">Último Campeão Mundial</div>
+                    <h2 className="champ-name">The International 2026</h2>
+                  </div>
+                </div>
+                
+                <div className="champ-team-tag">
+                  <img 
+                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png" 
+                    alt="Team Spirit" 
+                    style={{ width: 32, height: 32, objectFit: 'contain' }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://raw.githubusercontent.com/odota/core/master/public/images/team_logos/7119388.png";
+                    }}
+                  />
+                  <span>Team Spirit</span>
+                </div>
+              </div>
 
-      <div>
-        <div className="champ-sub">Último Campeão Mundial</div>
-        <h2 className="champ-name">The International 2026</h2>
-      </div>
-    </div>
-    
-    <div className="champ-team-tag">
-      <img 
-        src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png" 
-        alt="Team Spirit" 
-        style={{ width: 32, height: 32, objectFit: 'contain' }}
-      />
-      <span>Team Spirit</span>
-    </div>
-  </div>
-
-  <div className="players-grid">
-    {[
-      { pos: 1, nick: "Yatoro", role: "Carry", kda: "6.8", gpm: 785 },
-      { pos: 2, nick: "Larl", role: "Midlane", kda: "5.9", gpm: 690 },
-      { pos: 3, nick: "Collapse", role: "Offlane", kda: "5.2", gpm: 610 },
-      { pos: 4, nick: "rue", role: "Support", kda: "3.4", gpm: 405 },
-      { pos: 5, nick: "not me", role: "Hard Support", kda: "2.4", gpm: 330 },
-    ].map((p) => (
-      <div key={p.pos} className="player-card">
-        <span className="player-pos-badge">{p.pos}</span>
-        <strong className="player-nick">{p.nick}</strong>
-        <span className="player-role-text">{p.role}</span>
-        <div className="player-stat-split">
-          <div><span className="player-stat-label">KDA</span>{p.kda}</div>
-          <div><span className="player-stat-label">GPM</span><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span></div>
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
+              <div className="players-grid">
+                {[
+                  { pos: 1, nick: "Yatoro", role: "Carry", kda: "6.8", gpm: 785 },
+                  { pos: 2, nick: "Larl", role: "Midlane", kda: "5.9", gpm: 690 },
+                  { pos: 3, nick: "Collapse", role: "Offlane", kda: "5.2", gpm: 610 },
+                  { pos: 4, nick: "rue", role: "Support", kda: "3.4", gpm: 405 },
+                  { pos: 5, nick: "not me", role: "Hard Support", kda: "2.4", gpm: 330 },
+                ].map((p) => (
+                  <div key={p.pos} className="player-card">
+                    <span className="player-pos-badge">{p.pos}</span>
+                    <strong className="player-nick">{p.nick}</strong>
+                    <span className="player-role-text">{p.role}</span>
+                    <div className="player-stat-split">
+                      <div><span className="player-stat-label">KDA</span>{p.kda}</div>
+                      <div><span className="player-stat-label">GPM</span><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </main>
 
           {/* COLUNA DIREITA */}
           <aside className="sidebar-right">
