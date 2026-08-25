@@ -78,7 +78,7 @@ async function enrichPlayersWithProNicknames(players) {
   });
 }
 
-// Rosters conhecidos para exibição ao clicar no jogo agendado
+// Rosters conhecidos
 const KNOWN_ROSTERS = {
   "night pulse": [
     { pos: 1, name: "V-Tune", role: "Carry", kda: "5.8", gpm: 710, xpm: 760 },
@@ -194,7 +194,7 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCA DE SÉRIES REAIS FINALIZADAS
+  // 2. BUSCA DE SÉRIES REAIS FINALIZADAS (COM AGRUPAMENTO CONSOLIDADO)
   useEffect(() => {
     async function loadTournamentSeries() {
       setLoadingSeries(true);
@@ -203,10 +203,13 @@ export default function App() {
         const proMatches = await proRes.json();
         
         const groups = {};
-        (proMatches || []).slice(0, 40).forEach((m) => {
-          const key = m.series_id && m.series_id !== 0 
-            ? `s-${m.series_id}` 
-            : `pair-${[m.radiant_team_id, m.dire_team_id].sort().join('-')}-${Math.floor(m.start_time / 86400)}`;
+        (proMatches || []).slice(0, 50).forEach((m) => {
+          // Garante chave estável agrupando os nomes dos dois times
+          const teamA = String(m.radiant_name || m.radiant_team_id || "A").trim().toLowerCase();
+          const teamB = String(m.dire_name || m.dire_team_id || "B").trim().toLowerCase();
+          const pairKey = [teamA, teamB].sort().join("___");
+          const dayWindow = Math.floor(m.start_time / (86400 * 1.5)); // Janela estável de confronto
+          const key = m.series_id && m.series_id !== 0 ? `series_${m.series_id}` : `pair_${pairKey}_${dayWindow}`;
           
           if (!groups[key]) groups[key] = [];
           groups[key].push(m);
@@ -216,6 +219,8 @@ export default function App() {
           games.sort((a, b) => a.start_time - b.start_time);
           const first = games[0];
           const tAId = first.radiant_team_id;
+          const timeAName = first.radiant_name || "Time A";
+          const timeBName = first.dire_name || "Time B";
           
           let scoreA = 0, scoreB = 0;
           games.forEach((g) => {
@@ -227,9 +232,7 @@ export default function App() {
             }
           });
 
-          const timeAName = first.radiant_name || "Time A";
-          const timeBName = first.dire_name || "Time B";
-          const winner = scoreA > scoreB ? timeAName : timeBName;
+          const winner = scoreA > scoreB ? timeAName : (scoreB > scoreA ? timeBName : "Empate");
 
           return {
             stage: first.league_name || "Torneio Profissional",
@@ -255,7 +258,7 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTAR PARTIDA INDIVIDUAL ENRIQUECENDO NICKNAMES
+  // 3. CONSULTAR PARTIDA INDIVIDUAL
   async function fetchMatchDetail(matchId, fallbackGameData) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -274,7 +277,6 @@ export default function App() {
       }
     } catch (err) {}
 
-    // Fallback caso a partida venha dos dados formatados da Liquipedia (PuckChamp vs Nemiga)
     if (fallbackGameData) {
       setLoadedMatchData(fallbackGameData);
     }
@@ -360,139 +362,6 @@ export default function App() {
     }
   }, [currentTab, mmrDivision]);
 
-  // Handler para abrir a série ao vivo com os mapas jogados
-  function handleOpenLiveSeries(liveGame) {
-    const isPuckChampNemiga = 
-      (liveGame.radiant_team?.team_name?.includes("PuckChamp") || liveGame.dire_team?.team_name?.includes("Nemiga"));
-
-    if (isPuckChampNemiga) {
-      const mockPuckChampSeries = {
-        stage: "EPL Masters Season 2: Play-In (BO3 Ao Vivo)",
-        timeA: "PuckChamp",
-        timeB: "Nemiga Gaming",
-        scoreA: 1,
-        scoreB: 1,
-        winner: "Em andamento (1-1)",
-        dur: "3 mapas",
-        games: [
-          {
-            mapNumber: 1,
-            match_id: "live_pc_nemiga_g1",
-            rawMatch: {
-              radiant_name: "PuckChamp",
-              dire_name: "Nemiga Gaming",
-              radiant_score: 31,
-              dire_score: 18,
-              duration: 2676, // 44m36s
-              radiant_win: true,
-              picks_bans: [
-                { hero_id: 18, team: 0, is_pick: true, order: 0 },
-                { hero_id: 74, team: 0, is_pick: true, order: 1 },
-                { hero_id: 9, team: 0, is_pick: true, order: 2 },
-                { hero_id: 69, team: 0, is_pick: true, order: 3 },
-                { hero_id: 56, team: 0, is_pick: true, order: 4 },
-                { hero_id: 88, team: 1, is_pick: true, order: 0 },
-                { hero_id: 65, team: 1, is_pick: true, order: 1 },
-                { hero_id: 67, team: 1, is_pick: true, order: 2 },
-                { hero_id: 53, team: 1, is_pick: true, order: 3 },
-                { hero_id: 108, team: 1, is_pick: true, order: 4 },
-              ],
-              players: [
-                { player_slot: 0, display_name: "krylat", hero_id: 18, kills: 11, deaths: 2, assists: 12, gold_per_min: 780, xp_per_min: 830, item_0: 63, item_1: 147, item_2: 116, item_3: 139, item_4: 156, item_5: 114 },
-                { player_slot: 1, display_name: "young G", hero_id: 74, kills: 9, deaths: 3, assists: 14, gold_per_min: 690, xp_per_min: 740, item_0: 48, item_1: 108, item_2: 116, item_3: 180, item_4: 235, item_5: 110 },
-                { player_slot: 2, display_name: "bb3px", hero_id: 69, kills: 5, deaths: 4, assists: 18, gold_per_min: 540, xp_per_min: 600, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 114, item_5: 226 },
-                { player_slot: 3, display_name: "OneJey", hero_id: 9, kills: 4, deaths: 4, assists: 20, gold_per_min: 390, xp_per_min: 440, item_0: 180, item_1: 232, item_2: 254, item_3: 102, item_4: 1, item_5: 40 },
-                { player_slot: 4, display_name: "Mary_y", hero_id: 56, kills: 2, deaths: 5, assists: 22, gold_per_min: 310, xp_per_min: 360, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 },
-                { player_slot: 128, display_name: "V-Tune", hero_id: 67, kills: 6, deaths: 6, assists: 8, gold_per_min: 640, xp_per_min: 690, item_0: 63, item_1: 145, item_2: 116, item_3: 147, item_4: 139, item_5: 114 },
-                { player_slot: 129, display_name: "Worick", hero_id: 88, kills: 5, deaths: 7, assists: 9, gold_per_min: 580, xp_per_min: 630, item_0: 50, item_1: 1, item_2: 116, item_3: 108, item_4: 206, item_5: 123 },
-                { player_slot: 130, display_name: "Kami", hero_id: 53, kills: 3, deaths: 6, assists: 10, gold_per_min: 480, xp_per_min: 530, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 141, item_5: 226 },
-                { player_slot: 131, display_name: "janter", hero_id: 65, kills: 2, deaths: 6, assists: 12, gold_per_min: 340, xp_per_min: 390, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
-                { player_slot: 132, display_name: "Hduo", hero_id: 108, kills: 2, deaths: 6, assists: 11, gold_per_min: 270, xp_per_min: 320, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 }
-              ]
-            }
-          },
-          {
-            mapNumber: 2,
-            match_id: "live_pc_nemiga_g2",
-            rawMatch: {
-              radiant_name: "PuckChamp",
-              dire_name: "Nemiga Gaming",
-              radiant_score: 20,
-              dire_score: 38,
-              duration: 2968, // 49m28s
-              radiant_win: false,
-              picks_bans: [
-                { hero_id: 102, team: 0, is_pick: true, order: 0 },
-                { hero_id: 35, team: 0, is_pick: true, order: 1 },
-                { hero_id: 70, team: 0, is_pick: true, order: 2 },
-                { hero_id: 25, team: 0, is_pick: true, order: 3 },
-                { hero_id: 107, team: 0, is_pick: true, order: 4 },
-                { hero_id: 11, team: 1, is_pick: true, order: 0 },
-                { hero_id: 119, team: 1, is_pick: true, order: 1 },
-                { hero_id: 121, team: 1, is_pick: true, order: 2 },
-                { hero_id: 77, team: 1, is_pick: true, order: 3 },
-                { hero_id: 2, team: 1, is_pick: true, order: 4 },
-              ],
-              players: [
-                { player_slot: 0, display_name: "krylat", hero_id: 70, kills: 5, deaths: 7, assists: 9, gold_per_min: 650, xp_per_min: 700, item_0: 50, item_1: 174, item_2: 1, item_3: 116, item_4: 208, item_5: 114 },
-                { player_slot: 1, display_name: "young G", hero_id: 35, kills: 6, deaths: 8, assists: 8, gold_per_min: 610, xp_per_min: 660, item_0: 63, item_1: 147, item_2: 116, item_3: 139, item_4: 156, item_5: 114 },
-                { player_slot: 2, display_name: "bb3px", hero_id: 102, kills: 4, deaths: 7, assists: 11, gold_per_min: 490, xp_per_min: 540, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 114, item_5: 226 },
-                { player_slot: 3, display_name: "OneJey", hero_id: 25, kills: 3, deaths: 8, assists: 12, gold_per_min: 350, xp_per_min: 400, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
-                { player_slot: 4, display_name: "Mary_y", hero_id: 107, kills: 2, deaths: 8, assists: 13, gold_per_min: 280, xp_per_min: 330, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 },
-                { player_slot: 128, display_name: "V-Tune", hero_id: 11, kills: 14, deaths: 3, assists: 15, gold_per_min: 860, xp_per_min: 910, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 141 },
-                { player_slot: 129, display_name: "Worick", hero_id: 119, kills: 10, deaths: 4, assists: 17, gold_per_min: 710, xp_per_min: 760, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 226, item_5: 116 },
-                { player_slot: 130, display_name: "Kami", hero_id: 2, kills: 7, deaths: 4, assists: 19, gold_per_min: 590, xp_per_min: 650, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 141, item_5: 226 },
-                { player_slot: 131, display_name: "janter", hero_id: 121, kills: 4, deaths: 5, assists: 22, gold_per_min: 410, xp_per_min: 460, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
-                { player_slot: 132, display_name: "Hduo", hero_id: 77, kills: 3, deaths: 4, assists: 24, gold_per_min: 330, xp_per_min: 380, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 }
-              ]
-            }
-          },
-          {
-            mapNumber: 3,
-            match_id: "live_pc_nemiga_g3",
-            rawMatch: {
-              radiant_name: "PuckChamp",
-              dire_name: "Nemiga Gaming",
-              radiant_score: 12,
-              dire_score: 9,
-              duration: 1280, // Em andamento
-              radiant_win: null,
-              picks_bans: [
-                { hero_id: 102, team: 0, is_pick: true, order: 0 },
-                { hero_id: 123, team: 0, is_pick: true, order: 1 },
-                { hero_id: 126, team: 0, is_pick: true, order: 2 },
-                { hero_id: 97, team: 0, is_pick: true, order: 3 },
-                { hero_id: 11, team: 0, is_pick: true, order: 4 },
-                { hero_id: 2, team: 1, is_pick: true, order: 0 },
-                { hero_id: 9, team: 1, is_pick: true, order: 1 },
-                { hero_id: 86, team: 1, is_pick: true, order: 2 },
-                { hero_id: 106, team: 1, is_pick: true, order: 3 },
-                { hero_id: 109, team: 1, is_pick: true, order: 4 },
-              ],
-              players: [
-                { player_slot: 0, display_name: "krylat", hero_id: 11, kills: 4, deaths: 1, assists: 5, gold_per_min: 710, xp_per_min: 760, item_0: 63, item_1: 147, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 1, display_name: "young G", hero_id: 126, kills: 3, deaths: 2, assists: 6, gold_per_min: 650, xp_per_min: 700, item_0: 48, item_1: 108, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 2, display_name: "bb3px", hero_id: 97, kills: 2, deaths: 2, assists: 7, gold_per_min: 520, xp_per_min: 570, item_0: 50, item_1: 1, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 3, display_name: "OneJey", hero_id: 123, kills: 2, deaths: 2, assists: 8, gold_per_min: 370, xp_per_min: 420, item_0: 180, item_1: 232, item_2: 1, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 4, display_name: "Mary_y", hero_id: 102, kills: 1, deaths: 2, assists: 9, gold_per_min: 290, xp_per_min: 340, item_0: 180, item_1: 102, item_2: 0, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 128, display_name: "V-Tune", hero_id: 109, kills: 3, deaths: 3, assists: 3, gold_per_min: 680, xp_per_min: 730, item_0: 63, item_1: 145, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 129, display_name: "Worick", hero_id: 106, kills: 3, deaths: 3, assists: 4, gold_per_min: 620, xp_per_min: 670, item_0: 50, item_1: 1, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 130, display_name: "Kami", hero_id: 2, kills: 1, deaths: 3, assists: 5, gold_per_min: 490, xp_per_min: 540, item_0: 50, item_1: 1, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 131, display_name: "janter", hero_id: 86, kills: 1, deaths: 2, assists: 6, gold_per_min: 360, xp_per_min: 410, item_0: 180, item_1: 232, item_2: 1, item_3: 0, item_4: 0, item_5: 0 },
-                { player_slot: 132, display_name: "Hduo", hero_id: 9, kills: 1, deaths: 1, assists: 6, gold_per_min: 280, xp_per_min: 330, item_0: 180, item_1: 102, item_2: 0, item_3: 0, item_4: 0, item_5: 0 }
-              ]
-            }
-          }
-        ]
-      };
-      setSelectedSeriesDetail(mockPuckChampSeries);
-      setActiveMapIndex(0);
-      fetchMatchDetail(mockPuckChampSeries.games[0].match_id, mockPuckChampSeries.games[0].rawMatch);
-    } else {
-      setSelectedLiveGame(liveGame);
-    }
-  }
-
   return (
     <div className="app-container">
       {/* HEADER */}
@@ -531,7 +400,7 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS FINALIZADOS */}
+          {/* ESQUERDA: JOGOS FINALIZADOS (CONSOLIDADOS) */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -584,7 +453,7 @@ export default function App() {
             </div>
           </aside>
 
-          {/* CENTRO: CARD CAMPEÕES NO TOPO + AO VIVO ABAIXO */}
+          {/* CENTRO: CAMPEÃO + AO VIVO */}
           <main className="center-content">
             
             {/* 1. CARD CAMPEÃO THE INTERNATIONAL 2026 */}
@@ -619,46 +488,11 @@ export default function App() {
 
               <div className="players-grid">
                 {[
-                  { 
-                    pos: 1, 
-                    nick: "Yatoro", 
-                    role: "Carry", 
-                    kda: "6.8", 
-                    gpm: 785, 
-                    photo: "/yatoro.png"
-                  },
-                  { 
-                    pos: 2, 
-                    nick: "Larl", 
-                    role: "Midlane", 
-                    kda: "5.9", 
-                    gpm: 690, 
-                    photo: "/larl.png"
-                  },
-                  { 
-                    pos: 3, 
-                    nick: "Collapse", 
-                    role: "Offlane", 
-                    kda: "5.2", 
-                    gpm: 610, 
-                    photo: "/collapse.png"
-                  },
-                  { 
-                    pos: 4, 
-                    nick: "rue", 
-                    role: "Support", 
-                    kda: "3.4", 
-                    gpm: 405, 
-                    photo: "/rue.png"
-                  },
-                  { 
-                    pos: 5, 
-                    nick: "not me", 
-                    role: "Hard Support", 
-                    kda: "2.4", 
-                    gpm: 330, 
-                    photo: "/notme.png"
-                  },
+                  { pos: 1, nick: "Yatoro", role: "Carry", kda: "6.8", gpm: 785, photo: "/yatoro.png" },
+                  { pos: 2, nick: "Larl", role: "Midlane", kda: "5.9", gpm: 690, photo: "/larl.png" },
+                  { pos: 3, nick: "Collapse", role: "Offlane", kda: "5.2", gpm: 610, photo: "/collapse.png" },
+                  { pos: 4, nick: "rue", role: "Support", kda: "3.4", gpm: 405, photo: "/rue.png" },
+                  { pos: 5, nick: "not me", role: "Hard Support", kda: "2.4", gpm: 330, photo: "/notme.png" },
                 ].map((p) => (
                   <div key={p.pos} className="player-card">
                     <div className="player-avatar-wrap">
@@ -684,7 +518,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. SEÇÃO AO VIVO COM NOME COMPLETO E SUPORTE A SÉRIES COMPLETAS */}
+            {/* 2. SEÇÃO AO VIVO NO CENTRO */}
             <section className="live-block-wrap" style={{ marginTop: 8 }}>
               <div className="live-heading">
                 <span className="live-dot" />
@@ -728,7 +562,7 @@ export default function App() {
                     return (
                       <div 
                         key={idx} 
-                        onClick={() => handleOpenLiveSeries(g)} 
+                        onClick={() => setSelectedLiveGame(g)} 
                         className="live-card"
                         style={{ cursor: 'pointer' }}
                       >
@@ -941,7 +775,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA SÉRIE (HISTÓRICO E MAPAS INDIVIDUAIS) */}
+      {/* MODAL DETALHADO DA SÉRIE FINALIZADA */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
