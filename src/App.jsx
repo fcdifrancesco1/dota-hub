@@ -14,6 +14,7 @@ function worldToPct(x, y) {
   };
 }
 
+// Helpers de heróis e itens pelas constantes da Valve
 function getHeroImg(constants, heroId) {
   const h = constants.heroes[heroId];
   return h ? `${STEAM_CDN}${h.img}` : "";
@@ -27,6 +28,48 @@ function getItemImg(constants, itemId) {
   return it ? `${STEAM_CDN}${it.img}` : "";
 }
 
+// Resgata o Nick Profissional com cache local no navegador (igual ao app.js)
+async function enrichPlayersWithProNicknames(players) {
+  let cache = {};
+  try {
+    const raw = localStorage.getItem("dota:playerNames");
+    if (raw) cache = JSON.parse(raw);
+  } catch (e) {}
+
+  const missingIds = (players || [])
+    .map(p => p.account_id)
+    .filter(id => id != null && !(id in cache));
+
+  if (missingIds.length > 0) {
+    await Promise.all(
+      missingIds.map(async (id) => {
+        try {
+          const res = await fetch(`${OPENDOTA_BASE}/players/${id}`);
+          if (res.ok) {
+            const data = await res.json();
+            cache[id] = (data && data.profile && data.profile.name) || null;
+          } else {
+            cache[id] = null;
+          }
+        } catch {
+          cache[id] = null;
+        }
+      })
+    );
+    try {
+      localStorage.setItem("dota:playerNames", JSON.stringify(cache));
+    } catch (e) {}
+  }
+
+  return (players || []).map(p => {
+    const proNick = (p.account_id != null && cache[p.account_id]) || p.name;
+    return {
+      ...p,
+      display_name: proNick || p.personaname || `Jogador ${p.account_id ?? "?"}`
+    };
+  });
+}
+
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
   const [liveGames, setLiveGames] = useState([]);
@@ -34,7 +77,7 @@ export default function App() {
   const [finishedSeries, setFinishedSeries] = useState([]);
   const [loadingSeries, setLoadingSeries] = useState(false);
   
-  // Constantes da Valve (OpenDota Cache 24h)
+  // Constantes da Valve
   const [constants, setConstants] = useState({ heroes: {}, itemsById: {} });
   
   // Modais de detalhes
@@ -49,7 +92,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGA CONSTANTES DE HERÓIS E ITENS DA VALVE
+  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS DA VALVE COM CACHE 24H
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -83,7 +126,7 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCA JOGOS FINALIZADOS DA SÉRIE
+  // 2. BUSCAR SÉRIES REAIS FINALIZADAS
   useEffect(() => {
     async function loadTournamentSeries() {
       setLoadingSeries(true);
@@ -144,7 +187,7 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTA PARTIDA INDIVIDUAL DINÂMICA
+  // 3. CONSULTAR PARTIDA INDIVIDUAL ENRIQUECENDO OS NICKNAMES DOS PLAYERS
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -153,7 +196,12 @@ export default function App() {
       const res = await fetch(`${OPENDOTA_BASE}/matches/${matchId}`);
       if (res.ok) {
         const data = await res.json();
-        setLoadedMatchData(data);
+        // Substitui os personanames da Steam pelos nicks oficiais de pro players
+        const enrichedPlayers = await enrichPlayersWithProNicknames(data.players || []);
+        setLoadedMatchData({
+          ...data,
+          players: enrichedPlayers
+        });
       }
     } catch (err) {
       console.error("Erro ao carregar partida:", err);
@@ -161,7 +209,7 @@ export default function App() {
     setLoadingMatch(false);
   }
 
-  // 4. LEITURA DA AGENDA MANUAL COM FILTRO DE DATA
+  // 4. LEITURA DA AGENDA MANUAL
   useEffect(() => {
     async function loadManualAgenda() {
       try {
@@ -181,7 +229,7 @@ export default function App() {
     loadManualAgenda();
   }, []);
 
-  // 5. POLLING VIA VALVE WEBAPI / LIVE PROXY
+  // 5. POLLING DE PARTIDAS AO VIVO
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -259,7 +307,7 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS FINALIZADOS DA RODADA */}
+          {/* ESQUERDA: JOGOS FINALIZADOS */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -494,7 +542,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DO JOGO COM PARSE REAL DA OPENDOTA */}
+      {/* MODAL DETALHADO DO JOGO COM NICKNAMES DOS PLAYERS */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -511,7 +559,7 @@ export default function App() {
               </h2>
             </div>
 
-            {/* ABAS DOS MAPAS DA SÉRIE */}
+            {/* ABAS DOS MAPAS */}
             <div className="map-tabs-row">
               {selectedSeriesDetail.games.map((g, idx) => (
                 <button
@@ -529,7 +577,7 @@ export default function App() {
 
             {/* CONTEÚDO DO MAPA CARREGADO */}
             {loadingMatch ? (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>Carregando dados da partida...</div>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>Carregando dados da partida e nicks profissionais...</div>
             ) : loadedMatchData ? (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12 }}>
@@ -541,7 +589,7 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* DRAFT COM CONSTANTES DA VALVE */}
+                {/* DRAFT */}
                 {loadedMatchData.picks_bans && (
                   <div className="draft-block">
                     <div className="draft-title">Ordem de Draft (Picks &amp; Bans)</div>
@@ -587,7 +635,9 @@ export default function App() {
                   <tbody>
                     {(loadedMatchData.players || []).filter(p => p.player_slot < 128).map((p, i) => (
                       <tr key={i}>
-                        <td style={{ color: '#fff', fontWeight: 600 }}>{p.personaname || p.name || `Jogador ${i + 1}`}</td>
+                        <td style={{ color: '#fff', fontWeight: 600 }}>
+                          {p.display_name}
+                        </td>
                         <td>
                           <img 
                             src={getHeroImg(constants, p.hero_id)} 
@@ -636,7 +686,9 @@ export default function App() {
                   <tbody>
                     {(loadedMatchData.players || []).filter(p => p.player_slot >= 128).map((p, i) => (
                       <tr key={i}>
-                        <td style={{ color: '#fff', fontWeight: 600 }}>{p.personaname || p.name || `Jogador ${i + 1}`}</td>
+                        <td style={{ color: '#fff', fontWeight: 600 }}>
+                          {p.display_name}
+                        </td>
                         <td>
                           <img 
                             src={getHeroImg(constants, p.hero_id)} 
