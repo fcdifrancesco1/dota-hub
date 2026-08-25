@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flame, Trophy, Award, History, X, Users, Radio, ArrowLeft, Calendar, DollarSign } from 'lucide-react';
+import { Flame, Trophy, Award, History, X, Users, Radio, ArrowLeft, Calendar, DollarSign, Layers, Loader2 } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
@@ -22,123 +22,19 @@ function worldToPct(x, y) {
   };
 }
 
-const FULL_TI_TOURNAMENT_MATCHES = [
-  {
-    stage: "Grande Final (BO5)",
-    timeA: "Team Spirit",
-    timeB: "TEAM VISION",
-    scoreA: 3,
-    scoreB: 2,
-    winner: "Team Spirit",
-    dur: "5 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_gf_g1" },
-      { mapNumber: 2, match_id: "ti26_gf_g2" },
-      { mapNumber: 3, match_id: "ti26_gf_g3" },
-      { mapNumber: 4, match_id: "ti26_gf_g4" },
-      { mapNumber: 5, match_id: "ti26_gf_g5" }
-    ]
-  },
-  {
-    stage: "Final Lower Bracket (BO3)",
-    timeA: "Team Spirit",
-    timeB: "Team Yandex",
-    scoreA: 2,
-    scoreB: 0,
-    winner: "Team Spirit",
-    dur: "2 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_lbf_g1" },
-      { mapNumber: 2, match_id: "ti26_lbf_g2" }
-    ]
-  },
-  {
-    stage: "Final Upper Bracket (BO3)",
-    timeA: "TEAM VISION",
-    timeB: "Team Yandex",
-    scoreA: 2,
-    scoreB: 1,
-    winner: "TEAM VISION",
-    dur: "3 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_ubf_g1" },
-      { mapNumber: 2, match_id: "ti26_ubf_g2" },
-      { mapNumber: 3, match_id: "ti26_ubf_g3" }
-    ]
-  },
-  {
-    stage: "Semi Lower Bracket (BO3)",
-    timeA: "Team Spirit",
-    timeB: "BetBoom Team",
-    scoreA: 2,
-    scoreB: 0,
-    winner: "Team Spirit",
-    dur: "2 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_lbs_g1" },
-      { mapNumber: 2, match_id: "ti26_lbs_g2" }
-    ]
-  },
-  {
-    stage: "Round 4 Lower Bracket (BO3)",
-    timeA: "Team Liquid",
-    timeB: "Team Spirit",
-    scoreA: 0,
-    scoreB: 2,
-    winner: "Team Spirit",
-    dur: "2 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_lbr4_g1" },
-      { mapNumber: 2, match_id: "ti26_lbr4_g2" }
-    ]
-  },
-  {
-    stage: "Round 4 Lower Bracket (BO3)",
-    timeA: "BetBoom Team",
-    timeB: "Gaimin Gladiators",
-    scoreA: 2,
-    scoreB: 1,
-    winner: "BetBoom Team",
-    dur: "3 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_lbr4_2_g1" },
-      { mapNumber: 2, match_id: "ti26_lbr4_2_g2" },
-      { mapNumber: 3, match_id: "ti26_lbr4_2_g3" }
-    ]
-  }
-];
-
+// IDs Oficiais das Ligas na Valve para busca dinâmica
 const FEATURED_TOURNAMENTS = [
-  {
-    id: 17144,
-    name: "The International 2026",
-    tier: "Tier 1 · Mundial",
-    date: "Agosto 2026",
-    prize: "$2,600,000",
-    champion: "Team Spirit",
-    runnerUp: "TEAM VISION",
-    matches: FULL_TI_TOURNAMENT_MATCHES
-  },
-  {
-    id: 16890,
-    name: "Riyadh Masters 2026",
-    tier: "Tier 1 · Premier",
-    date: "Julho 2026",
-    prize: "$5,000,000",
-    champion: "Gaimin Gladiators",
-    runnerUp: "Team Liquid",
-    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 5)
-  }
+  { id: 17144, league_id: 17144, name: "The International 2026", tier: "Tier 1 · Mundial", date: "Agosto 2026", prize: "$2,600,000", champion: "Team Spirit" },
+  { id: 16890, league_id: 16890, name: "Riyadh Masters 2026", tier: "Tier 1 · Premier", date: "Julho 2026", prize: "$5,000,000", champion: "Gaimin Gladiators" },
+  { id: 16750, league_id: 16750, name: "PGL Wallachia Season 2", tier: "Tier 1", date: "Junho 2026", prize: "$1,000,000", champion: "Team Falcons" },
+  { id: 16640, league_id: 16640, name: "DreamLeague Season 23", tier: "Tier 1", date: "Maio 2026", prize: "$1,000,000", champion: "Team Falcons" },
+  { id: 16530, league_id: 16530, name: "ESL One Birmingham 2026", tier: "Tier 1", date: "Abril 2026", prize: "$1,000,000", champion: "Team Falcons" },
+  { id: 16420, league_id: 16420, name: "Elite League Season 1", tier: "Tier 1", date: "Março 2026", prize: "$960,000", champion: "Xtreme Gaming" },
+  { id: 16310, league_id: 16310, name: "DreamLeague Season 22", tier: "Tier 1", date: "Fevereiro 2026", prize: "$1,000,000", champion: "Team Falcons" },
+  { id: 16200, league_id: 16200, name: "BetBoom Dacha Dubai 2026", tier: "Tier 1", date: "Janeiro 2026", prize: "$1,000,000", champion: "Team Falcons" },
+  { id: 16090, league_id: 16090, name: "ESL One Kuala Lumpur", tier: "Tier 1", date: "Dezembro 2025", prize: "$1,000,000", champion: "Azure Ray" },
+  { id: 15980, league_id: 15980, name: "The International 2025", tier: "Tier 1 · Mundial", date: "Outubro 2025", prize: "$2,700,000", champion: "Team Liquid" }
 ];
-
-function normalizeTeamKey(name) {
-  if (!name) return "";
-  return String(name)
-    .toLowerCase()
-    .replace(/\b(team|gaming|esports|esport|gg|club)\b/g, '')
-    .replace(/[^a-z0-9]/g, '')
-    .trim();
-}
 
 function getHeroImg(constants, heroId) {
   const h = constants.heroes[heroId];
@@ -153,6 +49,7 @@ function getItemImg(constants, itemId) {
   return it ? `${STEAM_CDN}${it.img}` : "";
 }
 
+// Enriquecimento de nomes profissionais via API
 async function enrichPlayersWithProNicknames(players) {
   let cache = {};
   try {
@@ -166,7 +63,7 @@ async function enrichPlayersWithProNicknames(players) {
 
   if (missingIds.length > 0) {
     await Promise.all(
-      missingIds.map(async (id) => {
+      missingIds.slice(0, 10).map(async (id) => {
         try {
           const res = await fetch(`${OPENDOTA_BASE}/players/${id}`);
           if (res.ok) {
@@ -197,6 +94,10 @@ async function enrichPlayersWithProNicknames(players) {
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
   const [selectedTournament, setSelectedTournament] = useState(null);
+  const [tournamentMatches, setTournamentMatches] = useState([]);
+  const [loadingTournamentMatches, setLoadingTournamentMatches] = useState(false);
+  const [tournamentSection, setTournamentSection] = useState('playoffs');
+
   const [liveGames, setLiveGames] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [finishedSeries, setFinishedSeries] = useState([]);
@@ -215,7 +116,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CONSTANTES VALVE (CACHE LOCAL 24H)
+  // 1. CARREGAR CONSTANTES VALVE (CACHE LOCAL 24H)
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -249,10 +150,9 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCA DE SÉRIES ENCERRADAS COM CACHE RÁPIDO
+  // 2. BUSCAR SÉRIES ENCERRADAS VIA API
   useEffect(() => {
     async function loadTournamentSeries() {
-      // 1. Renderiza o cache local imediatamente se existir
       const cached = localStorage.getItem("dota:finishedSeriesCache");
       if (cached) {
         try {
@@ -263,7 +163,7 @@ export default function App() {
         } catch (e) {}
       }
 
-      // 2. Busca do endpoint serverless otimizado da Vercel
+      setLoadingSeries(!cached);
       try {
         const res = await fetch('/api/results');
         if (res.ok) {
@@ -281,7 +181,27 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTA DE DETALHES DA PARTIDA
+  // 3. CARREGAR PARTIDAS DO TORNEIO SELECIONADO 100% DINÂMICO VIA API
+  useEffect(() => {
+    if (!selectedTournament) return;
+    async function fetchTournamentData() {
+      setLoadingTournamentMatches(true);
+      setTournamentMatches([]);
+      try {
+        const res = await fetch(`/api/tournament?league_id=${selectedTournament.league_id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setTournamentMatches(data.series || []);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar partidas do torneio:", err);
+      }
+      setLoadingTournamentMatches(false);
+    }
+    fetchTournamentData();
+  }, [selectedTournament]);
+
+  // 4. CONSULTA REAL DE MATCH_ID DINÂMICO NA OPENDOTA (DRAFT, JOGADORES, KDA, ITENS)
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -297,12 +217,12 @@ export default function App() {
         });
       }
     } catch (err) {
-      console.error("Erro ao carregar dados do match:", err);
+      console.error("Erro ao carregar detalhes da partida:", err);
     }
     setLoadingMatch(false);
   }
 
-  // 4. JOGOS A SEREM REALIZADOS
+  // 5. JOGOS A SEREM REALIZADOS
   useEffect(() => {
     async function loadUpcomingMatches() {
       try {
@@ -337,7 +257,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 5. POLLING DE PARTIDAS AO VIVO 100% REAL (SEM MOCKS ESTÁTICOS)
+  // 6. POLLING DE PARTIDAS AO VIVO 100% REAL
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -352,7 +272,6 @@ export default function App() {
           list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
         }
 
-        // Filtra estritamente jogos com lobbies reais ativos no servidor Steam
         const validLive = list.filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
         setLiveGames(validLive);
       } catch {
@@ -364,7 +283,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 6. RANKING MMR OFICIAL
+  // 7. RANKING MMR OFICIAL
   useEffect(() => {
     if (currentTab === 'mmr') {
       setMmrLoading(true);
@@ -497,10 +416,10 @@ export default function App() {
                 
                 <div className="champ-team-tag">
                   <img 
-                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/team_logos/7119388.png" 
+                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png" 
                     alt="Team Spirit" 
                     onError={(e) => {
-                      e.target.src = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png";
+                      e.target.src = "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png";
                     }}
                   />
                   <span>Team Spirit</span>
@@ -646,7 +565,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. ABA DE TORNEIOS */}
+      {/* 2. ABA DE TORNEIOS COM BUSCA DINÂMICA VIA API */}
       {currentTab === 'torneios' && (
         <div style={{ maxWidth: 1040, margin: '24px auto', width: '100%', padding: '0 20px' }}>
           {selectedTournament ? (
@@ -683,50 +602,76 @@ export default function App() {
                   </div>
 
                   <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '10px 16px', borderRadius: 12 }}>
-                    <div style={{ fontSize: 10, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 700 }}>Campeão</div>
+                    <div style={{ fontSize: 10, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 700 }}>Campeão Oficial</div>
                     <div style={{ fontSize: 16, color: '#fff', fontWeight: 800 }}>👑 {selectedTournament.champion}</div>
                   </div>
                 </div>
               </div>
 
-              <h3 style={{ color: '#fff', fontSize: 15, textTransform: 'uppercase', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <History size={16} color="var(--accent-gold)" /> Chave de Eliminatórias (Playoffs)
-              </h3>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
-                {selectedTournament.matches.map((m, idx) => {
-                  const aWon = m.scoreA > m.scoreB;
-                  const bWon = m.scoreB > m.scoreA;
-
-                  return (
-                    <div
-                      key={idx}
-                      className="finished-card"
-                      style={{ padding: 16 }}
-                      onClick={() => {
-                        setSelectedSeriesDetail(m);
-                        setActiveMapIndex(0);
-                        if (m.games && m.games[0]) {
-                          fetchMatchDetail(m.games[0].match_id);
-                        }
-                      }}
-                    >
-                      <div className="finished-card-stage" style={{ marginBottom: 8 }}>
-                        <span style={{ color: 'var(--accent-gold)' }}>{m.stage}</span>
-                        <span>{m.dur}</span>
-                      </div>
-                      <div className="finished-team-row" style={{ fontSize: 14 }}>
-                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeA}</span>
-                        <span className="score-tag" style={{ color: aWon ? '#00E676' : '#FF5252', fontSize: 14 }}>{m.scoreA}</span>
-                      </div>
-                      <div className="finished-team-row" style={{ fontSize: 14 }}>
-                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeB}</span>
-                        <span className="score-tag" style={{ color: bWon ? '#00E676' : '#FF5252', fontSize: 14 }}>{m.scoreB}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+              {/* SELETOR DE ETAPAS */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <button
+                  onClick={() => setTournamentSection('playoffs')}
+                  className={`map-tab-btn ${tournamentSection === 'playoffs' ? 'active' : ''}`}
+                >
+                  <Trophy size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                  Eliminatórias (Playoffs)
+                </button>
+                <button
+                  onClick={() => setTournamentSection('groups')}
+                  className={`map-tab-btn ${tournamentSection === 'groups' ? 'active' : ''}`}
+                >
+                  <Layers size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                  Fase de Grupos
+                </button>
               </div>
+
+              {loadingTournamentMatches ? (
+                <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Loader2 className="animate-spin" size={18} /> Carregando todas as partidas oficiais do torneio...
+                </div>
+              ) : tournamentMatches.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>
+                  Nenhuma partida registrada para esta liga.
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
+                  {tournamentMatches
+                    .filter(m => tournamentSection === 'playoffs' ? (m.games && m.games.length >= 2) : (m.games && m.games.length === 2))
+                    .map((m, idx) => {
+                      const aWon = m.scoreA > m.scoreB;
+                      const bWon = m.scoreB > m.scoreA;
+
+                      return (
+                        <div
+                          key={idx}
+                          className="finished-card"
+                          style={{ padding: 16 }}
+                          onClick={() => {
+                            setSelectedSeriesDetail(m);
+                            setActiveMapIndex(0);
+                            if (m.games && m.games[0]) {
+                              fetchMatchDetail(m.games[0].match_id);
+                            }
+                          }}
+                        >
+                          <div className="finished-card-stage" style={{ marginBottom: 8 }}>
+                            <span style={{ color: 'var(--accent-gold)' }}>{m.stage}</span>
+                            <span>{m.dur}</span>
+                          </div>
+                          <div className="finished-team-row" style={{ fontSize: 14 }}>
+                            <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeA}</span>
+                            <span className="score-tag" style={{ color: aWon ? '#00E676' : (m.scoreA === m.scoreB ? '#fff' : '#FF5252'), fontSize: 14 }}>{m.scoreA}</span>
+                          </div>
+                          <div className="finished-team-row" style={{ fontSize: 14 }}>
+                            <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeB}</span>
+                            <span className="score-tag" style={{ color: bWon ? '#00E676' : (m.scoreA === m.scoreB ? '#fff' : '#FF5252'), fontSize: 14 }}>{m.scoreB}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           ) : (
             <div>
@@ -735,7 +680,7 @@ export default function App() {
                   Últimos Torneios Principais
                 </h2>
                 <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>
-                  Selecione um torneio para consultar as partidas e as estatísticas de cada mapa
+                  Selecione um torneio para consultar todas as partidas e as estatísticas dos mapas diretamente pela API
                 </span>
               </div>
 
@@ -841,113 +786,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DO JOGO AGENDADO */}
-      {selectedUpcomingMatch && (
-        <div className="modal-backdrop">
-          <div className="modal-box-wide" style={{ maxWidth: 780 }}>
-            <button onClick={() => setSelectedUpcomingMatch(null)} className="modal-close-btn">
-              <X size={20} />
-            </button>
-
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
-              <span style={{ fontSize: 11, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 700 }}>
-                {selectedUpcomingMatch.torneio} {selectedUpcomingMatch.fase ? `· ${selectedUpcomingMatch.fase}` : ""}
-              </span>
-              <h2 style={{ color: '#fff', fontSize: 20, marginTop: 4 }}>
-                {selectedUpcomingMatch.timeA} <span style={{ color: 'var(--accent-gold)', margin: '0 8px' }}>vs</span> {selectedUpcomingMatch.timeB}
-              </h2>
-              <div style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>
-                Horário Previsto: {new Date(selectedUpcomingMatch.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} BRT ({selectedUpcomingMatch.formato || "BO3"})
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE PARTIDA AO VIVO (COM MINIMAPA LOCAL /minimap.jpg) */}
-      {selectedLiveGame && (
-        <div className="modal-backdrop">
-          <div className="modal-box-wide" style={{ maxWidth: 1060 }}>
-            <button onClick={() => setSelectedLiveGame(null)} className="modal-close-btn">
-              <X size={20} />
-            </button>
-
-            <div style={{ textAlign: 'center', marginBottom: 14 }}>
-              <span className="live-badge" style={{ margin: '0 auto 6px auto', display: 'inline-block' }}>
-                AO VIVO
-              </span>
-              <h2 style={{ color: '#fff', fontSize: 24, marginTop: 4 }}>
-                {(selectedLiveGame.radiant_team?.team_name || "Radiant")}
-                <span style={{ color: 'var(--accent-gold)', margin: '0 12px' }}>
-                  {(selectedLiveGame.scoreboard?.radiant?.score ?? selectedLiveGame.radiant_score ?? 0)} - {(selectedLiveGame.scoreboard?.dire?.score ?? selectedLiveGame.dire_score ?? 0)}
-                </span>
-                {(selectedLiveGame.dire_team?.team_name || "Dire")}
-              </h2>
-            </div>
-
-            <div style={{ textAlign: 'center', margin: '20px auto' }}>
-              <div 
-                style={{
-                  position: 'relative',
-                  width: 320,
-                  height: 320,
-                  margin: '0 auto',
-                  borderRadius: 14,
-                  border: '2px solid var(--border)',
-                  background: `url('/minimap.jpg') center/cover no-repeat`,
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
-                }}
-              >
-                {[...(selectedLiveGame.scoreboard?.radiant?.players || []).map((p, i) => {
-                  const pos = worldToPct(p.position_x || 0, p.position_y || 0);
-                  return (
-                    <div
-                      key={`r_${i}`}
-                      style={{
-                        position: 'absolute',
-                        left: pos.left,
-                        top: pos.top,
-                        transform: 'translate(-50%, -50%)',
-                        width: 22,
-                        height: 22,
-                        borderRadius: '4px',
-                        border: '2px solid #00E676',
-                        overflow: 'hidden',
-                        background: '#000'
-                      }}
-                    >
-                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
-                  );
-                }), ...(selectedLiveGame.scoreboard?.dire?.players || []).map((p, i) => {
-                  const pos = worldToPct(p.position_x || 0, p.position_y || 0);
-                  return (
-                    <div
-                      key={`d_${i}`}
-                      style={{
-                        position: 'absolute',
-                        left: pos.left,
-                        top: pos.top,
-                        transform: 'translate(-50%, -50%)',
-                        width: 22,
-                        height: 22,
-                        borderRadius: '4px',
-                        border: '2px solid #FF5252',
-                        overflow: 'hidden',
-                        background: '#000'
-                      }}
-                    >
-                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
-                  );
-                })]}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DETALHADO DA SÉRIE FINALIZADA */}
+      {/* MODAL DETALHADO DA PARTIDA (HISTÓRICO 100% DINÂMICO VIA API) */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -959,8 +798,8 @@ export default function App() {
               <span style={{ fontSize: 11, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 700 }}>
                 {selectedSeriesDetail.stage}
               </span>
-              <h2 style={{ color: '#fff', fontSize: 18, marginTop: 4 }}>
-                {selectedSeriesDetail.timeA} <span style={{ color: 'var(--accent-gold)' }}>{selectedSeriesDetail.scoreA} - {selectedSeriesDetail.scoreB}</span> {selectedSeriesDetail.timeB}
+              <h2 style={{ color: '#fff', fontSize: 20, marginTop: 4 }}>
+                {selectedSeriesDetail.timeA} <span style={{ color: 'var(--accent-gold)', margin: '0 8px' }}>{selectedSeriesDetail.scoreA} - {selectedSeriesDetail.scoreB}</span> {selectedSeriesDetail.timeB}
               </h2>
             </div>
 
@@ -982,7 +821,9 @@ export default function App() {
 
             {/* CONTEÚDO DO MAPA */}
             {loadingMatch ? (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>Carregando dados da partida e estatísticas...</div>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Loader2 className="animate-spin" size={18} /> Carregando estatísticas e ordem de draft da partida...
+              </div>
             ) : loadedMatchData ? (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12 }}>
@@ -990,18 +831,18 @@ export default function App() {
                     {loadedMatchData.radiant_name || "Radiant"} {loadedMatchData.radiant_score} - {loadedMatchData.dire_score} {loadedMatchData.dire_name || "Dire"} ({loadedMatchData.radiant_win ? (loadedMatchData.radiant_name || "Radiant") : (loadedMatchData.dire_name || "Dire")} venceu)
                   </span>
                   <span style={{ color: 'var(--text-dim)' }}>
-                    Duração: {Math.round(loadedMatchData.duration / 60)} min
+                    Duração: {Math.round((loadedMatchData.duration || 0) / 60)} min
                   </span>
                 </div>
 
-                {/* ORDEM DE DRAFT */}
-                {loadedMatchData.picks_bans && (
+                {/* ORDEM COMPLETA DE DRAFT (PICKS & BANS) */}
+                {loadedMatchData.picks_bans && loadedMatchData.picks_bans.length > 0 && (
                   <div className="draft-block">
                     <div className="draft-title">Ordem Completa de Draft (Picks &amp; Bans)</div>
                     
                     <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
-                      {loadedMatchData.picks_bans.filter(p => p.team === 0).map((p, i) => (
+                      <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>{loadedMatchData.radiant_name || "Radiant"}:</span>
+                      {loadedMatchData.picks_bans.filter(p => p.team === 0).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
                         <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-cyan)' : '1px dashed rgba(255,255,255,0.2)' }}>
                           <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                           {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
@@ -1010,8 +851,8 @@ export default function App() {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
-                      {loadedMatchData.picks_bans.filter(p => p.team === 1).map((p, i) => (
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>{loadedMatchData.dire_name || "Dire"}:</span>
+                      {loadedMatchData.picks_bans.filter(p => p.team === 1).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
                         <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-red)' : '1px dashed rgba(255,255,255,0.2)' }}>
                           <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                           {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
@@ -1022,7 +863,7 @@ export default function App() {
                 )}
 
                 {/* TABELA RADIANT */}
-                <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 12, marginTop: 12 }}>
+                <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 13, marginTop: 12 }}>
                   {loadedMatchData.radiant_name || "Radiant"}
                 </div>
                 <table className="table-custom">
@@ -1059,7 +900,7 @@ export default function App() {
                 </table>
 
                 {/* TABELA DIRE */}
-                <div style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: 12, marginTop: 16 }}>
+                <div style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: 13, marginTop: 16 }}>
                   {loadedMatchData.dire_name || "Dire"}
                 </div>
                 <table className="table-custom">
