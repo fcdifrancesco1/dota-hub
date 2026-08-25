@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Flame, Trophy, Award, History, X, Users, Radio, ArrowLeft, Calendar, DollarSign, Layers, Loader2 } from 'lucide-react';
+import { Flame, Trophy, Award, History, X, Radio, ArrowLeft, Calendar, Loader2, RefreshCw } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
-
-const NUMERIC_POSITION_LABELS = {
-  1: "Posição 1 (Carry)",
-  2: "Posição 2 (Midlane)",
-  3: "Posição 3 (Offlane)",
-  4: "Posição 4 (Support)",
-  5: "Posição 5 (Hard Support)"
-};
 
 const MAP_MIN = -8288, MAP_MAX = 8288;
 function worldToPct(x, y) {
@@ -22,19 +14,14 @@ function worldToPct(x, y) {
   };
 }
 
-// IDs Oficiais das Ligas na Valve para busca dinâmica
-const FEATURED_TOURNAMENTS = [
-  { id: 17144, league_id: 17144, name: "The International 2026", tier: "Tier 1 · Mundial", date: "Agosto 2026", prize: "$2,600,000", champion: "Team Spirit" },
-  { id: 16890, league_id: 16890, name: "Riyadh Masters 2026", tier: "Tier 1 · Premier", date: "Julho 2026", prize: "$5,000,000", champion: "Gaimin Gladiators" },
-  { id: 16750, league_id: 16750, name: "PGL Wallachia Season 2", tier: "Tier 1", date: "Junho 2026", prize: "$1,000,000", champion: "Team Falcons" },
-  { id: 16640, league_id: 16640, name: "DreamLeague Season 23", tier: "Tier 1", date: "Maio 2026", prize: "$1,000,000", champion: "Team Falcons" },
-  { id: 16530, league_id: 16530, name: "ESL One Birmingham 2026", tier: "Tier 1", date: "Abril 2026", prize: "$1,000,000", champion: "Team Falcons" },
-  { id: 16420, league_id: 16420, name: "Elite League Season 1", tier: "Tier 1", date: "Março 2026", prize: "$960,000", champion: "Xtreme Gaming" },
-  { id: 16310, league_id: 16310, name: "DreamLeague Season 22", tier: "Tier 1", date: "Fevereiro 2026", prize: "$1,000,000", champion: "Team Falcons" },
-  { id: 16200, league_id: 16200, name: "BetBoom Dacha Dubai 2026", tier: "Tier 1", date: "Janeiro 2026", prize: "$1,000,000", champion: "Team Falcons" },
-  { id: 16090, league_id: 16090, name: "ESL One Kuala Lumpur", tier: "Tier 1", date: "Dezembro 2025", prize: "$1,000,000", champion: "Azure Ray" },
-  { id: 15980, league_id: 15980, name: "The International 2025", tier: "Tier 1 · Mundial", date: "Outubro 2025", prize: "$2,700,000", champion: "Team Liquid" }
-];
+function normalizeTeamKey(name) {
+  if (!name) return "";
+  return String(name)
+    .toLowerCase()
+    .replace(/\b(team|gaming|esports|esport|gg|club)\b/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
 
 function getHeroImg(constants, heroId) {
   const h = constants.heroes[heroId];
@@ -42,66 +29,23 @@ function getHeroImg(constants, heroId) {
 }
 function getHeroName(constants, heroId) {
   const h = constants.heroes[heroId];
-  return h ? h.localized_name : "?";
+  return h ? h.localized_name : `Herói ${heroId}`;
 }
 function getItemImg(constants, itemId) {
   const it = constants.itemsById[itemId];
   return it ? `${STEAM_CDN}${it.img}` : "";
 }
 
-// Enriquecimento de nomes profissionais via API
-async function enrichPlayersWithProNicknames(players) {
-  let cache = {};
-  try {
-    const raw = localStorage.getItem("dota:playerNames");
-    if (raw) cache = JSON.parse(raw);
-  } catch (e) {}
-
-  const missingIds = (players || [])
-    .map(p => p.account_id)
-    .filter(id => id != null && !(id in cache));
-
-  if (missingIds.length > 0) {
-    await Promise.all(
-      missingIds.slice(0, 10).map(async (id) => {
-        try {
-          const res = await fetch(`${OPENDOTA_BASE}/players/${id}`);
-          if (res.ok) {
-            const data = await res.json();
-            cache[id] = (data && data.profile && data.profile.name) || null;
-          } else {
-            cache[id] = null;
-          }
-        } catch {
-          cache[id] = null;
-        }
-      })
-    );
-    try {
-      localStorage.setItem("dota:playerNames", JSON.stringify(cache));
-    } catch (e) {}
-  }
-
-  return (players || []).map(p => {
-    const proNick = (p.account_id != null && cache[p.account_id]) || p.name;
-    return {
-      ...p,
-      display_name: proNick || p.personaname || `Jogador ${p.account_id ?? "?"}`
-    };
-  });
-}
-
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
+  const [allProMatches, setAllProMatches] = useState([]);
+  const [finishedSeries, setFinishedSeries] = useState([]);
+  const [tournamentsList, setTournamentsList] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
-  const [tournamentMatches, setTournamentMatches] = useState([]);
-  const [loadingTournamentMatches, setLoadingTournamentMatches] = useState(false);
-  const [tournamentSection, setTournamentSection] = useState('playoffs');
+  const [loadingData, setLoadingData] = useState(true);
 
   const [liveGames, setLiveGames] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
-  const [finishedSeries, setFinishedSeries] = useState([]);
-  const [loadingSeries, setLoadingSeries] = useState(false);
   
   const [constants, setConstants] = useState({ heroes: {}, itemsById: {} });
   
@@ -116,11 +60,11 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR CONSTANTES VALVE (CACHE LOCAL 24H)
+  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS DA VALVE
   useEffect(() => {
     async function loadConstants() {
       try {
-        const cached = localStorage.getItem("dota:constants:v2");
+        const cached = localStorage.getItem("dota:constants:v4");
         const now = Date.now();
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -141,7 +85,7 @@ export default function App() {
           if (it && it.id != null) itemsById[it.id] = it;
         });
 
-        localStorage.setItem("dota:constants:v2", JSON.stringify({ ts: now, heroes, itemsById }));
+        localStorage.setItem("dota:constants:v4", JSON.stringify({ ts: now, heroes, itemsById }));
         setConstants({ heroes, itemsById });
       } catch (err) {
         console.error("Erro ao carregar constantes:", err);
@@ -150,58 +94,177 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCAR SÉRIES ENCERRADAS VIA API
-  useEffect(() => {
-    async function loadTournamentSeries() {
-      const cached = localStorage.getItem("dota:finishedSeriesCache");
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (Date.now() - parsed.ts < 5 * 60 * 1000) {
-            setFinishedSeries(parsed.data);
-          }
-        } catch (e) {}
-      }
+  // 2. BUSCA PRINCIPAL DE PARTIDAS PROFISSIONAIS (OPENDOTA PROMATCHES)
+  async function fetchProMatchesData() {
+    setLoadingData(true);
+    try {
+      const res = await fetch(`${OPENDOTA_BASE}/proMatches`);
+      if (res.ok) {
+        const matches = await res.json();
+        const list = Array.isArray(matches) ? matches : [];
+        setAllProMatches(list);
 
-      setLoadingSeries(!cached);
-      try {
-        const res = await fetch('/api/results');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.series && data.series.length > 0) {
-            setFinishedSeries(data.series);
-            localStorage.setItem("dota:finishedSeriesCache", JSON.stringify({ ts: Date.now(), data: data.series }));
+        // Agrupamento de Séries Recentes
+        const seriesClusters = [];
+        list.slice(0, 150).forEach((m) => {
+          const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
+          const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
+          const leagueId = m.leagueid;
+          const matchTime = m.start_time;
+
+          let cluster = seriesClusters.find(c => {
+            const hasSameTeams = (c.teamAKey === tA && c.teamBKey === tB) || (c.teamAKey === tB && c.teamBKey === tA);
+            const isSameLeague = !leagueId || !c.leagueId || leagueId === c.leagueId;
+            const isNearInTime = Math.abs(c.baseTime - matchTime) < (8 * 3600);
+            return hasSameTeams && isSameLeague && isNearInTime;
+          });
+
+          if (!cluster) {
+            cluster = {
+              teamAKey: tA,
+              teamBKey: tB,
+              leagueId,
+              leagueName: m.league_name || "Torneio Profissional",
+              baseTime: matchTime,
+              preferredNameA: m.radiant_name || "Radiant",
+              preferredNameB: m.dire_name || "Dire",
+              preferredIdA: m.radiant_team_id,
+              preferredIdB: m.dire_team_id,
+              games: []
+            };
+            seriesClusters.push(cluster);
           }
-        }
-      } catch (e) {
-        console.error("Erro ao carregar resultados:", e);
+          cluster.games.push(m);
+        });
+
+        const completedSeries = [];
+        seriesClusters.forEach((cluster) => {
+          const games = cluster.games;
+          games.sort((a, b) => a.start_time - b.start_time);
+          const teamAName = cluster.preferredNameA;
+          const teamBName = cluster.preferredNameB;
+          const teamAId = cluster.preferredIdA;
+          const teamAKey = cluster.teamAKey;
+
+          let scoreA = 0;
+          let scoreB = 0;
+
+          games.forEach((g) => {
+            const radWon = g.radiant_win;
+            const radKey = normalizeTeamKey(g.radiant_name || g.radiant_team_id);
+            const isRadTeamA = (g.radiant_team_id && g.radiant_team_id === teamAId) || (radKey === teamAKey);
+
+            if (isRadTeamA) {
+              if (radWon) scoreA++; else scoreB++;
+            } else {
+              if (radWon) scoreB++; else scoreA++;
+            }
+          });
+
+          const isFinished = (scoreA >= 2 || scoreB >= 2) || (games.length >= 2 && scoreA !== scoreB);
+          if (!isFinished) return;
+
+          completedSeries.push({
+            stage: cluster.leagueName,
+            timeA: teamAName,
+            timeB: teamBName,
+            scoreA,
+            scoreB,
+            winner: scoreA > scoreB ? teamAName : teamBName,
+            dur: `${games.length} mapa${games.length > 1 ? 's' : ''}`,
+            games: games.map((g, idx) => ({
+              mapNumber: idx + 1,
+              match_id: String(g.match_id)
+            }))
+          });
+        });
+
+        setFinishedSeries(completedSeries.slice(0, 10));
+
+        // Agrupamento de Torneios por Liga
+        const leaguesMap = {};
+        list.forEach((m) => {
+          const lId = m.leagueid || m.league_name;
+          if (!lId) return;
+          if (!leaguesMap[lId]) {
+            leaguesMap[lId] = {
+              id: lId,
+              league_id: m.leagueid,
+              name: m.league_name || "Torneio Dota 2",
+              matchesCount: 0,
+              recentDate: new Date(m.start_time * 1000).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }),
+              matches: []
+            };
+          }
+          leaguesMap[lId].matchesCount++;
+          leaguesMap[lId].matches.push(m);
+        });
+
+        const leaguesList = Object.values(leaguesMap).map((l) => {
+          // Agrupa partidas da liga em séries
+          const lClusters = [];
+          l.matches.forEach((m) => {
+            const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
+            const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
+            let cl = lClusters.find(c => (c.teamAKey === tA && c.teamBKey === tB) || (c.teamAKey === tB && c.teamBKey === tA));
+            if (!cl) {
+              cl = {
+                teamAKey: tA,
+                teamBKey: tB,
+                timeA: m.radiant_name || "Radiant",
+                timeB: m.dire_name || "Dire",
+                preferredIdA: m.radiant_team_id,
+                games: []
+              };
+              lClusters.push(cl);
+            }
+            cl.games.push(m);
+          });
+
+          const series = lClusters.map(cl => {
+            cl.games.sort((a, b) => a.start_time - b.start_time);
+            let sA = 0, sB = 0;
+            cl.games.forEach(g => {
+              if (g.radiant_team_id === cl.preferredIdA) {
+                if (g.radiant_win) sA++; else sB++;
+              } else {
+                if (g.radiant_win) sB++; else sA++;
+              }
+            });
+            return {
+              stage: l.name,
+              timeA: cl.timeA,
+              timeB: cl.timeB,
+              scoreA: sA,
+              scoreB: sB,
+              winner: sA > sB ? cl.timeA : (sB > sA ? cl.timeB : "Empate"),
+              dur: `${cl.games.length} mapa${cl.games.length > 1 ? 's' : ''}`,
+              games: cl.games.map((g, idx) => ({
+                mapNumber: idx + 1,
+                match_id: String(g.match_id)
+              }))
+            };
+          });
+
+          return {
+            ...l,
+            seriesList: series
+          };
+        });
+
+        setTournamentsList(leaguesList.slice(0, 10));
       }
-      setLoadingSeries(false);
+    } catch (e) {
+      console.error("Erro ao carregar proMatches:", e);
     }
-    loadTournamentSeries();
+    setLoadingData(false);
+  }
+
+  useEffect(() => {
+    fetchProMatchesData();
   }, []);
 
-  // 3. CARREGAR PARTIDAS DO TORNEIO SELECIONADO 100% DINÂMICO VIA API
-  useEffect(() => {
-    if (!selectedTournament) return;
-    async function fetchTournamentData() {
-      setLoadingTournamentMatches(true);
-      setTournamentMatches([]);
-      try {
-        const res = await fetch(`/api/tournament?league_id=${selectedTournament.league_id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setTournamentMatches(data.series || []);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar partidas do torneio:", err);
-      }
-      setLoadingTournamentMatches(false);
-    }
-    fetchTournamentData();
-  }, [selectedTournament]);
-
-  // 4. CONSULTA REAL DE MATCH_ID DINÂMICO NA OPENDOTA (DRAFT, JOGADORES, KDA, ITENS)
+  // 3. CONSULTA DINÂMICA DO MATCH_ID DIRETO NA OPENDOTA
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -210,11 +273,7 @@ export default function App() {
       const res = await fetch(`${OPENDOTA_BASE}/matches/${matchId}`);
       if (res.ok) {
         const data = await res.json();
-        const enrichedPlayers = await enrichPlayersWithProNicknames(data.players || []);
-        setLoadedMatchData({
-          ...data,
-          players: enrichedPlayers
-        });
+        setLoadedMatchData(data);
       }
     } catch (err) {
       console.error("Erro ao carregar detalhes da partida:", err);
@@ -222,7 +281,7 @@ export default function App() {
     setLoadingMatch(false);
   }
 
-  // 5. JOGOS A SEREM REALIZADOS
+  // 4. JOGOS A SEREM REALIZADOS
   useEffect(() => {
     async function loadUpcomingMatches() {
       try {
@@ -257,7 +316,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 6. POLLING DE PARTIDAS AO VIVO 100% REAL
+  // 5. POLLING DE PARTIDAS AO VIVO 100% REAL
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -279,11 +338,11 @@ export default function App() {
       }
     }
     fetchLive();
-    const interval = setInterval(fetchLive, 10000);
+    const interval = setInterval(fetchLive, 12000);
     return () => clearInterval(interval);
   }, []);
 
-  // 7. RANKING MMR OFICIAL
+  // 6. RANKING MMR OFICIAL
   useEffect(() => {
     if (currentTab === 'mmr') {
       setMmrLoading(true);
@@ -335,19 +394,30 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS FINALIZADOS */}
+          {/* ESQUERDA: RESULTADOS REAIS DA OPENDOTA */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
                 <History size={14} /> Resultados Recentes
               </div>
-              <span className="badge-status">ENCERRADOS</span>
+              <button 
+                onClick={fetchProMatchesData}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}
+                title="Atualizar resultados"
+              >
+                <RefreshCw size={12} />
+              </button>
             </div>
 
             <div className="finished-scroll">
-              {loadingSeries ? (
+              {loadingData ? (
                 <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-dim)', fontSize: 12 }}>
+                  <Loader2 size={16} className="animate-spin" style={{ margin: '0 auto 6px auto' }} />
                   Carregando séries...
+                </div>
+              ) : finishedSeries.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 10px', color: 'var(--text-dim)', fontSize: 12 }}>
+                  Nenhuma série recente encontrada.
                 </div>
               ) : (
                 finishedSeries.map((m, idx) => {
@@ -393,7 +463,7 @@ export default function App() {
             </div>
           </aside>
 
-          {/* CENTRO: CAMPEÃO + AO VIVO */}
+          {/* CENTRO: CAMPEÃO MUNDIAL + AO VIVO */}
           <main className="center-content">
             
             {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
@@ -565,7 +635,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. ABA DE TORNEIOS COM BUSCA DINÂMICA VIA API */}
+      {/* 2. ABA DE TORNEIOS DINÂMICA VIA API */}
       {currentTab === 'torneios' && (
         <div style={{ maxWidth: 1040, margin: '24px auto', width: '100%', padding: '0 20px' }}>
           {selectedTournament ? (
@@ -592,135 +662,116 @@ export default function App() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                   <div>
                     <span style={{ fontSize: 11, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 800 }}>
-                      {selectedTournament.tier}
+                      Torneio Oficial Valve
                     </span>
                     <h2 style={{ fontSize: 24, color: '#fff', marginTop: 4 }}>{selectedTournament.name}</h2>
                     <div style={{ display: 'flex', gap: 16, color: 'var(--text-dim)', fontSize: 12, marginTop: 6 }}>
-                      <span><Calendar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {selectedTournament.date}</span>
-                      <span><DollarSign size={13} style={{ verticalAlign: 'middle', marginRight: 2 }} /> {selectedTournament.prize}</span>
+                      <span><Calendar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {selectedTournament.recentDate}</span>
+                      <span><Trophy size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {selectedTournament.seriesList?.length || 0} Confrontos Registrados</span>
                     </div>
                   </div>
-
-                  <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '10px 16px', borderRadius: 12 }}>
-                    <div style={{ fontSize: 10, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 700 }}>Campeão Oficial</div>
-                    <div style={{ fontSize: 16, color: '#fff', fontWeight: 800 }}>👑 {selectedTournament.champion}</div>
-                  </div>
                 </div>
               </div>
 
-              {/* SELETOR DE ETAPAS */}
-              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                <button
-                  onClick={() => setTournamentSection('playoffs')}
-                  className={`map-tab-btn ${tournamentSection === 'playoffs' ? 'active' : ''}`}
-                >
-                  <Trophy size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                  Eliminatórias (Playoffs)
-                </button>
-                <button
-                  onClick={() => setTournamentSection('groups')}
-                  className={`map-tab-btn ${tournamentSection === 'groups' ? 'active' : ''}`}
-                >
-                  <Layers size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                  Fase de Grupos
-                </button>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
+                {(selectedTournament.seriesList || []).map((m, idx) => {
+                  const aWon = m.scoreA > m.scoreB;
+                  const bWon = m.scoreB > m.scoreA;
+
+                  return (
+                    <div
+                      key={idx}
+                      className="finished-card"
+                      style={{ padding: 16 }}
+                      onClick={() => {
+                        setSelectedSeriesDetail(m);
+                        setActiveMapIndex(0);
+                        if (m.games && m.games[0]) {
+                          fetchMatchDetail(m.games[0].match_id);
+                        }
+                      }}
+                    >
+                      <div className="finished-card-stage" style={{ marginBottom: 8 }}>
+                        <span style={{ color: 'var(--accent-gold)' }}>{m.stage}</span>
+                        <span>{m.dur}</span>
+                      </div>
+                      <div className="finished-team-row" style={{ fontSize: 14 }}>
+                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeA}</span>
+                        <span className="score-tag" style={{ color: aWon ? '#00E676' : (m.scoreA === m.scoreB ? '#fff' : '#FF5252'), fontSize: 14 }}>{m.scoreA}</span>
+                      </div>
+                      <div className="finished-team-row" style={{ fontSize: 14 }}>
+                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeB}</span>
+                        <span className="score-tag" style={{ color: bWon ? '#00E676' : (m.scoreA === m.scoreB ? '#fff' : '#FF5252'), fontSize: 14 }}>{m.scoreB}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-
-              {loadingTournamentMatches ? (
-                <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Loader2 className="animate-spin" size={18} /> Carregando todas as partidas oficiais do torneio...
-                </div>
-              ) : tournamentMatches.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>
-                  Nenhuma partida registrada para esta liga.
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
-                  {tournamentMatches
-                    .filter(m => tournamentSection === 'playoffs' ? (m.games && m.games.length >= 2) : (m.games && m.games.length === 2))
-                    .map((m, idx) => {
-                      const aWon = m.scoreA > m.scoreB;
-                      const bWon = m.scoreB > m.scoreA;
-
-                      return (
-                        <div
-                          key={idx}
-                          className="finished-card"
-                          style={{ padding: 16 }}
-                          onClick={() => {
-                            setSelectedSeriesDetail(m);
-                            setActiveMapIndex(0);
-                            if (m.games && m.games[0]) {
-                              fetchMatchDetail(m.games[0].match_id);
-                            }
-                          }}
-                        >
-                          <div className="finished-card-stage" style={{ marginBottom: 8 }}>
-                            <span style={{ color: 'var(--accent-gold)' }}>{m.stage}</span>
-                            <span>{m.dur}</span>
-                          </div>
-                          <div className="finished-team-row" style={{ fontSize: 14 }}>
-                            <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeA}</span>
-                            <span className="score-tag" style={{ color: aWon ? '#00E676' : (m.scoreA === m.scoreB ? '#fff' : '#FF5252'), fontSize: 14 }}>{m.scoreA}</span>
-                          </div>
-                          <div className="finished-team-row" style={{ fontSize: 14 }}>
-                            <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeB}</span>
-                            <span className="score-tag" style={{ color: bWon ? '#00E676' : (m.scoreA === m.scoreB ? '#fff' : '#FF5252'), fontSize: 14 }}>{m.scoreB}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
             </div>
           ) : (
             <div>
               <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 14, marginBottom: 20 }}>
                 <h2 style={{ color: '#fff', textTransform: 'uppercase', fontSize: 18, letterSpacing: 1 }}>
-                  Últimos Torneios Principais
+                  Torneios Profissionais Recentes
                 </h2>
                 <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>
                   Selecione um torneio para consultar todas as partidas e as estatísticas dos mapas diretamente pela API
                 </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: 14 }}>
-                {FEATURED_TOURNAMENTS.map((t) => (
-                  <div
-                    key={t.id}
-                    onClick={() => setSelectedTournament(t)}
-                    style={{
-                      background: 'var(--bg-surface)',
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 14,
-                      padding: 18,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      gap: 12
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 800, textTransform: 'uppercase' }}>{t.tier}</span>
-                        <span style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'monospace' }}>{t.date}</span>
+              {loadingData ? (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-dim)' }}>
+                  <Loader2 size={22} className="animate-spin" style={{ margin: '0 auto 8px auto' }} />
+                  Carregando lista de torneios da API...
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: 14 }}>
+                  {tournamentsList.map((t) => (
+                    <div
+                      key={t.id}
+                      onClick={() => setSelectedTournament(t)}
+                      style={{
+                        background: 'var(--bg-surface)',
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 14,
+                        padding: 18,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: 12
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--accent-gold)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--border)';
+                        e.currentTarget.style.transform = 'none';
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 800, textTransform: 'uppercase' }}>
+                            Oficial
+                          </span>
+                          <span style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'monospace' }}>
+                            {t.recentDate}
+                          </span>
+                        </div>
+                        <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>{t.name}</h3>
                       </div>
-                      <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>{t.name}</h3>
-                      <div style={{ fontSize: 11, color: 'var(--accent-cyan)', fontFamily: 'monospace', marginTop: 4 }}>
-                        Premiação: {t.prize}
+                      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Confrontos:</span>
+                        <strong style={{ fontSize: 12, color: 'var(--accent-cyan)' }}>{t.seriesList?.length || 0} Séries</strong>
                       </div>
                     </div>
-                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Campeão:</span>
-                      <strong style={{ fontSize: 12, color: '#fff' }}>👑 {t.champion}</strong>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -786,7 +837,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA PARTIDA (HISTÓRICO 100% DINÂMICO VIA API) */}
+      {/* MODAL DETALHADO DA PARTIDA (100% DINÂMICO VIA API) */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -879,7 +930,9 @@ export default function App() {
                   <tbody>
                     {(loadedMatchData.players || []).filter(p => p.player_slot < 128).map((p, i) => (
                       <tr key={i}>
-                        <td style={{ color: '#fff', fontWeight: 600 }}>{p.display_name}</td>
+                        <td style={{ color: '#fff', fontWeight: 600 }}>
+                          {p.name || p.personaname || `Jogador ${i + 1}`}
+                        </td>
                         <td>
                           <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} />
                         </td>
@@ -916,7 +969,9 @@ export default function App() {
                   <tbody>
                     {(loadedMatchData.players || []).filter(p => p.player_slot >= 128).map((p, i) => (
                       <tr key={i}>
-                        <td style={{ color: '#fff', fontWeight: 600 }}>{p.display_name}</td>
+                        <td style={{ color: '#fff', fontWeight: 600 }}>
+                          {p.name || p.personaname || `Jogador ${i + 1}`}
+                        </td>
                         <td>
                           <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} />
                         </td>
