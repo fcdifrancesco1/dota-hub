@@ -14,13 +14,28 @@ function worldToPct(x, y) {
   };
 }
 
+// Helpers de heróis e itens pelas constantes da Valve
+function getHeroImg(constants, heroId) {
+  const h = constants.heroes[heroId];
+  return h ? `${STEAM_CDN}${h.img}` : "";
+}
+function getHeroName(constants, heroId) {
+  const h = constants.heroes[heroId];
+  return h ? h.localized_name : "?";
+}
+function getItemImg(constants, itemId) {
+  const it = constants.itemsById[itemId];
+  return it ? `${STEAM_CDN}${it.img}` : "";
+}
+
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
   const [liveGames, setLiveGames] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
-  const [tiFinishedMatches, setTiFinishedMatches] = useState([]);
+  const [finishedSeries, setFinishedSeries] = useState([]);
+  const [loadingSeries, setLoadingSeries] = useState(false);
   
-  // Dicionários de constantes carregados dinamicamente da Valve/OpenDota
+  // Dicionários de constantes da Valve
   const [constants, setConstants] = useState({ heroes: {}, itemsById: {} });
   
   // Modais de detalhes
@@ -35,7 +50,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS COM CACHE DE 24H (ODOTA)
+  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS COM CACHE DE 24H
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -69,144 +84,88 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. CARREGAR JOGOS DO ÚLTIMO TORNEIO (THE INTERNATIONAL 2026)
+  // 2. BUSCA DINÂMICA DE SÉRIES E JOGOS REAIS DO ÚLTIMO TORNEIO
   useEffect(() => {
-    const ti2026Playoffs = [
-      {
-        stage: "Grande Final (BO5)",
-        timeA: "Team Spirit",
-        timeB: "TEAM VISION",
-        scoreA: 3,
-        scoreB: 2,
-        winner: "Team Spirit",
-        dur: "5 mapas",
-        games: [
-          { mapNumber: 1, match_id: "800101" },
-          { mapNumber: 2, match_id: "800102" },
-          { mapNumber: 3, match_id: "800103" },
-          { mapNumber: 4, match_id: "800104" },
-          { mapNumber: 5, match_id: "800105" },
-        ]
-      },
-      {
-        stage: "Final Lower Bracket",
-        timeA: "Team Spirit",
-        timeB: "Team Yandex",
-        scoreA: 2,
-        scoreB: 0,
-        winner: "Team Spirit",
-        dur: "38m / 32m",
-        games: [
-          { mapNumber: 1, match_id: "800201" },
-          { mapNumber: 2, match_id: "800202" },
-        ]
-      },
-      {
-        stage: "Semi Lower Bracket",
-        timeA: "Team Spirit",
-        timeB: "BB Team",
-        scoreA: 2,
-        scoreB: 0,
-        winner: "Team Spirit",
-        dur: "41m / 29m",
-        games: [
-          { mapNumber: 1, match_id: "800301" },
-          { mapNumber: 2, match_id: "800302" },
-        ]
-      },
-      {
-        stage: "Final Upper Bracket",
-        timeA: "TEAM VISION",
-        timeB: "Team Yandex",
-        scoreA: 2,
-        scoreB: 1,
-        winner: "TEAM VISION",
-        dur: "3 mapas",
-        games: [
-          { mapNumber: 1, match_id: "800401" },
-          { mapNumber: 2, match_id: "800402" },
-          { mapNumber: 3, match_id: "800403" },
-        ]
-      },
-      {
-        stage: "Round 3 Lower Bracket",
-        timeA: "Team Liquid",
-        timeB: "Team Spirit",
-        scoreA: 0,
-        scoreB: 2,
-        winner: "Team Spirit",
-        dur: "34m / 30m",
-        games: [
-          { mapNumber: 1, match_id: "800501" },
-          { mapNumber: 2, match_id: "800502" },
-        ]
+    async function loadTournamentSeries() {
+      setLoadingSeries(true);
+      try {
+        // Busca as últimas partidas profissionais concluídas
+        const proRes = await fetch(`${OPENDOTA_BASE}/proMatches`);
+        const proMatches = await proRes.json();
+        
+        // Agrupa por série usando a lógica do app.js
+        const groups = {};
+        (proMatches || []).slice(0, 40).forEach((m) => {
+          const key = m.series_id && m.series_id !== 0 
+            ? `s-${m.series_id}` 
+            : `pair-${[m.radiant_team_id, m.dire_team_id].sort().join('-')}-${Math.floor(m.start_time / 86400)}`;
+          
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(m);
+        });
+
+        const seriesList = Object.values(groups).map((games) => {
+          games.sort((a, b) => a.start_time - b.start_time);
+          const first = games[0];
+          const tAId = first.radiant_team_id;
+          const tBId = first.dire_team_id;
+          
+          let scoreA = 0, scoreB = 0;
+          games.forEach((g) => {
+            const radiantWon = g.radiant_win;
+            if (g.radiant_team_id === tAId) {
+              if (radiantWon) scoreA++; else scoreB++;
+            } else {
+              if (radiantWon) scoreB++; else scoreA++;
+            }
+          });
+
+          const timeAName = first.radiant_name || "Time A";
+          const timeBName = first.dire_name || "Time B";
+          const winner = scoreA > scoreB ? timeAName : timeBName;
+
+          return {
+            stage: first.league_name || "Torneio Profissional",
+            timeA: timeAName,
+            timeB: timeBName,
+            scoreA,
+            scoreB,
+            winner,
+            dur: `${games.length} mapa${games.length > 1 ? 's' : ''}`,
+            games: games.map((g, idx) => ({
+              mapNumber: idx + 1,
+              match_id: String(g.match_id)
+            }))
+          };
+        });
+
+        setFinishedSeries(seriesList.slice(0, 10));
+      } catch (e) {
+        console.error("Erro ao carregar séries:", e);
       }
-    ];
-    setTiFinishedMatches(ti2026Playoffs);
+      setLoadingSeries(false);
+    }
+    loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTAR PARTIDA DETALHADA (/matches/{id}) DA OPENDOTA
+  // 3. CONSULTAR PARTIDA INDIVIDUAL REAL DA OPENDOTA
   async function fetchMatchDetail(matchId) {
+    if (!matchId) return;
     setLoadingMatch(true);
+    setLoadedMatchData(null);
     try {
       const res = await fetch(`${OPENDOTA_BASE}/matches/${matchId}`);
       if (res.ok) {
         const data = await res.json();
         setLoadedMatchData(data);
-      } else {
-        throw new Error("Match não encontrado na OpenDota");
       }
-    } catch {
-      // Fallback formatado com a estrutura oficial caso o match seja local/simulado
-      setLoadedMatchData({
-        match_id: matchId,
-        radiant_score: 34,
-        dire_score: 22,
-        duration: 2775,
-        radiant_win: true,
-        radiant_name: "Team Spirit",
-        dire_name: "TEAM VISION",
-        picks_bans: [
-          { hero_id: 11, team: 0, is_pick: false, order: 0 },
-          { hero_id: 69, team: 1, is_pick: false, order: 1 },
-          { hero_id: 93, team: 0, is_pick: true, order: 2 },
-          { hero_id: 106, team: 1, is_pick: true, order: 3 },
-          { hero_id: 119, team: 0, is_pick: true, order: 4 },
-          { hero_id: 9, team: 1, is_pick: true, order: 5 },
-        ],
-        players: [
-          { player_slot: 0, personaname: "Yatoro", hero_id: 93, kills: 15, deaths: 3, assists: 9, gold_per_min: 820, xp_per_min: 870, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 208 },
-          { player_slot: 1, personaname: "Larl", hero_id: 11, kills: 9, deaths: 4, assists: 14, gold_per_min: 740, xp_per_min: 790, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 141 },
-          { player_slot: 2, personaname: "Collapse", hero_id: 119, kills: 6, deaths: 4, assists: 18, gold_per_min: 560, xp_per_min: 620, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 226, item_5: 116 },
-          { player_slot: 3, personaname: "rue", hero_id: 86, kills: 4, deaths: 5, assists: 21, gold_per_min: 390, xp_per_min: 450, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
-          { player_slot: 4, personaname: "not me", hero_id: 87, kills: 3, deaths: 6, assists: 23, gold_per_min: 320, xp_per_min: 380, item_0: 180, item_1: 108, item_2: 254, item_3: 102, item_4: 232, item_5: 40 },
-          { player_slot: 128, personaname: "Kiritych", hero_id: 106, kills: 7, deaths: 6, assists: 12, gold_per_min: 680, xp_per_min: 720, item_0: 50, item_1: 145, item_2: 249, item_3: 116, item_4: 141, item_5: 114 },
-          { player_slot: 129, personaname: "Squad1x", hero_id: 9, kills: 8, deaths: 5, assists: 11, gold_per_min: 640, xp_per_min: 690, item_0: 63, item_1: 147, item_2: 174, item_3: 139, item_4: 116, item_5: 123 },
-          { player_slot: 130, personaname: "Fng", hero_id: 129, kills: 4, deaths: 7, assists: 15, gold_per_min: 490, xp_per_min: 540, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 141, item_5: 112 },
-          { player_slot: 131, personaname: "sayuw", hero_id: 123, kills: 3, deaths: 8, assists: 16, gold_per_min: 350, xp_per_min: 410, item_0: 180, item_1: 232, item_2: 249, item_3: 102, item_4: 100, item_5: 229 },
-          { player_slot: 132, personaname: "Pantomem", hero_id: 91, kills: 2, deaths: 9, assists: 19, gold_per_min: 290, xp_per_min: 340, item_0: 269, item_1: 79, item_2: 254, item_3: 40, item_4: 108, item_5: 244 },
-        ]
-      });
+    } catch (err) {
+      console.error("Erro ao carregar partida:", err);
     }
     setLoadingMatch(false);
   }
 
-  // Helper para resgatar imagem do herói via constante da Valve
-  function getHeroImg(heroId) {
-    const h = constants.heroes[heroId];
-    return h ? `${STEAM_CDN}${h.img}` : "";
-  }
-  function getHeroName(heroId) {
-    const h = constants.heroes[heroId];
-    return h ? h.localized_name : "?";
-  }
-  // Helper para resgatar imagem do item via constante da Valve
-  function getItemImg(itemId) {
-    const it = constants.itemsById[itemId];
-    return it ? `${STEAM_CDN}${it.img}` : "";
-  }
-
-  // 4. LEITURA DA AGENDA MANUAL (/agenda.json) COM FILTRO DE DATA
+  // 4. LEITURA DA AGENDA MANUAL (/agenda.json) COM VALIDAÇÃO DE DATA
   useEffect(() => {
     async function loadManualAgenda() {
       try {
@@ -300,46 +259,52 @@ export default function App() {
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
-                <History size={14} /> The International 2026
+                <History size={14} /> Resultados Recentes
               </div>
-              <span className="badge-status">FINALIZADO</span>
+              <span className="badge-status">OFICIAL</span>
             </div>
 
             <div className="finished-scroll">
-              {tiFinishedMatches.map((m, idx) => (
-                <div 
-                  key={idx} 
-                  className="finished-card"
-                  onClick={() => {
-                    setSelectedSeriesDetail(m);
-                    setActiveMapIndex(0);
-                    if (m.games && m.games[0]) {
-                      fetchMatchDetail(m.games[0].match_id);
-                    }
-                  }}
-                >
-                  <div className="finished-card-stage">
-                    <span>{m.stage}</span>
-                    <span>{m.dur}</span>
-                  </div>
-                  <div className="finished-team-row">
-                    <span className={m.winner === m.timeA ? "finished-team-winner" : "finished-team-loser"}>
-                      {m.winner === m.timeA ? `👑 ${m.timeA}` : m.timeA}
-                    </span>
-                    <span className="score-tag" style={{ color: m.winner === m.timeA ? "var(--accent-gold)" : "var(--text-dim)" }}>
-                      {m.scoreA}
-                    </span>
-                  </div>
-                  <div className="finished-team-row">
-                    <span className={m.winner === m.timeB ? "finished-team-winner" : "finished-team-loser"}>
-                      {m.winner === m.timeB ? `👑 ${m.timeB}` : m.timeB}
-                    </span>
-                    <span className="score-tag" style={{ color: m.winner === m.timeB ? "var(--accent-gold)" : "var(--text-dim)" }}>
-                      {m.scoreB}
-                    </span>
-                  </div>
+              {loadingSeries ? (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-dim)', fontSize: 12 }}>
+                  Carregando séries...
                 </div>
-              ))}
+              ) : (
+                finishedSeries.map((m, idx) => (
+                  <div 
+                    key={idx} 
+                    className="finished-card"
+                    onClick={() => {
+                      setSelectedSeriesDetail(m);
+                      setActiveMapIndex(0);
+                      if (m.games && m.games[0]) {
+                        fetchMatchDetail(m.games[0].match_id);
+                      }
+                    }}
+                  >
+                    <div className="finished-card-stage">
+                      <span>{m.stage}</span>
+                      <span>{m.dur}</span>
+                    </div>
+                    <div className="finished-team-row">
+                      <span className={m.winner === m.timeA ? "finished-team-winner" : "finished-team-loser"}>
+                        {m.winner === m.timeA ? `👑 ${m.timeA}` : m.timeA}
+                      </span>
+                      <span className="score-tag" style={{ color: m.winner === m.timeA ? "var(--accent-gold)" : "var(--text-dim)" }}>
+                        {m.scoreA}
+                      </span>
+                    </div>
+                    <div className="finished-team-row">
+                      <span className={m.winner === m.timeB ? "finished-team-winner" : "finished-team-loser"}>
+                        {m.winner === m.timeB ? `👑 ${m.timeB}` : m.timeB}
+                      </span>
+                      <span className="score-tag" style={{ color: m.winner === m.timeB ? "var(--accent-gold)" : "var(--text-dim)" }}>
+                        {m.scoreB}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </aside>
 
@@ -525,7 +490,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA SÉRIE COM CONSTANTES DA VALVE (HERÓIS, DRAFTS E ITENS) */}
+      {/* MODAL DETALHADO DA SÉRIE COM PARTIDA REAL DA OPENDOTA */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -542,7 +507,7 @@ export default function App() {
               </h2>
             </div>
 
-            {/* ABAS DOS MAPAS */}
+            {/* ABAS DOS MAPAS DA SÉRIE */}
             <div className="map-tabs-row">
               {selectedSeriesDetail.games.map((g, idx) => (
                 <button
@@ -582,8 +547,8 @@ export default function App() {
                       <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
                       {loadedMatchData.picks_bans.filter(p => p.team === 0).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
                         <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.6, border: p.is_pick ? '1px solid var(--accent-cyan)' : 'none' }}>
-                          <img src={getHeroImg(p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(p.hero_id)}`} />
-                          {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(p.hero_id)}</span>}
+                          <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
+                          {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
                         </div>
                       ))}
                     </div>
@@ -593,8 +558,8 @@ export default function App() {
                       <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
                       {loadedMatchData.picks_bans.filter(p => p.team === 1).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
                         <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.6, border: p.is_pick ? '1px solid var(--accent-red)' : 'none' }}>
-                          <img src={getHeroImg(p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(p.hero_id)}`} />
-                          {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(p.hero_id)}</span>}
+                          <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
+                          {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
                         </div>
                       ))}
                     </div>
@@ -621,9 +586,9 @@ export default function App() {
                         <td style={{ color: '#fff', fontWeight: 600 }}>{p.personaname || p.name || `Jogador ${i + 1}`}</td>
                         <td>
                           <img 
-                            src={getHeroImg(p.hero_id)} 
+                            src={getHeroImg(constants, p.hero_id)} 
                             alt="" 
-                            title={getHeroName(p.hero_id)}
+                            title={getHeroName(constants, p.hero_id)}
                             style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover', verticalAlign: 'middle', border: '1px solid var(--border)' }} 
                           />
                         </td>
@@ -634,10 +599,10 @@ export default function App() {
                         <td>
                           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                             {[p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].map((itId, itIdx) => (
-                              itId && getItemImg(itId) ? (
+                              itId && getItemImg(constants, itId) ? (
                                 <img
                                   key={itIdx}
-                                  src={getItemImg(itId)}
+                                  src={getItemImg(constants, itId)}
                                   alt=""
                                   className="item-slot-icon"
                                 />
@@ -670,9 +635,9 @@ export default function App() {
                         <td style={{ color: '#fff', fontWeight: 600 }}>{p.personaname || p.name || `Jogador ${i + 1}`}</td>
                         <td>
                           <img 
-                            src={getHeroImg(p.hero_id)} 
+                            src={getHeroImg(constants, p.hero_id)} 
                             alt="" 
-                            title={getHeroName(p.hero_id)}
+                            title={getHeroName(constants, p.hero_id)}
                             style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover', verticalAlign: 'middle', border: '1px solid var(--border)' }} 
                           />
                         </td>
@@ -683,10 +648,10 @@ export default function App() {
                         <td>
                           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                             {[p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].map((itId, itIdx) => (
-                              itId && getItemImg(itId) ? (
+                              itId && getItemImg(constants, itId) ? (
                                 <img
                                   key={itIdx}
-                                  src={getItemImg(itId)}
+                                  src={getItemImg(constants, itId)}
                                   alt=""
                                   className="item-slot-icon"
                                 />
