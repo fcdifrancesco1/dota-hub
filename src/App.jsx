@@ -546,60 +546,70 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. SEÇÃO AO VIVO (POSICIONADA LOGO ABAIXO DOS CAMPEÕES) */}
-            <section className="live-block-wrap" style={{ marginTop: 8 }}>
-              <div className="live-heading">
-                <span className="live-dot" />
-                Partidas Ao Vivo
-                {liveGames.length > 0 && (
-                  <span style={{ fontSize: 10, background: 'rgba(212,146,68,0.2)', padding: '2px 8px', borderRadius: 10, marginLeft: 6 }}>
-                    {liveGames.length} EM ANDAMENTO
-                  </span>
-                )}
-              </div>
+           {/* 2. SEÇÃO AO VIVO */}
+<section className="live-block-wrap" style={{ marginTop: 8 }}>
+  <div className="live-heading">
+    <span className="live-dot" />
+    Partidas Ao Vivo
+    {liveGames.length > 0 && (
+      <span style={{ fontSize: 10, background: 'rgba(212,146,68,0.2)', color: 'var(--accent-gold)', padding: '2px 8px', borderRadius: 10, marginLeft: 6, fontWeight: 700 }}>
+        {liveGames.length} EM ANDAMENTO
+      </span>
+    )}
+  </div>
 
-              {liveGames.length === 0 ? (
-                <div style={{
-                  width: '100%',
-                  background: 'var(--bg-surface)',
-                  border: '1px dashed var(--border)',
-                  borderRadius: 14,
-                  padding: '36px 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  color: 'var(--text-dim)'
-                }}>
-                  <Radio size={24} style={{ opacity: 0.5, color: 'var(--accent-gold)' }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Nenhuma partida oficial ao vivo no momento</span>
-                  <span style={{ fontSize: 11 }}>Acompanhe os próximos confrontos agendados na coluna da direita</span>
-                </div>
-              ) : (
-                <div className="live-grid">
-                  {liveGames.map((g, idx) => {
-                    const sb = g.scoreboard || {};
-                    const rScore = sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
-                    const dScore = sb.dire ? sb.dire.score : (g.dire_score ?? 0);
-                    const mins = Math.floor((sb.duration || 0) / 60) || 26;
-                    const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "Radiant";
-                    const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Dire";
+  {liveGames.length === 0 ? (
+    <div style={{
+      width: '100%',
+      background: 'var(--bg-surface)',
+      border: '1px dashed var(--border)',
+      borderRadius: 14,
+      padding: '36px 20px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      color: 'var(--text-dim)'
+    }}>
+      <Radio size={24} style={{ opacity: 0.5, color: 'var(--accent-gold)' }} />
+      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Nenhuma partida oficial ao vivo no momento</span>
+      <span style={{ fontSize: 11 }}>Acompanhe os próximos confrontos agendados na coluna da direita</span>
+    </div>
+  ) : (
+    <div className="live-grid">
+      {liveGames.map((g, idx) => {
+        const sb = g.scoreboard || {};
+        const rScore = sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
+        const dScore = sb.dire ? sb.dire.score : (g.dire_score ?? 0);
+        const mins = Math.floor((sb.duration || g.duration || 0) / 60);
+        const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "PuckChamp";
+        const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Nemiga Gaming";
+        const seriesInfo = g.series_score ? `Série: ${g.series_score}` : `${mins}MIN`;
 
-                    return (
-                      <div key={idx} onClick={() => setSelectedLiveGame(g)} className="live-card">
-                        <span className="live-badge">AO VIVO · {mins}MIN</span>
-                        <div className="live-teams-row">
-                          <span className="live-team-name">{rName}</span>
-                          <span className="live-score">{rScore} - {dScore}</span>
-                          <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+        return (
+          <div key={idx} onClick={() => setSelectedLiveGame(g)} className="live-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="live-badge">AO VIVO · {g.current_game || `${mins}MIN`}</span>
+              {g.series_score && (
+                <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
+                  {seriesInfo}
+                </span>
               )}
-            </section>
+            </div>
+            <div className="live-teams-row" style={{ marginTop: 6 }}>
+              <span className="live-team-name">{rName}</span>
+              <span className="live-score">
+                {g.series_score ? g.series_score : `${rScore} - ${dScore}`}
+              </span>
+              <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</section>
           </main>
 
           {/* DIREITA: JOGOS A SEREM REALIZADOS */}
