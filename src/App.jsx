@@ -22,7 +22,6 @@ function worldToPct(x, y) {
   };
 }
 
-// Helpers de heróis e itens pelas constantes da Valve
 function getHeroImg(constants, heroId) {
   const h = constants.heroes[heroId];
   return h ? `${STEAM_CDN}${h.img}` : "";
@@ -36,7 +35,6 @@ function getItemImg(constants, itemId) {
   return it ? `${STEAM_CDN}${it.img}` : "";
 }
 
-// Enriquecimento de nicknames pro players
 async function enrichPlayersWithProNicknames(players) {
   let cache = {};
   try {
@@ -78,7 +76,6 @@ async function enrichPlayersWithProNicknames(players) {
   });
 }
 
-// Rosters conhecidos
 const KNOWN_ROSTERS = {
   "night pulse": [
     { pos: 1, name: "V-Tune", role: "Carry", kda: "5.8", gpm: 710, xpm: 760 },
@@ -127,7 +124,6 @@ const KNOWN_ROSTERS = {
 function getTeamRosterFallback(teamName) {
   const key = String(teamName || "").trim().toLowerCase();
   if (KNOWN_ROSTERS[key]) return KNOWN_ROSTERS[key];
-  
   return [
     { pos: 1, name: `${teamName} Carry`, role: "Carry", kda: "5.2", gpm: 710, xpm: 750 },
     { pos: 2, name: `${teamName} Mid`, role: "Midlane", kda: "4.9", gpm: 650, xpm: 690 },
@@ -144,10 +140,8 @@ export default function App() {
   const [finishedSeries, setFinishedSeries] = useState([]);
   const [loadingSeries, setLoadingSeries] = useState(false);
   
-  // Constantes da Valve
   const [constants, setConstants] = useState({ heroes: {}, itemsById: {} });
   
-  // Modais de detalhes
   const [selectedLiveGame, setSelectedLiveGame] = useState(null);
   const [selectedSeriesDetail, setSelectedSeriesDetail] = useState(null);
   const [selectedUpcomingMatch, setSelectedUpcomingMatch] = useState(null);
@@ -155,12 +149,11 @@ export default function App() {
   const [loadedMatchData, setLoadedMatchData] = useState(null);
   const [loadingMatch, setLoadingMatch] = useState(false);
 
-  // Leaderboard MMR Valve
   const [mmrPlayers, setMmrPlayers] = useState([]);
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS COM CACHE 24H
+  // 1. CONSTANTES DA VALVE (CACHE 24H)
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -194,7 +187,7 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCA DE SÉRIES REAIS FINALIZADAS (COM AGRUPAMENTO CONSOLIDADO)
+  // 2. BUSCAR APENAS SÉRIES 100% FINALIZADAS (SEM DUPLICATAS NA ESQUERDA)
   useEffect(() => {
     async function loadTournamentSeries() {
       setLoadingSeries(true);
@@ -203,19 +196,20 @@ export default function App() {
         const proMatches = await proRes.json();
         
         const groups = {};
-        (proMatches || []).slice(0, 50).forEach((m) => {
-          // Garante chave estável agrupando os nomes dos dois times
-          const teamA = String(m.radiant_name || m.radiant_team_id || "A").trim().toLowerCase();
-          const teamB = String(m.dire_name || m.dire_team_id || "B").trim().toLowerCase();
-          const pairKey = [teamA, teamB].sort().join("___");
-          const dayWindow = Math.floor(m.start_time / (86400 * 1.5)); // Janela estável de confronto
-          const key = m.series_id && m.series_id !== 0 ? `series_${m.series_id}` : `pair_${pairKey}_${dayWindow}`;
+        (proMatches || []).slice(0, 60).forEach((m) => {
+          const tA = String(m.radiant_name || m.radiant_team_id || "A").trim().toLowerCase();
+          const tB = String(m.dire_name || m.dire_team_id || "B").trim().toLowerCase();
+          const pairKey = [tA, tB].sort().join("___");
+          const dayWindow = Math.floor(m.start_time / (86400 * 2)); // Agrupamento do mesmo confronto
+          const key = m.series_id && m.series_id !== 0 ? `s_${m.series_id}` : `p_${pairKey}_${dayWindow}`;
           
           if (!groups[key]) groups[key] = [];
           groups[key].push(m);
         });
 
-        const seriesList = Object.values(groups).map((games) => {
+        const completedSeries = [];
+
+        Object.values(groups).forEach((games) => {
           games.sort((a, b) => a.start_time - b.start_time);
           const first = games[0];
           const tAId = first.radiant_team_id;
@@ -232,9 +226,13 @@ export default function App() {
             }
           });
 
-          const winner = scoreA > scoreB ? timeAName : (scoreB > scoreA ? timeBName : "Empate");
+          // REGRA DE FINALIZAÇÃO: descarta séries em andamento (ex: 1x1 antes do mapa 3)
+          const isCompleted = (scoreA >= 2 || scoreB >= 2) || (games.length === 1 && (scoreA === 1 || scoreB === 1));
+          if (!isCompleted) return;
 
-          return {
+          const winner = scoreA > scoreB ? timeAName : timeBName;
+
+          completedSeries.push({
             stage: first.league_name || "Torneio Profissional",
             timeA: timeAName,
             timeB: timeBName,
@@ -246,10 +244,10 @@ export default function App() {
               mapNumber: idx + 1,
               match_id: String(g.match_id)
             }))
-          };
+          });
         });
 
-        setFinishedSeries(seriesList.slice(0, 10));
+        setFinishedSeries(completedSeries.slice(0, 10));
       } catch (e) {
         console.error("Erro ao carregar séries:", e);
       }
@@ -258,8 +256,8 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTAR PARTIDA INDIVIDUAL
-  async function fetchMatchDetail(matchId, fallbackGameData) {
+  // 3. CONSULTAR PARTIDA INDIVIDUAL DINÂMICA
+  async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
     setLoadedMatchData(null);
@@ -272,13 +270,9 @@ export default function App() {
           ...data,
           players: enrichedPlayers
         });
-        setLoadingMatch(false);
-        return;
       }
-    } catch (err) {}
-
-    if (fallbackGameData) {
-      setLoadedMatchData(fallbackGameData);
+    } catch (err) {
+      console.error("Erro ao carregar partida:", err);
     }
     setLoadingMatch(false);
   }
@@ -292,9 +286,7 @@ export default function App() {
           const res = await fetch('/api/upcoming');
           if (res.ok) {
             const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-              list = data;
-            }
+            if (Array.isArray(data) && data.length > 0) list = data;
           }
         } catch (e) {}
 
@@ -303,9 +295,7 @@ export default function App() {
             const resJson = await fetch(`/agenda.json?_=${Date.now()}`);
             if (resJson.ok) {
               const dataJson = await resJson.json();
-              if (Array.isArray(dataJson) && dataJson.length > 0) {
-                list = dataJson;
-              }
+              if (Array.isArray(dataJson) && dataJson.length > 0) list = dataJson;
             }
           } catch (e) {}
         }
@@ -337,7 +327,7 @@ export default function App() {
           list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
         }
 
-        const validLive = list.filter(g => (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
+        const validLive = list.filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
         setLiveGames(validLive);
       } catch {
         setLiveGames([]);
@@ -400,13 +390,13 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS FINALIZADOS (CONSOLIDADOS) */}
+          {/* ESQUERDA: APENAS JOGOS 100% FINALIZADOS */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
                 <History size={14} /> Resultados Recentes
               </div>
-              <span className="badge-status">OFICIAL</span>
+              <span className="badge-status">ENCERRADOS</span>
             </div>
 
             <div className="finished-scroll">
@@ -456,7 +446,7 @@ export default function App() {
           {/* CENTRO: CAMPEÃO + AO VIVO */}
           <main className="center-content">
             
-            {/* 1. CARD CAMPEÃO THE INTERNATIONAL 2026 */}
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
@@ -518,7 +508,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. SEÇÃO AO VIVO NO CENTRO */}
+            {/* SEÇÃO AO VIVO NO CENTRO */}
             <section className="live-block-wrap" style={{ marginTop: 8 }}>
               <div className="live-heading">
                 <span className="live-dot" />
@@ -555,9 +545,8 @@ export default function App() {
                     const rScore = sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
                     const dScore = sb.dire ? sb.dire.score : (g.dire_score ?? 0);
                     const mins = Math.floor((sb.duration || g.duration || 0) / 60);
-                    const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "PuckChamp";
-                    const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Nemiga Gaming";
-                    const seriesInfo = g.series_score ? `Série: ${g.series_score}` : `${mins}MIN`;
+                    const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "Radiant";
+                    const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Dire";
 
                     return (
                       <div 
@@ -567,18 +556,11 @@ export default function App() {
                         style={{ cursor: 'pointer' }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span className="live-badge">AO VIVO · {g.current_game || `${mins}MIN`}</span>
-                          {g.series_score && (
-                            <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
-                              {seriesInfo}
-                            </span>
-                          )}
+                          <span className="live-badge">AO VIVO · {mins}MIN</span>
                         </div>
                         <div className="live-teams-row" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                           <span className="live-team-name" style={{ textAlign: 'left' }}>{rName}</span>
-                          <span className="live-score">
-                            {g.series_score ? g.series_score : `${rScore} - ${dScore}`}
-                          </span>
+                          <span className="live-score">{rScore} - {dScore}</span>
                           <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
                         </div>
                       </div>
@@ -799,7 +781,7 @@ export default function App() {
                   key={idx}
                   onClick={() => {
                     setActiveMapIndex(idx);
-                    fetchMatchDetail(g.match_id, g.rawMatch);
+                    fetchMatchDetail(g.match_id);
                   }}
                   className={`map-tab-btn ${activeMapIndex === idx ? 'active' : ''}`}
                 >
@@ -815,7 +797,7 @@ export default function App() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12 }}>
                   <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
-                    {loadedMatchData.radiant_name || "Radiant"} {loadedMatchData.radiant_score} - {loadedMatchData.dire_score} {loadedMatchData.dire_name || "Dire"} {loadedMatchData.radiant_win !== null ? `(${loadedMatchData.radiant_win ? (loadedMatchData.radiant_name || "Radiant") : (loadedMatchData.dire_name || "Dire")} venceu)` : "(Em andamento)"}
+                    {loadedMatchData.radiant_name || "Radiant"} {loadedMatchData.radiant_score} - {loadedMatchData.dire_score} {loadedMatchData.dire_name || "Dire"} ({loadedMatchData.radiant_win ? (loadedMatchData.radiant_name || "Radiant") : (loadedMatchData.dire_name || "Dire")} venceu)
                   </span>
                   <span style={{ color: 'var(--text-dim)' }}>
                     Duração: {Math.round(loadedMatchData.duration / 60)} min
