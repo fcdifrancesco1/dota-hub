@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flame, Trophy, Award, X } from 'lucide-react';
+import { Flame, Trophy, Award, History, X } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 
@@ -16,14 +16,32 @@ function worldToPct(x, y) {
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
   const [liveGames, setLiveGames] = useState([]);
-  const [matchFeed, setMatchFeed] = useState([]);
+  const [upcomingMatches, setUpcomingMatches] = useState([]);
+  const [tiFinishedMatches, setTiFinishedMatches] = useState([]);
   const [selectedLiveGame, setSelectedLiveGame] = useState(null);
   const [expandedMatchId, setExpandedMatchId] = useState(null);
   const [mmrPlayers, setMmrPlayers] = useState([]);
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. Polling de partidas ao vivo (só exibe se houver partida)
+  // 1. CARREGAR JOGOS DO ÚLTIMO TORNEIO FINALIZADO (THE INTERNATIONAL 2026 - PLAYOFFS)
+  useEffect(() => {
+    const ti2026Playoffs = [
+      { stage: "Grande Final (BO5)", timeA: "Team Spirit", timeB: "TEAM VISION", scoreA: 3, scoreB: 2, winner: "Team Spirit", dur: "5 mapas" },
+      { stage: "Final Lower Bracket", timeA: "Team Spirit", timeB: "Team Yandex", scoreA: 2, scoreB: 0, winner: "Team Spirit", dur: "38m / 32m" },
+      { stage: "Semi Lower Bracket", timeA: "Team Spirit", timeB: "BB Team", scoreA: 2, scoreB: 0, winner: "Team Spirit", dur: "41m / 29m" },
+      { stage: "Final Upper Bracket", timeA: "TEAM VISION", timeB: "Team Yandex", scoreA: 2, scoreB: 1, winner: "TEAM VISION", dur: "3 mapas" },
+      { stage: "Round 3 Lower Bracket", timeA: "Nigma Galaxy", timeB: "BB Team", scoreA: 1, scoreB: 2, winner: "BB Team", dur: "3 mapas" },
+      { stage: "Round 3 Lower Bracket", timeA: "Team Liquid", timeB: "Team Spirit", scoreA: 0, scoreB: 2, winner: "Team Spirit", dur: "34m / 30m" },
+      { stage: "Semi Upper Bracket", timeA: "Nigma Galaxy", timeB: "Team Yandex", scoreA: 1, scoreB: 2, winner: "Team Yandex", dur: "3 mapas" },
+      { stage: "Semi Upper Bracket", timeA: "TEAM VISION", timeB: "Team Spirit", scoreA: 2, scoreB: 1, winner: "TEAM VISION", dur: "3 mapas" },
+      { stage: "Round 2 Lower Bracket", timeA: "Team Liquid", timeB: "Team Falcons", scoreA: 2, scoreB: 1, winner: "Team Liquid", dur: "3 mapas" },
+      { stage: "Round 2 Lower Bracket", timeA: "1win Team", timeB: "BB Team", scoreA: 1, scoreB: 2, winner: "BB Team", dur: "3 mapas" },
+    ];
+    setTiFinishedMatches(ti2026Playoffs);
+  }, []);
+
+  // 2. POLLING DE PARTIDAS AO VIVO (SÓ EXIBE SE HOUVER JOGO EM ANDAMENTO)
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -54,20 +72,20 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 2. Feed de partidas e resultados (Coluna direita)
+  // 3. JOGOS A SEREM REALIZADOS (COLUNA DIREITA)
   useEffect(() => {
-    const feed = [
-      { torneio: "The International 2026", timeA: "Xtreme Gaming", timeB: "Team Resilience", status: "EM BREVE", formato: "BO3", time: "11:00 BRT" },
-      { torneio: "The International 2026", timeA: "OG", timeB: "GamerLegion", status: "EM BREVE", formato: "BO3", time: "12:30 BRT" },
-      { torneio: "The International 2026", timeA: "Team Falcons", timeB: "BoomBoys", status: "EM BREVE", formato: "BO3", time: "14:00 BRT" },
-      { torneio: "The International 2026", timeA: "LGD Gaming", timeB: "Vici Gaming", status: "AO VIVO", scoreA: 1, scoreB: 0, formato: "BO3", time: "AO VIVO" },
-      { torneio: "The International 2026", timeA: "Team Liquid", timeB: "Iron Wing", status: "FINALIZADO", scoreA: 2, scoreB: 0, formato: "BO3", time: "05:40 BRT" },
-      { torneio: "The International 2026", timeA: "TEAM VISION", timeB: "Team Spirit", status: "FINALIZADO", scoreA: 2, scoreB: 3, formato: "BO5", time: "FINAL" },
+    const upcoming = [
+      { torneio: "ESL One Birmingham 2026", timeA: "Team Falcons", timeB: "Xtreme Gaming", formato: "BO3", data: new Date(Date.now() + 3600*1000*3).toISOString(), time: "11:00 BRT" },
+      { torneio: "ESL One Birmingham 2026", timeA: "Gaimin Gladiators", timeB: "Tundra Esports", formato: "BO3", data: new Date(Date.now() + 3600*1000*6).toISOString(), time: "14:30 BRT" },
+      { torneio: "ESL One Birmingham 2026", timeA: "Team Liquid", timeB: "HEROIC", formato: "BO3", data: new Date(Date.now() + 3600*1000*9).toISOString(), time: "17:00 BRT" },
+      { torneio: "DreamLeague Season 25", timeA: "Team Spirit", timeB: "PARIVISION", formato: "BO3", data: new Date(Date.now() + 3600*1000*24).toISOString(), time: "Amanhã 12:00" },
+      { torneio: "DreamLeague Season 25", timeA: "Aurora Gaming", timeB: "Nigma Galaxy", formato: "BO3", data: new Date(Date.now() + 3600*1000*27).toISOString(), time: "Amanhã 15:30" },
+      { torneio: "DreamLeague Season 25", timeA: "BetBoom Team", timeB: "OG", formato: "BO3", data: new Date(Date.now() + 3600*1000*30).toISOString(), time: "Amanhã 19:00" },
     ];
-    setMatchFeed(feed);
+    setUpcomingMatches(upcoming);
   }, []);
 
-  // 3. Ranking MMR Oficial
+  // 4. LEADERBOARD MMR OFICIAL (VALVE)
   useEffect(() => {
     if (currentTab === 'mmr') {
       setMmrLoading(true);
@@ -115,9 +133,48 @@ export default function App() {
         <div style={{ width: 42 }} />
       </header>
 
-      {/* HUB PRINCIPAL */}
+      {/* HUB PRINCIPAL (3 COLUNAS) */}
       {currentTab === 'hub' && (
         <div className="main-grid">
+          
+          {/* ESQUERDA: JOGOS DO ÚLTIMO TORNEIO FINALIZADO (THE INTERNATIONAL 2026) */}
+          <aside className="sidebar-left">
+            <div className="sidebar-header">
+              <div className="sidebar-title">
+                <History size={14} /> The International 2026
+              </div>
+              <span className="badge-status">FINALIZADO</span>
+            </div>
+
+            <div className="finished-scroll">
+              {tiFinishedMatches.map((m, idx) => (
+                <div key={idx} className="finished-card">
+                  <div className="finished-card-stage">
+                    <span>{m.stage}</span>
+                    <span>{m.dur}</span>
+                  </div>
+                  <div className="finished-team-row">
+                    <span className={m.winner === m.timeA ? "finished-team-winner" : "finished-team-loser"}>
+                      {m.winner === m.timeA ? `👑 ${m.timeA}` : m.timeA}
+                    </span>
+                    <span className="score-tag" style={{ color: m.winner === m.timeA ? "var(--accent-gold)" : "var(--text-dim)" }}>
+                      {m.scoreA}
+                    </span>
+                  </div>
+                  <div className="finished-team-row">
+                    <span className={m.winner === m.timeB ? "finished-team-winner" : "finished-team-loser"}>
+                      {m.winner === m.timeB ? `👑 ${m.timeB}` : m.timeB}
+                    </span>
+                    <span className="score-tag" style={{ color: m.winner === m.timeB ? "var(--accent-gold)" : "var(--text-dim)" }}>
+                      {m.scoreB}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </aside>
+
+          {/* CENTRO: AO VIVO NO TOPO + CAMPEÃO MUNDIAL TI 2026 */}
           <main className="center-content">
             
             {/* SEÇÃO AO VIVO CONDICIONAL */}
@@ -151,7 +208,7 @@ export default function App() {
               </section>
             )}
 
-            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 COM O AEGIS OFICIAL */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
@@ -173,10 +230,8 @@ export default function App() {
                   <img 
                     src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png" 
                     alt="Team Spirit" 
-                    style={{ width: 32, height: 32, objectFit: 'contain' }}
                     onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://raw.githubusercontent.com/odota/core/master/public/images/team_logos/7119388.png";
+                      e.target.src = "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png";
                     }}
                   />
                   <span>Team Spirit</span>
@@ -205,18 +260,16 @@ export default function App() {
             </div>
           </main>
 
-          {/* COLUNA DIREITA */}
+          {/* DIREITA: JOGOS A SEREM REALIZADOS */}
           <aside className="sidebar-right">
             <div className="date-strip">
-              <span>Partidas & Resultados</span>
-              <span style={{ fontSize: 9, background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 3 }}>OFICIAL</span>
+              <span>Jogos a Serem Realizados</span>
+              <span style={{ fontSize: 9, background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 3 }}>EM BREVE</span>
             </div>
 
             <div className="matches-scroll">
-              {matchFeed.map((m, idx) => {
+              {upcomingMatches.map((m, idx) => {
                 const isExpanded = expandedMatchId === idx;
-                const isLive = m.status === "AO VIVO";
-                const isFinished = m.status === "FINALIZADO";
 
                 return (
                   <div key={idx} className="match-card">
@@ -227,30 +280,8 @@ export default function App() {
                         <div className="match-team-single">{m.timeB}</div>
                       </div>
                       <div className="match-meta-col">
-                        {isFinished ? (
-                          <>
-                            <span style={{ fontSize: 10, fontWeight: 700, background: 'rgba(126,137,160,0.2)', color: 'var(--text-dim)', padding: '1px 6px', borderRadius: 4 }}>
-                              FINALIZADO
-                            </span>
-                            <span style={{ fontSize: 13, fontWeight: 800, color: '#fff', fontFamily: 'monospace' }}>
-                              {m.scoreA} - {m.scoreB}
-                            </span>
-                          </>
-                        ) : isLive ? (
-                          <>
-                            <span style={{ fontSize: 10, fontWeight: 700, background: 'rgba(212,146,68,0.2)', color: 'var(--accent-gold)', padding: '1px 6px', borderRadius: 4 }}>
-                              AO VIVO
-                            </span>
-                            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--accent-gold)', fontFamily: 'monospace' }}>
-                              {m.scoreA} - {m.scoreB}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="match-format-badge">{m.formato}</span>
-                            <span className="match-time-text">{m.time}</span>
-                          </>
-                        )}
+                        <span className="match-format-badge">{m.formato}</span>
+                        <span className="match-time-text">{m.time}</span>
                       </div>
                     </div>
 
@@ -288,13 +319,13 @@ export default function App() {
           <h2 style={{ color: 'var(--accent-gold)', textTransform: 'uppercase', marginBottom: 16, fontSize: 16 }}>Próximos Torneios</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: 20, borderRadius: 12 }}>
-              <h3 style={{ color: '#fff', fontSize: 16 }}>The International 2026</h3>
-              <p style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>14 a 28 de Agosto, 2026</p>
-              <p style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', fontSize: 13, marginTop: 8 }}>$3,000,000+</p>
-            </div>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: 20, borderRadius: 12 }}>
               <h3 style={{ color: '#fff', fontSize: 16 }}>ESL One Birmingham 2026</h3>
               <p style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>10 a 18 de Outubro, 2026</p>
+              <p style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', fontSize: 13, marginTop: 8 }}>$1,000,000</p>
+            </div>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: 20, borderRadius: 12 }}>
+              <h3 style={{ color: '#fff', fontSize: 16 }}>DreamLeague Season 25</h3>
+              <p style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>Novembro, 2026</p>
               <p style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', fontSize: 13, marginTop: 8 }}>$1,000,000</p>
             </div>
           </div>
