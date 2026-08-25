@@ -28,7 +28,7 @@ function getItemImg(constants, itemId) {
   return it ? `${STEAM_CDN}${it.img}` : "";
 }
 
-// Resgata o Nick Profissional com cache local no navegador (igual ao app.js)
+// Resgata o Nick Profissional com cache local no navegador
 async function enrichPlayersWithProNicknames(players) {
   let cache = {};
   try {
@@ -187,7 +187,7 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTAR PARTIDA INDIVIDUAL ENRIQUECENDO OS NICKNAMES DOS PLAYERS
+  // 3. CONSULTAR PARTIDA INDIVIDUAL ENRIQUECENDO OS NICKNAMES
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -196,7 +196,6 @@ export default function App() {
       const res = await fetch(`${OPENDOTA_BASE}/matches/${matchId}`);
       if (res.ok) {
         const data = await res.json();
-        // Substitui os personanames da Steam pelos nicks oficiais de pro players
         const enrichedPlayers = await enrichPlayersWithProNicknames(data.players || []);
         setLoadedMatchData({
           ...data,
@@ -209,24 +208,46 @@ export default function App() {
     setLoadingMatch(false);
   }
 
-  // 4. LEITURA DA AGENDA MANUAL
+  // 4. JOGOS A SEREM REALIZADOS (BUSCA NA ROTA /api/upcoming E NO /agenda.json)
   useEffect(() => {
-    async function loadManualAgenda() {
+    async function loadUpcomingMatches() {
       try {
-        const res = await fetch(`/agenda.json?_=${Date.now()}`);
-        if (res.ok) {
-          const items = await res.json();
-          const now = Date.now();
-          const validFuture = (items || []).filter(it => it.data && new Date(it.data).getTime() > now);
-          setUpcomingMatches(validFuture);
-        } else {
-          setUpcomingMatches([]);
+        let list = [];
+        
+        // Tenta primeiro a Serverless Function /api/upcoming (EPL Masters)
+        try {
+          const res = await fetch('/api/upcoming');
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              list = data;
+            }
+          }
+        } catch (e) {}
+
+        // Se ainda não achou, tenta carregar o agenda.json estático
+        if (!list.length) {
+          try {
+            const resJson = await fetch(`/agenda.json?_=${Date.now()}`);
+            if (resJson.ok) {
+              const dataJson = await resJson.json();
+              if (Array.isArray(dataJson) && dataJson.length > 0) {
+                list = dataJson;
+              }
+            }
+          } catch (e) {}
         }
+
+        const now = Date.now();
+        const validFuture = (list || []).filter(it => it.data && new Date(it.data).getTime() > now);
+        setUpcomingMatches(validFuture);
       } catch {
         setUpcomingMatches([]);
       }
     }
-    loadManualAgenda();
+    loadUpcomingMatches();
+    const interval = setInterval(loadUpcomingMatches, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // 5. POLLING DE PARTIDAS AO VIVO
@@ -542,7 +563,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DO JOGO COM NICKNAMES DOS PLAYERS */}
+      {/* MODAL DETALHADO DO JOGO COM PARSE REAL DA OPENDOTA */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -559,7 +580,7 @@ export default function App() {
               </h2>
             </div>
 
-            {/* ABAS DOS MAPAS */}
+            {/* ABAS DOS MAPAS DA SÉRIE */}
             <div className="map-tabs-row">
               {selectedSeriesDetail.games.map((g, idx) => (
                 <button
