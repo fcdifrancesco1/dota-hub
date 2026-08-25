@@ -12,14 +12,13 @@ const NUMERIC_POSITION_LABELS = {
   5: "Posição 5 (Hard Support)"
 };
 
-const MAP_MIN = -8288, MAP_MAX = 8288;
-function worldToPct(x, y) {
-  const fx = (x - MAP_MIN) / (MAP_MAX - MAP_MIN);
-  const fy = 1 - (y - MAP_MIN) / (MAP_MAX - MAP_MIN);
-  return { 
-    left: `${Math.min(100, Math.max(0, fx * 100)).toFixed(1)}%`, 
-    top: `${Math.min(100, Math.max(0, fy * 100)).toFixed(1)}%` 
-  };
+function normalizeTeamKey(name) {
+  if (!name) return "";
+  return String(name)
+    .toLowerCase()
+    .replace(/\b(team|gaming|esports|esport|gg|club)\b/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
 }
 
 function getHeroImg(constants, heroId) {
@@ -187,7 +186,7 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCAR APENAS SÉRIES 100% FINALIZADAS (SEM DUPLICATAS NA ESQUERDA)
+  // 2. AGRUPAMENTO ROBUSTO DE SÉRIES COMPLETAS (BO3 / BO5)
   useEffect(() => {
     async function loadTournamentSeries() {
       setLoadingSeries(true);
@@ -195,47 +194,79 @@ export default function App() {
         const proRes = await fetch(`${OPENDOTA_BASE}/proMatches`);
         const proMatches = await proRes.json();
         
-        const groups = {};
-        (proMatches || []).slice(0, 60).forEach((m) => {
-          const tA = String(m.radiant_name || m.radiant_team_id || "A").trim().toLowerCase();
-          const tB = String(m.dire_name || m.dire_team_id || "B").trim().toLowerCase();
-          const pairKey = [tA, tB].sort().join("___");
-          const dayWindow = Math.floor(m.start_time / (86400 * 2)); // Agrupamento do mesmo confronto
-          const key = m.series_id && m.series_id !== 0 ? `s_${m.series_id}` : `p_${pairKey}_${dayWindow}`;
-          
-          if (!groups[key]) groups[key] = [];
-          groups[key].push(m);
+        const rawList = (proMatches || []).slice(0, 150);
+        const seriesClusters = [];
+
+        rawList.forEach((m) => {
+          const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
+          const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
+          const leagueId = m.leagueid;
+          const matchTime = m.start_time;
+
+          // Procura se já existe um cluster compatível (mesma liga, mesmos times em até 8h de intervalo)
+          let cluster = seriesClusters.find(c => {
+            const hasSameTeams = (c.teamAKey === tA && c.teamBKey === tB) || (c.teamAKey === tB && c.teamBKey === tA);
+            const isSameLeague = !leagueId || !c.leagueId || leagueId === c.leagueId;
+            const isNearInTime = Math.abs(c.baseTime - matchTime) < (8 * 3600);
+            return hasSameTeams && isSameLeague && isNearInTime;
+          });
+
+          if (!cluster) {
+            cluster = {
+              teamAKey: tA,
+              teamBKey: tB,
+              leagueId,
+              leagueName: m.league_name,
+              baseTime: matchTime,
+              preferredNameA: m.radiant_name || "Time A",
+              preferredNameB: m.dire_name || "Time B",
+              preferredIdA: m.radiant_team_id,
+              preferredIdB: m.dire_team_id,
+              games: []
+            };
+            seriesClusters.push(cluster);
+          }
+
+          cluster.games.push(m);
         });
 
         const completedSeries = [];
 
-        Object.values(groups).forEach((games) => {
+        seriesClusters.forEach((cluster) => {
+          const games = cluster.games;
+          // Ordena cronologicamente
           games.sort((a, b) => a.start_time - b.start_time);
-          const first = games[0];
-          const tAId = first.radiant_team_id;
-          const timeAName = first.radiant_name || "Time A";
-          const timeBName = first.dire_name || "Time B";
           
-          let scoreA = 0, scoreB = 0;
+          const teamAName = cluster.preferredNameA;
+          const teamBName = cluster.preferredNameB;
+          const teamAId = cluster.preferredIdA;
+          const teamAKey = cluster.teamAKey;
+
+          let scoreA = 0;
+          let scoreB = 0;
+
           games.forEach((g) => {
-            const radiantWon = g.radiant_win;
-            if (g.radiant_team_id === tAId) {
-              if (radiantWon) scoreA++; else scoreB++;
+            const radWon = g.radiant_win;
+            const radKey = normalizeTeamKey(g.radiant_name || g.radiant_team_id);
+            const isRadTeamA = (g.radiant_team_id && g.radiant_team_id === teamAId) || (radKey === teamAKey);
+
+            if (isRadTeamA) {
+              if (radWon) scoreA++; else scoreB++;
             } else {
-              if (radiantWon) scoreB++; else scoreA++;
+              if (radWon) scoreB++; else scoreA++;
             }
           });
 
-          // REGRA DE FINALIZAÇÃO: descarta séries em andamento (ex: 1x1 antes do mapa 3)
-          const isCompleted = (scoreA >= 2 || scoreB >= 2) || (games.length === 1 && (scoreA === 1 || scoreB === 1));
-          if (!isCompleted) return;
+          // Aceita séries que tenham chegado a 2 vitórias (BO3) ou séries com 2+ mapas consolidados
+          const isFinished = (scoreA >= 2 || scoreB >= 2) || (games.length >= 2 && scoreA !== scoreB);
+          if (!isFinished) return;
 
-          const winner = scoreA > scoreB ? timeAName : timeBName;
+          const winner = scoreA > scoreB ? teamAName : teamBName;
 
           completedSeries.push({
-            stage: first.league_name || "Torneio Profissional",
-            timeA: timeAName,
-            timeB: timeBName,
+            stage: cluster.leagueName || "Torneio Profissional",
+            timeA: teamAName,
+            timeB: teamBName,
             scoreA,
             scoreB,
             winner,
@@ -390,7 +421,7 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: APENAS JOGOS 100% FINALIZADOS */}
+          {/* ESQUERDA: APENAS SÉRIES 100% ENCERRADAS E CONSOLIDADAS */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
