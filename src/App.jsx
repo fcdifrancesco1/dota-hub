@@ -4,16 +4,6 @@ import { Flame, Trophy, Award, History, X, Radio, ArrowLeft, Calendar, Loader2, 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
 
-const MAP_MIN = -8288, MAP_MAX = 8288;
-function worldToPct(x, y) {
-  const fx = (x - MAP_MIN) / (MAP_MAX - MAP_MIN);
-  const fy = 1 - (y - MAP_MIN) / (MAP_MAX - MAP_MIN);
-  return { 
-    left: `${Math.min(95, Math.max(5, fx * 100)).toFixed(1)}%`, 
-    top: `${Math.min(95, Math.max(5, fy * 100)).toFixed(1)}%` 
-  };
-}
-
 function normalizeTeamKey(name) {
   if (!name) return "";
   return String(name)
@@ -36,9 +26,79 @@ function getItemImg(constants, itemId) {
   return it ? `${STEAM_CDN}${it.img}` : "";
 }
 
+// Algoritmo sequencial de agrupamento de séries
+function clusterMatchesIntoSeries(rawMatches) {
+  const list = [...rawMatches].sort((a, b) => a.start_time - b.start_time);
+  const seriesList = [];
+
+  list.forEach((m) => {
+    const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
+    const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
+    const matchTime = m.start_time;
+
+    // Busca série existente aberta para esses mesmos dois times
+    let targetSeries = seriesList.find((s) => {
+      const sameTeams = (s.teamAKey === tA && s.teamBKey === tB) || (s.teamAKey === tB && s.teamBKey === tA);
+      const sameLeague = !m.leagueid || !s.leagueId || m.leagueid === s.leagueId;
+      
+      // Intervalo entre o último mapa da série e o mapa atual (máximo 3.5 horas)
+      const lastGameTime = s.games[s.games.length - 1].start_time;
+      const withinTime = (matchTime - lastGameTime) <= (3.5 * 3600) && (matchTime >= lastGameTime);
+
+      // Série já concluída não recebe novos mapas (BO3 atinge 2 vitórias, BO5 atinge 3 vitórias)
+      const isAlreadyClosed = (s.scoreA >= 2 && s.scoreB < s.scoreA && s.games.length <= 3) || 
+                              (s.scoreB >= 2 && s.scoreA < s.scoreB && s.games.length <= 3) || 
+                              (s.scoreA >= 3 || s.scoreB >= 3);
+
+      return sameTeams && sameLeague && withinTime && !isAlreadyClosed;
+    });
+
+    if (!targetSeries) {
+      targetSeries = {
+        leagueId: m.leagueid,
+        leagueName: m.league_name || "Torneio Profissional",
+        teamAKey: tA,
+        teamBKey: tB,
+        timeA: m.radiant_name || "Radiant",
+        timeB: m.dire_name || "Dire",
+        preferredIdA: m.radiant_team_id,
+        scoreA: 0,
+        scoreB: 0,
+        games: []
+      };
+      seriesList.push(targetSeries);
+    }
+
+    // Adiciona o mapa à série correspondente
+    targetSeries.games.push(m);
+    const radWon = m.radiant_win;
+    const isRadTeamA = (m.radiant_team_id === targetSeries.preferredIdA);
+
+    if (isRadTeamA) {
+      if (radWon) targetSeries.scoreA++; else targetSeries.scoreB++;
+    } else {
+      if (radWon) targetSeries.scoreB++; else targetSeries.scoreA++;
+    }
+  });
+
+  return seriesList.map((s) => ({
+    stage: s.leagueName,
+    timeA: s.timeA,
+    timeB: s.timeB,
+    scoreA: s.scoreA,
+    scoreB: s.scoreB,
+    winner: s.scoreA > s.scoreB ? s.timeA : (s.scoreB > s.scoreA ? s.timeB : "Empate"),
+    dur: `${s.games.length} mapa${s.games.length > 1 ? 's' : ''}`,
+    games: s.games.map((g, idx) => ({
+      mapNumber: idx + 1,
+      match_id: String(g.match_id),
+      start_time: g.start_time
+    }))
+  }));
+}
+
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
-  const [allProMatches, setAllProMatches] = useState([]);
   const [finishedSeries, setFinishedSeries] = useState([]);
   const [tournamentsList, setTournamentsList] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -60,11 +120,11 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS DA VALVE
+  // 1. CARREGAR CONSTANTES DA VALVE
   useEffect(() => {
     async function loadConstants() {
       try {
-        const cached = localStorage.getItem("dota:constants:v4");
+        const cached = localStorage.getItem("dota:constants:v5");
         const now = Date.now();
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -85,7 +145,7 @@ export default function App() {
           if (it && it.id != null) itemsById[it.id] = it;
         });
 
-        localStorage.setItem("dota:constants:v4", JSON.stringify({ ts: now, heroes, itemsById }));
+        localStorage.setItem("dota:constants:v5", JSON.stringify({ ts: now, heroes, itemsById }));
         setConstants({ heroes, itemsById });
       } catch (err) {
         console.error("Erro ao carregar constantes:", err);
@@ -94,7 +154,7 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCA PRINCIPAL DE PARTIDAS PROFISSIONAIS (OPENDOTA PROMATCHES)
+  // 2. BUSCA DE PARTIDAS COM SEPARAÇÃO TEMPORAL DE SÉRIES
   async function fetchProMatchesData() {
     setLoadingData(true);
     try {
@@ -102,86 +162,18 @@ export default function App() {
       if (res.ok) {
         const matches = await res.json();
         const list = Array.isArray(matches) ? matches : [];
-        setAllProMatches(list);
 
-        // Agrupamento de Séries Recentes
-        const seriesClusters = [];
-        list.slice(0, 150).forEach((m) => {
-          const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
-          const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
-          const leagueId = m.leagueid;
-          const matchTime = m.start_time;
+        // Agrupamento temporal estrito
+        const allClusteredSeries = clusterMatchesIntoSeries(list);
 
-          let cluster = seriesClusters.find(c => {
-            const hasSameTeams = (c.teamAKey === tA && c.teamBKey === tB) || (c.teamAKey === tB && c.teamBKey === tA);
-            const isSameLeague = !leagueId || !c.leagueId || leagueId === c.leagueId;
-            const isNearInTime = Math.abs(c.baseTime - matchTime) < (8 * 3600);
-            return hasSameTeams && isSameLeague && isNearInTime;
-          });
+        // Apenas séries que tiveram 2 ou mais mapas (ou 1 mapa finalizado com vencedor claro)
+        const validRecentSeries = allClusteredSeries
+          .filter(s => s.games.length >= 2 || (s.scoreA + s.scoreB === 1))
+          .reverse();
 
-          if (!cluster) {
-            cluster = {
-              teamAKey: tA,
-              teamBKey: tB,
-              leagueId,
-              leagueName: m.league_name || "Torneio Profissional",
-              baseTime: matchTime,
-              preferredNameA: m.radiant_name || "Radiant",
-              preferredNameB: m.dire_name || "Dire",
-              preferredIdA: m.radiant_team_id,
-              preferredIdB: m.dire_team_id,
-              games: []
-            };
-            seriesClusters.push(cluster);
-          }
-          cluster.games.push(m);
-        });
+        setFinishedSeries(validRecentSeries.slice(0, 10));
 
-        const completedSeries = [];
-        seriesClusters.forEach((cluster) => {
-          const games = cluster.games;
-          games.sort((a, b) => a.start_time - b.start_time);
-          const teamAName = cluster.preferredNameA;
-          const teamBName = cluster.preferredNameB;
-          const teamAId = cluster.preferredIdA;
-          const teamAKey = cluster.teamAKey;
-
-          let scoreA = 0;
-          let scoreB = 0;
-
-          games.forEach((g) => {
-            const radWon = g.radiant_win;
-            const radKey = normalizeTeamKey(g.radiant_name || g.radiant_team_id);
-            const isRadTeamA = (g.radiant_team_id && g.radiant_team_id === teamAId) || (radKey === teamAKey);
-
-            if (isRadTeamA) {
-              if (radWon) scoreA++; else scoreB++;
-            } else {
-              if (radWon) scoreB++; else scoreA++;
-            }
-          });
-
-          const isFinished = (scoreA >= 2 || scoreB >= 2) || (games.length >= 2 && scoreA !== scoreB);
-          if (!isFinished) return;
-
-          completedSeries.push({
-            stage: cluster.leagueName,
-            timeA: teamAName,
-            timeB: teamBName,
-            scoreA,
-            scoreB,
-            winner: scoreA > scoreB ? teamAName : teamBName,
-            dur: `${games.length} mapa${games.length > 1 ? 's' : ''}`,
-            games: games.map((g, idx) => ({
-              mapNumber: idx + 1,
-              match_id: String(g.match_id)
-            }))
-          });
-        });
-
-        setFinishedSeries(completedSeries.slice(0, 10));
-
-        // Agrupamento de Torneios por Liga
+        // Agrupamento por Liga/Torneio
         const leaguesMap = {};
         list.forEach((m) => {
           const lId = m.leagueid || m.league_name;
@@ -191,68 +183,19 @@ export default function App() {
               id: lId,
               league_id: m.leagueid,
               name: m.league_name || "Torneio Dota 2",
-              matchesCount: 0,
               recentDate: new Date(m.start_time * 1000).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }),
-              matches: []
+              rawMatches: []
             };
           }
-          leaguesMap[lId].matchesCount++;
-          leaguesMap[lId].matches.push(m);
+          leaguesMap[lId].rawMatches.push(m);
         });
 
-        const leaguesList = Object.values(leaguesMap).map((l) => {
-          // Agrupa partidas da liga em séries
-          const lClusters = [];
-          l.matches.forEach((m) => {
-            const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
-            const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
-            let cl = lClusters.find(c => (c.teamAKey === tA && c.teamBKey === tB) || (c.teamAKey === tB && c.teamBKey === tA));
-            if (!cl) {
-              cl = {
-                teamAKey: tA,
-                teamBKey: tB,
-                timeA: m.radiant_name || "Radiant",
-                timeB: m.dire_name || "Dire",
-                preferredIdA: m.radiant_team_id,
-                games: []
-              };
-              lClusters.push(cl);
-            }
-            cl.games.push(m);
-          });
+        const tournaments = Object.values(leaguesMap).map((l) => ({
+          ...l,
+          seriesList: clusterMatchesIntoSeries(l.rawMatches).reverse()
+        }));
 
-          const series = lClusters.map(cl => {
-            cl.games.sort((a, b) => a.start_time - b.start_time);
-            let sA = 0, sB = 0;
-            cl.games.forEach(g => {
-              if (g.radiant_team_id === cl.preferredIdA) {
-                if (g.radiant_win) sA++; else sB++;
-              } else {
-                if (g.radiant_win) sB++; else sA++;
-              }
-            });
-            return {
-              stage: l.name,
-              timeA: cl.timeA,
-              timeB: cl.timeB,
-              scoreA: sA,
-              scoreB: sB,
-              winner: sA > sB ? cl.timeA : (sB > sA ? cl.timeB : "Empate"),
-              dur: `${cl.games.length} mapa${cl.games.length > 1 ? 's' : ''}`,
-              games: cl.games.map((g, idx) => ({
-                mapNumber: idx + 1,
-                match_id: String(g.match_id)
-              }))
-            };
-          });
-
-          return {
-            ...l,
-            seriesList: series
-          };
-        });
-
-        setTournamentsList(leaguesList.slice(0, 10));
+        setTournamentsList(tournaments.slice(0, 10));
       }
     } catch (e) {
       console.error("Erro ao carregar proMatches:", e);
@@ -264,7 +207,7 @@ export default function App() {
     fetchProMatchesData();
   }, []);
 
-  // 3. CONSULTA DINÂMICA DO MATCH_ID DIRETO NA OPENDOTA
+  // 3. CONSULTA DINÂMICA DE MAPA ESPECÍFICO NA OPENDOTA
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -316,7 +259,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 5. POLLING DE PARTIDAS AO VIVO 100% REAL
+  // 5. POLLING DE PARTIDAS AO VIVO
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -394,7 +337,7 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: RESULTADOS REAIS DA OPENDOTA */}
+          {/* ESQUERDA: RESULTADOS REAIS */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -463,7 +406,7 @@ export default function App() {
             </div>
           </aside>
 
-          {/* CENTRO: CAMPEÃO MUNDIAL + AO VIVO */}
+          {/* CENTRO: CAMPEÃO + AO VIVO */}
           <main className="center-content">
             
             {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
@@ -486,10 +429,10 @@ export default function App() {
                 
                 <div className="champ-team-tag">
                   <img 
-                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png" 
+                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/team_logos/7119388.png" 
                     alt="Team Spirit" 
                     onError={(e) => {
-                      e.target.src = "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png";
+                      e.target.src = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png";
                     }}
                   />
                   <span>Team Spirit</span>
@@ -635,7 +578,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. ABA DE TORNEIOS DINÂMICA VIA API */}
+      {/* 2. ABA DE TORNEIOS (COM SÉRIES INDIVIDUAIS E MAPAS SEPARADOS) */}
       {currentTab === 'torneios' && (
         <div style={{ maxWidth: 1040, margin: '24px auto', width: '100%', padding: '0 20px' }}>
           {selectedTournament ? (
@@ -662,12 +605,12 @@ export default function App() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                   <div>
                     <span style={{ fontSize: 11, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 800 }}>
-                      Torneio Oficial Valve
+                      Torneio Profissional
                     </span>
                     <h2 style={{ fontSize: 24, color: '#fff', marginTop: 4 }}>{selectedTournament.name}</h2>
                     <div style={{ display: 'flex', gap: 16, color: 'var(--text-dim)', fontSize: 12, marginTop: 6 }}>
                       <span><Calendar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {selectedTournament.recentDate}</span>
-                      <span><Trophy size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {selectedTournament.seriesList?.length || 0} Confrontos Registrados</span>
+                      <span><Trophy size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {selectedTournament.seriesList?.length || 0} Séries Disputadas</span>
                     </div>
                   </div>
                 </div>
@@ -715,7 +658,7 @@ export default function App() {
                   Torneios Profissionais Recentes
                 </h2>
                 <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>
-                  Selecione um torneio para consultar todas as partidas e as estatísticas dos mapas diretamente pela API
+                  Selecione um torneio para consultar todas as séries e as estatísticas oficiais de cada partida
                 </span>
               </div>
 
@@ -765,8 +708,8 @@ export default function App() {
                         <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>{t.name}</h3>
                       </div>
                       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Confrontos:</span>
-                        <strong style={{ fontSize: 12, color: 'var(--accent-cyan)' }}>{t.seriesList?.length || 0} Séries</strong>
+                        <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Séries Registradas:</span>
+                        <strong style={{ fontSize: 12, color: 'var(--accent-cyan)' }}>{t.seriesList?.length || 0}</strong>
                       </div>
                     </div>
                   ))}
@@ -837,7 +780,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA PARTIDA (100% DINÂMICO VIA API) */}
+      {/* MODAL DETALHADO DA PARTIDA COM DADOS REAIS DO REPLAY */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -854,7 +797,7 @@ export default function App() {
               </h2>
             </div>
 
-            {/* ABAS DOS MAPAS */}
+            {/* ABAS DOS MAPAS DAQUELA SÉRIE ESPECÍFICA */}
             <div className="map-tabs-row">
               {selectedSeriesDetail.games.map((g, idx) => (
                 <button
@@ -870,7 +813,7 @@ export default function App() {
               ))}
             </div>
 
-            {/* CONTEÚDO DO MAPA */}
+            {/* CONTEÚDO DO MAPA SELECIONADO */}
             {loadingMatch ? (
               <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <Loader2 className="animate-spin" size={18} /> Carregando estatísticas e ordem de draft da partida...
@@ -886,7 +829,7 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* ORDEM COMPLETA DE DRAFT (PICKS & BANS) */}
+                {/* ORDEM COMPLETA DE PICKS & BANS */}
                 {loadedMatchData.picks_bans && loadedMatchData.picks_bans.length > 0 && (
                   <div className="draft-block">
                     <div className="draft-title">Ordem Completa de Draft (Picks &amp; Bans)</div>
