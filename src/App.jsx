@@ -157,16 +157,16 @@ export default function App() {
     <div className="champ-title-group">
       {/* Imagem Oficial do Aegis enviada */}
       <img
-        src="/aegis.png"
-        alt="Aegis of Champions"
-        className="aegis-real-img"
-        style={{
-          width: 72,
-          height: 72,
-          objectFit: 'contain',
-          filter: 'drop-shadow(0 0 14px rgba(212, 146, 68, 0.45))'
-        }}
-      />
+  src="/aegis.png"
+  alt="Aegis of Champions"
+  className="aegis-real-img"
+  style={{
+    width: 72,
+    height: 72,
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 0 14px rgba(212, 146, 68, 0.45))'
+  }}
+/>
 
       <div>
         <div className="champ-sub">Último Campeão Mundial</div>
