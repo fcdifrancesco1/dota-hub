@@ -511,76 +511,70 @@ export default function App() {
               </div>
 
               <div className="players-grid">
-                {[
-                  { 
-                    pos: 1, 
-                    nick: "Yatoro", 
-                    role: "Carry", 
-                    kda: "6.8", 
-                    gpm: 785, 
-                    photo: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/players/321580797.png",
-                    fallback: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png"
-                  },
-                  { 
-                    pos: 2, 
-                    nick: "Larl", 
-                    role: "Midlane", 
-                    kda: "5.9", 
-                    gpm: 690, 
-                    photo: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/players/181716187.png",
-                    fallback: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/storm_spirit.png"
-                  },
-                  { 
-                    pos: 3, 
-                    nick: "Collapse", 
-                    role: "Offlane", 
-                    kda: "5.2", 
-                    gpm: 610, 
-                    photo: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/players/302214028.png",
-                    fallback: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png"
-                  },
-                  { 
-                    pos: 4, 
-                    nick: "rue", 
-                    role: "Support", 
-                    kda: "3.4", 
-                    gpm: 405, 
-                    photo: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/players/1151414302.png",
-                    fallback: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png"
-                  },
-                  { 
-                    pos: 5, 
-                    nick: "not me", 
-                    role: "Hard Support", 
-                    kda: "2.4", 
-                    gpm: 330, 
-                    photo: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/players/106863163.png",
-                    fallback: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/disruptor.png"
-                  },
-                ].map((p) => (
-                  <div key={p.pos} className="player-card">
-                    <div className="player-avatar-wrap">
-                      <img 
-                        src={p.photo} 
-                        alt={p.nick} 
-                        className="player-avatar-img"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = p.fallback;
-                        }}
-                      />
-                      <span className="player-pos-badge-floating">{p.pos}</span>
-                    </div>
-                    <strong className="player-nick">{p.nick}</strong>
-                    <span className="player-role-text">{p.role}</span>
-                    <div className="player-stat-split">
-                      <div><span className="player-stat-label">KDA</span>{p.kda}</div>
-                      <div><span className="player-stat-label">GPM</span><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+    {[
+      { 
+        pos: 1, 
+        nick: "Yatoro", 
+        role: "Carry", 
+        kda: "6.8", 
+        gpm: 785, 
+        photo: "/yatoro.png"
+      },
+      { 
+        pos: 2, 
+        nick: "Larl", 
+        role: "Midlane", 
+        kda: "5.9", 
+        gpm: 690, 
+        photo: "/larl.png"
+      },
+      { 
+        pos: 3, 
+        nick: "Collapse", 
+        role: "Offlane", 
+        kda: "5.2", 
+        gpm: 610, 
+        photo: "/collapse.png"
+      },
+      { 
+        pos: 4, 
+        nick: "rue", 
+        role: "Support", 
+        kda: "3.4", 
+        gpm: 405, 
+        photo: "/rue.png"
+      },
+      { 
+        pos: 5, 
+        nick: "not me", 
+        role: "Hard Support", 
+        kda: "2.4", 
+        gpm: 330, 
+        photo: "/notme.png"
+      },
+    ].map((p) => (
+      <div key={p.pos} className="player-card">
+        <div className="player-avatar-wrap">
+          <img 
+            src={p.photo} 
+            alt={p.nick} 
+            className="player-avatar-img"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/aegis.png";
+            }}
+          />
+          <span className="player-pos-badge-floating">{p.pos}</span>
+        </div>
+        <strong className="player-nick">{p.nick}</strong>
+        <span className="player-role-text">{p.role}</span>
+        <div className="player-stat-split">
+          <div><span className="player-stat-label">KDA</span>{p.kda}</div>
+          <div><span className="player-stat-label">GPM</span><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span></div>
+        </div>
+      </div>
+    ))}
+  </div>
           </main>
 
           {/* DIREITA: JOGOS A SEREM REALIZADOS */}
