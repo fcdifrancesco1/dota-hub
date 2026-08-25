@@ -252,6 +252,7 @@ export default function App() {
   // 2. BUSCA DE SÉRIES ENCERRADAS COM CACHE RÁPIDO
   useEffect(() => {
     async function loadTournamentSeries() {
+      // 1. Renderiza o cache local imediatamente se existir
       const cached = localStorage.getItem("dota:finishedSeriesCache");
       if (cached) {
         try {
@@ -262,97 +263,18 @@ export default function App() {
         } catch (e) {}
       }
 
-      setLoadingSeries(!cached);
+      // 2. Busca do endpoint serverless otimizado da Vercel
       try {
-        const proRes = await fetch(`${OPENDOTA_BASE}/proMatches`);
-        const proMatches = await proRes.json();
-        
-        const rawList = (proMatches || []).slice(0, 150);
-        const seriesClusters = [];
-
-        rawList.forEach((m) => {
-          const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
-          const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
-          const leagueId = m.leagueid;
-          const matchTime = m.start_time;
-
-          let cluster = seriesClusters.find(c => {
-            const hasSameTeams = (c.teamAKey === tA && c.teamBKey === tB) || (c.teamAKey === tB && c.teamBKey === tA);
-            const isSameLeague = !leagueId || !c.leagueId || leagueId === c.leagueId;
-            const isNearInTime = Math.abs(c.baseTime - matchTime) < (8 * 3600);
-            return hasSameTeams && isSameLeague && isNearInTime;
-          });
-
-          if (!cluster) {
-            cluster = {
-              teamAKey: tA,
-              teamBKey: tB,
-              leagueId,
-              leagueName: m.league_name,
-              baseTime: matchTime,
-              preferredNameA: m.radiant_name || "Time A",
-              preferredNameB: m.dire_name || "Time B",
-              preferredIdA: m.radiant_team_id,
-              preferredIdB: m.dire_team_id,
-              games: []
-            };
-            seriesClusters.push(cluster);
+        const res = await fetch('/api/results');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.series && data.series.length > 0) {
+            setFinishedSeries(data.series);
+            localStorage.setItem("dota:finishedSeriesCache", JSON.stringify({ ts: Date.now(), data: data.series }));
           }
-
-          cluster.games.push(m);
-        });
-
-        const completedSeries = [];
-
-        seriesClusters.forEach((cluster) => {
-          const games = cluster.games;
-          games.sort((a, b) => a.start_time - b.start_time);
-          
-          const teamAName = cluster.preferredNameA;
-          const teamBName = cluster.preferredNameB;
-          const teamAId = cluster.preferredIdA;
-          const teamAKey = cluster.teamAKey;
-
-          let scoreA = 0;
-          let scoreB = 0;
-
-          games.forEach((g) => {
-            const radWon = g.radiant_win;
-            const radKey = normalizeTeamKey(g.radiant_name || g.radiant_team_id);
-            const isRadTeamA = (g.radiant_team_id && g.radiant_team_id === teamAId) || (radKey === teamAKey);
-
-            if (isRadTeamA) {
-              if (radWon) scoreA++; else scoreB++;
-            } else {
-              if (radWon) scoreB++; else scoreA++;
-            }
-          });
-
-          const isFinished = (scoreA >= 2 || scoreB >= 2) || (games.length >= 2 && scoreA !== scoreB);
-          if (!isFinished) return;
-
-          const winner = scoreA > scoreB ? teamAName : teamBName;
-
-          completedSeries.push({
-            stage: cluster.leagueName || "Torneio Profissional",
-            timeA: teamAName,
-            timeB: teamBName,
-            scoreA,
-            scoreB,
-            winner,
-            dur: `${games.length} mapa${games.length > 1 ? 's' : ''}`,
-            games: games.map((g, idx) => ({
-              mapNumber: idx + 1,
-              match_id: String(g.match_id)
-            }))
-          });
-        });
-
-        const top10 = completedSeries.slice(0, 10);
-        setFinishedSeries(top10);
-        localStorage.setItem("dota:finishedSeriesCache", JSON.stringify({ ts: Date.now(), data: top10 }));
+        }
       } catch (e) {
-        console.error("Erro ao carregar séries:", e);
+        console.error("Erro ao carregar resultados:", e);
       }
       setLoadingSeries(false);
     }
