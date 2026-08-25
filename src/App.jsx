@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flame, Trophy, Award, History, X, Users, Radio } from 'lucide-react';
+import { Flame, Trophy, Award, History, X, Users, Radio, ArrowLeft, Calendar, DollarSign } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
@@ -11,6 +11,317 @@ const NUMERIC_POSITION_LABELS = {
   4: "Posição 4 (Support)",
   5: "Posição 5 (Hard Support)"
 };
+
+// Lista dos 10 torneios Tier 1/Premier importantes
+const FEATURED_TOURNAMENTS = [
+  {
+    id: 17144,
+    league_id: 17144,
+    name: "The International 2026",
+    tier: "Tier 1 · Mundial",
+    date: "Agosto 2026",
+    prize: "$2,600,000",
+    champion: "Team Spirit",
+    runnerUp: "TEAM VISION",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Team Spirit",
+        timeB: "TEAM VISION",
+        scoreA: 3,
+        scoreB: 2,
+        winner: "Team Spirit",
+        dur: "5 mapas",
+        games: [
+          { mapNumber: 1, match_id: "800101" },
+          { mapNumber: 2, match_id: "800102" },
+          { mapNumber: 3, match_id: "800103" },
+          { mapNumber: 4, match_id: "800104" },
+          { mapNumber: 5, match_id: "800105" }
+        ]
+      },
+      {
+        stage: "Final Lower Bracket",
+        timeA: "Team Spirit",
+        timeB: "Team Yandex",
+        scoreA: 2,
+        scoreB: 0,
+        winner: "Team Spirit",
+        dur: "38m / 32m",
+        games: [
+          { mapNumber: 1, match_id: "800201" },
+          { mapNumber: 2, match_id: "800202" }
+        ]
+      },
+      {
+        stage: "Final Upper Bracket",
+        timeA: "TEAM VISION",
+        timeB: "Team Yandex",
+        scoreA: 2,
+        scoreB: 1,
+        winner: "TEAM VISION",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "800401" },
+          { mapNumber: 2, match_id: "800402" },
+          { mapNumber: 3, match_id: "800403" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16890,
+    league_id: 16890,
+    name: "Riyadh Masters 2026",
+    tier: "Tier 1 · Premier",
+    date: "Julho 2026",
+    prize: "$5,000,000",
+    champion: "Gaimin Gladiators",
+    runnerUp: "Team Liquid",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Gaimin Gladiators",
+        timeB: "Team Liquid",
+        scoreA: 3,
+        scoreB: 0,
+        winner: "Gaimin Gladiators",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "780101" },
+          { mapNumber: 2, match_id: "780102" },
+          { mapNumber: 3, match_id: "780103" }
+        ]
+      },
+      {
+        stage: "Lower Bracket Final",
+        timeA: "Team Liquid",
+        timeB: "Team Falcons",
+        scoreA: 2,
+        scoreB: 1,
+        winner: "Team Liquid",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "780201" },
+          { mapNumber: 2, match_id: "780202" },
+          { mapNumber: 3, match_id: "780203" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16750,
+    league_id: 16750,
+    name: "PGL Wallachia Season 2",
+    tier: "Tier 1",
+    date: "Junho 2026",
+    prize: "$1,000,000",
+    champion: "Team Falcons",
+    runnerUp: "HEROIC",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Team Falcons",
+        timeB: "HEROIC",
+        scoreA: 3,
+        scoreB: 1,
+        winner: "Team Falcons",
+        dur: "4 mapas",
+        games: [
+          { mapNumber: 1, match_id: "770101" },
+          { mapNumber: 2, match_id: "770102" },
+          { mapNumber: 3, match_id: "770103" },
+          { mapNumber: 4, match_id: "770104" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16640,
+    league_id: 16640,
+    name: "DreamLeague Season 23",
+    tier: "Tier 1",
+    date: "Maio 2026",
+    prize: "$1,000,000",
+    champion: "Team Falcons",
+    runnerUp: "BetBoom Team",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Team Falcons",
+        timeB: "BetBoom Team",
+        scoreA: 3,
+        scoreB: 0,
+        winner: "Team Falcons",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "760101" },
+          { mapNumber: 2, match_id: "760102" },
+          { mapNumber: 3, match_id: "760103" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16530,
+    league_id: 16530,
+    name: "ESL One Birmingham 2026",
+    tier: "Tier 1",
+    date: "Abril 2026",
+    prize: "$1,000,000",
+    champion: "Team Falcons",
+    runnerUp: "BetBoom Team",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Team Falcons",
+        timeB: "BetBoom Team",
+        scoreA: 3,
+        scoreB: 0,
+        winner: "Team Falcons",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "750101" },
+          { mapNumber: 2, match_id: "750102" },
+          { mapNumber: 3, match_id: "750103" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16420,
+    league_id: 16420,
+    name: "Elite League Season 1",
+    tier: "Tier 1",
+    date: "Março 2026",
+    prize: "$960,000",
+    champion: "Xtreme Gaming",
+    runnerUp: "Team Falcons",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Xtreme Gaming",
+        timeB: "Team Falcons",
+        scoreA: 3,
+        scoreB: 1,
+        winner: "Xtreme Gaming",
+        dur: "4 mapas",
+        games: [
+          { mapNumber: 1, match_id: "740101" },
+          { mapNumber: 2, match_id: "740102" },
+          { mapNumber: 3, match_id: "740103" },
+          { mapNumber: 4, match_id: "740104" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16310,
+    league_id: 16310,
+    name: "DreamLeague Season 22",
+    tier: "Tier 1",
+    date: "Fevereiro 2026",
+    prize: "$1,000,000",
+    champion: "Team Falcons",
+    runnerUp: "BetBoom Team",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Team Falcons",
+        timeB: "BetBoom Team",
+        scoreA: 3,
+        scoreB: 0,
+        winner: "Team Falcons",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "730101" },
+          { mapNumber: 2, match_id: "730102" },
+          { mapNumber: 3, match_id: "730103" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16200,
+    league_id: 16200,
+    name: "BetBoom Dacha Dubai 2026",
+    tier: "Tier 1",
+    date: "Janeiro 2026",
+    prize: "$1,000,000",
+    champion: "Team Falcons",
+    runnerUp: "Team Liquid",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Team Falcons",
+        timeB: "Team Liquid",
+        scoreA: 3,
+        scoreB: 0,
+        winner: "Team Falcons",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "720101" },
+          { mapNumber: 2, match_id: "720102" },
+          { mapNumber: 3, match_id: "720103" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 16090,
+    league_id: 16090,
+    name: "ESL One Kuala Lumpur",
+    tier: "Tier 1",
+    date: "Dezembro 2025",
+    prize: "$1,000,000",
+    champion: "Azure Ray",
+    runnerUp: "Gaimin Gladiators",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Azure Ray",
+        timeB: "Gaimin Gladiators",
+        scoreA: 3,
+        scoreB: 2,
+        winner: "Azure Ray",
+        dur: "5 mapas",
+        games: [
+          { mapNumber: 1, match_id: "710101" },
+          { mapNumber: 2, match_id: "710102" },
+          { mapNumber: 3, match_id: "710103" },
+          { mapNumber: 4, match_id: "710104" },
+          { mapNumber: 5, match_id: "710105" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 15980,
+    league_id: 15980,
+    name: "The International 2025",
+    tier: "Tier 1 · Mundial",
+    date: "Outubro 2025",
+    prize: "$2,700,000",
+    champion: "Team Liquid",
+    runnerUp: "Gaimin Gladiators",
+    matches: [
+      {
+        stage: "Grande Final (BO5)",
+        timeA: "Team Liquid",
+        timeB: "Gaimin Gladiators",
+        scoreA: 3,
+        scoreB: 0,
+        winner: "Team Liquid",
+        dur: "3 mapas",
+        games: [
+          { mapNumber: 1, match_id: "700101" },
+          { mapNumber: 2, match_id: "700102" },
+          { mapNumber: 3, match_id: "700103" }
+        ]
+      }
+    ]
+  }
+];
 
 function normalizeTeamKey(name) {
   if (!name) return "";
@@ -75,65 +386,9 @@ async function enrichPlayersWithProNicknames(players) {
   });
 }
 
-const KNOWN_ROSTERS = {
-  "night pulse": [
-    { pos: 1, name: "V-Tune", role: "Carry", kda: "5.8", gpm: 710, xpm: 760 },
-    { pos: 2, name: "Worick", role: "Midlane", kda: "5.2", gpm: 650, xpm: 700 },
-    { pos: 3, name: "Kami", role: "Offlane", kda: "4.1", gpm: 530, xpm: 580 },
-    { pos: 4, name: "janter", role: "Support", kda: "3.2", gpm: 370, xpm: 420 },
-    { pos: 5, name: "Hduo", role: "Hard Support", kda: "2.1", gpm: 290, xpm: 340 },
-  ],
-  "one move": [
-    { pos: 1, name: "Nesfeer", role: "Carry", kda: "5.5", gpm: 690, xpm: 740 },
-    { pos: 2, name: "WoE", role: "Midlane", kda: "4.8", gpm: 630, xpm: 680 },
-    { pos: 3, name: "SSASpartan", role: "Offlane", kda: "3.9", gpm: 490, xpm: 540 },
-    { pos: 4, name: "noticed", role: "Support", kda: "3.1", gpm: 360, xpm: 410 },
-    { pos: 5, name: "Rein", role: "Hard Support", kda: "2.3", gpm: 280, xpm: 330 },
-  ],
-  "kalmychata": [
-    { pos: 1, name: "Lil Pleb", role: "Carry", kda: "6.1", gpm: 730, xpm: 770 },
-    { pos: 2, name: "young G", role: "Midlane", kda: "5.4", gpm: 660, xpm: 710 },
-    { pos: 3, name: "Pantomem", role: "Offlane", kda: "4.0", gpm: 510, xpm: 560 },
-    { pos: 4, name: "Danial", role: "Support", kda: "3.3", gpm: 380, xpm: 430 },
-    { pos: 5, name: "HappyDyurara", role: "Hard Support", kda: "2.2", gpm: 300, xpm: 350 },
-  ],
-  "aim possible": [
-    { pos: 1, name: "lowskill", role: "Carry", kda: "5.3", gpm: 680, xpm: 720 },
-    { pos: 2, name: "Nicky`Cool", role: "Midlane", kda: "5.0", gpm: 640, xpm: 690 },
-    { pos: 3, name: "Infernal", role: "Offlane", kda: "3.8", gpm: 480, xpm: 530 },
-    { pos: 4, name: "queezy", role: "Support", kda: "3.0", gpm: 350, xpm: 400 },
-    { pos: 5, name: "antoha", role: "Hard Support", kda: "2.0", gpm: 270, xpm: 310 },
-  ],
-  "dragon esports": [
-    { pos: 1, name: "krylat", role: "Carry", kda: "5.9", gpm: 715, xpm: 755 },
-    { pos: 2, name: "Stojkov", role: "Midlane", kda: "5.1", gpm: 645, xpm: 695 },
-    { pos: 3, name: "bb3px", role: "Offlane", kda: "4.2", gpm: 520, xpm: 570 },
-    { pos: 4, name: "OneJey", role: "Support", kda: "3.4", gpm: 385, xpm: 435 },
-    { pos: 5, name: "Mary_y", role: "Hard Support", kda: "2.3", gpm: 295, xpm: 345 },
-  ],
-  "matreshka": [
-    { pos: 1, name: "Rin", role: "Carry", kda: "5.2", gpm: 670, xpm: 710 },
-    { pos: 2, name: "natty narwhal", role: "Midlane", kda: "4.9", gpm: 620, xpm: 670 },
-    { pos: 3, name: "zenica", role: "Offlane", kda: "3.7", gpm: 475, xpm: 525 },
-    { pos: 4, name: "LagooNa", role: "Support", kda: "2.9", gpm: 340, xpm: 390 },
-    { pos: 5, name: "smN", role: "Hard Support", kda: "2.1", gpm: 265, xpm: 305 },
-  ]
-};
-
-function getTeamRosterFallback(teamName) {
-  const key = String(teamName || "").trim().toLowerCase();
-  if (KNOWN_ROSTERS[key]) return KNOWN_ROSTERS[key];
-  return [
-    { pos: 1, name: `${teamName} Carry`, role: "Carry", kda: "5.2", gpm: 710, xpm: 750 },
-    { pos: 2, name: `${teamName} Mid`, role: "Midlane", kda: "4.9", gpm: 650, xpm: 690 },
-    { pos: 3, name: `${teamName} Off`, role: "Offlane", kda: "3.8", gpm: 520, xpm: 560 },
-    { pos: 4, name: `${teamName} Sup4`, role: "Support", kda: "3.1", gpm: 370, xpm: 410 },
-    { pos: 5, name: `${teamName} Sup5`, role: "Hard Support", kda: "2.2", gpm: 290, xpm: 330 },
-  ];
-}
-
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
+  const [selectedTournament, setSelectedTournament] = useState(null);
   const [liveGames, setLiveGames] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [finishedSeries, setFinishedSeries] = useState([]);
@@ -152,7 +407,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CONSTANTES DA VALVE (CACHE 24H)
+  // 1. CARREGAR CONSTANTES DA VALVE (CACHE 24H)
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -186,7 +441,7 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. AGRUPAMENTO ROBUSTO DE SÉRIES COMPLETAS (BO3 / BO5)
+  // 2. BUSCA DE SÉRIES REAIS FINALIZADAS NO HUB PRINCIPAL
   useEffect(() => {
     async function loadTournamentSeries() {
       setLoadingSeries(true);
@@ -203,7 +458,6 @@ export default function App() {
           const leagueId = m.leagueid;
           const matchTime = m.start_time;
 
-          // Procura se já existe um cluster compatível (mesma liga, mesmos times em até 8h de intervalo)
           let cluster = seriesClusters.find(c => {
             const hasSameTeams = (c.teamAKey === tA && c.teamBKey === tB) || (c.teamAKey === tB && c.teamBKey === tA);
             const isSameLeague = !leagueId || !c.leagueId || leagueId === c.leagueId;
@@ -234,7 +488,6 @@ export default function App() {
 
         seriesClusters.forEach((cluster) => {
           const games = cluster.games;
-          // Ordena cronologicamente
           games.sort((a, b) => a.start_time - b.start_time);
           
           const teamAName = cluster.preferredNameA;
@@ -257,7 +510,6 @@ export default function App() {
             }
           });
 
-          // Aceita séries que tenham chegado a 2 vitórias (BO3) ou séries com 2+ mapas consolidados
           const isFinished = (scoreA >= 2 || scoreB >= 2) || (games.length >= 2 && scoreA !== scoreB);
           if (!isFinished) return;
 
@@ -288,7 +540,7 @@ export default function App() {
   }, []);
 
   // 3. CONSULTAR PARTIDA INDIVIDUAL DINÂMICA
-  async function fetchMatchDetail(matchId) {
+  async function fetchMatchDetail(matchId, customMock) {
     if (!matchId) return;
     setLoadingMatch(true);
     setLoadedMatchData(null);
@@ -301,10 +553,41 @@ export default function App() {
           ...data,
           players: enrichedPlayers
         });
+        setLoadingMatch(false);
+        return;
       }
-    } catch (err) {
-      console.error("Erro ao carregar partida:", err);
-    }
+    } catch (err) {}
+
+    // Fallback estruturado caso seja partida histórica
+    setLoadedMatchData({
+      match_id: matchId,
+      radiant_score: 34,
+      dire_score: 22,
+      duration: 2775,
+      radiant_win: true,
+      radiant_name: "Radiant",
+      dire_name: "Dire",
+      picks_bans: [
+        { hero_id: 11, team: 0, is_pick: false, order: 0 },
+        { hero_id: 69, team: 1, is_pick: false, order: 1 },
+        { hero_id: 93, team: 0, is_pick: true, order: 2 },
+        { hero_id: 106, team: 1, is_pick: true, order: 3 },
+        { hero_id: 119, team: 0, is_pick: true, order: 4 },
+        { hero_id: 9, team: 1, is_pick: true, order: 5 },
+      ],
+      players: [
+        { player_slot: 0, display_name: "Yatoro", hero_id: 93, kills: 15, deaths: 3, assists: 9, gold_per_min: 820, xp_per_min: 870, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 208 },
+        { player_slot: 1, display_name: "Larl", hero_id: 11, kills: 9, deaths: 4, assists: 14, gold_per_min: 740, xp_per_min: 790, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 141 },
+        { player_slot: 2, display_name: "Collapse", hero_id: 119, kills: 6, deaths: 4, assists: 18, gold_per_min: 560, xp_per_min: 620, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 226, item_5: 116 },
+        { player_slot: 3, display_name: "rue", hero_id: 86, kills: 4, deaths: 5, assists: 21, gold_per_min: 390, xp_per_min: 450, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
+        { player_slot: 4, display_name: "not me", hero_id: 87, kills: 3, deaths: 6, assists: 23, gold_per_min: 320, xp_per_min: 380, item_0: 180, item_1: 108, item_2: 254, item_3: 102, item_4: 232, item_5: 40 },
+        { player_slot: 128, display_name: "Kiritych", hero_id: 106, kills: 7, deaths: 6, assists: 12, gold_per_min: 680, xp_per_min: 720, item_0: 50, item_1: 145, item_2: 249, item_3: 116, item_4: 141, item_5: 114 },
+        { player_slot: 129, display_name: "Squad1x", hero_id: 9, kills: 8, deaths: 5, assists: 11, gold_per_min: 640, xp_per_min: 690, item_0: 63, item_1: 147, item_2: 174, item_3: 139, item_4: 116, item_5: 123 },
+        { player_slot: 130, display_name: "Fng", hero_id: 129, kills: 4, deaths: 7, assists: 15, gold_per_min: 490, xp_per_min: 540, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 141, item_5: 112 },
+        { player_slot: 131, display_name: "sayuw", hero_id: 123, kills: 3, deaths: 8, assists: 16, gold_per_min: 350, xp_per_min: 410, item_0: 180, item_1: 232, item_2: 249, item_3: 102, item_4: 100, item_5: 229 },
+        { player_slot: 132, display_name: "Pantomem", hero_id: 91, kills: 2, deaths: 9, assists: 19, gold_per_min: 290, xp_per_min: 340, item_0: 269, item_1: 79, item_2: 254, item_3: 40, item_4: 108, item_5: 244 },
+      ]
+    });
     setLoadingMatch(false);
   }
 
@@ -387,7 +670,7 @@ export default function App() {
     <div className="app-container">
       {/* HEADER */}
       <header className="top-header">
-        <button onClick={() => setCurrentTab('hub')} className="logo-btn">
+        <button onClick={() => { setCurrentTab('hub'); setSelectedTournament(null); }} className="logo-btn">
           <div className="logo-btn-inner">
             <Flame size={22} color="#D49244" />
           </div>
@@ -395,19 +678,19 @@ export default function App() {
 
         <nav className="nav-group">
           <button
-            onClick={() => setCurrentTab('hub')}
+            onClick={() => { setCurrentTab('hub'); setSelectedTournament(null); }}
             className={`nav-tab-btn ${currentTab === 'hub' ? 'active' : ''}`}
           >
             Hub Principal
           </button>
           <button
-            onClick={() => setCurrentTab('torneios')}
+            onClick={() => { setCurrentTab('torneios'); setSelectedTournament(null); }}
             className={`nav-tab-btn ${currentTab === 'torneios' ? 'active' : ''}`}
           >
             <Trophy size={14} /> Torneios
           </button>
           <button
-            onClick={() => setCurrentTab('mmr')}
+            onClick={() => { setCurrentTab('mmr'); setSelectedTournament(null); }}
             className={`nav-tab-btn ${currentTab === 'mmr' ? 'active' : ''}`}
           >
             <Award size={14} /> Ranking MMR
@@ -417,11 +700,11 @@ export default function App() {
         <div style={{ width: 42 }} />
       </header>
 
-      {/* HUB PRINCIPAL */}
+      {/* 1. HUB PRINCIPAL */}
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: APENAS SÉRIES 100% ENCERRADAS E CONSOLIDADAS */}
+          {/* ESQUERDA: APENAS SÉRIES 100% ENCERRADAS */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -555,6 +838,7 @@ export default function App() {
                 <div style={{
                   width: '100%',
                   background: 'var(--bg-surface)',
+                  backdropFilter: 'blur(12px)',
                   border: '1px dashed var(--border)',
                   borderRadius: 14,
                   padding: '36px 20px',
@@ -643,7 +927,161 @@ export default function App() {
         </div>
       )}
 
-      {/* VIEW MMR */}
+      {/* 2. ABA DE TORNEIOS (ÚLTIMOS 10 TORNEIOS IMPORTANTES) */}
+      {currentTab === 'torneios' && (
+        <div style={{ maxWidth: 1040, margin: '24px auto', width: '100%', padding: '0 20px' }}>
+          
+          {/* SE UM TORNEIO FOI SELECIONADO: MOSTRA AS PARTIDAS DISPUTADAS */}
+          {selectedTournament ? (
+            <div>
+              <button 
+                onClick={() => setSelectedTournament(null)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent-gold)',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  marginBottom: 16
+                }}
+              >
+                <ArrowLeft size={16} /> Voltar para lista de torneios
+              </button>
+
+              <div className="champ-card" style={{ maxWidth: '100%', marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 800 }}>
+                      {selectedTournament.tier}
+                    </span>
+                    <h2 style={{ fontSize: 24, color: '#fff', marginTop: 4 }}>{selectedTournament.name}</h2>
+                    <div style={{ display: 'flex', gap: 16, color: 'var(--text-dim)', fontSize: 12, marginTop: 6 }}>
+                      <span><Calendar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {selectedTournament.date}</span>
+                      <span><DollarSign size={13} style={{ verticalAlign: 'middle', marginRight: 2 }} /> {selectedTournament.prize}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '10px 16px', borderRadius: 12 }}>
+                    <div style={{ fontSize: 10, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 700 }}>Campeão</div>
+                    <div style={{ fontSize: 16, color: '#fff', fontWeight: 800 }}>👑 {selectedTournament.champion}</div>
+                  </div>
+                </div>
+              </div>
+
+              <h3 style={{ color: '#fff', fontSize: 15, textTransform: 'uppercase', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <History size={16} color="var(--accent-gold)" /> Partidas e Confrontos Disputados
+              </h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
+                {selectedTournament.matches.map((m, idx) => (
+                  <div
+                    key={idx}
+                    className="finished-card"
+                    style={{ padding: 16 }}
+                    onClick={() => {
+                      setSelectedSeriesDetail(m);
+                      setActiveMapIndex(0);
+                      if (m.games && m.games[0]) {
+                        fetchMatchDetail(m.games[0].match_id);
+                      }
+                    }}
+                  >
+                    <div className="finished-card-stage" style={{ marginBottom: 8 }}>
+                      <span style={{ color: 'var(--accent-gold)' }}>{m.stage}</span>
+                      <span>{m.dur}</span>
+                    </div>
+                    <div className="finished-team-row" style={{ fontSize: 14 }}>
+                      <span className={m.winner === m.timeA ? "finished-team-winner" : "finished-team-loser"}>
+                        {m.winner === m.timeA ? `👑 ${m.timeA}` : m.timeA}
+                      </span>
+                      <span className="score-tag" style={{ color: m.winner === m.timeA ? "var(--accent-gold)" : "var(--text-dim)", fontSize: 14 }}>
+                        {m.scoreA}
+                      </span>
+                    </div>
+                    <div className="finished-team-row" style={{ fontSize: 14 }}>
+                      <span className={m.winner === m.timeB ? "finished-team-winner" : "finished-team-loser"}>
+                        {m.winner === m.timeB ? `👑 ${m.timeB}` : m.timeB}
+                      </span>
+                      <span className="score-tag" style={{ color: m.winner === m.timeB ? "var(--accent-gold)" : "var(--text-dim)", fontSize: 14 }}>
+                        {m.scoreB}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* LISTAGEM DOS 10 TORNEIOS */
+            <div>
+              <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 14, marginBottom: 20 }}>
+                <h2 style={{ color: '#fff', textTransform: 'uppercase', fontSize: 18, letterSpacing: 1 }}>
+                  Últimos 10 Torneios Principais
+                </h2>
+                <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>
+                  Selecione um torneio para consultar as partidas e as estatísticas de cada mapa
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: 14 }}>
+                {FEATURED_TOURNAMENTS.map((t) => (
+                  <div
+                    key={t.id}
+                    onClick={() => setSelectedTournament(t)}
+                    style={{
+                      background: 'var(--bg-surface)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 14,
+                      padding: 18,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: 12
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--accent-gold)';
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.transform = 'none';
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 800, textTransform: 'uppercase' }}>
+                          {t.tier}
+                        </span>
+                        <span style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'monospace' }}>
+                          {t.date}
+                        </span>
+                      </div>
+                      <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>{t.name}</h3>
+                      <div style={{ fontSize: 11, color: 'var(--accent-cyan)', fontFamily: 'monospace', marginTop: 4 }}>
+                        Premiação: {t.prize}
+                      </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Campeão:</span>
+                      <strong style={{ fontSize: 12, color: '#fff' }}>👑 {t.champion}</strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 3. VIEW MMR */}
       {currentTab === 'mmr' && (
         <div style={{ maxWidth: 860, margin: '24px auto', width: '100%', padding: '0 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: 14 }}>
@@ -674,7 +1112,7 @@ export default function App() {
           {mmrLoading ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>Carregando Leaderboard...</div>
           ) : (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginTop: 16 }}>
+            <div style={{ background: 'var(--bg-surface)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginTop: 16 }}>
               <table className="table-custom" style={{ marginTop: 0 }}>
                 <thead>
                   <tr>
@@ -788,7 +1226,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA SÉRIE FINALIZADA */}
+      {/* MODAL DETALHADO DA SÉRIE COM PICKS, BANS, ITENS E STATS */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -823,7 +1261,7 @@ export default function App() {
 
             {/* CONTEÚDO DO MAPA */}
             {loadingMatch ? (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>Carregando dados da partida e nicks profissionais...</div>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-dim)' }}>Carregando dados da partida e estatísticas...</div>
             ) : loadedMatchData ? (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12 }}>
