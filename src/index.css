@@ -268,13 +268,11 @@ body {
   justify-content: space-between;
 }
 .live-team-name {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
+  flex: 1;
 }
 .live-score {
   font-size: 14px;

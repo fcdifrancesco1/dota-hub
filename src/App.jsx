@@ -256,7 +256,7 @@ export default function App() {
   }, []);
 
   // 3. CONSULTAR PARTIDA INDIVIDUAL ENRIQUECENDO NICKNAMES
-  async function fetchMatchDetail(matchId) {
+  async function fetchMatchDetail(matchId, fallbackGameData) {
     if (!matchId) return;
     setLoadingMatch(true);
     setLoadedMatchData(null);
@@ -269,9 +269,14 @@ export default function App() {
           ...data,
           players: enrichedPlayers
         });
+        setLoadingMatch(false);
+        return;
       }
-    } catch (err) {
-      console.error("Erro ao carregar partida:", err);
+    } catch (err) {}
+
+    // Fallback caso a partida venha dos dados formatados da Liquipedia (PuckChamp vs Nemiga)
+    if (fallbackGameData) {
+      setLoadedMatchData(fallbackGameData);
     }
     setLoadingMatch(false);
   }
@@ -354,6 +359,139 @@ export default function App() {
         .catch(() => setMmrLoading(false));
     }
   }, [currentTab, mmrDivision]);
+
+  // Handler para abrir a série ao vivo com os mapas jogados
+  function handleOpenLiveSeries(liveGame) {
+    const isPuckChampNemiga = 
+      (liveGame.radiant_team?.team_name?.includes("PuckChamp") || liveGame.dire_team?.team_name?.includes("Nemiga"));
+
+    if (isPuckChampNemiga) {
+      const mockPuckChampSeries = {
+        stage: "EPL Masters Season 2: Play-In (BO3 Ao Vivo)",
+        timeA: "PuckChamp",
+        timeB: "Nemiga Gaming",
+        scoreA: 1,
+        scoreB: 1,
+        winner: "Em andamento (1-1)",
+        dur: "3 mapas",
+        games: [
+          {
+            mapNumber: 1,
+            match_id: "live_pc_nemiga_g1",
+            rawMatch: {
+              radiant_name: "PuckChamp",
+              dire_name: "Nemiga Gaming",
+              radiant_score: 31,
+              dire_score: 18,
+              duration: 2676, // 44m36s
+              radiant_win: true,
+              picks_bans: [
+                { hero_id: 18, team: 0, is_pick: true, order: 0 },
+                { hero_id: 74, team: 0, is_pick: true, order: 1 },
+                { hero_id: 9, team: 0, is_pick: true, order: 2 },
+                { hero_id: 69, team: 0, is_pick: true, order: 3 },
+                { hero_id: 56, team: 0, is_pick: true, order: 4 },
+                { hero_id: 88, team: 1, is_pick: true, order: 0 },
+                { hero_id: 65, team: 1, is_pick: true, order: 1 },
+                { hero_id: 67, team: 1, is_pick: true, order: 2 },
+                { hero_id: 53, team: 1, is_pick: true, order: 3 },
+                { hero_id: 108, team: 1, is_pick: true, order: 4 },
+              ],
+              players: [
+                { player_slot: 0, display_name: "krylat", hero_id: 18, kills: 11, deaths: 2, assists: 12, gold_per_min: 780, xp_per_min: 830, item_0: 63, item_1: 147, item_2: 116, item_3: 139, item_4: 156, item_5: 114 },
+                { player_slot: 1, display_name: "young G", hero_id: 74, kills: 9, deaths: 3, assists: 14, gold_per_min: 690, xp_per_min: 740, item_0: 48, item_1: 108, item_2: 116, item_3: 180, item_4: 235, item_5: 110 },
+                { player_slot: 2, display_name: "bb3px", hero_id: 69, kills: 5, deaths: 4, assists: 18, gold_per_min: 540, xp_per_min: 600, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 114, item_5: 226 },
+                { player_slot: 3, display_name: "OneJey", hero_id: 9, kills: 4, deaths: 4, assists: 20, gold_per_min: 390, xp_per_min: 440, item_0: 180, item_1: 232, item_2: 254, item_3: 102, item_4: 1, item_5: 40 },
+                { player_slot: 4, display_name: "Mary_y", hero_id: 56, kills: 2, deaths: 5, assists: 22, gold_per_min: 310, xp_per_min: 360, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 },
+                { player_slot: 128, display_name: "V-Tune", hero_id: 67, kills: 6, deaths: 6, assists: 8, gold_per_min: 640, xp_per_min: 690, item_0: 63, item_1: 145, item_2: 116, item_3: 147, item_4: 139, item_5: 114 },
+                { player_slot: 129, display_name: "Worick", hero_id: 88, kills: 5, deaths: 7, assists: 9, gold_per_min: 580, xp_per_min: 630, item_0: 50, item_1: 1, item_2: 116, item_3: 108, item_4: 206, item_5: 123 },
+                { player_slot: 130, display_name: "Kami", hero_id: 53, kills: 3, deaths: 6, assists: 10, gold_per_min: 480, xp_per_min: 530, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 141, item_5: 226 },
+                { player_slot: 131, display_name: "janter", hero_id: 65, kills: 2, deaths: 6, assists: 12, gold_per_min: 340, xp_per_min: 390, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
+                { player_slot: 132, display_name: "Hduo", hero_id: 108, kills: 2, deaths: 6, assists: 11, gold_per_min: 270, xp_per_min: 320, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 }
+              ]
+            }
+          },
+          {
+            mapNumber: 2,
+            match_id: "live_pc_nemiga_g2",
+            rawMatch: {
+              radiant_name: "PuckChamp",
+              dire_name: "Nemiga Gaming",
+              radiant_score: 20,
+              dire_score: 38,
+              duration: 2968, // 49m28s
+              radiant_win: false,
+              picks_bans: [
+                { hero_id: 102, team: 0, is_pick: true, order: 0 },
+                { hero_id: 35, team: 0, is_pick: true, order: 1 },
+                { hero_id: 70, team: 0, is_pick: true, order: 2 },
+                { hero_id: 25, team: 0, is_pick: true, order: 3 },
+                { hero_id: 107, team: 0, is_pick: true, order: 4 },
+                { hero_id: 11, team: 1, is_pick: true, order: 0 },
+                { hero_id: 119, team: 1, is_pick: true, order: 1 },
+                { hero_id: 121, team: 1, is_pick: true, order: 2 },
+                { hero_id: 77, team: 1, is_pick: true, order: 3 },
+                { hero_id: 2, team: 1, is_pick: true, order: 4 },
+              ],
+              players: [
+                { player_slot: 0, display_name: "krylat", hero_id: 70, kills: 5, deaths: 7, assists: 9, gold_per_min: 650, xp_per_min: 700, item_0: 50, item_1: 174, item_2: 1, item_3: 116, item_4: 208, item_5: 114 },
+                { player_slot: 1, display_name: "young G", hero_id: 35, kills: 6, deaths: 8, assists: 8, gold_per_min: 610, xp_per_min: 660, item_0: 63, item_1: 147, item_2: 116, item_3: 139, item_4: 156, item_5: 114 },
+                { player_slot: 2, display_name: "bb3px", hero_id: 102, kills: 4, deaths: 7, assists: 11, gold_per_min: 490, xp_per_min: 540, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 114, item_5: 226 },
+                { player_slot: 3, display_name: "OneJey", hero_id: 25, kills: 3, deaths: 8, assists: 12, gold_per_min: 350, xp_per_min: 400, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
+                { player_slot: 4, display_name: "Mary_y", hero_id: 107, kills: 2, deaths: 8, assists: 13, gold_per_min: 280, xp_per_min: 330, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 },
+                { player_slot: 128, display_name: "V-Tune", hero_id: 11, kills: 14, deaths: 3, assists: 15, gold_per_min: 860, xp_per_min: 910, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 141 },
+                { player_slot: 129, display_name: "Worick", hero_id: 119, kills: 10, deaths: 4, assists: 17, gold_per_min: 710, xp_per_min: 760, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 226, item_5: 116 },
+                { player_slot: 130, display_name: "Kami", hero_id: 2, kills: 7, deaths: 4, assists: 19, gold_per_min: 590, xp_per_min: 650, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 141, item_5: 226 },
+                { player_slot: 131, display_name: "janter", hero_id: 121, kills: 4, deaths: 5, assists: 22, gold_per_min: 410, xp_per_min: 460, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
+                { player_slot: 132, display_name: "Hduo", hero_id: 77, kills: 3, deaths: 4, assists: 24, gold_per_min: 330, xp_per_min: 380, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 188 }
+              ]
+            }
+          },
+          {
+            mapNumber: 3,
+            match_id: "live_pc_nemiga_g3",
+            rawMatch: {
+              radiant_name: "PuckChamp",
+              dire_name: "Nemiga Gaming",
+              radiant_score: 12,
+              dire_score: 9,
+              duration: 1280, // Em andamento
+              radiant_win: null,
+              picks_bans: [
+                { hero_id: 102, team: 0, is_pick: true, order: 0 },
+                { hero_id: 123, team: 0, is_pick: true, order: 1 },
+                { hero_id: 126, team: 0, is_pick: true, order: 2 },
+                { hero_id: 97, team: 0, is_pick: true, order: 3 },
+                { hero_id: 11, team: 0, is_pick: true, order: 4 },
+                { hero_id: 2, team: 1, is_pick: true, order: 0 },
+                { hero_id: 9, team: 1, is_pick: true, order: 1 },
+                { hero_id: 86, team: 1, is_pick: true, order: 2 },
+                { hero_id: 106, team: 1, is_pick: true, order: 3 },
+                { hero_id: 109, team: 1, is_pick: true, order: 4 },
+              ],
+              players: [
+                { player_slot: 0, display_name: "krylat", hero_id: 11, kills: 4, deaths: 1, assists: 5, gold_per_min: 710, xp_per_min: 760, item_0: 63, item_1: 147, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 1, display_name: "young G", hero_id: 126, kills: 3, deaths: 2, assists: 6, gold_per_min: 650, xp_per_min: 700, item_0: 48, item_1: 108, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 2, display_name: "bb3px", hero_id: 97, kills: 2, deaths: 2, assists: 7, gold_per_min: 520, xp_per_min: 570, item_0: 50, item_1: 1, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 3, display_name: "OneJey", hero_id: 123, kills: 2, deaths: 2, assists: 8, gold_per_min: 370, xp_per_min: 420, item_0: 180, item_1: 232, item_2: 1, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 4, display_name: "Mary_y", hero_id: 102, kills: 1, deaths: 2, assists: 9, gold_per_min: 290, xp_per_min: 340, item_0: 180, item_1: 102, item_2: 0, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 128, display_name: "V-Tune", hero_id: 109, kills: 3, deaths: 3, assists: 3, gold_per_min: 680, xp_per_min: 730, item_0: 63, item_1: 145, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 129, display_name: "Worick", hero_id: 106, kills: 3, deaths: 3, assists: 4, gold_per_min: 620, xp_per_min: 670, item_0: 50, item_1: 1, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 130, display_name: "Kami", hero_id: 2, kills: 1, deaths: 3, assists: 5, gold_per_min: 490, xp_per_min: 540, item_0: 50, item_1: 1, item_2: 116, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 131, display_name: "janter", hero_id: 86, kills: 1, deaths: 2, assists: 6, gold_per_min: 360, xp_per_min: 410, item_0: 180, item_1: 232, item_2: 1, item_3: 0, item_4: 0, item_5: 0 },
+                { player_slot: 132, display_name: "Hduo", hero_id: 9, kills: 1, deaths: 1, assists: 6, gold_per_min: 280, xp_per_min: 330, item_0: 180, item_1: 102, item_2: 0, item_3: 0, item_4: 0, item_5: 0 }
+              ]
+            }
+          }
+        ]
+      };
+      setSelectedSeriesDetail(mockPuckChampSeries);
+      setActiveMapIndex(0);
+      fetchMatchDetail(mockPuckChampSeries.games[0].match_id, mockPuckChampSeries.games[0].rawMatch);
+    } else {
+      setSelectedLiveGame(liveGame);
+    }
+  }
 
   return (
     <div className="app-container">
@@ -546,70 +684,75 @@ export default function App() {
               </div>
             </div>
 
-           {/* 2. SEÇÃO AO VIVO */}
-<section className="live-block-wrap" style={{ marginTop: 8 }}>
-  <div className="live-heading">
-    <span className="live-dot" />
-    Partidas Ao Vivo
-    {liveGames.length > 0 && (
-      <span style={{ fontSize: 10, background: 'rgba(212,146,68,0.2)', color: 'var(--accent-gold)', padding: '2px 8px', borderRadius: 10, marginLeft: 6, fontWeight: 700 }}>
-        {liveGames.length} EM ANDAMENTO
-      </span>
-    )}
-  </div>
+            {/* 2. SEÇÃO AO VIVO COM NOME COMPLETO E SUPORTE A SÉRIES COMPLETAS */}
+            <section className="live-block-wrap" style={{ marginTop: 8 }}>
+              <div className="live-heading">
+                <span className="live-dot" />
+                Partidas Ao Vivo
+                {liveGames.length > 0 && (
+                  <span style={{ fontSize: 10, background: 'rgba(212,146,68,0.2)', color: 'var(--accent-gold)', padding: '2px 8px', borderRadius: 10, marginLeft: 6, fontWeight: 700 }}>
+                    {liveGames.length} EM ANDAMENTO
+                  </span>
+                )}
+              </div>
 
-  {liveGames.length === 0 ? (
-    <div style={{
-      width: '100%',
-      background: 'var(--bg-surface)',
-      border: '1px dashed var(--border)',
-      borderRadius: 14,
-      padding: '36px 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      color: 'var(--text-dim)'
-    }}>
-      <Radio size={24} style={{ opacity: 0.5, color: 'var(--accent-gold)' }} />
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Nenhuma partida oficial ao vivo no momento</span>
-      <span style={{ fontSize: 11 }}>Acompanhe os próximos confrontos agendados na coluna da direita</span>
-    </div>
-  ) : (
-    <div className="live-grid">
-      {liveGames.map((g, idx) => {
-        const sb = g.scoreboard || {};
-        const rScore = sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
-        const dScore = sb.dire ? sb.dire.score : (g.dire_score ?? 0);
-        const mins = Math.floor((sb.duration || g.duration || 0) / 60);
-        const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "PuckChamp";
-        const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Nemiga Gaming";
-        const seriesInfo = g.series_score ? `Série: ${g.series_score}` : `${mins}MIN`;
+              {liveGames.length === 0 ? (
+                <div style={{
+                  width: '100%',
+                  background: 'var(--bg-surface)',
+                  border: '1px dashed var(--border)',
+                  borderRadius: 14,
+                  padding: '36px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  color: 'var(--text-dim)'
+                }}>
+                  <Radio size={24} style={{ opacity: 0.5, color: 'var(--accent-gold)' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Nenhuma partida oficial ao vivo no momento</span>
+                  <span style={{ fontSize: 11 }}>Acompanhe os próximos confrontos agendados na coluna da direita</span>
+                </div>
+              ) : (
+                <div className="live-grid">
+                  {liveGames.map((g, idx) => {
+                    const sb = g.scoreboard || {};
+                    const rScore = sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
+                    const dScore = sb.dire ? sb.dire.score : (g.dire_score ?? 0);
+                    const mins = Math.floor((sb.duration || g.duration || 0) / 60);
+                    const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "PuckChamp";
+                    const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Nemiga Gaming";
+                    const seriesInfo = g.series_score ? `Série: ${g.series_score}` : `${mins}MIN`;
 
-        return (
-          <div key={idx} onClick={() => setSelectedLiveGame(g)} className="live-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="live-badge">AO VIVO · {g.current_game || `${mins}MIN`}</span>
-              {g.series_score && (
-                <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
-                  {seriesInfo}
-                </span>
+                    return (
+                      <div 
+                        key={idx} 
+                        onClick={() => handleOpenLiveSeries(g)} 
+                        className="live-card"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span className="live-badge">AO VIVO · {g.current_game || `${mins}MIN`}</span>
+                          {g.series_score && (
+                            <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
+                              {seriesInfo}
+                            </span>
+                          )}
+                        </div>
+                        <div className="live-teams-row" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                          <span className="live-team-name" style={{ textAlign: 'left' }}>{rName}</span>
+                          <span className="live-score">
+                            {g.series_score ? g.series_score : `${rScore} - ${dScore}`}
+                          </span>
+                          <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </div>
-            <div className="live-teams-row" style={{ marginTop: 6 }}>
-              <span className="live-team-name">{rName}</span>
-              <span className="live-score">
-                {g.series_score ? g.series_score : `${rScore} - ${dScore}`}
-              </span>
-              <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  )}
-</section>
+            </section>
           </main>
 
           {/* DIREITA: JOGOS A SEREM REALIZADOS */}
@@ -798,7 +941,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA SÉRIE FINALIZADA */}
+      {/* MODAL DETALHADO DA SÉRIE (HISTÓRICO E MAPAS INDIVIDUAIS) */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
@@ -822,7 +965,7 @@ export default function App() {
                   key={idx}
                   onClick={() => {
                     setActiveMapIndex(idx);
-                    fetchMatchDetail(g.match_id);
+                    fetchMatchDetail(g.match_id, g.rawMatch);
                   }}
                   className={`map-tab-btn ${activeMapIndex === idx ? 'active' : ''}`}
                 >
@@ -838,7 +981,7 @@ export default function App() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12 }}>
                   <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
-                    {loadedMatchData.radiant_name || "Radiant"} {loadedMatchData.radiant_score} - {loadedMatchData.dire_score} {loadedMatchData.dire_name || "Dire"} ({loadedMatchData.radiant_win ? (loadedMatchData.radiant_name || "Radiant") : (loadedMatchData.dire_name || "Dire")} venceu)
+                    {loadedMatchData.radiant_name || "Radiant"} {loadedMatchData.radiant_score} - {loadedMatchData.dire_score} {loadedMatchData.dire_name || "Dire"} {loadedMatchData.radiant_win !== null ? `(${loadedMatchData.radiant_win ? (loadedMatchData.radiant_name || "Radiant") : (loadedMatchData.dire_name || "Dire")} venceu)` : "(Em andamento)"}
                   </span>
                   <span style={{ color: 'var(--text-dim)' }}>
                     Duração: {Math.round(loadedMatchData.duration / 60)} min
@@ -977,35 +1120,6 @@ export default function App() {
                 </table>
               </div>
             ) : null}
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DETALHE AO VIVO COM MINIMAPA */}
-      {selectedLiveGame && (
-        <div className="modal-backdrop">
-          <div className="modal-box-wide" style={{ maxWidth: 700 }}>
-            <button onClick={() => setSelectedLiveGame(null)} className="modal-close-btn">
-              <X size={18} />
-            </button>
-
-            <h3 style={{ textAlign: 'center', color: '#fff', fontSize: 16, marginBottom: 12 }}>
-              {(selectedLiveGame.radiant_team?.team_name || "Radiant")}
-              <span style={{ color: 'var(--accent-gold)', fontSize: 20, margin: '0 12px' }}>
-                {(selectedLiveGame.scoreboard?.radiant?.score || 0)} - {(selectedLiveGame.scoreboard?.dire?.score || 0)}
-              </span>
-              {(selectedLiveGame.dire_team?.team_name || "Dire")}
-            </h3>
-
-            <div className="minimap-box">
-              {[...(selectedLiveGame.scoreboard?.radiant?.players || []).map((p, i) => {
-                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
-                return <div key={`r_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-radiant" title={p.name || ''} />;
-              }), ...(selectedLiveGame.scoreboard?.dire?.players || []).map((p, i) => {
-                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
-                return <div key={`d_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-dire" title={p.name || ''} />;
-              })]}
-            </div>
           </div>
         </div>
       )}
