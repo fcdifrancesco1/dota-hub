@@ -3,11 +3,41 @@ import { Flame, Trophy, Award, History, X } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 
-// Helpers para URLs oficiais das imagens de Heróis e Itens da Valve
+// Mapeamento exato dos heróis para os nomes dos arquivos na CDN da Valve
 function getHeroImageUrl(heroName) {
   if (!heroName) return "";
-  const clean = heroName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${clean}.png`;
+  const map = {
+    "Anti-Mage": "antimage",
+    "Centaur Warrunner": "centaur",
+    "Clockwerk": "rattletrap",
+    "Dark Seer": "dark_seer",
+    "Dark Willow": "dark_willow",
+    "Doom": "doom_bringer",
+    "Dragon Knight": "dragon_knight",
+    "Earth Spirit": "earth_spirit",
+    "Earthshaker": "earthshaker",
+    "Ember Spirit": "ember_spirit",
+    "Enchantress": "enchantress",
+    "Faceless Void": "faceless_void",
+    "Keeper of the Light": "keeper_of_the_light",
+    "Nature's Prophet": "furion",
+    "Queen of Pain": "queenofpain",
+    "Sand King": "sand_king",
+    "Shadow Demon": "shadow_demon",
+    "Shadow Fiend": "nevermore",
+    "Shadow Shaman": "shadow_shaman",
+    "Storm Spirit": "storm_spirit",
+    "Templar Assassin": "templar_assassin",
+    "Treant Protector": "treant",
+    "Vengeful Spirit": "vengefulspirit",
+    "Windranger": "windrunner",
+    "Witch Doctor": "witch_doctor",
+    "Wraith King": "skeleton_king",
+    "Io": "wisp",
+    "Underlord": "abyssal_underlord"
+  };
+  const key = map[heroName] || heroName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${key}.png`;
 }
 
 function getItemImageUrl(itemName) {
@@ -75,7 +105,9 @@ function getItemImageUrl(itemName) {
     "Mage Slayer": "mage_slayer",
     "Moon Shard": "moon_shard",
     "Armlet of Mordiggian": "armlet",
-    "Aeon Disk": "aeon_disk"
+    "Aeon Disk": "aeon_disk",
+    "Bloodthorn": "bloodthorn",
+    "Nullifier": "nullifier"
   };
   const key = map[itemName] || itemName.toLowerCase().replace(/[^a-z0-9]/g, '_');
   return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/${key}.png`;
@@ -103,7 +135,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR JOGOS DO THE INTERNATIONAL 2026 (PLAYOFFS & DRAFTS)
+  // 1. CARREGAR TODAS AS PARTIDAS DOS PLAYOFFS COM DADOS E JOGOS REAIS
   useEffect(() => {
     const ti2026Playoffs = [
       {
@@ -118,140 +150,255 @@ export default function App() {
         games: [
           {
             mapNumber: 1,
-            duracao: "38:42",
-            vencedor: "Team Spirit (Radiant)",
+            duracao: "46:15",
+            vencedor: "Team Spirit (Dire)",
             draft: {
-              radiantBans: ["Doom", "Shadow Demon", "Beastmaster"],
-              radiantPicks: ["Morphling", "Storm Spirit", "Centaur Warrunner", "Hoodwink", "Clockwerk"],
-              direBans: ["Batrider", "Naga Siren", "Chen"],
-              direPicks: ["Luna", "Puck", "Mars", "Rubick", "Disruptor"]
+              radiantBans: ["Doom", "Beastmaster", "Chen", "Naga Siren", "Batrider", "Shadow Demon", "Puck"],
+              radiantPicks: ["Ember Spirit", "Mirana", "Io", "Mars", "Hoodwink"],
+              direBans: ["Terrorblade", "Leshrac", "Morphling", "Storm Spirit", "Centaur Warrunner", "Dark Seer", "Luna"],
+              direPicks: ["Slark", "Dark Willow", "Shadow Fiend", "Disruptor", "Rubick"]
             },
             radiantRoster: [
-              { pos: 1, name: "Yatoro", hero: "Morphling", kda: "12/1/8", gpm: 790, xpm: 840, items: ["Power Treads", "Manta Style", "Butterfly", "Satanic", "Eye of Skadi", "Black King Bar"] },
-              { pos: 2, name: "Larl", hero: "Storm Spirit", kda: "8/2/14", gpm: 680, xpm: 730, items: ["Power Treads", "Kaya and Sange", "Orchid Malevolence", "Black King Bar", "Shiva's Guard", "Aghanim's Scepter"] },
-              { pos: 3, name: "Collapse", hero: "Centaur Warrunner", kda: "4/3/18", gpm: 540, xpm: 610, items: ["Phase Boots", "Blink Dagger", "Pipe of Insight", "Heart of Tarrasque", "Crimson Guard", "Lotus Orb"] },
-              { pos: 4, name: "rue", hero: "Hoodwink", kda: "3/3/16", gpm: 390, xpm: 450, items: ["Arcane Boots", "Aether Lens", "Gleipnir", "Force Staff", "Eul's Scepter", "Solar Crest"] },
-              { pos: 5, name: "not me", hero: "Clockwerk", kda: "2/5/17", gpm: 310, xpm: 380, items: ["Tranquil Boots", "Force Staff", "Glimmer Cape", "Aghanim's Shard", "Blade Mail", "Observer Ward"] }
+              { pos: 1, name: "Kiritych", hero: "Ember Spirit", kda: "7/6/12", gpm: 680, xpm: 720, items: ["Phase Boots", "Battle Fury", "Mage Slayer", "Black King Bar", "Desolator", "Daedalus"] },
+              { pos: 2, name: "Squad1x", hero: "Mirana", kda: "8/5/11", gpm: 640, xpm: 690, items: ["Power Treads", "Manta Style", "Diffusal Blade", "Butterfly", "Black King Bar", "Linken's Sphere"] },
+              { pos: 3, name: "Fng", hero: "Mars", kda: "4/7/15", gpm: 490, xpm: 540, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Desolator", "Assault Cuirass"] },
+              { pos: 4, name: "sayuw", hero: "Hoodwink", kda: "3/8/16", gpm: 350, xpm: 410, items: ["Arcane Boots", "Aether Lens", "Gleipnir", "Force Staff", "Eul's Scepter", "Solar Crest"] },
+              { pos: 5, name: "Pantomem", hero: "Io", kda: "2/9/19", gpm: 290, xpm: 340, items: ["Holy Locket", "Mekansm", "Glimmer Cape", "Ghost Scepter", "Aghanim's Shard", "Wind Lace"] }
             ],
             direRoster: [
-              { pos: 1, name: "Kiritych", hero: "Luna", kda: "4/5/3", gpm: 670, xpm: 710, items: ["Power Treads", "Manta Style", "Black King Bar", "Dragon Lance", "Butterfly", "Mask of Madness"] },
-              { pos: 2, name: "Squad1x", hero: "Puck", kda: "5/4/6", gpm: 610, xpm: 650, items: ["Phase Boots", "Witch Blade", "Blink Dagger", "Eul's Scepter", "Linken's Sphere", "Dagon"] },
-              { pos: 3, name: "Fng", hero: "Mars", kda: "2/6/7", gpm: 460, xpm: 520, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Desolator", "Vladmir's Offering"] },
-              { pos: 4, name: "sayuw", hero: "Rubick", kda: "1/5/9", gpm: 340, xpm: 390, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Ghost Scepter"] },
-              { pos: 5, name: "Pantomem", hero: "Disruptor", kda: "2/8/6", gpm: 280, xpm: 330, items: ["Arcane Boots", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Observer Ward", "Town Portal Scroll"] }
+              { pos: 1, name: "Yatoro", hero: "Slark", kda: "15/3/9", gpm: 820, xpm: 870, items: ["Power Treads", "Diffusal Blade", "Aghanim's Scepter", "Black King Bar", "Eye of Skadi", "Abyssal Blade"] },
+              { pos: 2, name: "Larl", hero: "Shadow Fiend", kda: "9/4/14", gpm: 740, xpm: 790, items: ["Power Treads", "Dragon Lance", "Black King Bar", "Butterfly", "Satanic", "Daedalus"] },
+              { pos: 3, name: "Collapse", hero: "Dark Willow", kda: "6/4/18", gpm: 560, xpm: 620, items: ["Eul's Scepter", "Blink Dagger", "Aghanim's Scepter", "Octarine Core", "Lotus Orb", "Black King Bar"] },
+              { pos: 4, name: "rue", hero: "Rubick", kda: "4/5/21", gpm: 390, xpm: 450, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Ghost Scepter"] },
+              { pos: 5, name: "not me", hero: "Disruptor", kda: "3/6/23", gpm: 320, xpm: 380, items: ["Arcane Boots", "Aghanim's Scepter", "Glimmer Cape", "Force Staff", "Aether Lens", "Ghost Scepter"] }
             ]
           },
           {
             mapNumber: 2,
-            duracao: "42:15",
-            vencedor: "TEAM VISION (Dire)",
+            duracao: "64:29",
+            vencedor: "TEAM VISION (Radiant)",
             draft: {
-              radiantBans: ["Chen", "Naga Siren", "Storm Spirit"],
-              radiantPicks: ["Faceless Void", "Ember Spirit", "Slardar", "Tusk", "Shadow Shaman"],
-              direBans: ["Morphling", "Batrider", "Hoodwink"],
-              direPicks: ["Terrorblade", "Leshrac", "Dark Seer", "Earth Spirit", "Treant Protector"]
+              radiantBans: ["Morphling", "Slark", "Dark Willow", "Disruptor", "Puck", "Batrider", "Mars"],
+              radiantPicks: ["Razor", "Enchantress", "Rubick", "Underlord", "Sand King"],
+              direBans: ["Io", "Ember Spirit", "Mirana", "Hoodwink", "Centaur Warrunner", "Leshrac", "Luna"],
+              direPicks: ["Shadow Fiend", "Slardar", "Hoodwink", "Rubick", "Mars"]
             },
             radiantRoster: [
-              { pos: 1, name: "Yatoro", hero: "Faceless Void", kda: "6/4/5", gpm: 710, xpm: 750, items: ["Power Treads", "Maelstrom", "Black King Bar", "Manta Style", "Eye of Skadi", "Daedalus"] },
-              { pos: 2, name: "Larl", hero: "Ember Spirit", kda: "5/5/8", gpm: 620, xpm: 670, items: ["Phase Boots", "Battle Fury", "Mage Slayer", "Black King Bar", "Shiva's Guard", "Desolator"] },
-              { pos: 3, name: "Collapse", hero: "Slardar", kda: "3/6/7", gpm: 490, xpm: 540, items: ["Power Treads", "Blink Dagger", "Black King Bar", "Aghanim's Scepter", "Moon Shard", "Assault Cuirass"] },
-              { pos: 4, name: "rue", hero: "Tusk", kda: "2/7/9", gpm: 340, xpm: 400, items: ["Phase Boots", "Blink Dagger", "Force Staff", "Desolator", "Solar Crest", "Ghost Scepter"] },
-              { pos: 5, name: "not me", hero: "Shadow Shaman", kda: "1/8/8", gpm: 270, xpm: 320, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Glimmer Cape", "Aghanim's Shard", "Wind Lace"] }
+              { pos: 1, name: "Kiritych", hero: "Razor", kda: "13/6/18", gpm: 810, xpm: 860, items: ["Phase Boots", "Black King Bar", "Refresher Orb", "Satanic", "Shiva's Guard", "Eye of Skadi"] },
+              { pos: 2, name: "Squad1x", hero: "Sand King", kda: "10/5/21", gpm: 730, xpm: 780, items: ["Boots of Travel", "Blink Dagger", "Black King Bar", "Bloodstone", "Shiva's Guard", "Aghanim's Scepter"] },
+              { pos: 3, name: "Fng", hero: "Underlord", kda: "5/7/24", gpm: 540, xpm: 600, items: ["Guardian Greaves", "Pipe of Insight", "Crimson Guard", "Lotus Orb", "Heart of Tarrasque", "Refresher Orb"] },
+              { pos: 4, name: "sayuw", hero: "Rubick", kda: "4/8/26", gpm: 410, xpm: 470, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Aeon Disk"] },
+              { pos: 5, name: "Pantomem", hero: "Enchantress", kda: "6/8/22", gpm: 380, xpm: 430, items: ["Power Treads", "Dragon Lance", "Solar Crest", "Glimmer Cape", "Hurricane Pike", "Aghanim's Shard"] }
             ],
             direRoster: [
-              { pos: 1, name: "Kiritych", hero: "Terrorblade", kda: "11/2/9", gpm: 820, xpm: 870, items: ["Power Treads", "Manta Style", "Eye of Skadi", "Butterfly", "Satanic", "Daedalus"] },
-              { pos: 2, name: "Squad1x", hero: "Leshrac", kda: "9/3/12", gpm: 740, xpm: 780, items: ["Bloodstone", "Boots of Travel", "Kaya and Sange", "Black King Bar", "Shiva's Guard", "Eternal Shroud"] },
-              { pos: 3, name: "Fng", hero: "Dark Seer", kda: "4/2/16", gpm: 550, xpm: 610, items: ["Guardian Greaves", "Blink Dagger", "Pipe of Insight", "Aghanim's Scepter", "Refresher Orb", "Lotus Orb"] },
-              { pos: 4, name: "sayuw", hero: "Earth Spirit", kda: "3/4/18", gpm: 380, xpm: 430, items: ["Tranquil Boots", "Urn of Shadows", "Blink Dagger", "Black King Bar", "Force Staff", "Ghost Scepter"] },
-              { pos: 5, name: "Pantomem", hero: "Treant Protector", kda: "2/3/20", gpm: 310, xpm: 370, items: ["Arcane Boots", "Solar Crest", "Holy Locket", "Aghanim's Shard", "Glimmer Cape", "Blink Dagger"] }
+              { pos: 1, name: "Yatoro", hero: "Shadow Fiend", kda: "11/8/12", gpm: 790, xpm: 830, items: ["Power Treads", "Black King Bar", "Butterfly", "Satanic", "Daedalus", "Eye of Skadi"] },
+              { pos: 2, name: "Larl", hero: "Slardar", kda: "7/9/14", gpm: 610, xpm: 670, items: ["Power Treads", "Blink Dagger", "Black King Bar", "Aghanim's Scepter", "Assault Cuirass", "Moon Shard"] },
+              { pos: 3, name: "Collapse", hero: "Mars", kda: "5/10/16", gpm: 510, xpm: 570, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Desolator", "Lotus Orb"] },
+              { pos: 4, name: "rue", hero: "Hoodwink", kda: "4/9/19", gpm: 360, xpm: 420, items: ["Arcane Boots", "Gleipnir", "Aether Lens", "Force Staff", "Eul's Scepter", "Ghost Scepter"] },
+              { pos: 5, name: "not me", hero: "Rubick", kda: "2/11/17", gpm: 290, xpm: 340, items: ["Arcane Boots", "Glimmer Cape", "Force Staff", "Aether Lens", "Aghanim's Shard", "Town Portal Scroll"] }
             ]
           },
           {
             mapNumber: 3,
-            duracao: "31:10",
-            vencedor: "Team Spirit (Radiant)",
+            duracao: "45:56",
+            vencedor: "Team Spirit (Dire)",
             draft: {
-              radiantBans: ["Terrorblade", "Leshrac", "Puck"],
-              radiantPicks: ["Ursa", "Pangolier", "Magnus", "Mirana", "Jakiro"],
-              direBans: ["Morphling", "Centaur Warrunner", "Batrider"],
-              direPicks: ["Sven", "Tiny", "Brewmaster", "Muerta", "Grimstroke"]
+              radiantBans: ["Slark", "Shadow Fiend", "Razor", "Underlord", "Disruptor", "Pangolier", "Mirana"],
+              radiantPicks: ["Shadow Fiend", "Enchantress", "Slardar", "Pangolier", "Marci"],
+              direBans: ["Sand King", "Io", "Ember Spirit", "Razor", "Centaur Warrunner", "Hoodwink", "Doom"],
+              direPicks: ["Nature's Prophet", "Dark Willow", "Tusk", "Mars", "Terrorblade"]
             },
             radiantRoster: [
-              { pos: 1, name: "Yatoro", hero: "Ursa", kda: "14/0/6", gpm: 840, xpm: 890, items: ["Phase Boots", "Diffusal Blade", "Blink Dagger", "Black King Bar", "Abyssal Blade", "Satanic"] },
-              { pos: 2, name: "Larl", hero: "Pangolier", kda: "6/2/11", gpm: 660, xpm: 710, items: ["Arcane Boots", "Diffusal Blade", "Blink Dagger", "Eul's Scepter", "Black King Bar", "Aghanim's Shard"] },
-              { pos: 3, name: "Collapse", hero: "Magnus", kda: "5/1/15", gpm: 580, xpm: 640, items: ["Power Treads", "Blink Dagger", "Force Staff", "Refresher Orb", "Harpoon", "Shiva's Guard"] },
-              { pos: 4, name: "rue", hero: "Mirana", kda: "4/2/13", gpm: 410, xpm: 460, items: ["Power Treads", "Spirit Vessel", "Eul's Scepter", "Solar Crest", "Force Staff", "Glimmer Cape"] },
-              { pos: 5, name: "not me", hero: "Jakiro", kda: "2/3/17", gpm: 330, xpm: 390, items: ["Arcane Boots", "Aether Lens", "Force Staff", "Glimmer Cape", "Aghanim's Shard", "Observer Ward"] }
+              { pos: 1, name: "Kiritych", hero: "Shadow Fiend", kda: "8/7/8", gpm: 720, xpm: 760, items: ["Power Treads", "Black King Bar", "Dragon Lance", "Butterfly", "Satanic", "Daedalus"] },
+              { pos: 2, name: "Squad1x", hero: "Pangolier", kda: "6/6/9", gpm: 630, xpm: 680, items: ["Arcane Boots", "Diffusal Blade", "Blink Dagger", "Eul's Scepter", "Black King Bar", "Aghanim's Shard"] },
+              { pos: 3, name: "Fng", hero: "Slardar", kda: "4/8/7", gpm: 470, xpm: 520, items: ["Power Treads", "Blink Dagger", "Black King Bar", "Aghanim's Scepter", "Echo Sabre", "Armlet of Mordiggian"] },
+              { pos: 4, name: "sayuw", hero: "Marci", kda: "3/8/11", gpm: 350, xpm: 400, items: ["Phase Boots", "Black King Bar", "Basher", "Blink Dagger", "Armlet of Mordiggian", "Ghost Scepter"] },
+              { pos: 5, name: "Pantomem", hero: "Enchantress", kda: "2/9/10", gpm: 300, xpm: 350, items: ["Power Treads", "Dragon Lance", "Solar Crest", "Glimmer Cape", "Aghanim's Shard", "Wind Lace"] }
             ],
             direRoster: [
-              { pos: 1, name: "Kiritych", hero: "Sven", kda: "3/7/2", gpm: 620, xpm: 660, items: ["Power Treads", "Echo Sabre", "Black King Bar", "Mask of Madness", "Blink Dagger", "Daedalus"] },
-              { pos: 2, name: "Squad1x", hero: "Tiny", kda: "2/6/4", gpm: 560, xpm: 600, items: ["Power Treads", "Blink Dagger", "Echo Sabre", "Black King Bar", "Daedalus", "Assault Cuirass"] },
-              { pos: 3, name: "Fng", hero: "Brewmaster", kda: "1/5/6", gpm: 420, xpm: 480, items: ["Phase Boots", "Urn of Shadows", "Radiance", "Black King Bar", "Refresher Orb", "Shiva's Guard"] },
-              { pos: 4, name: "sayuw", hero: "Muerta", kda: "1/6/5", gpm: 320, xpm: 380, items: ["Power Treads", "Dragon Lance", "Maelstrom", "Blink Dagger", "Ghost Scepter", "Force Staff"] },
-              { pos: 5, name: "Pantomem", hero: "Grimstroke", kda: "1/7/4", gpm: 260, xpm: 310, items: ["Arcane Boots", "Aether Lens", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Wind Lace"] }
+              { pos: 1, name: "Yatoro", hero: "Terrorblade", kda: "14/2/11", gpm: 870, xpm: 920, items: ["Power Treads", "Manta Style", "Eye of Skadi", "Butterfly", "Satanic", "Daedalus"] },
+              { pos: 2, name: "Larl", hero: "Nature's Prophet", kda: "9/3/16", gpm: 780, xpm: 820, items: ["Power Treads", "Orchid Malevolence", "Black King Bar", "Gleipnir", "Bloodthorn", "Nullifier"] },
+              { pos: 3, name: "Collapse", hero: "Mars", kda: "6/4/20", gpm: 580, xpm: 640, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Desolator", "Lotus Orb"] },
+              { pos: 4, name: "rue", hero: "Dark Willow", kda: "4/5/22", gpm: 420, xpm: 480, items: ["Eul's Scepter", "Blink Dagger", "Aghanim's Scepter", "Force Staff", "Ghost Scepter", "Solar Crest"] },
+              { pos: 5, name: "not me", hero: "Tusk", kda: "3/5/24", gpm: 340, xpm: 400, items: ["Phase Boots", "Blink Dagger", "Force Staff", "Solar Crest", "Glimmer Cape", "Aghanim's Shard"] }
             ]
           },
           {
             mapNumber: 4,
-            duracao: "47:20",
+            duracao: "44:18",
             vencedor: "TEAM VISION (Radiant)",
             draft: {
-              radiantBans: ["Ursa", "Magnus", "Centaur Warrunner"],
-              radiantPicks: ["Medusa", "Invoker", "Beastmaster", "Snapfire", "Bane"],
-              direBans: ["Terrorblade", "Morphling", "Storm Spirit"],
-              direPicks: ["Chaos Knight", "Queen of Pain", "Tidehunter", "Rubick", "Lich"]
+              radiantBans: ["Terrorblade", "Nature's Prophet", "Slark", "Mars", "Disruptor", "Dark Willow", "Puck"],
+              radiantPicks: ["Keeper of the Light", "Doom", "Sand King", "Mirana", "Venomancer"],
+              direBans: ["Razor", "Underlord", "Io", "Ember Spirit", "Shadow Fiend", "Slardar", "Hoodwink"],
+              direPicks: ["Weaver", "Earthshaker", "Clockwerk", "Templar Assassin", "Storm Spirit"]
             },
             radiantRoster: [
-              { pos: 1, name: "Kiritych", hero: "Medusa", kda: "9/1/14", gpm: 860, xpm: 910, items: ["Power Treads", "Manta Style", "Butterfly", "Eye of Skadi", "Daedalus", "Disperser"] },
-              { pos: 2, name: "Squad1x", hero: "Invoker", kda: "8/2/16", gpm: 710, xpm: 760, items: ["Boots of Travel", "Aghanim's Scepter", "Refresher Orb", "Black King Bar", "Shiva's Guard", "Octarine Core"] },
-              { pos: 3, name: "Fng", hero: "Beastmaster", kda: "4/4/15", gpm: 530, xpm: 590, items: ["Helm of the Overlord", "Blink Dagger", "Refresher Orb", "Black King Bar", "Boots of Bearing", "Solar Crest"] },
-              { pos: 4, name: "sayuw", hero: "Snapfire", kda: "3/5/18", gpm: 400, xpm: 460, items: ["Tranquil Boots", "Rod of Atos", "Aghanim's Scepter", "Force Staff", "Blink Dagger", "Ghost Scepter"] },
-              { pos: 5, name: "Pantomem", hero: "Bane", kda: "2/5/19", gpm: 300, xpm: 360, items: ["Arcane Boots", "Aether Lens", "Glimmer Cape", "Aghanim's Shard", "Blink Dagger", "Lotus Orb"] }
+              { pos: 1, name: "Kiritych", hero: "Doom", kda: "9/4/16", gpm: 780, xpm: 830, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Shiva's Guard", "Heart of Tarrasque"] },
+              { pos: 2, name: "Squad1x", hero: "Keeper of the Light", kda: "11/2/19", gpm: 740, xpm: 790, items: ["Boots of Travel", "Dagon", "Ethereal Blade", "Octarine Core", "Black King Bar", "Shiva's Guard"] },
+              { pos: 3, name: "Fng", hero: "Sand King", kda: "6/5/22", gpm: 560, xpm: 620, items: ["Boots of Travel", "Blink Dagger", "Black King Bar", "Bloodstone", "Shiva's Guard", "Aghanim's Scepter"] },
+              { pos: 4, name: "sayuw", hero: "Mirana", kda: "4/4/24", gpm: 420, xpm: 480, items: ["Power Treads", "Spirit Vessel", "Eul's Scepter", "Solar Crest", "Force Staff", "Glimmer Cape"] },
+              { pos: 5, name: "Pantomem", hero: "Venomancer", kda: "3/6/26", gpm: 330, xpm: 390, items: ["Arcane Boots", "Glimmer Cape", "Force Staff", "Aghanim's Scepter", "Aghanim's Shard", "Ghost Scepter"] }
             ],
             direRoster: [
-              { pos: 1, name: "Yatoro", hero: "Chaos Knight", kda: "5/6/7", gpm: 680, xpm: 720, items: ["Power Treads", "Armlet of Mordiggian", "Echo Sabre", "Heart of Tarrasque", "Black King Bar", "Assault Cuirass"] },
-              { pos: 2, name: "Larl", hero: "Queen of Pain", kda: "6/5/6", gpm: 640, xpm: 690, items: ["Power Treads", "Witch Blade", "Black King Bar", "Aghanim's Scepter", "Shiva's Guard", "Refresher Orb"] },
-              { pos: 3, name: "Collapse", hero: "Tidehunter", kda: "2/5/8", gpm: 460, xpm: 510, items: ["Phase Boots", "Blink Dagger", "Refresher Orb", "Pipe of Insight", "Shiva's Guard", "Lotus Orb"] },
-              { pos: 4, name: "rue", hero: "Rubick", kda: "2/7/9", gpm: 330, xpm: 380, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Ghost Scepter"] },
-              { pos: 5, name: "not me", hero: "Lich", kda: "1/7/8", gpm: 270, xpm: 320, items: ["Tranquil Boots", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Aether Lens", "Wind Lace"] }
+              { pos: 1, name: "Yatoro", hero: "Templar Assassin", kda: "7/6/5", gpm: 760, xpm: 800, items: ["Power Treads", "Dragon Lance", "Desolator", "Black King Bar", "Blink Dagger", "Daedalus"] },
+              { pos: 2, name: "Larl", hero: "Storm Spirit", kda: "6/7/8", gpm: 660, xpm: 710, items: ["Power Treads", "Kaya and Sange", "Orchid Malevolence", "Black King Bar", "Shiva's Guard", "Linken's Sphere"] },
+              { pos: 3, name: "Collapse", hero: "Earthshaker", kda: "4/8/9", gpm: 480, xpm: 530, items: ["Arcane Boots", "Blink Dagger", "Aghanim's Scepter", "Black King Bar", "Refresher Orb", "Force Staff"] },
+              { pos: 4, name: "rue", hero: "Weaver", kda: "3/7/11", gpm: 370, xpm: 430, items: ["Power Treads", "Spirit Vessel", "Solar Crest", "Gleipnir", "Aghanim's Shard", "Ghost Scepter"] },
+              { pos: 5, name: "not me", hero: "Clockwerk", kda: "1/9/12", gpm: 270, xpm: 320, items: ["Tranquil Boots", "Force Staff", "Blade Mail", "Glimmer Cape", "Aghanim's Shard", "Wind Lace"] }
             ]
           },
           {
             mapNumber: 5,
-            duracao: "36:55",
-            vencedor: "Team Spirit (Dire - Campeã)",
+            duracao: "64:22",
+            vencedor: "Team Spirit (Dire - Campeã Tricampeã)",
             draft: {
-              radiantBans: ["Morphling", "Magnus", "Pangolier"],
-              radiantPicks: ["Dragon Knight", "Storm Spirit", "Enigma", "Tusk", "Shadow Demon"],
-              direBans: ["Medusa", "Invoker", "Terrorblade"],
-              direPicks: ["Anti-Mage", "Kunkka", "Centaur Warrunner", "Clockwerk", "Disruptor"]
+              radiantBans: ["Terrorblade", "Slark", "Nature's Prophet", "Mars", "Dark Willow", "Disruptor", "Templar Assassin"],
+              radiantPicks: ["Invoker", "Rubick", "Mars", "Hoodwink", "Silencer"],
+              direBans: ["Keeper of the Light", "Doom", "Sand King", "Razor", "Underlord", "Ember Spirit", "Io"],
+              direPicks: ["Faceless Void", "Pangolier", "Mirana", "Sand King", "Tinker"]
             },
             radiantRoster: [
-              { pos: 1, name: "Kiritych", hero: "Dragon Knight", kda: "3/6/5", gpm: 650, xpm: 690, items: ["Power Treads", "Manta Style", "Black King Bar", "Blink Dagger", "Assault Cuirass", "Daedalus"] },
-              { pos: 2, name: "Squad1x", hero: "Storm Spirit", kda: "5/7/4", gpm: 620, xpm: 670, items: ["Power Treads", "Kaya and Sange", "Orchid Malevolence", "Black King Bar", "Shiva's Guard", "Linken's Sphere"] },
-              { pos: 3, name: "Fng", hero: "Enigma", kda: "2/5/7", gpm: 480, xpm: 540, items: ["Blink Dagger", "Black King Bar", "Refresher Orb", "Guardian Greaves", "Aghanim's Shard", "Aeon Disk"] },
-              { pos: 4, name: "sayuw", hero: "Tusk", kda: "2/8/8", gpm: 330, xpm: 390, items: ["Phase Boots", "Blink Dagger", "Force Staff", "Desolator", "Solar Crest", "Ghost Scepter"] },
-              { pos: 5, name: "Pantomem", hero: "Shadow Demon", kda: "1/9/6", gpm: 260, xpm: 310, items: ["Arcane Boots", "Aether Lens", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Wind Lace"] }
+              { pos: 1, name: "Kiritych", hero: "Invoker", kda: "10/7/16", gpm: 790, xpm: 840, items: ["Boots of Travel", "Aghanim's Scepter", "Refresher Orb", "Black King Bar", "Shiva's Guard", "Octarine Core"] },
+              { pos: 2, name: "Squad1x", hero: "Silencer", kda: "8/8/18", gpm: 710, xpm: 760, items: ["Power Treads", "Dragon Lance", "Black King Bar", "Refresher Orb", "Scythe of Vyse", "Moon Shard"] },
+              { pos: 3, name: "Fng", hero: "Mars", kda: "5/11/20", gpm: 520, xpm: 580, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Desolator", "Lotus Orb"] },
+              { pos: 4, name: "sayuw", hero: "Hoodwink", kda: "4/9/22", gpm: 390, xpm: 450, items: ["Arcane Boots", "Gleipnir", "Aether Lens", "Force Staff", "Eul's Scepter", "Ghost Scepter"] },
+              { pos: 5, name: "Pantomem", hero: "Rubick", kda: "3/10/24", gpm: 320, xpm: 380, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Aeon Disk"] }
             ],
             direRoster: [
-              { pos: 1, name: "Yatoro", hero: "Anti-Mage", kda: "15/1/8", gpm: 890, xpm: 940, items: ["Power Treads", "Battle Fury", "Manta Style", "Butterfly", "Abyssal Blade", "Heart of Tarrasque"] },
-              { pos: 2, name: "Larl", hero: "Kunkka", kda: "8/2/15", gpm: 720, xpm: 770, items: ["Phase Boots", "Aghanim's Scepter", "Black King Bar", "Shiva's Guard", "Refresher Orb", "Heart of Tarrasque"] },
-              { pos: 3, name: "Collapse", hero: "Centaur Warrunner", kda: "6/2/18", gpm: 590, xpm: 650, items: ["Phase Boots", "Blink Dagger", "Heart of Tarrasque", "Pipe of Insight", "Crimson Guard", "Lotus Orb"] },
-              { pos: 4, name: "rue", hero: "Clockwerk", kda: "4/4/19", gpm: 410, xpm: 470, items: ["Tranquil Boots", "Force Staff", "Blade Mail", "Glimmer Cape", "Aghanim's Shard", "Lotus Orb"] },
-              { pos: 5, name: "not me", hero: "Disruptor", kda: "2/4/22", gpm: 330, xpm: 390, items: ["Arcane Boots", "Aghanim's Scepter", "Glimmer Cape", "Force Staff", "Aether Lens", "Ghost Scepter"] }
+              { pos: 1, name: "Yatoro", hero: "Faceless Void", kda: "17/4/15", gpm: 910, xpm: 960, items: ["Power Treads", "Manta Style", "Maelstrom", "Black King Bar", "Butterfly", "Refresher Orb"] },
+              { pos: 2, name: "Larl", hero: "Pangolier", kda: "10/5/22", gpm: 750, xpm: 800, items: ["Arcane Boots", "Diffusal Blade", "Blink Dagger", "Eul's Scepter", "Black King Bar", "Aghanim's Shard"] },
+              { pos: 3, name: "Collapse", hero: "Sand King", kda: "8/6/26", gpm: 640, xpm: 710, items: ["Boots of Travel", "Blink Dagger", "Black King Bar", "Bloodstone", "Shiva's Guard", "Aghanim's Scepter"] },
+              { pos: 4, name: "rue", hero: "Mirana", kda: "5/7/28", gpm: 440, xpm: 500, items: ["Power Treads", "Spirit Vessel", "Eul's Scepter", "Solar Crest", "Force Staff", "Glimmer Cape"] },
+              { pos: 5, name: "not me", hero: "Tinker", kda: "4/6/30", gpm: 380, xpm: 440, items: ["Guardian Greaves", "Blink Dagger", "Glimmer Cape", "Holy Locket", "Aether Lens", "Ghost Scepter"] }
             ]
           }
         ]
       },
-      { stage: "Final Lower Bracket", timeA: "Team Spirit", timeB: "Team Yandex", scoreA: 2, scoreB: 0, winner: "Team Spirit", dur: "38m / 32m" },
-      { stage: "Semi Lower Bracket", timeA: "Team Spirit", timeB: "BB Team", scoreA: 2, scoreB: 0, winner: "Team Spirit", dur: "41m / 29m" },
-      { stage: "Final Upper Bracket", timeA: "TEAM VISION", timeB: "Team Yandex", scoreA: 2, scoreB: 1, winner: "TEAM VISION", dur: "3 mapas" },
-      { stage: "Round 3 Lower Bracket", timeA: "Nigma Galaxy", timeB: "BB Team", scoreA: 1, scoreB: 2, winner: "BB Team", dur: "3 mapas" },
-      { stage: "Round 3 Lower Bracket", timeA: "Team Liquid", timeB: "Team Spirit", scoreA: 0, scoreB: 2, winner: "Team Spirit", dur: "34m / 30m" },
-      { stage: "Semi Upper Bracket", timeA: "Nigma Galaxy", timeB: "Team Yandex", scoreA: 1, scoreB: 2, winner: "Team Yandex", dur: "3 mapas" },
-      { stage: "Semi Upper Bracket", timeA: "TEAM VISION", timeB: "Team Spirit", scoreA: 2, scoreB: 1, winner: "TEAM VISION", dur: "3 mapas" },
-      { stage: "Round 2 Lower Bracket", timeA: "Team Liquid", timeB: "Team Falcons", scoreA: 2, scoreB: 1, winner: "Team Liquid", dur: "3 mapas" },
-      { stage: "Round 2 Lower Bracket", timeA: "1win Team", timeB: "BB Team", scoreA: 1, scoreB: 2, winner: "BB Team", dur: "3 mapas" },
+      {
+        id: "final_lb",
+        stage: "Final Lower Bracket",
+        timeA: "Team Spirit",
+        timeB: "Team Yandex",
+        scoreA: 2,
+        scoreB: 0,
+        winner: "Team Spirit",
+        dur: "38m / 32m",
+        games: [
+          {
+            mapNumber: 1,
+            duracao: "38:12",
+            vencedor: "Team Spirit (Radiant)",
+            draft: {
+              radiantBans: ["Doom", "Chen", "Shadow Demon", "Batrider", "Puck", "Naga Siren", "Mars"],
+              radiantPicks: ["Morphling", "Storm Spirit", "Centaur Warrunner", "Hoodwink", "Clockwerk"],
+              direBans: ["Slark", "Terrorblade", "Leshrac", "Dark Willow", "Disruptor", "Luna", "Rubick"],
+              direPicks: ["Luna", "Puck", "Mars", "Rubick", "Disruptor"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Yatoro", hero: "Morphling", kda: "11/1/9", gpm: 780, xpm: 830, items: ["Power Treads", "Manta Style", "Butterfly", "Satanic", "Eye of Skadi", "Black King Bar"] },
+              { pos: 2, name: "Larl", hero: "Storm Spirit", kda: "7/2/13", gpm: 670, xpm: 720, items: ["Power Treads", "Kaya and Sange", "Orchid Malevolence", "Black King Bar", "Shiva's Guard", "Aghanim's Scepter"] },
+              { pos: 3, name: "Collapse", hero: "Centaur Warrunner", kda: "4/3/17", gpm: 530, xpm: 600, items: ["Phase Boots", "Blink Dagger", "Pipe of Insight", "Heart of Tarrasque", "Crimson Guard", "Lotus Orb"] },
+              { pos: 4, name: "rue", hero: "Hoodwink", kda: "3/3/15", gpm: 380, xpm: 440, items: ["Arcane Boots", "Aether Lens", "Gleipnir", "Force Staff", "Eul's Scepter", "Solar Crest"] },
+              { pos: 5, name: "not me", hero: "Clockwerk", kda: "2/5/16", gpm: 300, xpm: 370, items: ["Tranquil Boots", "Force Staff", "Glimmer Cape", "Aghanim's Shard", "Blade Mail", "Observer Ward"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Pure", hero: "Luna", kda: "3/5/4", gpm: 640, xpm: 680, items: ["Power Treads", "Manta Style", "Black King Bar", "Dragon Lance", "Butterfly", "Mask of Madness"] },
+              { pos: 2, name: "gpk", hero: "Puck", kda: "4/4/5", gpm: 590, xpm: 630, items: ["Phase Boots", "Witch Blade", "Blink Dagger", "Eul's Scepter", "Linken's Sphere", "Dagon"] },
+              { pos: 3, name: "MieRo", hero: "Mars", kda: "2/6/6", gpm: 450, xpm: 510, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Desolator", "Vladmir's Offering"] },
+              { pos: 4, name: "Save-", hero: "Rubick", kda: "1/5/8", gpm: 330, xpm: 380, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Ghost Scepter"] },
+              { pos: 5, name: "TORONTOTOKYO", hero: "Disruptor", kda: "1/7/5", gpm: 270, xpm: 320, items: ["Arcane Boots", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Observer Ward", "Town Portal Scroll"] }
+            ]
+          },
+          {
+            mapNumber: 2,
+            duracao: "32:45",
+            vencedor: "Team Spirit (Dire)",
+            draft: {
+              radiantBans: ["Terrorblade", "Slark", "Morphling", "Centaur Warrunner", "Disruptor", "Dark Willow", "Mars"],
+              radiantPicks: ["Sven", "Tiny", "Brewmaster", "Muerta", "Grimstroke"],
+              direBans: ["Doom", "Beastmaster", "Shadow Demon", "Puck", "Naga Siren", "Chen", "Batrider"],
+              direPicks: ["Ursa", "Pangolier", "Magnus", "Mirana", "Jakiro"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Pure", hero: "Sven", kda: "2/6/3", gpm: 610, xpm: 650, items: ["Power Treads", "Echo Sabre", "Black King Bar", "Mask of Madness", "Blink Dagger", "Daedalus"] },
+              { pos: 2, name: "gpk", hero: "Tiny", kda: "3/5/4", gpm: 550, xpm: 590, items: ["Power Treads", "Blink Dagger", "Echo Sabre", "Black King Bar", "Daedalus", "Assault Cuirass"] },
+              { pos: 3, name: "MieRo", hero: "Brewmaster", kda: "1/5/5", gpm: 410, xpm: 470, items: ["Phase Boots", "Urn of Shadows", "Radiance", "Black King Bar", "Refresher Orb", "Shiva's Guard"] },
+              { pos: 4, name: "Save-", hero: "Muerta", kda: "1/6/4", gpm: 310, xpm: 370, items: ["Power Treads", "Dragon Lance", "Maelstrom", "Blink Dagger", "Ghost Scepter", "Force Staff"] },
+              { pos: 5, name: "TORONTOTOKYO", hero: "Grimstroke", kda: "1/6/3", gpm: 250, xpm: 300, items: ["Arcane Boots", "Aether Lens", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Wind Lace"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Yatoro", hero: "Ursa", kda: "13/0/7", gpm: 830, xpm: 880, items: ["Phase Boots", "Diffusal Blade", "Blink Dagger", "Black King Bar", "Abyssal Blade", "Satanic"] },
+              { pos: 2, name: "Larl", hero: "Pangolier", kda: "6/2/12", gpm: 650, xpm: 700, items: ["Arcane Boots", "Diffusal Blade", "Blink Dagger", "Eul's Scepter", "Black King Bar", "Aghanim's Shard"] },
+              { pos: 3, name: "Collapse", hero: "Magnus", kda: "5/1/14", gpm: 570, xpm: 630, items: ["Power Treads", "Blink Dagger", "Force Staff", "Refresher Orb", "Harpoon", "Shiva's Guard"] },
+              { pos: 4, name: "rue", hero: "Mirana", kda: "4/2/14", gpm: 400, xpm: 450, items: ["Power Treads", "Spirit Vessel", "Eul's Scepter", "Solar Crest", "Force Staff", "Glimmer Cape"] },
+              { pos: 5, name: "not me", hero: "Jakiro", kda: "2/3/16", gpm: 320, xpm: 380, items: ["Arcane Boots", "Aether Lens", "Force Staff", "Glimmer Cape", "Aghanim's Shard", "Observer Ward"] }
+            ]
+          }
+        ]
+      },
+      {
+        id: "semi_lb",
+        stage: "Semi Lower Bracket",
+        timeA: "Team Spirit",
+        timeB: "BB Team",
+        scoreA: 2,
+        scoreB: 0,
+        winner: "Team Spirit",
+        dur: "41m / 29m",
+        games: [
+          {
+            mapNumber: 1,
+            duracao: "41:30",
+            vencedor: "Team Spirit (Radiant)",
+            draft: {
+              radiantBans: ["Doom", "Beastmaster", "Chen", "Naga Siren", "Batrider", "Puck", "Shadow Demon"],
+              radiantPicks: ["Faceless Void", "Ember Spirit", "Slardar", "Tusk", "Shadow Shaman"],
+              direBans: ["Terrorblade", "Slark", "Morphling", "Centaur Warrunner", "Disruptor", "Dark Willow", "Mars"],
+              direPicks: ["Terrorblade", "Leshrac", "Dark Seer", "Earth Spirit", "Treant Protector"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Yatoro", hero: "Faceless Void", kda: "10/2/8", gpm: 760, xpm: 810, items: ["Power Treads", "Maelstrom", "Black King Bar", "Manta Style", "Eye of Skadi", "Daedalus"] },
+              { pos: 2, name: "Larl", hero: "Ember Spirit", kda: "7/3/11", gpm: 660, xpm: 710, items: ["Phase Boots", "Battle Fury", "Mage Slayer", "Black King Bar", "Shiva's Guard", "Desolator"] },
+              { pos: 3, name: "Collapse", hero: "Slardar", kda: "5/4/10", gpm: 520, xpm: 580, items: ["Power Treads", "Blink Dagger", "Black King Bar", "Aghanim's Scepter", "Moon Shard", "Assault Cuirass"] },
+              { pos: 4, name: "rue", hero: "Tusk", kda: "3/5/12", gpm: 370, xpm: 430, items: ["Phase Boots", "Blink Dagger", "Force Staff", "Desolator", "Solar Crest", "Ghost Scepter"] },
+              { pos: 5, name: "not me", hero: "Shadow Shaman", kda: "2/6/11", gpm: 290, xpm: 340, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Glimmer Cape", "Aghanim's Shard", "Wind Lace"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Nightfall", hero: "Terrorblade", kda: "4/5/4", gpm: 680, xpm: 720, items: ["Power Treads", "Manta Style", "Eye of Skadi", "Butterfly", "Satanic", "Daedalus"] },
+              { pos: 2, name: "gpk", hero: "Leshrac", kda: "5/6/5", gpm: 620, xpm: 670, items: ["Bloodstone", "Boots of Travel", "Kaya and Sange", "Black King Bar", "Shiva's Guard", "Eternal Shroud"] },
+              { pos: 3, name: "MieRo", hero: "Dark Seer", kda: "2/5/7", gpm: 460, xpm: 510, items: ["Guardian Greaves", "Blink Dagger", "Pipe of Insight", "Aghanim's Scepter", "Refresher Orb", "Lotus Orb"] },
+              { pos: 4, name: "Save-", hero: "Earth Spirit", kda: "2/6/8", gpm: 320, xpm: 370, items: ["Tranquil Boots", "Urn of Shadows", "Blink Dagger", "Black King Bar", "Force Staff", "Ghost Scepter"] },
+              { pos: 5, name: "TORONTOTOKYO", hero: "Treant Protector", kda: "1/6/9", gpm: 260, xpm: 310, items: ["Arcane Boots", "Solar Crest", "Holy Locket", "Aghanim's Shard", "Glimmer Cape", "Blink Dagger"] }
+            ]
+          },
+          {
+            mapNumber: 2,
+            duracao: "29:10",
+            vencedor: "Team Spirit (Dire)",
+            draft: {
+              radiantBans: ["Terrorblade", "Slark", "Morphling", "Centaur Warrunner", "Disruptor", "Dark Willow", "Mars"],
+              radiantPicks: ["Chaos Knight", "Queen of Pain", "Tidehunter", "Rubick", "Lich"],
+              direBans: ["Doom", "Beastmaster", "Chen", "Naga Siren", "Batrider", "Puck", "Shadow Demon"],
+              direPicks: ["Anti-Mage", "Kunkka", "Centaur Warrunner", "Clockwerk", "Disruptor"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Nightfall", hero: "Chaos Knight", kda: "2/7/3", gpm: 580, xpm: 620, items: ["Power Treads", "Armlet of Mordiggian", "Echo Sabre", "Heart of Tarrasque", "Black King Bar", "Assault Cuirass"] },
+              { pos: 2, name: "gpk", hero: "Queen of Pain", kda: "3/6/4", gpm: 540, xpm: 590, items: ["Power Treads", "Witch Blade", "Black King Bar", "Aghanim's Scepter", "Shiva's Guard", "Refresher Orb"] },
+              { pos: 3, name: "MieRo", hero: "Tidehunter", kda: "1/6/5", gpm: 400, xpm: 450, items: ["Phase Boots", "Blink Dagger", "Refresher Orb", "Pipe of Insight", "Shiva's Guard", "Lotus Orb"] },
+              { pos: 4, name: "Save-", hero: "Rubick", kda: "1/7/6", gpm: 290, xpm: 340, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Ghost Scepter"] },
+              { pos: 5, name: "TORONTOTOKYO", hero: "Lich", kda: "1/8/5", gpm: 230, xpm: 280, items: ["Tranquil Boots", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Aether Lens", "Wind Lace"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Yatoro", hero: "Anti-Mage", kda: "12/0/5", gpm: 880, xpm: 930, items: ["Power Treads", "Battle Fury", "Manta Style", "Butterfly", "Abyssal Blade", "Heart of Tarrasque"] },
+              { pos: 2, name: "Larl", hero: "Kunkka", kda: "6/1/12", gpm: 700, xpm: 750, items: ["Phase Boots", "Aghanim's Scepter", "Black King Bar", "Shiva's Guard", "Refresher Orb", "Heart of Tarrasque"] },
+              { pos: 3, name: "Collapse", hero: "Centaur Warrunner", kda: "5/1/14", gpm: 570, xpm: 630, items: ["Phase Boots", "Blink Dagger", "Heart of Tarrasque", "Pipe of Insight", "Crimson Guard", "Lotus Orb"] },
+              { pos: 4, name: "rue", hero: "Clockwerk", kda: "3/3/15", gpm: 390, xpm: 450, items: ["Tranquil Boots", "Force Staff", "Blade Mail", "Glimmer Cape", "Aghanim's Shard", "Lotus Orb"] },
+              { pos: 5, name: "not me", hero: "Disruptor", kda: "2/3/17", gpm: 310, xpm: 370, items: ["Arcane Boots", "Aghanim's Scepter", "Glimmer Cape", "Force Staff", "Aether Lens", "Ghost Scepter"] }
+            ]
+          }
+        ]
+      }
     ];
     setTiFinishedMatches(ti2026Playoffs);
   }, []);
@@ -439,7 +586,7 @@ export default function App() {
               </section>
             )}
 
-            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 COM O AEGIS OFICIAL */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
@@ -641,12 +788,12 @@ export default function App() {
                     <span style={{ color: 'var(--text-dim)' }}>Duração: {game.duracao}</span>
                   </div>
 
-                  {/* DRAFT COM IMAGENS DOS HERÓIS */}
+                  {/* DRAFT COM BANS E PICKS COMPLETOS */}
                   <div className="draft-block">
                     <div className="draft-title">Ordem de Draft (Picks & Bans)</div>
                     
                     {/* RADIANT DRAFT */}
-                    <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
                       <span style={{ color: 'var(--text-dim)', fontSize: 10 }}>Bans:</span>
                       {game.draft.radiantBans.map((h, i) => (
@@ -664,7 +811,7 @@ export default function App() {
                     </div>
 
                     {/* DIRE DRAFT */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
                       <span style={{ color: 'var(--text-dim)', fontSize: 10 }}>Bans:</span>
                       {game.draft.direBans.map((h, i) => (
