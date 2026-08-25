@@ -14,7 +14,6 @@ function worldToPct(x, y) {
   };
 }
 
-// Helpers de heróis e itens pelas constantes da Valve
 function getHeroImg(constants, heroId) {
   const h = constants.heroes[heroId];
   return h ? `${STEAM_CDN}${h.img}` : "";
@@ -35,7 +34,7 @@ export default function App() {
   const [finishedSeries, setFinishedSeries] = useState([]);
   const [loadingSeries, setLoadingSeries] = useState(false);
   
-  // Dicionários de constantes da Valve
+  // Constantes da Valve (OpenDota Cache 24h)
   const [constants, setConstants] = useState({ heroes: {}, itemsById: {} });
   
   // Modais de detalhes
@@ -45,12 +44,12 @@ export default function App() {
   const [loadedMatchData, setLoadedMatchData] = useState(null);
   const [loadingMatch, setLoadingMatch] = useState(false);
 
-  // Leaderboard MMR
+  // Leaderboard MMR Valve
   const [mmrPlayers, setMmrPlayers] = useState([]);
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR CONSTANTES DE HERÓIS E ITENS COM CACHE DE 24H
+  // 1. CARREGA CONSTANTES DE HERÓIS E ITENS DA VALVE
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -84,16 +83,14 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCA DINÂMICA DE SÉRIES E JOGOS REAIS DO ÚLTIMO TORNEIO
+  // 2. BUSCA JOGOS FINALIZADOS DA SÉRIE
   useEffect(() => {
     async function loadTournamentSeries() {
       setLoadingSeries(true);
       try {
-        // Busca as últimas partidas profissionais concluídas
         const proRes = await fetch(`${OPENDOTA_BASE}/proMatches`);
         const proMatches = await proRes.json();
         
-        // Agrupa por série usando a lógica do app.js
         const groups = {};
         (proMatches || []).slice(0, 40).forEach((m) => {
           const key = m.series_id && m.series_id !== 0 
@@ -108,7 +105,6 @@ export default function App() {
           games.sort((a, b) => a.start_time - b.start_time);
           const first = games[0];
           const tAId = first.radiant_team_id;
-          const tBId = first.dire_team_id;
           
           let scoreA = 0, scoreB = 0;
           games.forEach((g) => {
@@ -148,7 +144,7 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTAR PARTIDA INDIVIDUAL REAL DA OPENDOTA
+  // 3. CONSULTA PARTIDA INDIVIDUAL DINÂMICA
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -165,7 +161,7 @@ export default function App() {
     setLoadingMatch(false);
   }
 
-  // 4. LEITURA DA AGENDA MANUAL (/agenda.json) COM VALIDAÇÃO DE DATA
+  // 4. LEITURA DA AGENDA MANUAL COM FILTRO DE DATA
   useEffect(() => {
     async function loadManualAgenda() {
       try {
@@ -185,13 +181,21 @@ export default function App() {
     loadManualAgenda();
   }, []);
 
-  // 5. POLLING DE PARTIDAS AO VIVO
+  // 5. POLLING VIA VALVE WEBAPI / LIVE PROXY
   useEffect(() => {
     async function fetchLive() {
       try {
-        const res = await fetch(`${OPENDOTA_BASE}/liveLeagueGames`);
-        const data = await res.json();
-        const list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
+        let list = [];
+        try {
+          const res = await fetch('/api/live');
+          const data = await res.json();
+          list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
+        } catch {
+          const res = await fetch(`${OPENDOTA_BASE}/liveLeagueGames`);
+          const data = await res.json();
+          list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
+        }
+
         const validLive = list.filter(g => (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
         setLiveGames(validLive);
       } catch {
@@ -255,7 +259,7 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS DO ÚLTIMO TORNEIO FINALIZADO */}
+          {/* ESQUERDA: JOGOS FINALIZADOS DA RODADA */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -342,7 +346,7 @@ export default function App() {
               </section>
             )}
 
-            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 COM O AEGIS OFICIAL */}
+            {/* CARD CAMPEÃO THE INTERNATIONAL 2026 */}
             <div className="champ-card">
               <div className="champ-header">
                 <div className="champ-title-group">
@@ -490,7 +494,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA SÉRIE COM PARTIDA REAL DA OPENDOTA */}
+      {/* MODAL DETALHADO DO JOGO COM PARSE REAL DA OPENDOTA */}
       {selectedSeriesDetail && selectedSeriesDetail.games && (
         <div className="modal-backdrop">
           <div className="modal-box-wide">
