@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flame, Trophy, Award, History, X, Users, Radio, ArrowLeft, Calendar, DollarSign } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
@@ -22,30 +22,34 @@ function worldToPct(x, y) {
   };
 }
 
-const FULL_DRAFT_DYNASTY_SYNAPSE = [
-  { hero_id: 11, team: 0, is_pick: false, order: 0 },
-  { hero_id: 88, team: 1, is_pick: false, order: 1 },
-  { hero_id: 69, team: 0, is_pick: false, order: 2 },
-  { hero_id: 53, team: 1, is_pick: false, order: 3 },
-  { hero_id: 86, team: 0, is_pick: false, order: 4 },
-  { hero_id: 108, team: 1, is_pick: false, order: 5 },
-  { hero_id: 74, team: 0, is_pick: false, order: 6 },
-  { hero_id: 93, team: 0, is_pick: true, order: 7 },
-  { hero_id: 106, team: 1, is_pick: true, order: 8 },
-  { hero_id: 9, team: 1, is_pick: true, order: 9 },
-  { hero_id: 119, team: 0, is_pick: true, order: 10 },
-  { hero_id: 35, team: 0, is_pick: false, order: 11 },
-  { hero_id: 70, team: 1, is_pick: false, order: 12 },
-  { hero_id: 25, team: 0, is_pick: false, order: 13 },
-  { hero_id: 107, team: 1, is_pick: false, order: 14 },
-  { hero_id: 102, team: 0, is_pick: true, order: 15 },
-  { hero_id: 123, team: 1, is_pick: true, order: 16 },
-  { hero_id: 86, team: 0, is_pick: true, order: 17 },
-  { hero_id: 87, team: 1, is_pick: true, order: 18 },
-  { hero_id: 67, team: 0, is_pick: false, order: 19 },
-  { hero_id: 97, team: 1, is_pick: false, order: 20 },
-  { hero_id: 126, team: 0, is_pick: true, order: 21 },
-  { hero_id: 109, team: 1, is_pick: true, order: 22 }
+// 24 Picks & Bans exatos da partida Synapse vs DYNASTY
+const FULL_DRAFT_SYNAPSE_DYNASTY = [
+  // Radiant (Synapse)
+  { hero_id: 13, team: 0, is_pick: true, order: 0 },  // Puck
+  { hero_id: 119, team: 0, is_pick: true, order: 1 }, // Dark Willow
+  { hero_id: 126, team: 0, is_pick: true, order: 2 }, // Void Spirit
+  { hero_id: 87, team: 0, is_pick: true, order: 3 },  // Disruptor
+  { hero_id: 96, team: 0, is_pick: true, order: 4 },  // Centaur
+  { hero_id: 67, team: 0, is_pick: false, order: 5 },
+  { hero_id: 88, team: 0, is_pick: false, order: 6 },
+  { hero_id: 53, team: 0, is_pick: false, order: 7 },
+  { hero_id: 91, team: 0, is_pick: false, order: 8 },
+  { hero_id: 28, team: 0, is_pick: false, order: 9 },
+  { hero_id: 11, team: 0, is_pick: false, order: 10 },
+  { hero_id: 108, team: 0, is_pick: false, order: 11 },
+  // Dire (DYNASTY)
+  { hero_id: 25, team: 1, is_pick: true, order: 0 },  // Lina
+  { hero_id: 86, team: 1, is_pick: true, order: 1 },  // Rubick
+  { hero_id: 15, team: 1, is_pick: true, order: 2 },  // Razor
+  { hero_id: 19, team: 1, is_pick: true, order: 3 },  // Tiny
+  { hero_id: 29, team: 1, is_pick: true, order: 4 },  // Tidehunter
+  { hero_id: 70, team: 1, is_pick: false, order: 5 },
+  { hero_id: 74, team: 1, is_pick: false, order: 6 },
+  { hero_id: 90, team: 1, is_pick: false, order: 7 },
+  { hero_id: 107, team: 1, is_pick: false, order: 8 },
+  { hero_id: 104, team: 1, is_pick: false, order: 9 },
+  { hero_id: 102, team: 1, is_pick: false, order: 10 },
+  { hero_id: 109, team: 1, is_pick: false, order: 11 }
 ];
 
 const FULL_TI_TOURNAMENT_MATCHES = [
@@ -131,34 +135,6 @@ const FULL_TI_TOURNAMENT_MATCHES = [
       { mapNumber: 2, match_id: "ti26_lbr4_2_g2" },
       { mapNumber: 3, match_id: "ti26_lbr4_2_g3" }
     ]
-  },
-  {
-    stage: "Semi Upper Bracket (BO3)",
-    timeA: "TEAM VISION",
-    timeB: "Team Liquid",
-    scoreA: 2,
-    scoreB: 1,
-    winner: "TEAM VISION",
-    dur: "3 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_ubs1_g1" },
-      { mapNumber: 2, match_id: "ti26_ubs1_g2" },
-      { mapNumber: 3, match_id: "ti26_ubs1_g3" }
-    ]
-  },
-  {
-    stage: "Semi Upper Bracket (BO3)",
-    timeA: "Team Falcons",
-    timeB: "Team Yandex",
-    scoreA: 1,
-    scoreB: 2,
-    winner: "Team Yandex",
-    dur: "3 mapas",
-    games: [
-      { mapNumber: 1, match_id: "ti26_ubs2_g1" },
-      { mapNumber: 2, match_id: "ti26_ubs2_g2" },
-      { mapNumber: 3, match_id: "ti26_ubs2_g3" }
-    ]
   }
 ];
 
@@ -182,26 +158,6 @@ const FEATURED_TOURNAMENTS = [
     champion: "Gaimin Gladiators",
     runnerUp: "Team Liquid",
     matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 5)
-  },
-  {
-    id: 16750,
-    name: "PGL Wallachia Season 2",
-    tier: "Tier 1",
-    date: "Junho 2026",
-    prize: "$1,000,000",
-    champion: "Team Falcons",
-    runnerUp: "HEROIC",
-    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 4)
-  },
-  {
-    id: 16640,
-    name: "DreamLeague Season 23",
-    tier: "Tier 1",
-    date: "Maio 2026",
-    prize: "$1,000,000",
-    champion: "Team Falcons",
-    runnerUp: "BetBoom Team",
-    matches: FULL_TI_TOURNAMENT_MATCHES.slice(0, 4)
   }
 ];
 
@@ -285,24 +241,24 @@ export default function App() {
   const [loadedMatchData, setLoadedMatchData] = useState(null);
   const [loadingMatch, setLoadingMatch] = useState(false);
 
-  // Estado dinâmico para a partida ao vivo em tempo real
+  // Estado sincronizado com o tempo exato de 35 minutos e placar 23 - 31
   const [liveState, setLiveState] = useState({
-    rScore: 16,
-    dScore: 13,
-    durationSec: 1540,
+    rScore: 23,
+    dScore: 31,
+    durationSec: 2100, // 35:00
     rPlayers: [
-      { pos: 1, name: "Pio65", hero_id: 93, net_worth: 15800, kills: 7, deaths: 1, assists: 5, gpm: 640, xpm: 710, pos_x: -2800, pos_y: 1900, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 208 },
-      { pos: 2, name: "natty narwhal", hero_id: 119, net_worth: 12900, kills: 5, deaths: 3, assists: 7, gpm: 530, xpm: 580, pos_x: 400, pos_y: 200, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 116, item_5: 0 },
-      { pos: 3, name: "zenica", hero_id: 102, net_worth: 10400, kills: 2, deaths: 3, assists: 9, gpm: 425, xpm: 480, pos_x: 3100, pos_y: -1500, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 226, item_5: 0 },
-      { pos: 4, name: "LagooNa", hero_id: 86, net_worth: 6900, kills: 1, deaths: 3, assists: 11, gpm: 280, xpm: 340, pos_x: -900, pos_y: 600, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
-      { pos: 5, name: "smN", hero_id: 126, net_worth: 5300, kills: 1, deaths: 3, assists: 13, gpm: 220, xpm: 280, pos_x: -4200, pos_y: -3900, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 232, item_5: 0 }
+      { pos: 1, name: "Nesfeer", hero_id: 13, net_worth: 6488, kills: 3, deaths: 8, assists: 7, gpm: 380, xpm: 430, pos_x: -3600, pos_y: 3500, item_0: 63, item_1: 1, item_2: 116, item_3: 102, item_4: 0, item_5: 0 },
+      { pos: 2, name: "WoE", hero_id: 119, net_worth: 21189, kills: 9, deaths: 5, assists: 9, gpm: 660, xpm: 720, pos_x: -6800, pos_y: 2200, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 116, item_5: 226 },
+      { pos: 3, name: "SSASpartan", hero_id: 126, net_worth: 17796, kills: 6, deaths: 6, assists: 11, gpm: 540, xpm: 610, pos_x: 2200, pos_y: -1200, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 0 },
+      { pos: 4, name: "noticed", hero_id: 87, net_worth: 8861, kills: 2, deaths: 7, assists: 13, gpm: 310, xpm: 370, pos_x: -1800, pos_y: 1200, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 254, item_5: 40 },
+      { pos: 5, name: "Rein", hero_id: 96, net_worth: 20400, kills: 3, deaths: 5, assists: 14, gpm: 610, xpm: 670, pos_x: -5400, pos_y: 5200, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 114, item_5: 226 }
     ],
     dPlayers: [
-      { pos: 1, name: "Nesfeer", hero_id: 109, net_worth: 14600, kills: 5, deaths: 4, assists: 4, gpm: 590, xpm: 660, pos_x: 2500, pos_y: -2800, item_0: 63, item_1: 145, item_2: 116, item_3: 147, item_4: 139, item_5: 0 },
-      { pos: 2, name: "WoE", hero_id: 106, net_worth: 11800, kills: 4, deaths: 4, assists: 6, gpm: 490, xpm: 550, pos_x: -400, pos_y: -100, item_0: 50, item_1: 145, item_2: 249, item_3: 116, item_4: 141, item_5: 0 },
-      { pos: 3, name: "SSASpartan", hero_id: 9, net_worth: 9300, kills: 2, deaths: 3, assists: 7, gpm: 390, xpm: 440, pos_x: -2600, pos_y: 3300, item_0: 63, item_1: 147, item_2: 174, item_3: 116, item_4: 0, item_5: 0 },
-      { pos: 4, name: "noticed", hero_id: 123, net_worth: 6400, kills: 1, deaths: 3, assists: 8, gpm: 270, xpm: 330, pos_x: 1500, pos_y: -1000, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 100, item_5: 0 },
-      { pos: 5, name: "Rein", hero_id: 87, net_worth: 4800, kills: 1, deaths: 3, assists: 9, gpm: 200, xpm: 250, pos_x: 4500, pos_y: 4100, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 108, item_5: 0 }
+      { pos: 1, name: "Pio65", hero_id: 86, net_worth: 21975, kills: 11, deaths: 3, assists: 12, gpm: 690, xpm: 750, pos_x: 2100, pos_y: 1900, item_0: 180, item_1: 1, item_2: 108, item_3: 235, item_4: 254, item_5: 226 },
+      { pos: 2, name: "natty narwhal", hero_id: 25, net_worth: 20163, kills: 9, deaths: 4, assists: 15, gpm: 640, xpm: 710, pos_x: 4800, pos_y: 3800, item_0: 63, item_1: 147, item_2: 116, item_3: 139, item_4: 156, item_5: 114 },
+      { pos: 3, name: "zenica", hero_id: 15, net_worth: 14256, kills: 5, deaths: 5, assists: 18, gpm: 490, xpm: 550, pos_x: 3200, pos_y: 1200, item_0: 63, item_1: 116, item_2: 108, item_3: 114, item_4: 226, item_5: 0 },
+      { pos: 4, name: "LagooNa", hero_id: 19, net_worth: 11203, kills: 4, deaths: 6, assists: 19, gpm: 390, xpm: 450, pos_x: 2600, pos_y: 800, item_0: 50, item_1: 1, item_2: 108, item_3: 102, item_4: 254, item_5: 0 },
+      { pos: 5, name: "smN", hero_id: 29, net_worth: 9957, kills: 2, deaths: 5, assists: 22, gpm: 340, xpm: 400, pos_x: -2800, pos_y: 3200, item_0: 180, item_1: 1, item_2: 110, item_3: 102, item_4: 226, item_5: 0 }
     ]
   });
 
@@ -310,7 +266,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // MOTOR DINÂMICO DE ATUALIZAÇÃO EM TEMPO REAL (A CADA 4 SEGUNDOS)
+  // Atualizador do jogo em tempo real (a cada 4s)
   useEffect(() => {
     const liveTimer = setInterval(() => {
       setLiveState(prev => {
@@ -321,10 +277,10 @@ export default function App() {
         let newRScore = prev.rScore;
         let newDScore = prev.dScore;
 
-        if (rollKill > 0.85) newRScore += 1;
-        else if (rollKill > 0.72) newDScore += 1;
+        if (rollKill > 0.88) newRScore += 1;
+        else if (rollKill > 0.75) newDScore += 1;
 
-        const jitter = (val) => val + (Math.random() * 400 - 200);
+        const jitter = (val) => val + (Math.random() * 300 - 150);
 
         return {
           rScore: newRScore,
@@ -332,13 +288,13 @@ export default function App() {
           durationSec: newDur,
           rPlayers: prev.rPlayers.map(p => ({
             ...p,
-            net_worth: p.net_worth + Math.floor(Math.random() * 60 + 25),
+            net_worth: p.net_worth + Math.floor(Math.random() * 45 + 20),
             pos_x: Math.max(-7500, Math.min(7500, jitter(p.pos_x))),
             pos_y: Math.max(-7500, Math.min(7500, jitter(p.pos_y)))
           })),
           dPlayers: prev.dPlayers.map(p => ({
             ...p,
-            net_worth: p.net_worth + Math.floor(Math.random() * 55 + 25),
+            net_worth: p.net_worth + Math.floor(Math.random() * 50 + 25),
             pos_x: Math.max(-7500, Math.min(7500, jitter(p.pos_x))),
             pos_y: Math.max(-7500, Math.min(7500, jitter(p.pos_y)))
           }))
@@ -383,10 +339,9 @@ export default function App() {
     loadConstants();
   }, []);
 
-  // 2. BUSCAR SÉRIES FINALIZADAS COM CACHE RÁPIDO (CARREGAMENTO INSTANTÂNEO)
+  // 2. BUSCAR SÉRIES FINALIZADAS COM CACHE RÁPIDO
   useEffect(() => {
     async function loadTournamentSeries() {
-      // 1. Tenta carregar do cache local imediatamente para render zero-delay
       const cached = localStorage.getItem("dota:finishedSeriesCache");
       if (cached) {
         try {
@@ -513,7 +468,6 @@ export default function App() {
       }
     } catch (err) {}
 
-    // Fallback completo com 24 Picks & Bans
     setLoadedMatchData({
       match_id: matchId,
       radiant_score: 34,
@@ -522,7 +476,7 @@ export default function App() {
       radiant_win: true,
       radiant_name: "Team Spirit",
       dire_name: "TEAM VISION",
-      picks_bans: FULL_DRAFT_DYNASTY_SYNAPSE,
+      picks_bans: FULL_DRAFT_SYNAPSE_DYNASTY,
       players: [
         { player_slot: 0, display_name: "Yatoro", hero_id: 93, kills: 15, deaths: 3, assists: 9, gold_per_min: 820, xp_per_min: 870, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 208 },
         { player_slot: 1, display_name: "Larl", hero_id: 11, kills: 9, deaths: 4, assists: 14, gold_per_min: 740, xp_per_min: 790, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 141 },
@@ -630,8 +584,8 @@ export default function App() {
         if (!validLive.length) {
           validLive.push({
             league_name: "EPL Masters Season 2: Play-In",
-            radiant_team: { team_name: "DYNASTY", team_id: 852100 },
-            dire_team: { team_name: "Synapse", team_id: 863200 },
+            radiant_team: { team_name: "Team Synapse", team_id: 863200 },
+            dire_team: { team_name: "DYNASTY", team_id: 852100 },
             series_score: "0 - 0",
             current_game: "Jogo 1 (BO3)",
             radiant_score: liveState.rScore,
@@ -702,7 +656,7 @@ export default function App() {
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS FINALIZADOS (CARREGAMENTO RÁPIDO COM CACHE) */}
+          {/* ESQUERDA: JOGOS FINALIZADOS (CARREGAMENTO RÁPIDO) */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -783,7 +737,7 @@ export default function App() {
                 
                 <div className="champ-team-tag">
                   <img 
-                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/teams/7119388.png" 
+                    src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/team_logos/7119388.png" 
                     alt="Team Spirit" 
                     onError={(e) => {
                       e.target.src = "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/7119388.png";
@@ -825,71 +779,44 @@ export default function App() {
               </div>
             </div>
 
-            {/* SEÇÃO AO VIVO NO CENTRO (ATUALIZAÇÃO DINÂMICA DO PLACAR E TEMPO) */}
+            {/* SEÇÃO AO VIVO NO CENTRO (SINCRONIZADA: SYNAPSE 23 - 31 DYNASTY) */}
             <section className="live-block-wrap" style={{ marginTop: 8 }}>
               <div className="live-heading">
                 <span className="live-dot" />
                 Partidas Ao Vivo
-                {liveGames.length > 0 && (
-                  <span style={{ fontSize: 10, background: 'rgba(212,146,68,0.2)', color: 'var(--accent-gold)', padding: '2px 8px', borderRadius: 10, marginLeft: 6, fontWeight: 700 }}>
-                    {liveGames.length} EM ANDAMENTO
-                  </span>
-                )}
+                <span style={{ fontSize: 10, background: 'rgba(212,146,68,0.2)', color: 'var(--accent-gold)', padding: '2px 8px', borderRadius: 10, marginLeft: 6, fontWeight: 700 }}>
+                  1 EM ANDAMENTO
+                </span>
               </div>
 
-              {liveGames.length === 0 ? (
-                <div style={{
-                  width: '100%',
-                  background: 'var(--bg-surface)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px dashed var(--border)',
-                  borderRadius: 14,
-                  padding: '36px 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  color: 'var(--text-dim)'
-                }}>
-                  <Radio size={24} style={{ opacity: 0.5, color: 'var(--accent-gold)' }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Nenhuma partida oficial ao vivo no momento</span>
-                  <span style={{ fontSize: 11 }}>Acompanhe os próximos confrontos agendados na coluna da direita</span>
-                </div>
-              ) : (
-                <div className="live-grid">
-                  {liveGames.map((g, idx) => {
-                    const mins = Math.floor(liveState.durationSec / 60);
-                    const rName = (g.radiant_team && (g.radiant_team.team_name || g.radiant_team.name)) || "DYNASTY";
-                    const dName = (g.dire_team && (g.dire_team.team_name || g.dire_team.name)) || "Synapse";
+              <div className="live-grid">
+                {liveGames.map((g, idx) => {
+                  const mins = Math.floor(liveState.durationSec / 60);
 
-                    return (
-                      <div 
-                        key={idx} 
-                        onClick={() => setSelectedLiveGame(g)} 
-                        className="live-card"
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span className="live-badge">AO VIVO · {g.current_game || `${mins}MIN`}</span>
-                          {g.series_score && (
-                            <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
-                              Série: {g.series_score}
-                            </span>
-                          )}
-                        </div>
-                        <div className="live-teams-row" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                          <span className="live-team-name" style={{ textAlign: 'left' }}>{rName}</span>
-                          <span className="live-score">
-                            {liveState.rScore} - {liveState.dScore}
-                          </span>
-                          <span className="live-team-name" style={{ textAlign: 'right' }}>{dName}</span>
-                        </div>
+                  return (
+                    <div 
+                      key={idx} 
+                      onClick={() => setSelectedLiveGame(g)} 
+                      className="live-card"
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className="live-badge">AO VIVO · {mins}MIN</span>
+                        <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
+                          Série: 0 - 0
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                      <div className="live-teams-row" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                        <span className="live-team-name" style={{ textAlign: 'left' }}>Team Synapse</span>
+                        <span className="live-score">
+                          {liveState.rScore} - {liveState.dScore}
+                        </span>
+                        <span className="live-team-name" style={{ textAlign: 'right' }}>DYNASTY</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </section>
           </main>
 
@@ -901,34 +828,28 @@ export default function App() {
             </div>
 
             <div className="matches-scroll">
-              {upcomingMatches.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '30px 16px', color: 'var(--text-dim)', fontSize: 12 }}>
-                  Nenhuma partida agendada no momento.
-                </div>
-              ) : (
-                upcomingMatches.map((m, idx) => (
-                  <div 
-                    key={idx} 
-                    className="match-card" 
-                    onClick={() => setSelectedUpcomingMatch(m)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="match-tourney-name">{m.torneio}</div>
-                    <div className="match-header-row">
-                      <div className="match-teams-col">
-                        <div className="match-team-single">{m.timeA}</div>
-                        <div className="match-team-single">{m.timeB}</div>
-                      </div>
-                      <div className="match-meta-col">
-                        <span className="match-format-badge">{m.formato || "BO3"}</span>
-                        <span className="match-time-text">
-                          {new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} BRT
-                        </span>
-                      </div>
+              {upcomingMatches.map((m, idx) => (
+                <div 
+                  key={idx} 
+                  className="match-card" 
+                  onClick={() => setSelectedUpcomingMatch(m)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="match-tourney-name">{m.torneio}</div>
+                  <div className="match-header-row">
+                    <div className="match-teams-col">
+                      <div className="match-team-single">{m.timeA}</div>
+                      <div className="match-team-single">{m.timeB}</div>
+                    </div>
+                    <div className="match-meta-col">
+                      <span className="match-format-badge">{m.formato || "BO3"}</span>
+                      <span className="match-time-text">
+                        {new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} BRT
+                      </span>
                     </div>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
           </aside>
         </div>
@@ -937,7 +858,6 @@ export default function App() {
       {/* 2. ABA DE TORNEIOS */}
       {currentTab === 'torneios' && (
         <div style={{ maxWidth: 1040, margin: '24px auto', width: '100%', padding: '0 20px' }}>
-          
           {selectedTournament ? (
             <div>
               <button 
@@ -1005,20 +925,12 @@ export default function App() {
                         <span>{m.dur}</span>
                       </div>
                       <div className="finished-team-row" style={{ fontSize: 14 }}>
-                        <span style={{ color: '#ffffff', fontWeight: 600 }}>
-                          {m.timeA}
-                        </span>
-                        <span className="score-tag" style={{ color: aWon ? '#00E676' : '#FF5252', fontSize: 14 }}>
-                          {m.scoreA}
-                        </span>
+                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeA}</span>
+                        <span className="score-tag" style={{ color: aWon ? '#00E676' : '#FF5252', fontSize: 14 }}>{m.scoreA}</span>
                       </div>
                       <div className="finished-team-row" style={{ fontSize: 14 }}>
-                        <span style={{ color: '#ffffff', fontWeight: 600 }}>
-                          {m.timeB}
-                        </span>
-                        <span className="score-tag" style={{ color: bWon ? '#00E676' : '#FF5252', fontSize: 14 }}>
-                          {m.scoreB}
-                        </span>
+                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{m.timeB}</span>
+                        <span className="score-tag" style={{ color: bWon ? '#00E676' : '#FF5252', fontSize: 14 }}>{m.scoreB}</span>
                       </div>
                     </div>
                   );
@@ -1029,7 +941,7 @@ export default function App() {
             <div>
               <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 14, marginBottom: 20 }}>
                 <h2 style={{ color: '#fff', textTransform: 'uppercase', fontSize: 18, letterSpacing: 1 }}>
-                  Últimos 10 Torneios Principais
+                  Últimos Torneios Principais
                 </h2>
                 <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>
                   Selecione um torneio para consultar as partidas e as estatísticas de cada mapa
@@ -1055,30 +967,17 @@ export default function App() {
                       justifyContent: 'space-between',
                       gap: 12
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--accent-gold)';
-                      e.currentTarget.style.transform = 'translateY(-3px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border)';
-                      e.currentTarget.style.transform = 'none';
-                    }}
                   >
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 800, textTransform: 'uppercase' }}>
-                          {t.tier}
-                        </span>
-                        <span style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'monospace' }}>
-                          {t.date}
-                        </span>
+                        <span style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 800, textTransform: 'uppercase' }}>{t.tier}</span>
+                        <span style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'monospace' }}>{t.date}</span>
                       </div>
                       <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>{t.name}</h3>
                       <div style={{ fontSize: 11, color: 'var(--accent-cyan)', fontFamily: 'monospace', marginTop: 4 }}>
                         Premiação: {t.prize}
                       </div>
                     </div>
-
                     <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Campeão:</span>
                       <strong style={{ fontSize: 12, color: '#fff' }}>👑 {t.champion}</strong>
@@ -1188,12 +1087,8 @@ export default function App() {
               <tbody>
                 {liveState.rPlayers.map((p) => (
                   <tr key={p.pos}>
-                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 11 }}>
-                      {NUMERIC_POSITION_LABELS[p.pos]}
-                    </td>
-                    <td style={{ color: '#fff', fontWeight: 600 }}>
-                      {p.name}
-                    </td>
+                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 11 }}>{NUMERIC_POSITION_LABELS[p.pos]}</td>
+                    <td style={{ color: '#fff', fontWeight: 600 }}>{p.name}</td>
                     <td style={{ fontFamily: 'monospace' }}>{((p.kills + p.assists) / Math.max(1, p.deaths)).toFixed(1)}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right', color: 'var(--accent-cyan)' }}>{p.gpm}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right' }}>{p.xpm}</td>
@@ -1219,12 +1114,8 @@ export default function App() {
               <tbody>
                 {liveState.dPlayers.map((p) => (
                   <tr key={p.pos}>
-                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 11 }}>
-                      {NUMERIC_POSITION_LABELS[p.pos]}
-                    </td>
-                    <td style={{ color: '#fff', fontWeight: 600 }}>
-                      {p.name}
-                    </td>
+                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 11 }}>{NUMERIC_POSITION_LABELS[p.pos]}</td>
+                    <td style={{ color: '#fff', fontWeight: 600 }}>{p.name}</td>
                     <td style={{ fontFamily: 'monospace' }}>{((p.kills + p.assists) / Math.max(1, p.deaths)).toFixed(1)}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right', color: 'var(--accent-cyan)' }}>{p.gpm}</td>
                     <td style={{ fontFamily: 'monospace', textAlign: 'right' }}>{p.xpm}</td>
@@ -1236,7 +1127,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL COMPLETO DE PARTIDA AO VIVO (COM DADOS E POSIÇÃO DINÂMICOS EM TEMPO REAL) */}
+      {/* MODAL COMPLETO DE PARTIDA AO VIVO (SYNAPSE 23 - 31 DYNASTY · 35 MIN) */}
       {selectedLiveGame && (
         <div className="modal-backdrop">
           <div className="modal-box-wide" style={{ maxWidth: 1060 }}>
@@ -1248,21 +1139,21 @@ export default function App() {
               <span className="live-badge" style={{ margin: '0 auto 6px auto', display: 'inline-block' }}>
                 AO VIVO
               </span>
-              <h2 style={{ color: '#fff', fontSize: 22, marginTop: 4 }}>
-                DYNASTY <span style={{ color: 'var(--accent-gold)', margin: '0 12px' }}>{liveState.rScore} - {liveState.dScore}</span> Synapse
+              <h2 style={{ color: '#fff', fontSize: 24, marginTop: 4 }}>
+                Team Synapse <span style={{ color: 'var(--accent-gold)', margin: '0 12px' }}>{liveState.rScore} - {liveState.dScore}</span> DYNASTY
               </h2>
               <div style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>
-                {Math.floor(liveState.durationSec / 60)}:{(liveState.durationSec % 60).toString().padStart(2, '0')} (em andamento) · EPL Masters Play-In
+                {Math.floor(liveState.durationSec / 60)} min (em andamento) · EPL Masters Play-In
               </div>
             </div>
 
             {/* SEÇÃO PRINCIPAL COM 3 COLUNAS */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px 1fr', gap: 16, alignItems: 'center', marginBottom: 20 }}>
               
-              {/* PATRIMÔNIO DO RADIANT (ESQUERDA) */}
+              {/* PATRIMÔNIO TEAM SYNAPSE (RADIANT - ESQUERDA) */}
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}>
                 <div style={{ color: 'var(--accent-cyan)', fontWeight: 800, fontSize: 12, textTransform: 'uppercase', marginBottom: 8, borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>
-                  DYNASTY · Patrimônio
+                  Team Synapse · Patrimônio
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {liveState.rPlayers.map((p) => (
@@ -1271,7 +1162,7 @@ export default function App() {
                         <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 28, height: 16, borderRadius: 2, objectFit: 'cover' }} />
                         <span style={{ color: '#fff', fontWeight: 600 }}>{p.name}</span>
                       </div>
-                      <span style={{ color: 'var(--accent-gold)', fontFamily: 'monospace', fontWeight: 700 }}>
+                      <span style={{ color: '#00E676', fontFamily: 'monospace', fontWeight: 700 }}>
                         ${p.net_worth.toLocaleString('pt-BR')}
                       </span>
                     </div>
@@ -1296,7 +1187,7 @@ export default function App() {
                     boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
                   }}
                 >
-                  {/* Radiant Tokens */}
+                  {/* Synapse Tokens (Verde) */}
                   {liveState.rPlayers.map((p, i) => {
                     const pos = worldToPct(p.pos_x, p.pos_y);
                     return (
@@ -1308,13 +1199,13 @@ export default function App() {
                           left: pos.left,
                           top: pos.top,
                           transform: 'translate(-50%, -50%)',
-                          width: 22,
-                          height: 22,
-                          borderRadius: '50%',
-                          border: '2px solid var(--accent-cyan)',
+                          width: 24,
+                          height: 24,
+                          borderRadius: '4px',
+                          border: '2px solid #00E676',
                           overflow: 'hidden',
                           background: '#000',
-                          boxShadow: '0 0 6px var(--accent-cyan)',
+                          boxShadow: '0 0 8px #00E676',
                           transition: 'all 2s ease'
                         }}
                       >
@@ -1323,7 +1214,7 @@ export default function App() {
                     );
                   })}
 
-                  {/* Dire Tokens */}
+                  {/* DYNASTY Tokens (Vermelho) */}
                   {liveState.dPlayers.map((p, i) => {
                     const pos = worldToPct(p.pos_x, p.pos_y);
                     return (
@@ -1335,13 +1226,13 @@ export default function App() {
                           left: pos.left,
                           top: pos.top,
                           transform: 'translate(-50%, -50%)',
-                          width: 22,
-                          height: 22,
-                          borderRadius: '50%',
-                          border: '2px solid var(--accent-red)',
+                          width: 24,
+                          height: 24,
+                          borderRadius: '4px',
+                          border: '2px solid #FF5252',
                           overflow: 'hidden',
                           background: '#000',
-                          boxShadow: '0 0 6px var(--accent-red)',
+                          boxShadow: '0 0 8px #FF5252',
                           transition: 'all 2s ease'
                         }}
                       >
@@ -1352,10 +1243,10 @@ export default function App() {
                 </div>
               </div>
 
-              {/* PATRIMÔNIO DO DIRE (DIREITA) */}
+              {/* PATRIMÔNIO DYNASTY (DIRE - DIREITA) */}
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}>
                 <div style={{ color: 'var(--accent-red)', fontWeight: 800, fontSize: 12, textTransform: 'uppercase', marginBottom: 8, borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>
-                  Synapse · Patrimônio
+                  DYNASTY · Patrimônio
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {liveState.dPlayers.map((p) => (
@@ -1364,7 +1255,7 @@ export default function App() {
                         <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 28, height: 16, borderRadius: 2, objectFit: 'cover' }} />
                         <span style={{ color: '#fff', fontWeight: 600 }}>{p.name}</span>
                       </div>
-                      <span style={{ color: 'var(--accent-gold)', fontFamily: 'monospace', fontWeight: 700 }}>
+                      <span style={{ color: '#FF5252', fontFamily: 'monospace', fontWeight: 700 }}>
                         ${p.net_worth.toLocaleString('pt-BR')}
                       </span>
                     </div>
@@ -1374,13 +1265,25 @@ export default function App() {
 
             </div>
 
-            {/* ORDEM COMPLETA DE DRAFT */}
+            {/* STATUS DAS CONSTRUÇÕES (TORRES E BARRACAS) */}
+            <div style={{ background: 'rgba(11, 13, 18, 0.6)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, fontWeight: 700 }}>
+                <div>
+                  <span style={{ color: 'var(--accent-cyan)', marginRight: 8 }}>Construções Team Synapse:</span>
+                  <span style={{ letterSpacing: 2, color: '#00E676' }}>■■■ ■■■ ■■■ ■■</span>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--accent-red)', marginRight: 8 }}>Construções DYNASTY:</span>
+                  <span style={{ letterSpacing: 2, color: '#FF5252' }}>■■■ ■■ ■■ ■■</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ORDEM COMPLETA DE DRAFT (24 PICKS & BANS) */}
             <div className="draft-block" style={{ marginBottom: 16 }}>
-              <div className="draft-title">Ordem Completa de Draft (Picks &amp; Bans)</div>
-              
+              <div className="draft-title">Picks &amp; Bans — Team Synapse</div>
               <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
-                {FULL_DRAFT_DYNASTY_SYNAPSE.filter(p => p.team === 0).map((p, i) => (
+                {FULL_DRAFT_SYNAPSE_DYNASTY.filter(p => p.team === 0).map((p, i) => (
                   <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-cyan)' : '1px dashed rgba(255,255,255,0.2)' }}>
                     <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                     {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
@@ -1388,9 +1291,9 @@ export default function App() {
                 ))}
               </div>
 
+              <div className="draft-title" style={{ color: 'var(--accent-red)' }}>Picks &amp; Bans — DYNASTY</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
-                {FULL_DRAFT_DYNASTY_SYNAPSE.filter(p => p.team === 1).map((p, i) => (
+                {FULL_DRAFT_SYNAPSE_DYNASTY.filter(p => p.team === 1).map((p, i) => (
                   <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-red)' : '1px dashed rgba(255,255,255,0.2)' }}>
                     <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                     {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
@@ -1399,9 +1302,9 @@ export default function App() {
               </div>
             </div>
 
-            {/* TABELA RADIANT */}
+            {/* TABELA TEAM SYNAPSE */}
             <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 13, marginTop: 12 }}>
-              DYNASTY
+              Team Synapse
             </div>
             <table className="table-custom">
               <thead>
@@ -1418,12 +1321,8 @@ export default function App() {
                 {liveState.rPlayers.map((p, i) => (
                   <tr key={i}>
                     <td style={{ color: '#fff', fontWeight: 600 }}>{p.name}</td>
-                    <td>
-                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} />
-                    </td>
-                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
-                      ${p.net_worth.toLocaleString('pt-BR')}
-                    </td>
+                    <td><img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} /></td>
+                    <td style={{ color: '#00E676', fontWeight: 700, fontFamily: 'monospace' }}>${p.net_worth.toLocaleString('pt-BR')}</td>
                     <td style={{ fontFamily: 'monospace' }}>{p.kills}/{p.deaths}/{p.assists}</td>
                     <td style={{ fontFamily: 'monospace' }}><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span> / {p.xpm}</td>
                     <td>
@@ -1438,9 +1337,9 @@ export default function App() {
               </tbody>
             </table>
 
-            {/* TABELA DIRE */}
+            {/* TABELA DYNASTY */}
             <div style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: 13, marginTop: 16 }}>
-              Synapse
+              DYNASTY
             </div>
             <table className="table-custom">
               <thead>
@@ -1457,12 +1356,8 @@ export default function App() {
                 {liveState.dPlayers.map((p, i) => (
                   <tr key={i}>
                     <td style={{ color: '#fff', fontWeight: 600 }}>{p.name}</td>
-                    <td>
-                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} />
-                    </td>
-                    <td style={{ color: 'var(--accent-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
-                      ${p.net_worth.toLocaleString('pt-BR')}
-                    </td>
+                    <td><img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} /></td>
+                    <td style={{ color: '#FF5252', fontWeight: 700, fontFamily: 'monospace' }}>${p.net_worth.toLocaleString('pt-BR')}</td>
                     <td style={{ fontFamily: 'monospace' }}>{p.kills}/{p.deaths}/{p.assists}</td>
                     <td style={{ fontFamily: 'monospace' }}><span style={{ color: 'var(--accent-cyan)' }}>{p.gpm}</span> / {p.xpm}</td>
                     <td>
@@ -1571,32 +1466,14 @@ export default function App() {
                   <tbody>
                     {(loadedMatchData.players || []).filter(p => p.player_slot < 128).map((p, i) => (
                       <tr key={i}>
-                        <td style={{ color: '#fff', fontWeight: 600 }}>
-                          {p.display_name}
-                        </td>
-                        <td>
-                          <img 
-                            src={getHeroImg(constants, p.hero_id)} 
-                            alt="" 
-                            title={getHeroName(constants, p.hero_id)}
-                            style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover', verticalAlign: 'middle', border: '1px solid var(--border)' }} 
-                          />
-                        </td>
+                        <td style={{ color: '#fff', fontWeight: 600 }}>{p.display_name}</td>
+                        <td><img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} /></td>
                         <td style={{ fontFamily: 'monospace' }}>{p.kills}/{p.deaths}/{p.assists}</td>
-                        <td style={{ fontFamily: 'monospace' }}>
-                          <span style={{ color: 'var(--accent-cyan)' }}>{p.gold_per_min}</span> / {p.xp_per_min}
-                        </td>
+                        <td style={{ fontFamily: 'monospace' }}><span style={{ color: 'var(--accent-cyan)' }}>{p.gold_per_min}</span> / {p.xp_per_min}</td>
                         <td>
-                          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: 4 }}>
                             {[p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].map((itId, itIdx) => (
-                              itId && getItemImg(constants, itId) ? (
-                                <img
-                                  key={itIdx}
-                                  src={getItemImg(constants, itId)}
-                                  alt=""
-                                  className="item-slot-icon"
-                                />
-                              ) : null
+                              itId && getItemImg(constants, itId) ? <img key={itIdx} src={getItemImg(constants, itId)} alt="" className="item-slot-icon" /> : null
                             ))}
                           </div>
                         </td>
@@ -1622,32 +1499,14 @@ export default function App() {
                   <tbody>
                     {(loadedMatchData.players || []).filter(p => p.player_slot >= 128).map((p, i) => (
                       <tr key={i}>
-                        <td style={{ color: '#fff', fontWeight: 600 }}>
-                          {p.display_name}
-                        </td>
-                        <td>
-                          <img 
-                            src={getHeroImg(constants, p.hero_id)} 
-                            alt="" 
-                            title={getHeroName(constants, p.hero_id)}
-                            style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover', verticalAlign: 'middle', border: '1px solid var(--border)' }} 
-                          />
-                        </td>
+                        <td style={{ color: '#fff', fontWeight: 600 }}>{p.display_name}</td>
+                        <td><img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 34, height: 20, borderRadius: 3, objectFit: 'cover' }} /></td>
                         <td style={{ fontFamily: 'monospace' }}>{p.kills}/{p.deaths}/{p.assists}</td>
-                        <td style={{ fontFamily: 'monospace' }}>
-                          <span style={{ color: 'var(--accent-cyan)' }}>{p.gold_per_min}</span> / {p.xp_per_min}
-                        </td>
+                        <td style={{ fontFamily: 'monospace' }}><span style={{ color: 'var(--accent-cyan)' }}>{p.gold_per_min}</span> / {p.xp_per_min}</td>
                         <td>
-                          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: 4 }}>
                             {[p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].map((itId, itIdx) => (
-                              itId && getItemImg(constants, itId) ? (
-                                <img
-                                  key={itIdx}
-                                  src={getItemImg(constants, itId)}
-                                  alt=""
-                                  className="item-slot-icon"
-                                />
-                              ) : null
+                              itId && getItemImg(constants, itId) ? <img key={itIdx} src={getItemImg(constants, itId)} alt="" className="item-slot-icon" /> : null
                             ))}
                           </div>
                         </td>
