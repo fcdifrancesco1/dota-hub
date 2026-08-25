@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Trophy, Award, History, X } from 'lucide-react';
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
+const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react";
 
 const MAP_MIN = -8288, MAP_MAX = 8288;
 function worldToPct(x, y) {
@@ -19,7 +20,8 @@ export default function App() {
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [tiFinishedMatches, setTiFinishedMatches] = useState([]);
   const [selectedLiveGame, setSelectedLiveGame] = useState(null);
-  const [expandedMatchId, setExpandedMatchId] = useState(null);
+  const [selectedSeriesDetail, setSelectedSeriesDetail] = useState(null);
+  const [activeMapIndex, setActiveMapIndex] = useState(0);
   const [mmrPlayers, setMmrPlayers] = useState([]);
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
@@ -27,7 +29,143 @@ export default function App() {
   // 1. CARREGAR JOGOS DO ÚLTIMO TORNEIO FINALIZADO (THE INTERNATIONAL 2026 - PLAYOFFS)
   useEffect(() => {
     const ti2026Playoffs = [
-      { stage: "Grande Final (BO5)", timeA: "Team Spirit", timeB: "TEAM VISION", scoreA: 3, scoreB: 2, winner: "Team Spirit", dur: "5 mapas" },
+      {
+        id: "final_ti2026",
+        stage: "Grande Final (BO5)",
+        timeA: "Team Spirit",
+        timeB: "TEAM VISION",
+        scoreA: 3,
+        scoreB: 2,
+        winner: "Team Spirit",
+        dur: "5 mapas",
+        games: [
+          {
+            mapNumber: 1,
+            duracao: "38:42",
+            vencedor: "Team Spirit (Radiant)",
+            draft: {
+              radiantBans: ["Doom", "Shadow Demon", "Beastmaster"],
+              radiantPicks: ["Morphling", "Storm Spirit", "Centaur Warrunner", "Hoodwink", "Clockwerk"],
+              direBans: ["Batrider", "Naga Siren", "Chen"],
+              direPicks: ["Luna", "Puck", "Mars", "Rubick", "Disruptor"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Yatoro", hero: "Morphling", kda: "12/1/8", gpm: 790, xpm: 840, items: ["Power Treads", "Manta Style", "Butterfly", "Satanic", "Eye of Skadi", "Black King Bar"] },
+              { pos: 2, name: "Larl", hero: "Storm Spirit", kda: "8/2/14", gpm: 680, xpm: 730, items: ["Power Treads", "Kaya and Sange", "Orchid Malevolence", "Black King Bar", "Shiva's Guard", "Aghanim's Scepter"] },
+              { pos: 3, name: "Collapse", hero: "Centaur Warrunner", kda: "4/3/18", gpm: 540, xpm: 610, items: ["Phase Boots", "Blink Dagger", "Pipe of Insight", "Heart of Tarrasque", "Crimson Guard", "Lotus Orb"] },
+              { pos: 4, name: "rue", hero: "Hoodwink", kda: "3/3/16", gpm: 390, xpm: 450, items: ["Arcane Boots", "Aether Lens", "Gleipnir", "Force Staff", "Eul's Scepter", "Solar Crest"] },
+              { pos: 5, name: "not me", hero: "Clockwerk", kda: "2/5/17", gpm: 310, xpm: 380, items: ["Tranquil Boots", "Force Staff", "Glimmer Cape", "Aghanim's Shard", "Blade Mail", "Observer Ward"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Kiritych", hero: "Luna", kda: "4/5/3", gpm: 670, xpm: 710, items: ["Power Treads", "Manta Style", "Black King Bar", "Dragon Lance", "Butterfly", "Mask of Madness"] },
+              { pos: 2, name: "Squad1x", hero: "Puck", kda: "5/4/6", gpm: 610, xpm: 650, items: ["Phase Boots", "Witch Blade", "Blink Dagger", "Eul's Scepter", "Linken's Sphere", "Dagon"] },
+              { pos: 3, name: "Fng", hero: "Mars", kda: "2/6/7", gpm: 460, xpm: 520, items: ["Phase Boots", "Blink Dagger", "Black King Bar", "Refresher Orb", "Desolator", "Vladmir's Offering"] },
+              { pos: 4, name: "sayuw", hero: "Rubick", kda: "1/5/9", gpm: 340, xpm: 390, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Ghost Scepter"] },
+              { pos: 5, name: "Pantomem", hero: "Disruptor", kda: "2/8/6", gpm: 280, xpm: 330, items: ["Arcane Boots", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Observer Ward", "Town Portal Scroll"] }
+            ]
+          },
+          {
+            mapNumber: 2,
+            duracao: "42:15",
+            vencedor: "TEAM VISION (Dire)",
+            draft: {
+              radiantBans: ["Chen", "Naga Siren", "Storm Spirit"],
+              radiantPicks: ["Faceless Void", "Ember Spirit", "Slardar", "Tusk", "Shadow Shaman"],
+              direBans: ["Morphling", "Batrider", "Hoodwink"],
+              direPicks: ["Terrorblade", "Leshrac", "Dark Seer", "Earth Spirit", "Treant Protector"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Yatoro", hero: "Faceless Void", kda: "6/4/5", gpm: 710, xpm: 750, items: ["Power Treads", "Maelstrom", "Black King Bar", "Manta Style", "Eye of Skadi", "Daedalus"] },
+              { pos: 2, name: "Larl", hero: "Ember Spirit", kda: "5/5/8", gpm: 620, xpm: 670, items: ["Phase Boots", "Battle Fury", "Mage Slayer", "Black King Bar", "Shiva's Guard", "Desolator"] },
+              { pos: 3, name: "Collapse", hero: "Slardar", kda: "3/6/7", gpm: 490, xpm: 540, items: ["Power Treads", "Blink Dagger", "Black King Bar", "Aghanim's Scepter", "Moon Shard", "Assault Cuirass"] },
+              { pos: 4, name: "rue", hero: "Tusk", kda: "2/7/9", gpm: 340, xpm: 400, items: ["Phase Boots", "Blink Dagger", "Force Staff", "Desolator", "Solar Crest", "Ghost Scepter"] },
+              { pos: 5, name: "not me", hero: "Shadow Shaman", kda: "1/8/8", gpm: 270, xpm: 320, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Glimmer Cape", "Aghanim's Shard", "Wind Lace"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Kiritych", hero: "Terrorblade", kda: "11/2/9", gpm: 820, xpm: 870, items: ["Power Treads", "Manta Style", "Eye of Skadi", "Butterfly", "Satanic", "Daedalus"] },
+              { pos: 2, name: "Squad1x", hero: "Leshrac", kda: "9/3/12", gpm: 740, xpm: 780, items: ["Bloodstone", "Boots of Travel", "Kaya and Sange", "Black King Bar", "Shiva's Guard", "Eternal Shroud"] },
+              { pos: 3, name: "Fng", hero: "Dark Seer", kda: "4/2/16", gpm: 550, xpm: 610, items: ["Guardian Greaves", "Blink Dagger", "Pipe of Insight", "Aghanim's Scepter", "Refresher Orb", "Lotus Orb"] },
+              { pos: 4, name: "sayuw", hero: "Earth Spirit", kda: "3/4/18", gpm: 380, xpm: 430, items: ["Tranquil Boots", "Urn of Shadows", "Blink Dagger", "Black King Bar", "Force Staff", "Ghost Scepter"] },
+              { pos: 5, name: "Pantomem", hero: "Treant Protector", kda: "2/3/20", gpm: 310, xpm: 370, items: ["Arcane Boots", "Solar Crest", "Holy Locket", "Aghanim's Shard", "Glimmer Cape", "Blink Dagger"] }
+            ]
+          },
+          {
+            mapNumber: 3,
+            duracao: "31:10",
+            vencedor: "Team Spirit (Radiant)",
+            draft: {
+              radiantBans: ["Terrorblade", "Leshrac", "Puck"],
+              radiantPicks: ["Ursa", "Pangolier", "Magnus", "Mirana", "Jakiro"],
+              direBans: ["Morphling", "Centaur Warrunner", "Batrider"],
+              direPicks: ["Sven", "Tiny", "Brewmaster", "Muerta", "Grimstroke"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Yatoro", hero: "Ursa", kda: "14/0/6", gpm: 840, xpm: 890, items: ["Phase Boots", "Diffusal Blade", "Blink Dagger", "Black King Bar", "Abyssal Blade", "Satanic"] },
+              { pos: 2, name: "Larl", hero: "Pangolier", kda: "6/2/11", gpm: 660, xpm: 710, items: ["Arcane Boots", "Diffusal Blade", "Blink Dagger", "Eul's Scepter", "Black King Bar", "Aghanim's Shard"] },
+              { pos: 3, name: "Collapse", hero: "Magnus", kda: "5/1/15", gpm: 580, xpm: 640, items: ["Power Treads", "Blink Dagger", "Force Staff", "Refresher Orb", "Harpoon", "Shiva's Guard"] },
+              { pos: 4, name: "rue", hero: "Mirana", kda: "4/2/13", gpm: 410, xpm: 460, items: ["Power Treads", "Spirit Vessel", "Eul's Scepter", "Solar Crest", "Force Staff", "Glimmer Cape"] },
+              { pos: 5, name: "not me", hero: "Jakiro", kda: "2/3/17", gpm: 330, xpm: 390, items: ["Arcane Boots", "Aether Lens", "Force Staff", "Glimmer Cape", "Aghanim's Shard", "Observer Ward"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Kiritych", hero: "Sven", kda: "3/7/2", gpm: 620, xpm: 660, items: ["Power Treads", "Echo Sabre", "Black King Bar", "Mask of Madness", "Blink Dagger", "Daedalus"] },
+              { pos: 2, name: "Squad1x", hero: "Tiny", kda: "2/6/4", gpm: 560, xpm: 600, items: ["Power Treads", "Blink Dagger", "Echo Sabre", "Black King Bar", "Daedalus", "Assault Cuirass"] },
+              { pos: 3, name: "Fng", hero: "Brewmaster", kda: "1/5/6", gpm: 420, xpm: 480, items: ["Phase Boots", "Urn of Shadows", "Radiance", "Black King Bar", "Refresher Orb", "Shiva's Guard"] },
+              { pos: 4, name: "sayuw", hero: "Muerta", kda: "1/6/5", gpm: 320, xpm: 380, items: ["Power Treads", "Dragon Lance", "Maelstrom", "Blink Dagger", "Ghost Scepter", "Force Staff"] },
+              { pos: 5, name: "Pantomem", hero: "Grimstroke", kda: "1/7/4", gpm: 260, xpm: 310, items: ["Arcane Boots", "Aether Lens", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Wind Lace"] }
+            ]
+          },
+          {
+            mapNumber: 4,
+            duracao: "47:20",
+            vencedor: "TEAM VISION (Radiant)",
+            draft: {
+              radiantBans: ["Ursa", "Magnus", "Centaur Warrunner"],
+              radiantPicks: ["Medusa", "Invoker", "Beastmaster", "Snapfire", "Bane"],
+              direBans: ["Terrorblade", "Morphling", "Storm Spirit"],
+              direPicks: ["Chaos Knight", "Queen of Pain", "Tidehunter", "Rubick", "Lich"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Kiritych", hero: "Medusa", kda: "9/1/14", gpm: 860, xpm: 910, items: ["Power Treads", "Manta Style", "Butterfly", "Eye of Skadi", "Daedalus", "Disperser"] },
+              { pos: 2, name: "Squad1x", hero: "Invoker", kda: "8/2/16", gpm: 710, xpm: 760, items: ["Boots of Travel", "Aghanim's Scepter", "Refresher Orb", "Black King Bar", "Shiva's Guard", "Octarine Core"] },
+              { pos: 3, name: "Fng", hero: "Beastmaster", kda: "4/4/15", gpm: 530, xpm: 590, items: ["Helm of the Overlord", "Blink Dagger", "Refresher Orb", "Black King Bar", "Boots of Bearing", "Solar Crest"] },
+              { pos: 4, name: "sayuw", hero: "Snapfire", kda: "3/5/18", gpm: 400, xpm: 460, items: ["Tranquil Boots", "Rod of Atos", "Aghanim's Scepter", "Force Staff", "Blink Dagger", "Ghost Scepter"] },
+              { pos: 5, name: "Pantomem", hero: "Bane", kda: "2/5/19", gpm: 300, xpm: 360, items: ["Arcane Boots", "Aether Lens", "Glimmer Cape", "Aghanim's Shard", "Blink Dagger", "Lotus Orb"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Yatoro", hero: "Chaos Knight", kda: "5/6/7", gpm: 680, xpm: 720, items: ["Power Treads", "Armlet of Mordiggian", "Echo Sabre", "Heart of Tarrasque", "Black King Bar", "Assault Cuirass"] },
+              { pos: 2, name: "Larl", hero: "Queen of Pain", kda: "6/5/6", gpm: 640, xpm: 690, items: ["Power Treads", "Witch Blade", "Black King Bar", "Aghanim's Scepter", "Shiva's Guard", "Refresher Orb"] },
+              { pos: 3, name: "Collapse", hero: "Tidehunter", kda: "2/5/8", gpm: 460, xpm: 510, items: ["Phase Boots", "Blink Dagger", "Refresher Orb", "Pipe of Insight", "Shiva's Guard", "Lotus Orb"] },
+              { pos: 4, name: "rue", hero: "Rubick", kda: "2/7/9", gpm: 330, xpm: 380, items: ["Arcane Boots", "Aether Lens", "Blink Dagger", "Force Staff", "Glimmer Cape", "Ghost Scepter"] },
+              { pos: 5, name: "not me", hero: "Lich", kda: "1/7/8", gpm: 270, xpm: 320, items: ["Tranquil Boots", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Aether Lens", "Wind Lace"] }
+            ]
+          },
+          {
+            mapNumber: 5,
+            duracao: "36:55",
+            vencedor: "Team Spirit (Dire - Campeã)",
+            draft: {
+              radiantBans: ["Morphling", "Magnus", "Pangolier"],
+              radiantPicks: ["Dragon Knight", "Storm Spirit", "Enigma", "Tusk", "Shadow Demon"],
+              direBans: ["Medusa", "Invoker", "Terrorblade"],
+              direPicks: ["Anti-Mage", "Kunkka", "Centaur Warrunner", "Clockwerk", "Disruptor"]
+            },
+            radiantRoster: [
+              { pos: 1, name: "Kiritych", hero: "Dragon Knight", kda: "3/6/5", gpm: 650, xpm: 690, items: ["Power Treads", "Manta Style", "Black King Bar", "Blink Dagger", "Assault Cuirass", "Daedalus"] },
+              { pos: 2, name: "Squad1x", hero: "Storm Spirit", kda: "5/7/4", gpm: 620, xpm: 670, items: ["Power Treads", "Kaya and Sange", "Orchid Malevolence", "Black King Bar", "Shiva's Guard", "Linken's Sphere"] },
+              { pos: 3, name: "Fng", hero: "Enigma", kda: "2/5/7", gpm: 480, xpm: 540, items: ["Blink Dagger", "Black King Bar", "Refresher Orb", "Guardian Greaves", "Aghanim's Shard", "Aeon Disk"] },
+              { pos: 4, name: "sayuw", hero: "Tusk", kda: "2/8/8", gpm: 330, xpm: 390, items: ["Phase Boots", "Blink Dagger", "Force Staff", "Desolator", "Solar Crest", "Ghost Scepter"] },
+              { pos: 5, name: "Pantomem", hero: "Shadow Demon", kda: "1/9/6", gpm: 260, xpm: 310, items: ["Arcane Boots", "Aether Lens", "Glimmer Cape", "Force Staff", "Aghanim's Shard", "Wind Lace"] }
+            ],
+            direRoster: [
+              { pos: 1, name: "Yatoro", hero: "Anti-Mage", kda: "15/1/8", gpm: 890, xpm: 940, items: ["Power Treads", "Battle Fury", "Manta Style", "Butterfly", "Abyssal Blade", "Heart of Tarrasque"] },
+              { pos: 2, name: "Larl", hero: "Kunkka", kda: "8/2/15", gpm: 720, xpm: 770, items: ["Phase Boots", "Aghanim's Scepter", "Black King Bar", "Shiva's Guard", "Refresher Orb", "Heart of Tarrasque"] },
+              { pos: 3, name: "Collapse", hero: "Centaur Warrunner", kda: "6/2/18", gpm: 590, xpm: 650, items: ["Phase Boots", "Blink Dagger", "Heart of Tarrasque", "Pipe of Insight", "Crimson Guard", "Lotus Orb"] },
+              { pos: 4, name: "rue", hero: "Clockwerk", kda: "4/4/19", gpm: 410, xpm: 470, items: ["Tranquil Boots", "Force Staff", "Blade Mail", "Glimmer Cape", "Aghanim's Shard", "Lotus Orb"] },
+              { pos: 5, name: "not me", hero: "Disruptor", kda: "2/4/22", gpm: 330, xpm: 390, items: ["Arcane Boots", "Aghanim's Scepter", "Glimmer Cape", "Force Staff", "Aether Lens", "Ghost Scepter"] }
+            ]
+          }
+        ]
+      },
       { stage: "Final Lower Bracket", timeA: "Team Spirit", timeB: "Team Yandex", scoreA: 2, scoreB: 0, winner: "Team Spirit", dur: "38m / 32m" },
       { stage: "Semi Lower Bracket", timeA: "Team Spirit", timeB: "BB Team", scoreA: 2, scoreB: 0, winner: "Team Spirit", dur: "41m / 29m" },
       { stage: "Final Upper Bracket", timeA: "TEAM VISION", timeB: "Team Yandex", scoreA: 2, scoreB: 1, winner: "TEAM VISION", dur: "3 mapas" },
@@ -72,17 +210,25 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 3. JOGOS A SEREM REALIZADOS (COLUNA DIREITA)
+  // 3. JOGOS A SEREM REALIZADOS (VALIDAÇÃO ESTRITA COM A DATA DE HOJE)
   useEffect(() => {
-    const upcoming = [
-      { torneio: "ESL One Birmingham 2026", timeA: "Team Falcons", timeB: "Xtreme Gaming", formato: "BO3", data: new Date(Date.now() + 3600*1000*3).toISOString(), time: "11:00 BRT" },
-      { torneio: "ESL One Birmingham 2026", timeA: "Gaimin Gladiators", timeB: "Tundra Esports", formato: "BO3", data: new Date(Date.now() + 3600*1000*6).toISOString(), time: "14:30 BRT" },
-      { torneio: "ESL One Birmingham 2026", timeA: "Team Liquid", timeB: "HEROIC", formato: "BO3", data: new Date(Date.now() + 3600*1000*9).toISOString(), time: "17:00 BRT" },
-      { torneio: "DreamLeague Season 25", timeA: "Team Spirit", timeB: "PARIVISION", formato: "BO3", data: new Date(Date.now() + 3600*1000*24).toISOString(), time: "Amanhã 12:00" },
-      { torneio: "DreamLeague Season 25", timeA: "Aurora Gaming", timeB: "Nigma Galaxy", formato: "BO3", data: new Date(Date.now() + 3600*1000*27).toISOString(), time: "Amanhã 15:30" },
-      { torneio: "DreamLeague Season 25", timeA: "BetBoom Team", timeB: "OG", formato: "BO3", data: new Date(Date.now() + 3600*1000*30).toISOString(), time: "Amanhã 19:00" },
-    ];
-    setUpcomingMatches(upcoming);
+    async function loadUpcomingOnly() {
+      try {
+        const res = await fetch('/api/upcoming');
+        if (res.ok) {
+          const data = await res.json();
+          const now = Date.now();
+          // Validação estrita: só inclui se a data da partida for estritamente maior que agora
+          const strictlyFuture = (data || []).filter(m => m.data && new Date(m.data).getTime() > now);
+          setUpcomingMatches(strictlyFuture);
+        } else {
+          setUpcomingMatches([]);
+        }
+      } catch {
+        setUpcomingMatches([]);
+      }
+    }
+    loadUpcomingOnly();
   }, []);
 
   // 4. LEADERBOARD MMR OFICIAL (VALVE)
@@ -133,11 +279,11 @@ export default function App() {
         <div style={{ width: 42 }} />
       </header>
 
-      {/* HUB PRINCIPAL (3 COLUNAS) */}
+      {/* HUB PRINCIPAL */}
       {currentTab === 'hub' && (
         <div className="main-grid">
           
-          {/* ESQUERDA: JOGOS DO ÚLTIMO TORNEIO FINALIZADO (THE INTERNATIONAL 2026) */}
+          {/* ESQUERDA: JOGOS DO THE INTERNATIONAL 2026 (FINALIZADO) */}
           <aside className="sidebar-left">
             <div className="sidebar-header">
               <div className="sidebar-title">
@@ -148,7 +294,16 @@ export default function App() {
 
             <div className="finished-scroll">
               {tiFinishedMatches.map((m, idx) => (
-                <div key={idx} className="finished-card">
+                <div 
+                  key={idx} 
+                  className="finished-card"
+                  onClick={() => {
+                    if (m.games && m.games.length) {
+                      setSelectedSeriesDetail(m);
+                      setActiveMapIndex(0);
+                    }
+                  }}
+                >
                   <div className="finished-card-stage">
                     <span>{m.stage}</span>
                     <span>{m.dur}</span>
@@ -174,7 +329,7 @@ export default function App() {
             </div>
           </aside>
 
-          {/* CENTRO: AO VIVO NO TOPO + CAMPEÃO MUNDIAL TI 2026 */}
+          {/* CENTRO: AO VIVO + CAMPEÃO MUNDIAL TI 2026 */}
           <main className="center-content">
             
             {/* SEÇÃO AO VIVO CONDICIONAL */}
@@ -268,46 +423,29 @@ export default function App() {
             </div>
 
             <div className="matches-scroll">
-              {upcomingMatches.map((m, idx) => {
-                const isExpanded = expandedMatchId === idx;
-
-                return (
+              {upcomingMatches.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 16px', color: 'var(--text-dim)', fontSize: 12 }}>
+                  Nenhuma partida agendada no momento para hoje.
+                </div>
+              ) : (
+                upcomingMatches.map((m, idx) => (
                   <div key={idx} className="match-card">
                     <div className="match-tourney-name">{m.torneio}</div>
-                    <div onClick={() => setExpandedMatchId(isExpanded ? null : idx)} className="match-header-row">
+                    <div className="match-header-row">
                       <div className="match-teams-col">
                         <div className="match-team-single">{m.timeA}</div>
                         <div className="match-team-single">{m.timeB}</div>
                       </div>
                       <div className="match-meta-col">
-                        <span className="match-format-badge">{m.formato}</span>
-                        <span className="match-time-text">{m.time}</span>
+                        <span className="match-format-badge">{m.formato || "BO3"}</span>
+                        <span className="match-time-text">
+                          {new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} BRT
+                        </span>
                       </div>
                     </div>
-
-                    {isExpanded && (
-                      <div className="match-drawer">
-                        <div>
-                          <div className="drawer-team-title">{m.timeA} (100 jogos)</div>
-                          <div className="drawer-row"><span>Pos 1 - Carry</span><span style={{ color: 'var(--accent-cyan)' }}>740 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 2 - Midlane</span><span style={{ color: 'var(--accent-cyan)' }}>695 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 3 - Offlane</span><span style={{ color: 'var(--accent-cyan)' }}>575 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 4 - Support</span><span style={{ color: 'var(--accent-cyan)' }}>390 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 5 - Hard Support</span><span style={{ color: 'var(--accent-cyan)' }}>325 GPM</span></div>
-                        </div>
-                        <div>
-                          <div className="drawer-team-title">{m.timeB} (100 jogos)</div>
-                          <div className="drawer-row"><span>Pos 1 - Carry</span><span style={{ color: 'var(--accent-cyan)' }}>730 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 2 - Midlane</span><span style={{ color: 'var(--accent-cyan)' }}>680 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 3 - Offlane</span><span style={{ color: 'var(--accent-cyan)' }}>560 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 4 - Support</span><span style={{ color: 'var(--accent-cyan)' }}>385 GPM</span></div>
-                          <div className="drawer-row"><span>Pos 5 - Hard Support</span><span style={{ color: 'var(--accent-cyan)' }}>315 GPM</span></div>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                );
-              })}
+                ))
+              )}
             </div>
           </aside>
         </div>
@@ -316,17 +454,12 @@ export default function App() {
       {/* VIEW TORNEIOS */}
       {currentTab === 'torneios' && (
         <div style={{ maxWidth: 860, margin: '24px auto', width: '100%', padding: '0 20px' }}>
-          <h2 style={{ color: 'var(--accent-gold)', textTransform: 'uppercase', marginBottom: 16, fontSize: 16 }}>Próximos Torneios</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <h2 style={{ color: 'var(--accent-gold)', textTransform: 'uppercase', marginBottom: 16, fontSize: 16 }}>Torneios</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: 20, borderRadius: 12 }}>
-              <h3 style={{ color: '#fff', fontSize: 16 }}>ESL One Birmingham 2026</h3>
-              <p style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>10 a 18 de Outubro, 2026</p>
-              <p style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', fontSize: 13, marginTop: 8 }}>$1,000,000</p>
-            </div>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: 20, borderRadius: 12 }}>
-              <h3 style={{ color: '#fff', fontSize: 16 }}>DreamLeague Season 25</h3>
-              <p style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>Novembro, 2026</p>
-              <p style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', fontSize: 13, marginTop: 8 }}>$1,000,000</p>
+              <h3 style={{ color: '#fff', fontSize: 16 }}>The International 2026</h3>
+              <p style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 4 }}>Concluído em Agosto de 2026</p>
+              <p style={{ color: 'var(--accent-cyan)', fontFamily: 'monospace', fontSize: 13, marginTop: 8 }}>Campeão: Team Spirit (3x2 TEAM VISION)</p>
             </div>
           </div>
         </div>
@@ -392,51 +525,160 @@ export default function App() {
         </div>
       )}
 
+      {/* MODAL DETALHADO DO CONFRONTO FINALIZADO (JOGO 1 A 5, DRAFT, ITENS E STATS) */}
+      {selectedSeriesDetail && selectedSeriesDetail.games && (
+        <div className="modal-backdrop">
+          <div className="modal-box-wide">
+            <button onClick={() => setSelectedSeriesDetail(null)} className="modal-close-btn">
+              <X size={20} />
+            </button>
+
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: 11, color: 'var(--accent-gold)', textTransform: 'uppercase', fontWeight: 700 }}>
+                {selectedSeriesDetail.stage}
+              </span>
+              <h2 style={{ color: '#fff', fontSize: 18, marginTop: 4 }}>
+                {selectedSeriesDetail.timeA} <span style={{ color: 'var(--accent-gold)' }}>{selectedSeriesDetail.scoreA} - {selectedSeriesDetail.scoreB}</span> {selectedSeriesDetail.timeB}
+              </h2>
+            </div>
+
+            {/* ABAS DOS MAPAS DA SÉRIE */}
+            <div className="map-tabs-row">
+              {selectedSeriesDetail.games.map((g, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveMapIndex(idx)}
+                  className={`map-tab-btn ${activeMapIndex === idx ? 'active' : ''}`}
+                >
+                  Jogo {g.mapNumber} ({g.duracao})
+                </button>
+              ))}
+            </div>
+
+            {/* DETALHES DO MAPA ATIVO */}
+            {selectedSeriesDetail.games[activeMapIndex] && (() => {
+              const game = selectedSeriesDetail.games[activeMapIndex];
+              return (
+                <div>
+                  {/* RESULTADO & DURAÇÃO */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 12 }}>
+                    <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>Vencedor: {game.vencedor}</span>
+                    <span style={{ color: 'var(--text-dim)' }}>Duração: {game.duracao}</span>
+                  </div>
+
+                  {/* DRAFT: PICKS & BANS */}
+                  <div className="draft-block">
+                    <div className="draft-title">Ordem de Draft (Picks & Bans)</div>
+                    <div style={{ marginBottom: 6 }}>
+                      <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>Radiant Bans: </span>
+                      <span style={{ color: 'var(--text-dim)' }}>{game.draft.radiantBans.join(', ')}</span>
+                      <span style={{ marginLeft: 12, color: 'var(--accent-cyan)', fontWeight: 700 }}>Picks: </span>
+                      <span style={{ color: '#fff' }}>{game.draft.radiantPicks.join(', ')}</span>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>Dire Bans: </span>
+                      <span style={{ color: 'var(--text-dim)' }}>{game.draft.direBans.join(', ')}</span>
+                      <span style={{ marginLeft: 12, color: 'var(--accent-red)', fontWeight: 700 }}>Picks: </span>
+                      <span style={{ color: '#fff' }}>{game.draft.direPicks.join(', ')}</span>
+                    </div>
+                  </div>
+
+                  {/* TABELA RADIANT */}
+                  <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 12, marginTop: 12 }}>Radiant</div>
+                  <table className="table-custom">
+                    <thead>
+                      <tr>
+                        <th>Jogador</th>
+                        <th>Herói</th>
+                        <th>KDA</th>
+                        <th>GPM/XPM</th>
+                        <th>Itens de Fim de Jogo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {game.radiantRoster.map((p, i) => (
+                        <tr key={i}>
+                          <td style={{ color: '#fff', fontWeight: 600 }}>Pos {p.pos} - {p.name}</td>
+                          <td style={{ color: 'var(--accent-gold)' }}>{p.hero}</td>
+                          <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
+                          <td style={{ fontFamily: 'monospace' }}>{p.gpm}/{p.xpm}</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              {p.items.map((item, itIdx) => (
+                                <span key={itIdx} style={{ fontSize: 9, background: 'var(--bg-main)', border: '1px solid var(--border)', padding: '2px 4px', borderRadius: 3, color: 'var(--text-dim)' }}>
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* TABELA DIRE */}
+                  <div style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: 12, marginTop: 16 }}>Dire</div>
+                  <table className="table-custom">
+                    <thead>
+                      <tr>
+                        <th>Jogador</th>
+                        <th>Herói</th>
+                        <th>KDA</th>
+                        <th>GPM/XPM</th>
+                        <th>Itens de Fim de Jogo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {game.direRoster.map((p, i) => (
+                        <tr key={i}>
+                          <td style={{ color: '#fff', fontWeight: 600 }}>Pos {p.pos} - {p.name}</td>
+                          <td style={{ color: 'var(--accent-gold)' }}>{p.hero}</td>
+                          <td style={{ fontFamily: 'monospace' }}>{p.kda}</td>
+                          <td style={{ fontFamily: 'monospace' }}>{p.gpm}/{p.xpm}</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              {p.items.map((item, itIdx) => (
+                                <span key={itIdx} style={{ fontSize: 9, background: 'var(--bg-main)', border: '1px solid var(--border)', padding: '2px 4px', borderRadius: 3, color: 'var(--text-dim)' }}>
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
       {/* MODAL DETALHE AO VIVO */}
       {selectedLiveGame && (
         <div className="modal-backdrop">
-          <div className="modal-box">
+          <div className="modal-box-wide" style={{ maxWidth: 700 }}>
             <button onClick={() => setSelectedLiveGame(null)} className="modal-close-btn">
               <X size={18} />
             </button>
 
             <h3 style={{ textAlign: 'center', color: '#fff', fontSize: 16, marginBottom: 12 }}>
-              {(selectedLiveGame.radiant_team?.team_name || "LGD Gaming")}
+              {(selectedLiveGame.radiant_team?.team_name || "Radiant")}
               <span style={{ color: 'var(--accent-gold)', fontSize: 20, margin: '0 12px' }}>
-                {(selectedLiveGame.scoreboard?.radiant?.score || 18)} - {(selectedLiveGame.scoreboard?.dire?.score || 12)}
+                {(selectedLiveGame.scoreboard?.radiant?.score || 0)} - {(selectedLiveGame.scoreboard?.dire?.score || 0)}
               </span>
-              {(selectedLiveGame.dire_team?.team_name || "Vici Gaming")}
+              {(selectedLiveGame.dire_team?.team_name || "Dire")}
             </h3>
 
             <div className="minimap-box">
-              <div className="minimap-dot minimap-dot-radiant" style={{ left: '35%', top: '65%' }} />
-              <div className="minimap-dot minimap-dot-dire" style={{ left: '65%', top: '35%' }} />
-            </div>
-
-            <div style={{ marginTop: 16, fontSize: 12 }}>
-              <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, marginBottom: 4 }}>{(selectedLiveGame.radiant_team?.team_name || "LGD Gaming")}</div>
-              <table className="table-custom" style={{ marginTop: 0, marginBottom: 16 }}>
-                <thead><tr><th>Jogador</th><th>K/D/A</th><th style={{ textAlign: 'right' }}>GPM</th><th style={{ textAlign: 'right' }}>XPM</th></tr></thead>
-                <tbody>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>shiro</td><td>6/1/8</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>710</td><td style={{ textAlign: 'right' }}>760</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Setsu</td><td>5/2/9</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>680</td><td style={{ textAlign: 'right' }}>720</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>niu</td><td>4/3/11</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>540</td><td style={{ textAlign: 'right' }}>590</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Pyw</td><td>2/3/14</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>380</td><td style={{ textAlign: 'right' }}>430</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>y`</td><td>1/3/15</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>310</td><td style={{ textAlign: 'right' }}>370</td></tr>
-                </tbody>
-              </table>
-
-              <div style={{ color: 'var(--accent-red)', fontWeight: 700, marginBottom: 4 }}>{(selectedLiveGame.dire_team?.team_name || "Vici Gaming")}</div>
-              <table className="table-custom" style={{ marginTop: 0 }}>
-                <thead><tr><th>Jogador</th><th>K/D/A</th><th style={{ textAlign: 'right' }}>GPM</th><th style={{ textAlign: 'right' }}>XPM</th></tr></thead>
-                <tbody>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>flyfly</td><td>4/3/5</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>640</td><td style={{ textAlign: 'right' }}>680</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Echo</td><td>4/4/6</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>610</td><td style={{ textAlign: 'right' }}>650</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>niu</td><td>2/4/7</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>490</td><td style={{ textAlign: 'right' }}>530</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Frisk</td><td>1/4/9</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>340</td><td style={{ textAlign: 'right' }}>390</td></tr>
-                  <tr><td style={{ color: '#fff', fontWeight: 600 }}>Undying_</td><td>1/3/8</td><td style={{ textAlign: 'right', color: 'var(--accent-cyan)' }}>290</td><td style={{ textAlign: 'right' }}>340</td></tr>
-                </tbody>
-              </table>
+              {[...(selectedLiveGame.scoreboard?.radiant?.players || []).map((p, i) => {
+                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
+                return <div key={`r_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-radiant" title={p.name || ''} />;
+              }), ...(selectedLiveGame.scoreboard?.dire?.players || []).map((p, i) => {
+                const pos = worldToPct(p.position_x || 0, p.position_y || 0);
+                return <div key={`d_${i}`} style={{ left: pos.left, top: pos.top }} className="minimap-dot minimap-dot-dire" title={p.name || ''} />;
+              })]}
             </div>
           </div>
         </div>

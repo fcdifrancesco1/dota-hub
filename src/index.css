@@ -157,10 +157,12 @@ body {
   flex-direction: column;
   gap: 6px;
   transition: all 0.15s;
+  cursor: pointer;
 }
 .finished-card:hover {
   background: var(--bg-card);
-  border-color: rgba(212, 146, 68, 0.4);
+  border-color: rgba(212, 146, 68, 0.5);
+  transform: translateX(2px);
 }
 .finished-card-stage {
   display: flex;
@@ -495,31 +497,7 @@ body {
   font-family: monospace;
 }
 
-.match-drawer {
-  background: var(--bg-main);
-  border-top: 1px solid var(--border);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 11px;
-}
-.drawer-team-title {
-  font-weight: 700;
-  color: var(--accent-gold);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 3px;
-  margin-bottom: 4px;
-}
-.drawer-row {
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-dim);
-  padding: 1px 0;
-}
-.drawer-row strong { color: #fff; }
-
-/* Modais */
+/* Modais de Jogos & Detalhes */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -531,12 +509,12 @@ body {
   justify-content: center;
   padding: 16px;
 }
-.modal-box {
+.modal-box-wide {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   width: 100%;
-  max-width: 680px;
+  max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
   padding: 24px;
@@ -552,11 +530,74 @@ body {
   cursor: pointer;
 }
 
+/* Abas de Mapas (Jogo 1 a 5) */
+.map-tabs-row {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin: 16px 0;
+}
+.map-tab-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.map-tab-btn.active {
+  background: var(--accent-gold);
+  color: #0B0D12;
+  border-color: var(--accent-gold);
+}
+
+/* Draft Bar */
+.draft-block {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 11px;
+}
+.draft-title {
+  color: var(--accent-gold);
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+.draft-items-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.draft-hero-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-card);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+.draft-hero-pill img {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
 .table-custom {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 .table-custom th {
   background: var(--bg-card);
@@ -569,6 +610,15 @@ body {
 .table-custom td {
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);
+}
+
+.item-slot-icon {
+  width: 22px;
+  height: 16px;
+  border-radius: 2px;
+  background: #0B0D12;
+  border: 1px solid var(--border);
+  object-fit: cover;
 }
 
 .minimap-box {
