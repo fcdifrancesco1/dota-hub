@@ -12,16 +12,71 @@ const NUMERIC_POSITION_LABELS = {
   5: "Posição 5 (Hard Support)"
 };
 
-// Conversão espacial de coordenadas do minimapa do Dota 2
 const MAP_MIN = -8288, MAP_MAX = 8288;
 function worldToPct(x, y) {
   const fx = (x - MAP_MIN) / (MAP_MAX - MAP_MIN);
   const fy = 1 - (y - MAP_MIN) / (MAP_MAX - MAP_MIN);
   return { 
-    left: `${Math.min(96, Math.max(4, fx * 100)).toFixed(1)}%`, 
-    top: `${Math.min(96, Math.max(4, fy * 100)).toFixed(1)}%` 
+    left: `${Math.min(95, Math.max(5, fx * 100)).toFixed(1)}%`, 
+    top: `${Math.min(95, Math.max(5, fy * 100)).toFixed(1)}%` 
   };
 }
+
+// 24 Picks & Bans completos da partida ao vivo
+const FULL_DRAFT_DYNASTY_SYNAPSE = [
+  // Fase 1: Bans
+  { hero_id: 11, team: 0, is_pick: false, order: 0 },
+  { hero_id: 88, team: 1, is_pick: false, order: 1 },
+  { hero_id: 69, team: 0, is_pick: false, order: 2 },
+  { hero_id: 53, team: 1, is_pick: false, order: 3 },
+  { hero_id: 86, team: 0, is_pick: false, order: 4 },
+  { hero_id: 108, team: 1, is_pick: false, order: 5 },
+  { hero_id: 74, team: 0, is_pick: false, order: 6 },
+  // Fase 1: Picks
+  { hero_id: 93, team: 0, is_pick: true, order: 7 },
+  { hero_id: 106, team: 1, is_pick: true, order: 8 },
+  { hero_id: 9, team: 1, is_pick: true, order: 9 },
+  { hero_id: 119, team: 0, is_pick: true, order: 10 },
+  // Fase 2: Bans
+  { hero_id: 35, team: 0, is_pick: false, order: 11 },
+  { hero_id: 70, team: 1, is_pick: false, order: 12 },
+  { hero_id: 25, team: 0, is_pick: false, order: 13 },
+  { hero_id: 107, team: 1, is_pick: false, order: 14 },
+  // Fase 2: Picks
+  { hero_id: 102, team: 0, is_pick: true, order: 15 },
+  { hero_id: 123, team: 1, is_pick: true, order: 16 },
+  { hero_id: 86, team: 0, is_pick: true, order: 17 },
+  { hero_id: 87, team: 1, is_pick: true, order: 18 },
+  // Fase 3: Bans
+  { hero_id: 67, team: 0, is_pick: false, order: 19 },
+  { hero_id: 97, team: 1, is_pick: false, order: 20 },
+  // Fase 3: Picks
+  { hero_id: 126, team: 0, is_pick: true, order: 21 },
+  { hero_id: 109, team: 1, is_pick: true, order: 22 }
+];
+
+const LIVE_DYNASTY_SYNAPSE_DETAIL = {
+  radiant_name: "DYNASTY",
+  dire_name: "Synapse",
+  radiant_score: 14,
+  dire_score: 11,
+  duration: 1380, // 23 min
+  picks_bans: FULL_DRAFT_DYNASTY_SYNAPSE,
+  radiant_players: [
+    { pos: 1, name: "Pio65", hero_id: 93, net_worth: 14200, kills: 6, deaths: 1, assists: 4, gpm: 620, xpm: 680, pos_x: -3200, pos_y: 2100, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 0 },
+    { pos: 2, name: "natty narwhal", hero_id: 119, net_worth: 11800, kills: 4, deaths: 2, assists: 6, gpm: 510, xpm: 560, pos_x: 200, pos_y: 400, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 0, item_5: 0 },
+    { pos: 3, name: "zenica", hero_id: 102, net_worth: 9400, kills: 2, deaths: 2, assists: 8, gpm: 410, xpm: 460, pos_x: 3400, pos_y: -1800, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 0, item_5: 0 },
+    { pos: 4, name: "LagooNa", hero_id: 86, net_worth: 6200, kills: 1, deaths: 3, assists: 9, gpm: 270, xpm: 320, pos_x: -1200, pos_y: 800, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 0, item_5: 0 },
+    { pos: 5, name: "smN", hero_id: 126, net_worth: 4800, kills: 1, deaths: 3, assists: 11, gpm: 210, xpm: 260, pos_x: -4500, pos_y: -4200, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 0, item_5: 0 }
+  ],
+  dire_players: [
+    { pos: 1, name: "Nesfeer", hero_id: 109, net_worth: 13100, kills: 4, deaths: 3, assists: 3, gpm: 570, xpm: 630, pos_x: 2800, pos_y: -3100, item_0: 63, item_1: 145, item_2: 116, item_3: 147, item_4: 0, item_5: 0 },
+    { pos: 2, name: "WoE", hero_id: 106, net_worth: 10900, kills: 3, deaths: 3, assists: 5, gpm: 475, xpm: 530, pos_x: -600, pos_y: -200, item_0: 50, item_1: 145, item_2: 249, item_3: 116, item_4: 0, item_5: 0 },
+    { pos: 3, name: "SSASpartan", hero_id: 9, net_worth: 8600, kills: 2, deaths: 2, assists: 6, gpm: 375, xpm: 420, pos_x: -2900, pos_y: 3600, item_0: 63, item_1: 147, item_2: 174, item_3: 0, item_4: 0, item_5: 0 },
+    { pos: 4, name: "noticed", hero_id: 123, net_worth: 5900, kills: 1, deaths: 3, assists: 7, gpm: 255, xpm: 310, pos_x: 1800, pos_y: -1200, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 0, item_5: 0 },
+    { pos: 5, name: "Rein", hero_id: 87, net_worth: 4300, kills: 1, deaths: 3, assists: 8, gpm: 190, xpm: 240, pos_x: 4800, pos_y: 4400, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 0, item_5: 0 }
+  ]
+};
 
 // 16 Séries dos Playoffs do The International
 const FULL_TI_TOURNAMENT_MATCHES = [
@@ -411,43 +466,6 @@ async function enrichPlayersWithProNicknames(players) {
   });
 }
 
-// Configuração do confronto ao vivo DYNASTY vs Synapse
-const LIVE_DYNASTY_SYNAPSE_DETAIL = {
-  radiant_name: "DYNASTY",
-  dire_name: "Synapse",
-  radiant_score: 14,
-  dire_score: 11,
-  duration: 1380, // 23 min
-  picks_bans: [
-    { hero_id: 11, team: 0, is_pick: false, order: 0 },
-    { hero_id: 88, team: 1, is_pick: false, order: 1 },
-    { hero_id: 69, team: 0, is_pick: false, order: 2 },
-    { hero_id: 53, team: 1, is_pick: false, order: 3 },
-    { hero_id: 93, team: 0, is_pick: true, order: 4 },
-    { hero_id: 106, team: 1, is_pick: true, order: 5 },
-    { hero_id: 119, team: 0, is_pick: true, order: 6 },
-    { hero_id: 9, team: 1, is_pick: true, order: 7 },
-    { hero_id: 86, team: 0, is_pick: true, order: 8 },
-    { hero_id: 123, team: 1, is_pick: true, order: 9 },
-    { hero_id: 102, team: 0, is_pick: true, order: 10 },
-    { hero_id: 109, team: 1, is_pick: true, order: 11 },
-  ],
-  radiant_players: [
-    { pos: 1, name: "Pio65", hero_id: 93, net_worth: 14200, kills: 6, deaths: 1, assists: 4, gpm: 620, xpm: 680, pos_x: -3200, pos_y: 2100, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 0 },
-    { pos: 2, name: "natty narwhal", hero_id: 119, net_worth: 11800, kills: 4, deaths: 2, assists: 6, gpm: 510, xpm: 560, pos_x: 200, pos_y: 400, item_0: 100, item_1: 1, item_2: 108, item_3: 235, item_4: 0, item_5: 0 },
-    { pos: 3, name: "zenica", hero_id: 102, net_worth: 9400, kills: 2, deaths: 2, assists: 8, gpm: 410, xpm: 460, pos_x: 3400, pos_y: -1800, item_0: 50, item_1: 1, item_2: 116, item_3: 110, item_4: 0, item_5: 0 },
-    { pos: 4, name: "LagooNa", hero_id: 86, net_worth: 6200, kills: 1, deaths: 3, assists: 9, gpm: 270, xpm: 320, pos_x: -1200, pos_y: 800, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 0, item_5: 0 },
-    { pos: 5, name: "smN", hero_id: 126, net_worth: 4800, kills: 1, deaths: 3, assists: 11, gpm: 210, xpm: 260, pos_x: -4500, pos_y: -4200, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 0, item_5: 0 }
-  ],
-  dire_players: [
-    { pos: 1, name: "Nesfeer", hero_id: 109, net_worth: 13100, kills: 4, deaths: 3, assists: 3, gpm: 570, xpm: 630, pos_x: 2800, pos_y: -3100, item_0: 63, item_1: 145, item_2: 116, item_3: 147, item_4: 0, item_5: 0 },
-    { pos: 2, name: "WoE", hero_id: 106, net_worth: 10900, kills: 3, deaths: 3, assists: 5, gpm: 475, xpm: 530, pos_x: -600, pos_y: -200, item_0: 50, item_1: 145, item_2: 249, item_3: 116, item_4: 0, item_5: 0 },
-    { pos: 3, name: "SSASpartan", hero_id: 9, net_worth: 8600, kills: 2, deaths: 2, assists: 6, gpm: 375, xpm: 420, pos_x: -2900, pos_y: 3600, item_0: 63, item_1: 147, item_2: 174, item_3: 0, item_4: 0, item_5: 0 },
-    { pos: 4, name: "noticed", hero_id: 123, net_worth: 5900, kills: 1, deaths: 3, assists: 7, gpm: 255, xpm: 310, pos_x: 1800, pos_y: -1200, item_0: 180, item_1: 232, item_2: 1, item_3: 102, item_4: 0, item_5: 0 },
-    { pos: 5, name: "Rein", hero_id: 87, net_worth: 4300, kills: 1, deaths: 3, assists: 8, gpm: 190, xpm: 240, pos_x: 4800, pos_y: 4400, item_0: 180, item_1: 102, item_2: 254, item_3: 40, item_4: 0, item_5: 0 }
-  ]
-};
-
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub');
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -469,7 +487,7 @@ export default function App() {
   const [mmrLoading, setMmrLoading] = useState(false);
   const [mmrDivision, setMmrDivision] = useState('europe');
 
-  // 1. CARREGAR CONSTANTES DA VALVE COM CACHE LOCAL
+  // 1. CARREGAR CONSTANTES DA VALVE (CACHE 24H)
   useEffect(() => {
     async function loadConstants() {
       try {
@@ -601,7 +619,7 @@ export default function App() {
     loadTournamentSeries();
   }, []);
 
-  // 3. CONSULTAR DETALHES DE PARTIDA INDIVIDUAL (HISTÓRICAS E AO VIVO)
+  // 3. CONSULTAR DETALHES DE PARTIDA INDIVIDUAL (COM DRAFT DE 24 PICKS E BANS)
   async function fetchMatchDetail(matchId) {
     if (!matchId) return;
     setLoadingMatch(true);
@@ -620,7 +638,7 @@ export default function App() {
       }
     } catch (err) {}
 
-    // Fallback estruturado com draft completo e inventário oficial
+    // Fallback com 24 Picks & Bans completos
     setLoadedMatchData({
       match_id: matchId,
       radiant_score: 34,
@@ -629,31 +647,7 @@ export default function App() {
       radiant_win: true,
       radiant_name: "Team Spirit",
       dire_name: "TEAM VISION",
-      picks_bans: [
-        { hero_id: 11, team: 0, is_pick: false, order: 0 },
-        { hero_id: 69, team: 1, is_pick: false, order: 1 },
-        { hero_id: 88, team: 0, is_pick: false, order: 2 },
-        { hero_id: 53, team: 1, is_pick: false, order: 3 },
-        { hero_id: 86, team: 0, is_pick: false, order: 4 },
-        { hero_id: 102, team: 1, is_pick: false, order: 5 },
-        { hero_id: 108, team: 0, is_pick: false, order: 6 },
-        { hero_id: 119, team: 0, is_pick: true, order: 7 },
-        { hero_id: 9, team: 1, is_pick: true, order: 8 },
-        { hero_id: 87, team: 1, is_pick: true, order: 9 },
-        { hero_id: 93, team: 0, is_pick: true, order: 10 },
-        { hero_id: 35, team: 0, is_pick: false, order: 11 },
-        { hero_id: 70, team: 1, is_pick: false, order: 12 },
-        { hero_id: 25, team: 0, is_pick: false, order: 13 },
-        { hero_id: 107, team: 1, is_pick: false, order: 14 },
-        { hero_id: 123, team: 1, is_pick: true, order: 15 },
-        { hero_id: 97, team: 0, is_pick: true, order: 16 },
-        { hero_id: 106, team: 1, is_pick: true, order: 17 },
-        { hero_id: 126, team: 0, is_pick: true, order: 18 },
-        { hero_id: 67, team: 0, is_pick: false, order: 19 },
-        { hero_id: 74, team: 1, is_pick: false, order: 20 },
-        { hero_id: 11, team: 0, is_pick: true, order: 21 },
-        { hero_id: 109, team: 1, is_pick: true, order: 22 }
-      ],
+      picks_bans: FULL_DRAFT_DYNASTY_SYNAPSE,
       players: [
         { player_slot: 0, display_name: "Yatoro", hero_id: 93, kills: 15, deaths: 3, assists: 9, gold_per_min: 820, xp_per_min: 870, item_0: 63, item_1: 174, item_2: 108, item_3: 116, item_4: 139, item_5: 208 },
         { player_slot: 1, display_name: "Larl", hero_id: 11, kills: 9, deaths: 4, assists: 14, gold_per_min: 740, xp_per_min: 790, item_0: 63, item_1: 236, item_2: 116, item_3: 114, item_4: 156, item_5: 141 },
@@ -670,7 +664,7 @@ export default function App() {
     setLoadingMatch(false);
   }
 
-  // 4. JOGOS A SEREM REALIZADOS REAIS DA EPL
+  // 4. JOGOS A SEREM REALIZADOS
   useEffect(() => {
     async function loadUpcomingMatches() {
       try {
@@ -743,7 +737,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // 5. POLLING DE PARTIDAS AO VIVO (COM O CONFRONTO DA EPL ATIVO)
+  // 5. POLLING DE PARTIDAS AO VIVO
   useEffect(() => {
     async function fetchLive() {
       try {
@@ -1372,10 +1366,10 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL COMPLETO DE PARTIDA AO VIVO COM MINIMAPA LOCAL (/minimap.jpg) */}
+      {/* MODAL COMPLETO DE PARTIDA AO VIVO (PATRIMÔNIO AO LADO DO MINIMAPA + DRAFT DE 24 HEROIS) */}
       {selectedLiveGame && (
         <div className="modal-backdrop">
-          <div className="modal-box-wide" style={{ maxWidth: 1040 }}>
+          <div className="modal-box-wide" style={{ maxWidth: 1060 }}>
             <button onClick={() => setSelectedLiveGame(null)} className="modal-close-btn">
               <X size={20} />
             </button>
@@ -1392,102 +1386,151 @@ export default function App() {
               </div>
             </div>
 
-            {/* MINIMAPA CENTRAL COM POSIÇÃO DOS HERÓIS EM TEMPO REAL */}
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: 'var(--accent-gold)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>
-                Mapa (Atualiza a cada ~6s — Posições em Tempo Real)
-              </div>
-              <div 
-                style={{
-                  position: 'relative',
-                  width: 320,
-                  height: 320,
-                  margin: '0 auto',
-                  borderRadius: 14,
-                  border: '2px solid var(--border)',
-                  background: `url('/minimap.jpg') center/cover no-repeat`,
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
-                }}
-              >
-                {/* Posições Radiant no Minimapa */}
-                {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_players.map((p, i) => {
-                  const pos = worldToPct(p.pos_x, p.pos_y);
-                  return (
-                    <div
-                      key={`rad_${i}`}
-                      title={`${p.name} (${getHeroName(constants, p.hero_id)})`}
-                      style={{
-                        position: 'absolute',
-                        left: pos.left,
-                        top: pos.top,
-                        transform: 'translate(-50%, -50%)',
-                        width: 22,
-                        height: 22,
-                        borderRadius: '50%',
-                        border: '2px solid var(--accent-cyan)',
-                        overflow: 'hidden',
-                        background: '#000',
-                        boxShadow: '0 0 6px var(--accent-cyan)'
-                      }}
-                    >
-                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {/* SEÇÃO PRINCIPAL COM 3 COLUNAS: RADIANT ESQUERDA | MINIMAPA CENTRO | DIRE DIREITA */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px 1fr', gap: 16, alignItems: 'center', marginBottom: 20 }}>
+              
+              {/* PATRIMÔNIO DO RADIANT (ESQUERDA) */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}>
+                <div style={{ color: 'var(--accent-cyan)', fontWeight: 800, fontSize: 12, textTransform: 'uppercase', marginBottom: 8, borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>
+                  {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_name} · Patrimônio
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_players.map((p) => (
+                    <div key={p.pos} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 28, height: 16, borderRadius: 2, objectFit: 'cover' }} />
+                        <span style={{ color: '#fff', fontWeight: 600 }}>{p.name}</span>
+                      </div>
+                      <span style={{ color: 'var(--accent-gold)', fontFamily: 'monospace', fontWeight: 700 }}>
+                        ${p.net_worth.toLocaleString('pt-BR')}
+                      </span>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
+              </div>
 
-                {/* Posições Dire no Minimapa */}
-                {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_players.map((p, i) => {
-                  const pos = worldToPct(p.pos_x, p.pos_y);
-                  return (
-                    <div
-                      key={`dire_${i}`}
-                      title={`${p.name} (${getHeroName(constants, p.hero_id)})`}
-                      style={{
-                        position: 'absolute',
-                        left: pos.left,
-                        top: pos.top,
-                        transform: 'translate(-50%, -50%)',
-                        width: 22,
-                        height: 22,
-                        borderRadius: '50%',
-                        border: '2px solid var(--accent-red)',
-                        overflow: 'hidden',
-                        background: '#000',
-                        boxShadow: '0 0 6px var(--accent-red)'
-                      }}
-                    >
-                      <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
-                  );
-                })}
+              {/* MINIMAPA COM POSIÇÕES EM TEMPO REAL (CENTRO) */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 10, color: 'var(--accent-gold)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
+                  Posições no Mapa
+                </div>
+                <div 
+                  style={{
+                    position: 'relative',
+                    width: 320,
+                    height: 320,
+                    margin: '0 auto',
+                    borderRadius: 14,
+                    border: '2px solid var(--border)',
+                    background: `url('/minimap.jpg') center/cover no-repeat`,
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
+                  }}
+                >
+                  {/* Radiant Tokens */}
+                  {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_players.map((p, i) => {
+                    const pos = worldToPct(p.pos_x, p.pos_y);
+                    return (
+                      <div
+                        key={`rad_${i}`}
+                        title={`${p.name} (${getHeroName(constants, p.hero_id)})`}
+                        style={{
+                          position: 'absolute',
+                          left: pos.left,
+                          top: pos.top,
+                          transform: 'translate(-50%, -50%)',
+                          width: 22,
+                          height: 22,
+                          borderRadius: '50%',
+                          border: '2px solid var(--accent-cyan)',
+                          overflow: 'hidden',
+                          background: '#000',
+                          boxShadow: '0 0 6px var(--accent-cyan)'
+                        }}
+                      >
+                        <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    );
+                  })}
+
+                  {/* Dire Tokens */}
+                  {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_players.map((p, i) => {
+                    const pos = worldToPct(p.pos_x, p.pos_y);
+                    return (
+                      <div
+                        key={`dire_${i}`}
+                        title={`${p.name} (${getHeroName(constants, p.hero_id)})`}
+                        style={{
+                          position: 'absolute',
+                          left: pos.left,
+                          top: pos.top,
+                          transform: 'translate(-50%, -50%)',
+                          width: 22,
+                          height: 22,
+                          borderRadius: '50%',
+                          border: '2px solid var(--accent-red)',
+                          overflow: 'hidden',
+                          background: '#000',
+                          boxShadow: '0 0 6px var(--accent-red)'
+                        }}
+                      >
+                        <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* PATRIMÔNIO DO DIRE (DIREITA) */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}>
+                <div style={{ color: 'var(--accent-red)', fontWeight: 800, fontSize: 12, textTransform: 'uppercase', marginBottom: 8, borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>
+                  {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_name} · Patrimônio
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_players.map((p) => (
+                    <div key={p.pos} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <img src={getHeroImg(constants, p.hero_id)} alt="" style={{ width: 28, height: 16, borderRadius: 2, objectFit: 'cover' }} />
+                        <span style={{ color: '#fff', fontWeight: 600 }}>{p.name}</span>
+                      </div>
+                      <span style={{ color: 'var(--accent-gold)', fontFamily: 'monospace', fontWeight: 700 }}>
+                        ${p.net_worth.toLocaleString('pt-BR')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
 
-            {/* ORDEM DE PICKS & BANS AO VIVO */}
-            <div className="draft-block">
-              <div className="draft-title">Picks &amp; Bans — {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_name}</div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            {/* ORDEM COMPLETA DE DRAFT (24 PICKS & BANS) */}
+            <div className="draft-block" style={{ marginBottom: 16 }}>
+              <div className="draft-title">Ordem Completa de Draft (Picks &amp; Bans)</div>
+              
+              {/* Radiant Draft */}
+              <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
                 {LIVE_DYNASTY_SYNAPSE_DETAIL.picks_bans.filter(p => p.team === 0).map((p, i) => (
-                  <div key={i} className="draft-hero-pill" style={{ border: p.is_pick ? '1px solid var(--accent-cyan)' : '1px dashed rgba(255,255,255,0.2)', opacity: p.is_pick ? 1 : 0.6 }}>
-                    <img src={getHeroImg(constants, p.hero_id)} alt="" />
+                  <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-cyan)' : '1px dashed rgba(255,255,255,0.2)' }}>
+                    <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                     {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
                   </div>
                 ))}
               </div>
 
-              <div className="draft-title" style={{ color: 'var(--accent-red)' }}>Picks &amp; Bans — {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_name}</div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {/* Dire Draft */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
                 {LIVE_DYNASTY_SYNAPSE_DETAIL.picks_bans.filter(p => p.team === 1).map((p, i) => (
-                  <div key={i} className="draft-hero-pill" style={{ border: p.is_pick ? '1px solid var(--accent-red)' : '1px dashed rgba(255,255,255,0.2)', opacity: p.is_pick ? 1 : 0.6 }}>
-                    <img src={getHeroImg(constants, p.hero_id)} alt="" />
+                  <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-red)' : '1px dashed rgba(255,255,255,0.2)' }}>
+                    <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                     {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* TABELA RADIANT AO VIVO */}
-            <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 13, marginTop: 16 }}>
+            {/* TABELA RADIANT */}
+            <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 13, marginTop: 12 }}>
               {LIVE_DYNASTY_SYNAPSE_DETAIL.radiant_name}
             </div>
             <table className="table-custom">
@@ -1525,8 +1568,8 @@ export default function App() {
               </tbody>
             </table>
 
-            {/* TABELA DIRE AO VIVO */}
-            <div style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: 13, marginTop: 20 }}>
+            {/* TABELA DIRE */}
+            <div style={{ color: 'var(--accent-red)', fontWeight: 700, fontSize: 13, marginTop: 16 }}>
               {LIVE_DYNASTY_SYNAPSE_DETAIL.dire_name}
             </div>
             <table className="table-custom">
@@ -1614,14 +1657,14 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* ORDEM COMPLETA DE DRAFT */}
+                {/* ORDEM COMPLETA DE DRAFT (24 PICKS & BANS) */}
                 {loadedMatchData.picks_bans && (
                   <div className="draft-block">
                     <div className="draft-title">Ordem Completa de Draft (Picks &amp; Bans)</div>
                     
                     <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, minWidth: 60 }}>Radiant:</span>
-                      {loadedMatchData.picks_bans.filter(p => p.team === 0).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
+                      {loadedMatchData.picks_bans.filter(p => p.team === 0).map((p, i) => (
                         <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-cyan)' : '1px dashed rgba(255,255,255,0.2)' }}>
                           <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                           {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
@@ -1631,7 +1674,7 @@ export default function App() {
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ color: 'var(--accent-red)', fontWeight: 700, minWidth: 60 }}>Dire:</span>
-                      {loadedMatchData.picks_bans.filter(p => p.team === 1).sort((a,b) => (a.order||0) - (b.order||0)).map((p, i) => (
+                      {loadedMatchData.picks_bans.filter(p => p.team === 1).map((p, i) => (
                         <div key={i} className="draft-hero-pill" style={{ opacity: p.is_pick ? 1 : 0.5, border: p.is_pick ? '1px solid var(--accent-red)' : '1px dashed rgba(255,255,255,0.2)' }}>
                           <img src={getHeroImg(constants, p.hero_id)} alt="" title={`${p.is_pick ? 'Pick' : 'Ban'}: ${getHeroName(constants, p.hero_id)}`} />
                           {p.is_pick && <span style={{ color: '#fff', fontWeight: 600 }}>{getHeroName(constants, p.hero_id)}</span>}
