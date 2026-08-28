@@ -5,6 +5,7 @@ import CenterChampion from './components/CenterChampion';
 import LiveMatchesSection from './components/LiveMatchesSection';
 import UpcomingSidebar from './components/UpcomingSidebar';
 import MatchDetailModal from './components/MatchDetailModal';
+import LiveMatchDetailModal from './components/LiveMatchDetailModal';
 import HeroMetaView from './components/HeroMetaView';
 import TournamentsView from './components/TournamentsView';
 import MmrRankingView from './components/MmrRankingView';
@@ -34,6 +35,7 @@ export default function App() {
 
   // Modais
   const [selectedSeries, setSelectedSeries] = useState(null);
+  const [selectedLiveGame, setSelectedLiveGame] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null); // { id, name }
 
   // 1. Carregar Constantes de Heróis e Itens da Valve
@@ -171,17 +173,7 @@ export default function App() {
                 liveGames={liveGames}
                 loading={loadingData}
                 onSelectLiveGame={(game) => {
-                  if (game.match_id) {
-                    setSelectedSeries({
-                      stage: game.league_name || "Partida Oficial Ao Vivo",
-                      timeA: (game.radiant_team && game.radiant_team.name) || "Radiant",
-                      timeB: (game.dire_team && game.dire_team.name) || "Dire",
-                      scoreA: game.radiant_score || 0,
-                      scoreB: game.dire_score || 0,
-                      dur: "Em andamento",
-                      games: [{ mapNumber: 1, match_id: String(game.match_id) }]
-                    });
-                  }
+                  setSelectedLiveGame(game);
                 }}
               />
             </main>
@@ -227,12 +219,24 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALHADO DA PARTIDA (REPLAY, DRAFT, VANTAGEM DE OURO/XP) */}
+      {/* MODAL DETALHADO DE REPLAY DA SÉRIE (FINALIZADAS / RECENTES) */}
       {selectedSeries && (
         <MatchDetailModal
           series={selectedSeries}
           constants={constants}
           onClose={() => setSelectedSeries(null)}
+          onOpenTeamProfile={(teamId, teamName) =>
+            setSelectedTeam({ id: teamId, name: teamName })
+          }
+        />
+      )}
+
+      {/* MODAL DETALHADO DA PARTIDA AO VIVO (MINIMAPA, ESTATÍSTICAS, BUYBACKS, PICKS & BANS) */}
+      {selectedLiveGame && (
+        <LiveMatchDetailModal
+          game={selectedLiveGame}
+          constants={constants}
+          onClose={() => setSelectedLiveGame(null)}
           onOpenTeamProfile={(teamId, teamName) =>
             setSelectedTeam({ id: teamId, name: teamName })
           }
