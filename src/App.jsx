@@ -49,16 +49,35 @@ export default function App() {
     else setLoadingData(true);
 
     try {
-      const [proData, liveData, upcomingData] = await Promise.all([
+      const [proData, gotvLiveData, allWikiMatches] = await Promise.all([
         fetchProMatches(),
         fetchLiveGames(),
         fetchUpcomingMatches()
       ]);
 
+      const now = Date.now();
+
+      // Separar jogos ao vivo reais da Liquipedia (placar ativo ou horário dentro da janela ao vivo)
+      const liveFromWiki = (allWikiMatches || []).filter((m) => {
+        const hasLiveScore = (m.scoreA > 0 || m.scoreB > 0);
+        const isInLiveWindow = m.timestamp && (m.timestamp <= now + 15 * 60 * 1000) && (m.timestamp >= now - 3.5 * 3600 * 1000);
+        return hasLiveScore || isInLiveWindow;
+      });
+
+      // Separar estritamente os jogos futuros agendados
+      const strictlyUpcoming = (allWikiMatches || []).filter((m) => {
+        const hasLiveScore = (m.scoreA > 0 || m.scoreB > 0);
+        const isInLiveWindow = m.timestamp && (m.timestamp <= now + 15 * 60 * 1000) && (m.timestamp >= now - 3.5 * 3600 * 1000);
+        return !hasLiveScore && !isInLiveWindow;
+      });
+
+      // Unificar partidas ao vivo no centro (OpenDota GOTV + Liquipedia Live Ticker)
+      const unifiedLive = [...(gotvLiveData || []), ...liveFromWiki];
+
       setFinishedSeries(proData.finishedSeries || []);
       setTournamentsList(proData.tournaments || []);
-      setLiveGames(liveData || []);
-      setUpcomingMatches(upcomingData || []);
+      setLiveGames(unifiedLive);
+      setUpcomingMatches(strictlyUpcoming);
       setLastUpdated(new Date().toLocaleTimeString('pt-BR'));
     } catch (err) {
       console.error('Erro ao carregar dados do Hub:', err);
@@ -71,11 +90,10 @@ export default function App() {
   useEffect(() => {
     loadData();
 
-    // Polling de partidas ao vivo a cada 20 segundos
+    // Polling de partidas ao vivo a cada 30 segundos
     const liveInterval = setInterval(async () => {
-      const live = await fetchLiveGames();
-      setLiveGames(live || []);
-    }, 20000);
+      loadData(false);
+    }, 30000);
 
     return () => clearInterval(liveInterval);
   }, [loadData]);
@@ -148,12 +166,11 @@ export default function App() {
                 }
               />
 
-              {/* Grid de Partidas Ao Vivo */}
+              {/* Grid de Partidas Ao Vivo no Centro */}
               <LiveMatchesSection
                 liveGames={liveGames}
                 loading={loadingData}
                 onSelectLiveGame={(game) => {
-                  // Se for uma partida com match_id, abre o modal
                   if (game.match_id) {
                     setSelectedSeries({
                       stage: game.league_name || "Partida Oficial Ao Vivo",
@@ -169,7 +186,7 @@ export default function App() {
               />
             </main>
 
-            {/* COLUNA DIREITA: JOGOS AGENDADOS */}
+            {/* COLUNA DIREITA: JOGOS AGENDADOS (ESTRITAMENTE FUTUROS) */}
             <div className={`${mobileHubSubTab === 'upcoming' ? 'block' : 'hidden'} lg:block h-full`}>
               <UpcomingSidebar
                 upcoming={upcomingMatches}
