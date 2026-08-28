@@ -1,116 +1,411 @@
-const OPENDOTA = "https://api.opendota.com/api";
+const OPENDOTA_BASE = "https://api.opendota.com/api";
+const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
 
-export async function getTop16Teams() {
-  try {
-    const res = await fetch(`${OPENDOTA}/teams`);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data
-      .filter((t) => t.name && t.rating && t.logo_url)
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 16);
-  } catch {
-    return [];
+// Cache em memória com TTL
+const memoryCache = new Map();
+
+function getCached(key, ttlMs = 5 * 60 * 1000) {
+  const item = memoryCache.get(key);
+  if (item && Date.now() - item.ts < ttlMs) {
+    return item.data;
   }
+  try {
+    const lsItem = localStorage.getItem(`dota_cache_${key}`);
+    if (lsItem) {
+      const parsed = JSON.parse(lsItem);
+      if (Date.now() - parsed.ts < ttlMs) {
+        memoryCache.set(key, parsed);
+        return parsed.data;
+      }
+    }
+  } catch (e) {}
+  return null;
 }
 
-// Busca os últimos 100 jogos de um time e infere os 5 jogadores por posição
-export async function getTeam100GamesStats(teamId, teamName) {
+function setCache(key, data) {
+  const payload = { ts: Date.now(), data };
+  memoryCache.set(key, payload);
   try {
-    const res = await fetch(`${OPENDOTA}/teams/${teamId}/matches`);
-    if (!res.ok) return [];
-    const matches = await res.json();
-    const last100 = (matches || []).slice(0, 100);
+    localStorage.setItem(`dota_cache_${key}`, JSON.stringify(payload));
+  } catch (e) {}
+}
 
-    // Amostra detalhada com fallback de dados
-    const sample = await Promise.all(
-      last100.slice(0, 15).map(async (m) => {
-        try {
-          const mRes = await fetch(`${OPENDOTA}/matches/${m.match_id}`);
-          return mRes.ok ? await mRes.json() : null;
-        } catch {
-          return null;
-        }
-      })
-    );
+export function normalizeTeamKey(name) {
+  if (!name) return "";
+  return String(name)
+    .toLowerCase()
+    .replace(/\b(team|gaming|esports|esport|gg|club)\b/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
 
-    const playerAgg = {};
+export function getHeroImg(constants, heroId) {
+  const h = constants?.heroes?.[heroId];
+  return h ? `${STEAM_CDN}${h.img}` : "";
+}
 
-    sample.filter(Boolean).forEach((match) => {
-      const isRadiant = String(match.radiant_name || "").toLowerCase().includes(teamName.toLowerCase());
-      const players = (match.players || []).filter((p) => (isRadiant ? p.player_slot < 128 : p.player_slot >= 128));
+export function getHeroName(constants, heroId) {
+  const h = constants?.heroes?.[heroId];
+  return h ? h.localized_name : `Herói ${heroId}`;
+}
 
-      players.forEach((pl, idx) => {
-        const id = pl.account_id || pl.personaname || `p_${idx}`;
-        if (!playerAgg[id]) {
-          playerAgg[id] = {
-            id,
-            name: pl.name || pl.personaname || `Jogador ${idx + 1}`,
-            games: 0,
-            kills: 0,
-            deaths: 0,
-            assists: 0,
-            gpm: 0,
-            xpm: 0,
-            mid: 0,
-            safe: 0,
-            off: 0,
-          };
-        }
-        playerAgg[id].games++;
-        playerAgg[id].kills += pl.kills || 0;
-        playerAgg[id].deaths += pl.deaths || 0;
-        playerAgg[id].assists += pl.assists || 0;
-        playerAgg[id].gpm += pl.gold_per_min || 0;
-        playerAgg[id].xpm += pl.xp_per_min || 0;
+export function getItemImg(constants, itemId) {
+  const it = constants?.itemsById?.[itemId];
+  return it ? `${STEAM_CDN}${it.img}` : "";
+}
 
-        if (pl.lane_role === 2) playerAgg[id].mid++;
-        else if (pl.lane_role === 1) playerAgg[id].safe++;
-        else if (pl.lane_role === 3) playerAgg[id].off++;
-      });
+// 1. Carregar Constantes de Heróis e Itens da Valve
+export async function fetchConstants() {
+  const cached = getCached("constants_v6", 24 * 3600 * 1000);
+  if (cached) return cached;
+
+  try {
+    const [heroesRes, itemsRes] = await Promise.all([
+      fetch(`${OPENDOTA_BASE}/constants/heroes`),
+      fetch(`${OPENDOTA_BASE}/constants/items`)
+    ]);
+
+    const heroes = heroesRes.ok ? await heroesRes.json() : {};
+    const items = itemsRes.ok ? await itemsRes.json() : {};
+
+    const itemsById = {};
+    Object.values(items || {}).forEach((it) => {
+      if (it && it.id != null) itemsById[it.id] = it;
     });
 
-    const list = Object.values(playerAgg);
-    if (!list.length) return [];
+    const result = { heroes, itemsById };
+    setCache("constants_v6", result);
+    return result;
+  } catch (err) {
+    console.error("Erro ao carregar constantes da Valve:", err);
+    return { heroes: {}, itemsById: {} };
+  }
+}
 
-    // Cálculo das Posições (1 a 5)
-    let mid = list.reduce((prev, cur) => (cur.mid > prev.mid ? cur : prev), list[0]);
-    mid.position = 2;
-    const rest = list.filter((p) => p !== mid).sort((a, b) => b.gpm / (b.games || 1) - a.gpm / (a.games || 1));
+// 2. Agrupamento Sequencial de Séries (BO3 / BO5)
+export function clusterMatchesIntoSeries(rawMatches) {
+  const list = [...rawMatches].sort((a, b) => a.start_time - b.start_time);
+  const seriesList = [];
 
-    if (rest.length >= 4) {
-      if (rest[0].safe >= rest[1].safe) {
-        rest[0].position = 1;
-        rest[1].position = 3;
-      } else {
-        rest[0].position = 3;
-        rest[1].position = 1;
-      }
-      rest[2].position = 4;
-      rest[3].position = 5;
-    } else {
-      rest.forEach((p, i) => (p.position = i === 0 ? 1 : i === 1 ? 3 : i === 2 ? 4 : 5));
+  list.forEach((m) => {
+    const tA = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
+    const tB = normalizeTeamKey(m.dire_name || m.dire_team_id);
+    const matchTime = m.start_time;
+
+    let targetSeries = seriesList.find((s) => {
+      const sameTeams = (s.teamAKey === tA && s.teamBKey === tB) || (s.teamAKey === tB && s.teamBKey === tA);
+      const sameLeague = !m.leagueid || !s.leagueId || m.leagueid === s.leagueId;
+      const lastGameTime = s.games[s.games.length - 1].start_time;
+      const withinTime = (matchTime - lastGameTime) <= (3.5 * 3600) && (matchTime >= lastGameTime);
+
+      const isAlreadyClosed = (s.scoreA >= 2 && s.scoreB < s.scoreA && s.games.length <= 3) || 
+                              (s.scoreB >= 2 && s.scoreA < s.scoreB && s.games.length <= 3) || 
+                              (s.scoreA >= 3 || s.scoreB >= 3);
+
+      return sameTeams && sameLeague && withinTime && !isAlreadyClosed;
+    });
+
+    if (!targetSeries) {
+      targetSeries = {
+        leagueId: m.leagueid,
+        leagueName: m.league_name || "Torneio Profissional",
+        teamAKey: tA,
+        teamBKey: tB,
+        timeA: m.radiant_name || "Radiant",
+        timeB: m.dire_name || "Dire",
+        preferredIdA: m.radiant_team_id,
+        preferredIdB: m.dire_team_id,
+        scoreA: 0,
+        scoreB: 0,
+        games: []
+      };
+      seriesList.push(targetSeries);
     }
 
-    return list.sort((a, b) => a.position - b.position);
+    targetSeries.games.push(m);
+    const radWon = m.radiant_win;
+    const isRadTeamA = (m.radiant_team_id === targetSeries.preferredIdA);
+
+    if (isRadTeamA) {
+      if (radWon) targetSeries.scoreA++; else targetSeries.scoreB++;
+    } else {
+      if (radWon) targetSeries.scoreB++; else targetSeries.scoreA++;
+    }
+  });
+
+  return seriesList.map((s) => ({
+    stage: s.leagueName,
+    leagueId: s.leagueId,
+    timeA: s.timeA,
+    timeB: s.timeB,
+    scoreA: s.scoreA,
+    scoreB: s.scoreB,
+    winner: s.scoreA > s.scoreB ? s.timeA : (s.scoreB > s.scoreA ? s.timeB : "Empate"),
+    dur: `${s.games.length} mapa${s.games.length > 1 ? 's' : ''}`,
+    games: s.games.map((g, idx) => ({
+      mapNumber: idx + 1,
+      match_id: String(g.match_id),
+      start_time: g.start_time,
+      radiant_win: g.radiant_win,
+      duration: g.duration
+    }))
+  }));
+}
+
+// 3. Buscar Partidas Profissionais Recentes
+export async function fetchProMatches() {
+  const cached = getCached("pro_matches_v6", 2 * 60 * 1000);
+  if (cached) return cached;
+
+  try {
+    const res = await fetch(`${OPENDOTA_BASE}/proMatches`);
+    if (res.ok) {
+      const list = await res.json();
+      const clustered = clusterMatchesIntoSeries(Array.isArray(list) ? list : []);
+      const valid = clustered
+        .filter(s => s.games.length >= 2 || (s.scoreA + s.scoreB === 1))
+        .reverse();
+
+      // Agrupamento por Liga
+      const leaguesMap = {};
+      (list || []).forEach((m) => {
+        const lId = m.leagueid || m.league_name;
+        if (!lId) return;
+        if (!leaguesMap[lId]) {
+          leaguesMap[lId] = {
+            id: lId,
+            league_id: m.leagueid,
+            name: m.league_name || "Torneio Dota 2",
+            recentDate: new Date(m.start_time * 1000).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }),
+            rawMatches: []
+          };
+        }
+        leaguesMap[lId].rawMatches.push(m);
+      });
+
+      const tournaments = Object.values(leaguesMap).map((l) => ({
+        ...l,
+        seriesList: clusterMatchesIntoSeries(l.rawMatches).reverse()
+      }));
+
+      const result = {
+        finishedSeries: valid.slice(0, 15),
+        tournaments: tournaments.slice(0, 15)
+      };
+
+      setCache("pro_matches_v6", result);
+      return result;
+    }
+  } catch (err) {
+    console.error("Erro ao buscar proMatches:", err);
+  }
+  return { finishedSeries: [], tournaments: [] };
+}
+
+// 4. Buscar Detalhes Completos do Replay da Partida
+export async function fetchMatchDetails(matchId) {
+  if (!matchId) return null;
+  const cached = getCached(`match_${matchId}`, 60 * 60 * 1000); // 1 hora de cache
+  if (cached) return cached;
+
+  try {
+    const res = await fetch(`${OPENDOTA_BASE}/matches/${matchId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setCache(`match_${matchId}`, data);
+      return data;
+    }
+  } catch (err) {
+    console.error("Erro ao carregar detalhes da partida:", err);
+  }
+  return null;
+}
+
+// 5. Buscar Meta dos Heróis do Patch (Tier List)
+export async function fetchHeroStats() {
+  const cached = getCached("hero_stats_v6", 30 * 60 * 1000);
+  if (cached) return cached;
+
+  try {
+    const res = await fetch(`${OPENDOTA_BASE}/heroStats`);
+    if (res.ok) {
+      const list = await res.json();
+      
+      const processed = (list || []).map((h) => {
+        const proPick = h.pro_pick || 0;
+        const proWin = h.pro_win || 0;
+        const proBan = h.pro_ban || 0;
+        const proWinRate = proPick > 0 ? (proWin / proPick) * 100 : 0;
+
+        // Immortal / High MMR pub stats (8_pick, 8_win)
+        const pub8Pick = h["8_pick"] || 0;
+        const pub8Win = h["8_win"] || 0;
+        const pub8WinRate = pub8Pick > 0 ? (pub8Win / pub8Pick) * 100 : 0;
+
+        // Classificação por Score de Tier (ponderado)
+        const compositeScore = (proWinRate * 0.45) + (pub8WinRate * 0.35) + (Math.min(proPick / 5, 20));
+        let tier = "B";
+        if (compositeScore >= 60 && (proPick >= 5 || pub8Pick >= 500)) tier = "S+";
+        else if (compositeScore >= 54) tier = "S";
+        else if (compositeScore >= 49) tier = "A";
+        else if (compositeScore < 45) tier = "C";
+
+        const primaryAttrMap = {
+          str: "Força",
+          agi: "Agilidade",
+          int: "Inteligência",
+          all: "Universal"
+        };
+
+        return {
+          id: h.id,
+          name: h.localized_name,
+          img: `${STEAM_CDN}${h.img}`,
+          icon: `${STEAM_CDN}${h.icon}`,
+          primaryAttr: primaryAttrMap[h.primary_attr] || "Universal",
+          attrCode: h.primary_attr,
+          attackType: h.attack_type,
+          roles: h.roles || [],
+          proPick,
+          proWin,
+          proBan,
+          proWinRate: Number(proWinRate.toFixed(1)),
+          pub8Pick,
+          pub8WinRate: Number(pub8WinRate.toFixed(1)),
+          tier,
+          baseHealth: h.base_health,
+          baseMana: h.base_mana,
+          moveSpeed: h.move_speed,
+          turboPicks: h.turbo_picks || 0
+        };
+      });
+
+      setCache("hero_stats_v6", processed);
+      return processed;
+    }
+  } catch (err) {
+    console.error("Erro ao carregar heroStats:", err);
+  }
+  return [];
+}
+
+// 6. Buscar Partidas Ao Vivo
+export async function fetchLiveGames() {
+  try {
+    let list = [];
+    try {
+      const res = await fetch("/api/live");
+      if (res.ok) {
+        const data = await res.json();
+        list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
+      }
+    } catch (e) {}
+
+    if (!list.length) {
+      const res = await fetch(`${OPENDOTA_BASE}/liveLeagueGames`);
+      if (res.ok) {
+        const data = await res.json();
+        list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
+      }
+    }
+
+    return (list || []).filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
   } catch {
     return [];
   }
 }
 
-export async function getOfficialMmr(division = "europe") {
+// 7. Buscar Próximos Jogos Agendados
+export async function fetchUpcomingMatches() {
   try {
-    const res = await fetch(`/.netlify/functions/leaderboard?division=${division}`);
-    if (!res.ok) {
-      // Fallback para api route vercel
-      const resVercel = await fetch(`/api/leaderboard?division=${division}`);
-      if (!resVercel.ok) return [];
-      const dataV = await resVercel.json();
-      return dataV.leaderboard || [];
+    let list = [];
+    try {
+      const res = await fetch("/api/upcoming");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) list = data;
+      }
+    } catch (e) {}
+
+    if (!list.length) {
+      try {
+        const resJson = await fetch(`/agenda.json?_=${Date.now()}`);
+        if (resJson.ok) {
+          const dataJson = await resJson.json();
+          if (Array.isArray(dataJson) && dataJson.length > 0) list = dataJson;
+        }
+      } catch (e) {}
     }
-    const data = await res.json();
-    return data.leaderboard || [];
+
+    const now = Date.now();
+    return (list || []).filter(it => it.data && new Date(it.data).getTime() > now - 3600 * 1000);
   } catch {
     return [];
+  }
+}
+
+// 8. Buscar Leaderboard Oficial da Valve
+export async function fetchOfficialLeaderboard(division = "europe") {
+  const cached = getCached(`leaderboard_${division}`, 10 * 60 * 1000);
+  if (cached) return cached;
+
+  try {
+    let players = [];
+    try {
+      const res = await fetch(`/api/leaderboard?division=${division}`);
+      if (res.ok) {
+        const data = await res.json();
+        players = data.leaderboard || [];
+      }
+    } catch (e) {}
+
+    if (!players.length) {
+      const resFallback = await fetch(`https://www.dota2.com/webapi/ILeaderboard/GetDivisionLeaderboard/v0001?division=${division}&leaderboard=0`);
+      if (resFallback.ok) {
+        const dataFallback = await resFallback.json();
+        players = dataFallback.leaderboard || [];
+      }
+    }
+
+    setCache(`leaderboard_${division}`, players);
+    return players;
+  } catch {
+    return [];
+  }
+}
+
+// 9. Buscar Perfil do Time
+export async function fetchTeamProfile(teamId) {
+  if (!teamId) return null;
+  const cached = getCached(`team_profile_${teamId}`, 15 * 60 * 1000);
+  if (cached) return cached;
+
+  try {
+    const [teamRes, matchesRes, heroesRes] = await Promise.all([
+      fetch(`${OPENDOTA_BASE}/teams/${teamId}`),
+      fetch(`${OPENDOTA_BASE}/teams/${teamId}/matches`),
+      fetch(`${OPENDOTA_BASE}/teams/${teamId}/heroes`)
+    ]);
+
+    const teamData = teamRes.ok ? await teamRes.json() : {};
+    const matches = matchesRes.ok ? await matchesRes.json() : [];
+    const topHeroes = heroesRes.ok ? await heroesRes.json() : [];
+
+    const last20 = (matches || []).slice(0, 20);
+    const wins = last20.filter(m => (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win)).length;
+    const winRate = last20.length > 0 ? ((wins / last20.length) * 100).toFixed(0) : 0;
+
+    const result = {
+      ...teamData,
+      recentMatches: last20,
+      recentWinRate: winRate,
+      topHeroes: (topHeroes || []).slice(0, 5)
+    };
+
+    setCache(`team_profile_${teamId}`, result);
+    return result;
+  } catch (err) {
+    console.error("Erro ao carregar perfil do time:", err);
+    return null;
   }
 }
