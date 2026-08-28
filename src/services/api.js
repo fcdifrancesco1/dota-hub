@@ -205,7 +205,7 @@ export async function fetchProMatches() {
 // 4. Buscar Detalhes Completos do Replay da Partida
 export async function fetchMatchDetails(matchId) {
   if (!matchId) return null;
-  const cached = getCached(`match_${matchId}`, 60 * 60 * 1000); // 1 hora de cache
+  const cached = getCached(`match_${matchId}`, 60 * 60 * 1000);
   if (cached) return cached;
 
   try {
@@ -237,12 +237,10 @@ export async function fetchHeroStats() {
         const proBan = h.pro_ban || 0;
         const proWinRate = proPick > 0 ? (proWin / proPick) * 100 : 0;
 
-        // Immortal / High MMR pub stats (8_pick, 8_win)
         const pub8Pick = h["8_pick"] || 0;
         const pub8Win = h["8_win"] || 0;
         const pub8WinRate = pub8Pick > 0 ? (pub8Win / pub8Pick) * 100 : 0;
 
-        // Classificação por Score de Tier (ponderado)
         const compositeScore = (proWinRate * 0.45) + (pub8WinRate * 0.35) + (Math.min(proPick / 5, 20));
         let tier = "B";
         if (compositeScore >= 60 && (proPick >= 5 || pub8Pick >= 500)) tier = "S+";
@@ -315,8 +313,102 @@ export async function fetchLiveGames() {
   }
 }
 
-// 7. Buscar Próximos Jogos Agendados
+// Parser de Jogos Reais da Liquipedia
+function parseLiquipediaHtml(html) {
+  const matches = [];
+  const matchBlocks = html.split('<div class="match-info">').slice(1);
+
+  matchBlocks.forEach((block) => {
+    try {
+      const tsMatch = block.match(/data-timestamp="(\d+)"/);
+      const timestamp = tsMatch ? parseInt(tsMatch[1], 10) * 1000 : null;
+
+      const leftBlockMatch = block.match(/class="match-info-header-opponent[^"]*match-info-header-opponent-left"([\s\S]*?)<div class="match-info-header-scoreholder"/);
+      const rightBlockMatch = block.match(/class="match-info-header-opponent"[^>]*>([\s\S]*?)<\/div><\/div><div class="match-info-tournament"/);
+
+      let timeA = "TBD";
+      let logoA = "";
+      if (leftBlockMatch) {
+        const leftBlock = leftBlockMatch[1];
+        const titleMatch = leftBlock.match(/class="team-template-image-icon[^"]*"[^>]*><a[^>]*title="([^"]+)"/);
+        const nameMatch = leftBlock.match(/<span class="name"[^>]*><a[^>]*>([^<]+)<\/a>/);
+        timeA = (titleMatch ? titleMatch[1] : (nameMatch ? nameMatch[1] : "TBD")).trim();
+        timeA = timeA.replace(/\(page does not exist\)/gi, '').trim();
+
+        const imgMatch = leftBlock.match(/<img[^>]*src="([^"]+)"/);
+        if (imgMatch) {
+          logoA = imgMatch[1].startsWith('http') ? imgMatch[1] : `https://liquipedia.net${imgMatch[1]}`;
+        }
+      }
+
+      let timeB = "TBD";
+      let logoB = "";
+      if (rightBlockMatch) {
+        const rightBlock = rightBlockMatch[1];
+        const titleMatch = rightBlock.match(/class="team-template-image-icon[^"]*"[^>]*><a[^>]*title="([^"]+)"/);
+        const nameMatch = rightBlock.match(/<span class="name"[^>]*><a[^>]*>([^<]+)<\/a>/);
+        timeB = (titleMatch ? titleMatch[1] : (nameMatch ? nameMatch[1] : "TBD")).trim();
+        timeB = timeB.replace(/\(page does not exist\)/gi, '').trim();
+
+        const imgMatch = rightBlock.match(/<img[^>]*src="([^"]+)"/);
+        if (imgMatch) {
+          logoB = imgMatch[1].startsWith('http') ? imgMatch[1] : `https://liquipedia.net${imgMatch[1]}`;
+        }
+      }
+
+      const formatMatch = block.match(/\((Bo\d+)\)/i);
+      const formato = formatMatch ? formatMatch[1].toUpperCase() : "BO3";
+
+      const scoreMatch = block.match(/class="match-info-header-score">(\d+)<\/span><span class="match-info-header-scoreholder-divider">:<\/span><span class="match-info-header-score">(\d+)<\/span>/);
+      const scoreA = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
+      const scoreB = scoreMatch ? parseInt(scoreMatch[2], 10) : 0;
+
+      let torneio = "Torneio Profissional";
+      const tourneyNameMatch = block.match(/class="match-info-tournament-name"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/);
+      if (tourneyNameMatch) {
+        torneio = tourneyNameMatch[1].replace(/ - [A-Za-z]+ \d+$/i, '').trim();
+      } else {
+        const tourneyBlock = block.match(/class="match-info-tournament"[\s\S]*?<\/div>/);
+        if (tourneyBlock) {
+          const tTitle = tourneyBlock[0].match(/title="([^"#]+)/);
+          if (tTitle) {
+            torneio = tTitle[1].replace(/_/g, ' ').replace(/\//g, ' ').trim();
+          }
+        }
+      }
+
+      let streamUrl = "";
+      const streamMatch = block.match(/href="([^"]*Special:Stream\/[^"]+)"/);
+      if (streamMatch) {
+        streamUrl = `https://liquipedia.net${streamMatch[1]}`;
+      }
+
+      if (timeA && timeB && (timeA !== "TBD" || timeB !== "TBD")) {
+        matches.push({
+          timeA,
+          timeB,
+          logoA,
+          logoB,
+          formato,
+          scoreA,
+          scoreB,
+          torneio,
+          streamUrl,
+          data: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
+          timestamp
+        });
+      }
+    } catch (err) {}
+  });
+
+  return matches;
+}
+
+// 7. Buscar Próximos Jogos Reais da Liquipedia
 export async function fetchUpcomingMatches() {
+  const cached = getCached("upcoming_real_matches_v2", 3 * 60 * 1000);
+  if (cached) return cached;
+
   try {
     let list = [];
     try {
@@ -327,18 +419,31 @@ export async function fetchUpcomingMatches() {
       }
     } catch (e) {}
 
+    // Fallback direto via Liquipedia com CORS
     if (!list.length) {
       try {
-        const resJson = await fetch(`/agenda.json?_=${Date.now()}`);
-        if (resJson.ok) {
-          const dataJson = await resJson.json();
-          if (Array.isArray(dataJson) && dataJson.length > 0) list = dataJson;
+        const resWiki = await fetch(
+          "https://liquipedia.net/dota2/api.php?action=parse&page=Liquipedia:Matches&format=json&origin=*",
+          {
+            headers: {
+              "Accept": "application/json"
+            }
+          }
+        );
+        if (resWiki.ok) {
+          const dataWiki = await resWiki.json();
+          const html = dataWiki?.parse?.text?.["*"] || "";
+          list = parseLiquipediaHtml(html);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Falha ao consultar Liquipedia diretamente:", e);
+      }
     }
 
-    const now = Date.now();
-    return (list || []).filter(it => it.data && new Date(it.data).getTime() > now - 3600 * 1000);
+    if (list.length > 0) {
+      setCache("upcoming_real_matches_v2", list);
+    }
+    return list;
   } catch {
     return [];
   }

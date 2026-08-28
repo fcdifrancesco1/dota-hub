@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Swords, ChevronDown, ChevronUp, Shield } from 'lucide-react';
+import { Calendar, Clock, Swords, ChevronDown, ChevronUp, Shield, Radio, Tv } from 'lucide-react';
 import { SkeletonCard } from './SkeletonLoader';
 
 export default function UpcomingSidebar({
@@ -25,10 +25,10 @@ export default function UpcomingSidebar({
       <div className="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
         <div className="flex items-center gap-2 font-extrabold uppercase text-xs tracking-wider text-cyan-400">
           <Calendar className="w-4 h-4 text-cyan-400" />
-          Próximos Confrontos
+          Confrontos e Agenda
         </div>
         <span className="text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">
-          EM BREVE
+          {filtered.length} PARTIDAS
         </span>
       </div>
 
@@ -47,6 +47,8 @@ export default function UpcomingSidebar({
           filtered.map((m, idx) => {
             const isExpanded = expandedIndex === idx;
             const matchDate = m.data ? new Date(m.data) : null;
+            const isLive = m.scoreA > 0 || m.scoreB > 0 || (matchDate && Math.abs(Date.now() - matchDate.getTime()) < 3600 * 1000 * 2);
+
             const timeStr = matchDate
               ? matchDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
               : "A definir";
@@ -61,12 +63,19 @@ export default function UpcomingSidebar({
               >
                 {/* Nome do Torneio */}
                 <div className="px-3 py-1.5 bg-black/40 border-b border-white/5 flex items-center justify-between text-[10px]">
-                  <span className="font-bold text-amber-400 truncate max-w-[190px] uppercase">
+                  <span className="font-bold text-amber-400 truncate max-w-[180px] uppercase">
                     {m.torneio || "Torneio Profissional"}
                   </span>
-                  <span className="font-mono text-cyan-400 font-bold bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px]">
-                    {m.formato || "BO3"}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {isLive && (
+                      <span className="flex items-center gap-1 text-[9px] font-bold text-rose-400 bg-rose-500/20 border border-rose-500/30 px-1.5 py-0.5 rounded animate-pulse">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> AO VIVO
+                      </span>
+                    )}
+                    <span className="font-mono text-cyan-400 font-bold bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px]">
+                      {m.formato || "BO3"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Confronto */}
@@ -74,24 +83,49 @@ export default function UpcomingSidebar({
                   onClick={() => setExpandedIndex(isExpanded ? null : idx)}
                   className="p-3 cursor-pointer flex items-center justify-between gap-3 hover:bg-white/[0.02] transition-colors"
                 >
-                  <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="space-y-2 flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                      {m.logoA ? (
+                        <img
+                          src={m.logoA}
+                          alt=""
+                          className="w-4 h-4 object-contain shrink-0"
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
+                      )}
                       <span className="text-xs font-bold text-white truncate">{m.timeA}</span>
+                      {m.scoreA !== undefined && (m.scoreA > 0 || m.scoreB > 0) && (
+                        <span className="ml-auto font-mono font-black text-xs text-amber-400">{m.scoreA}</span>
+                      )}
                     </div>
+
                     <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+                      {m.logoB ? (
+                        <img
+                          src={m.logoB}
+                          alt=""
+                          className="w-4 h-4 object-contain shrink-0"
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
+                      )}
                       <span className="text-xs font-bold text-white truncate">{m.timeB}</span>
+                      {m.scoreB !== undefined && (m.scoreA > 0 || m.scoreB > 0) && (
+                        <span className="ml-auto font-mono font-black text-xs text-amber-400">{m.scoreB}</span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-1 shrink-0">
+                  <div className="flex flex-col items-end gap-1 shrink-0 pl-2 border-l border-white/5">
                     <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-gray-300">
                       <Clock className="w-3 h-3 text-cyan-400" />
                       {timeStr} <span className="text-[9px] text-gray-500">BRT</span>
                     </div>
                     {dateStr && (
-                      <span className="text-[9px] text-gray-500 font-mono">{dateStr}</span>
+                      <span className="text-[9px] text-gray-400 font-mono">{dateStr}</span>
                     )}
                     {isExpanded ? (
                       <ChevronUp className="w-3.5 h-3.5 text-gray-400 mt-0.5" />
@@ -101,34 +135,24 @@ export default function UpcomingSidebar({
                   </div>
                 </div>
 
-                {/* Bloco Expandido: Ações rápidas & Head-to-Head */}
+                {/* Bloco Expandido: Ações rápidas & Streams */}
                 {isExpanded && (
-                  <div className="p-3 bg-black/40 border-t border-white/5 space-y-2 text-xs">
+                  <div className="p-3 bg-black/40 border-t border-white/5 space-y-2.5 text-xs">
                     <div className="flex items-center justify-between text-[11px] text-gray-400">
                       <span>Formato da Série:</span>
                       <strong className="text-white font-mono">{m.formato || "BO3 (Melhor de 3)"}</strong>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onOpenTeamProfile && m.teamAId) onOpenTeamProfile(m.teamAId, m.timeA);
-                        }}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/40 text-[10px] font-bold text-cyan-300 text-center truncate transition-all"
+                    {m.streamUrl && (
+                      <a
+                        href={m.streamUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs transition-all"
                       >
-                        Perfil {m.timeA}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onOpenTeamProfile && m.teamBId) onOpenTeamProfile(m.teamBId, m.timeB);
-                        }}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/40 text-[10px] font-bold text-rose-300 text-center truncate transition-all"
-                      >
-                        Perfil {m.timeB}
-                      </button>
-                    </div>
+                        <Tv className="w-3.5 h-3.5" /> Assistir Transmissão Ao Vivo
+                      </a>
+                    )}
                   </div>
                 )}
               </div>
