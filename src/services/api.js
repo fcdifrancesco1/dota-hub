@@ -34,7 +34,7 @@ export function normalizeTeamKey(name) {
   if (!name) return "";
   return String(name)
     .toLowerCase()
-    .replace(/\b(team|gaming|esports|esport|gg|club)\b/g, '')
+    .replace(/\b(team|gaming|esports|esport|gg|club|academy)\b/g, '')
     .replace(/[^a-z0-9]/g, '')
     .trim();
 }
@@ -406,7 +406,7 @@ function parseLiquipediaHtml(html) {
 
 // 7. Buscar Próximos Jogos Reais da Liquipedia
 export async function fetchUpcomingMatches() {
-  const cached = getCached("upcoming_real_matches_v2", 3 * 60 * 1000);
+  const cached = getCached("upcoming_real_matches_v2", 2 * 60 * 1000);
   if (cached) return cached;
 
   try {
@@ -449,7 +449,56 @@ export async function fetchUpcomingMatches() {
   }
 }
 
-// 8. Buscar Leaderboard Oficial da Valve
+// 8. Buscar Telemetria em Tempo Real de Partida Ao Vivo
+export async function findLiveMatchDetails(game) {
+  if (!game) return { matchData: null, maps: [] };
+
+  const normA = normalizeTeamKey(game.timeA || game.radiant_team?.name || game.radiant_team?.team_name);
+  const normB = normalizeTeamKey(game.timeB || game.dire_team?.name || game.dire_team?.team_name);
+
+  // 1. Se o objeto já possui match_id explícito
+  if (game.match_id) {
+    const data = await fetchMatchDetails(game.match_id);
+    return { matchData: data, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+  }
+
+  // 2. Busca nos proMatches recentes para encontrar os mapas daquela série
+  try {
+    const proRes = await fetch(`${OPENDOTA_BASE}/proMatches`);
+    if (proRes.ok) {
+      const list = await proRes.json();
+      const matched = (list || []).filter(m => {
+        const rad = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
+        const dire = normalizeTeamKey(m.dire_name || m.dire_team_id);
+        const matchTime = m.start_time;
+        const isRecent = Math.abs(Date.now() - matchTime * 1000) < (24 * 3600 * 1000);
+        return isRecent && ((rad.includes(normA) && dire.includes(normB)) || (rad.includes(normB) && dire.includes(normA)));
+      });
+
+      if (matched.length > 0) {
+        matched.sort((a, b) => a.start_time - b.start_time);
+        const latestMatch = matched[matched.length - 1];
+        const matchData = await fetchMatchDetails(latestMatch.match_id);
+
+        const maps = matched.map((m, idx) => ({
+          mapNumber: idx + 1,
+          match_id: String(m.match_id),
+          radiant_score: m.radiant_score,
+          dire_score: m.dire_score,
+          start_time: m.start_time
+        }));
+
+        return { matchData, maps };
+      }
+    }
+  } catch (e) {
+    console.error("Erro ao buscar mapas recentes da série ao vivo:", e);
+  }
+
+  return { matchData: null, maps: [] };
+}
+
+// 9. Buscar Leaderboard Oficial da Valve
 export async function fetchOfficialLeaderboard(division = "europe") {
   const cached = getCached(`leaderboard_${division}`, 10 * 60 * 1000);
   if (cached) return cached;
@@ -479,7 +528,7 @@ export async function fetchOfficialLeaderboard(division = "europe") {
   }
 }
 
-// 9. Buscar Perfil do Time
+// 10. Buscar Perfil do Time
 export async function fetchTeamProfile(teamId) {
   if (!teamId) return null;
   const cached = getCached(`team_profile_${teamId}`, 15 * 60 * 1000);

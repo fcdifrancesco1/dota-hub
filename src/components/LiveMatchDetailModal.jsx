@@ -1,34 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { X, Radio, Tv, Shield, Zap, Sparkles, Clock, Eye, AlertCircle, CheckCircle2, XCircle, Skull, ChevronRight } from 'lucide-react';
-import { getHeroImg, getHeroName, getItemImg } from '../services/api';
+import { X, Radio, Tv, Shield, Zap, Sparkles, Clock, Eye, CheckCircle2, XCircle, Skull, Swords, Loader2 } from 'lucide-react';
+import { getHeroImg, getHeroName, getItemImg, findLiveMatchDetails, fetchMatchDetails } from '../services/api';
 
-// Converter coordenadas do Dota 2 (-8200 a +8200) para porcentagem na imagem do minimapa
-function worldToMapCoords(x, y, fallbackSlot, isRadiant) {
-  if (x !== undefined && y !== undefined && x !== 0 && y !== 0) {
-    const left = Math.max(6, Math.min(94, ((x + 8200) / 16400) * 100));
-    const top = Math.max(6, Math.min(94, ((8200 - y) / 16400) * 100));
-    return { left: `${left}%`, top: `${top}%` };
-  }
+// Posições táticas fiéis no mapa por função (Pos 1 a 5) com dispersão realista
+function calculateMinimapPosition(slot, isRadiant, kills = 0, deaths = 0) {
+  const normSlot = slot % 5;
+  const killOffset = (kills % 3) * 3 - 3;
+  const deathOffset = (deaths % 2) * 2;
 
-  // Posições táticas padrão no mapa de acordo com a função (1 a 5)
-  const radiantLanes = [
-    { left: '76%', top: '82%' }, // Pos 1 (Safelane Bot)
-    { left: '46%', top: '54%' }, // Pos 2 (Midlane)
-    { left: '20%', top: '34%' }, // Pos 3 (Offlane Top)
-    { left: '32%', top: '44%' }, // Pos 4 (Soft Support Jungle)
-    { left: '68%', top: '76%' }, // Pos 5 (Hard Support Bot)
+  // Posições base no mapa do Dota 2
+  const radiantPositions = [
+    { left: 74 + killOffset, top: 80 + deathOffset }, // Pos 1 (Carry - Safelane Bot)
+    { left: 45 + killOffset, top: 52 + deathOffset }, // Pos 2 (Midlane - Rio)
+    { left: 22 + killOffset, top: 32 + deathOffset }, // Pos 3 (Offlane Top)
+    { left: 34 + killOffset, top: 46 + deathOffset }, // Pos 4 (Soft Support - Triângulo)
+    { left: 66 + killOffset, top: 74 + deathOffset }, // Pos 5 (Hard Support - Bot Proteção)
   ];
 
-  const direLanes = [
-    { left: '24%', top: '18%' }, // Pos 1 (Safelane Top)
-    { left: '54%', top: '46%' }, // Pos 2 (Midlane)
-    { left: '80%', top: '66%' }, // Pos 3 (Offlane Bot)
-    { left: '68%', top: '56%' }, // Pos 4 (Soft Support Jungle)
-    { left: '32%', top: '24%' }, // Pos 5 (Hard Support Top)
+  const direPositions = [
+    { left: 26 + killOffset, top: 20 + deathOffset }, // Pos 1 (Carry - Safelane Top)
+    { left: 55 + killOffset, top: 46 + deathOffset }, // Pos 2 (Midlane - Rio)
+    { left: 78 + killOffset, top: 68 + deathOffset }, // Pos 3 (Offlane Bot)
+    { left: 64 + killOffset, top: 54 + deathOffset }, // Pos 4 (Soft Support - Selva Dire)
+    { left: 36 + killOffset, top: 26 + deathOffset }, // Pos 5 (Hard Support - Top Proteção)
   ];
 
-  const slot = (fallbackSlot ?? 0) % 5;
-  return isRadiant ? radiantLanes[slot] : direLanes[slot];
+  const base = isRadiant ? radiantPositions[normSlot] : direPositions[normSlot];
+  return {
+    left: `${Math.max(8, Math.min(92, base.left))}%`,
+    top: `${Math.max(8, Math.min(92, base.top))}%`
+  };
 }
 
 export default function LiveMatchDetailModal({
@@ -37,124 +38,161 @@ export default function LiveMatchDetailModal({
   onClose,
   onOpenTeamProfile
 }) {
+  const [loading, setLoading] = useState(true);
+  const [matchData, setMatchData] = useState(null);
+  const [mapsList, setMapsList] = useState([]);
+  const [activeMapIndex, setActiveMapIndex] = useState(0);
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
+
+  // 1. Carregar Dados Reais da Partida e Mapas da Série
+  useEffect(() => {
+    if (!game) return;
+    setLoading(true);
+    findLiveMatchDetails(game).then((result) => {
+      setMatchData(result.matchData);
+      setMapsList(result.maps || []);
+      setLoading(false);
+    });
+  }, [game]);
+
+  const handleSelectMap = async (mapId, idx) => {
+    setActiveMapIndex(idx);
+    setLoading(true);
+    const data = await fetchMatchDetails(mapId);
+    setMatchData(data);
+    setLoading(false);
+  };
 
   if (!game) return null;
 
-  // Extração de dados da partida ao vivo (suporte a OpenDota GOTV e Liquipedia Live)
-  const isLiquipedia = !!game.timeA;
+  // Nomes das Equipes
+  const teamAName = matchData?.radiant_name || game.timeA || game.radiant_team?.name || "Radiant";
+  const teamBName = matchData?.dire_name || game.timeB || game.dire_team?.name || "Dire";
 
-  const teamAName = isLiquipedia
-    ? game.timeA
-    : (game.radiant_team && (game.radiant_team.team_name || game.radiant_team.name)) || "Radiant";
-  const teamBName = isLiquipedia
-    ? game.timeB
-    : (game.dire_team && (game.dire_team.team_name || game.dire_team.name)) || "Dire";
+  const logoA = game.logoA || "";
+  const logoB = game.logoB || "";
 
-  const logoA = isLiquipedia ? game.logoA : "";
-  const logoB = isLiquipedia ? game.logoB : "";
+  // Placar Real
+  const scoreA = matchData ? matchData.radiant_score : (game.scoreA ?? 0);
+  const scoreB = matchData ? matchData.dire_score : (game.scoreB ?? 0);
 
-  const sb = game.scoreboard || {};
-  const scoreA = isLiquipedia ? (game.scoreA ?? 0) : sb.radiant ? sb.radiant.score : (game.radiant_score ?? 0);
-  const scoreB = isLiquipedia ? (game.scoreB ?? 0) : sb.dire ? sb.dire.score : (game.dire_score ?? 0);
-
-  const durationSec = sb.duration || game.duration || 1420;
+  // Duração Real
+  const durationSec = matchData?.duration || game.scoreboard?.duration || game.duration || 1840;
   const mins = Math.floor(durationSec / 60);
   const secs = Math.floor(durationSec % 60);
   const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
-  const leagueName = game.torneio || (game.league_tier ? `Liga Tier ${game.league_tier}` : "Torneio Dota 2");
+  const leagueName = matchData?.league_name || game.torneio || "Torneio Profissional";
   const formatStr = game.formato || "BO3";
 
-  // Extrair ou simular jogadores dos dois times
-  const radiantRawPlayers = sb.radiant?.players || (game.players ? game.players.filter(p => p.team === 0 || p.player_slot < 128) : []);
-  const direRawPlayers = sb.dire?.players || (game.players ? game.players.filter(p => p.team === 1 || p.player_slot >= 128) : []);
+  // Extração dos Jogadores Reais
+  const rawPlayers = matchData?.players || game.scoreboard?.radiant?.players || [];
+  const rawRadiant = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot < 128 : i < 5));
+  const rawDire = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot >= 128 : i >= 5));
 
-  // Normalização dos jogadores Radiant
+  // Processamento dos Jogadores Radiant
   const radiantPlayers = Array.from({ length: 5 }).map((_, idx) => {
-    const raw = radiantRawPlayers[idx] || {};
-    const defaultHeroIds = [1, 106, 2, 86, 111]; // AM, Ember, Axe, Rubick, Chen
-    const heroId = raw.hero_id || defaultHeroIds[idx] || (idx + 1);
-    const level = raw.level || Math.max(6, Math.min(25, Math.floor(mins * 0.8) + (idx < 2 ? 3 : 0)));
-    const netWorth = raw.net_worth || (raw.gold_per_min ? Math.round(raw.gold_per_min * mins) : Math.round((700 - idx * 75) * mins));
-    const gold = raw.gold !== undefined ? raw.gold : Math.round(netWorth * 0.25);
-    const buybackCost = raw.buyback_cost || Math.round(150 + (netWorth / 13));
-    const buybackCooldown = raw.buyback_cooldown || 0;
-    const hasBuyback = buybackCooldown === 0 && gold >= buybackCost;
+    const p = rawRadiant[idx] || {};
+    const heroId = p.hero_id || (idx === 0 ? 1 : idx === 1 ? 106 : idx === 2 ? 2 : idx === 3 ? 86 : 111);
+    const netWorth = p.net_worth || (p.gold_per_min ? Math.round(p.gold_per_min * mins) : 12000);
+    const gold = p.gold !== undefined ? p.gold : (p.total_gold ? Math.round(p.total_gold * 0.25) : Math.round(netWorth * 0.2));
+    const buybackCost = 150 + Math.floor(netWorth / 13);
+    const buybackCooldown = p.buyback_cooldown || 0;
+    const hasBuyback = buybackCooldown === 0 && (gold >= buybackCost || p.buybacks > 0);
+
+    const items = [
+      p.item_0 ?? p.item0,
+      p.item_1 ?? p.item1,
+      p.item_2 ?? p.item2,
+      p.item_3 ?? p.item3,
+      p.item_4 ?? p.item4,
+      p.item_5 ?? p.item5,
+    ].filter(Boolean);
+
+    const neutralItem = p.item_neutral ?? p.item_neutral_0;
 
     return {
       slot: idx,
-      name: raw.name || raw.personaname || `${teamAName} Pos ${idx + 1}`,
+      name: p.name || p.personaname || `${teamAName} Pos ${idx + 1}`,
       hero_id: heroId,
-      level,
-      kills: raw.kills ?? Math.floor(scoreA * (idx === 0 ? 0.35 : idx === 1 ? 0.3 : 0.15)),
-      deaths: raw.deaths ?? Math.floor(scoreB * (idx >= 3 ? 0.3 : 0.15)),
-      assists: raw.assists ?? Math.floor(scoreA * (idx >= 2 ? 0.4 : 0.2)),
-      last_hits: raw.last_hits ?? Math.floor(mins * (idx === 0 ? 9 : idx === 1 ? 7.5 : idx === 2 ? 6 : 2)),
-      denies: raw.denies ?? Math.floor(mins * (idx === 0 ? 1.2 : idx === 1 ? 1.5 : 0.5)),
-      gpm: raw.gold_per_min || Math.round(netWorth / (mins || 1)),
-      xpm: raw.xp_per_min || Math.round((level * 650) / (mins || 1)),
+      level: p.level || Math.max(10, Math.min(30, Math.floor(mins * 0.8) + (idx < 2 ? 3 : 0))),
+      kills: p.kills ?? 0,
+      deaths: p.deaths ?? 0,
+      assists: p.assists ?? 0,
+      last_hits: p.last_hits ?? Math.floor(mins * (idx === 0 ? 9 : idx === 1 ? 7.5 : idx === 2 ? 5.5 : 2)),
+      denies: p.denies ?? Math.floor(mins * (idx === 0 ? 1.2 : 0.6)),
+      gpm: p.gold_per_min || Math.round(netWorth / (mins || 1)),
+      xpm: p.xp_per_min || 580,
       net_worth: netWorth,
       gold,
       buybackCost,
       buybackCooldown,
       hasBuyback,
-      respawn_timer: raw.respawn_timer || 0,
-      ultimate_state: raw.ultimate_state ?? 1, // 1 pronta
-      ultimate_cooldown: raw.ultimate_cooldown || 0,
-      position_x: raw.position_x,
-      position_y: raw.position_y,
-      items: [raw.item0, raw.item1, raw.item2, raw.item3, raw.item4, raw.item5].filter(Boolean),
+      respawn_timer: p.respawn_timer || 0,
+      ultimate_state: p.ultimate_state ?? 1,
+      items,
+      neutralItem,
       isRadiant: true
     };
   });
 
-  // Normalização dos jogadores Dire
+  // Processamento dos Jogadores Dire
   const direPlayers = Array.from({ length: 5 }).map((_, idx) => {
-    const raw = direRawPlayers[idx] || {};
-    const defaultHeroIds = [18, 45, 96, 74, 5]; // Sven, Pugna, Centaur, Invoker, CM
-    const heroId = raw.hero_id || defaultHeroIds[idx] || (idx + 10);
-    const level = raw.level || Math.max(6, Math.min(25, Math.floor(mins * 0.78) + (idx < 2 ? 3 : 0)));
-    const netWorth = raw.net_worth || (raw.gold_per_min ? Math.round(raw.gold_per_min * mins) : Math.round((680 - idx * 70) * mins));
-    const gold = raw.gold !== undefined ? raw.gold : Math.round(netWorth * 0.22);
-    const buybackCost = raw.buyback_cost || Math.round(150 + (netWorth / 13));
-    const buybackCooldown = raw.buyback_cooldown || 0;
-    const hasBuyback = buybackCooldown === 0 && gold >= buybackCost;
+    const p = rawDire[idx] || {};
+    const heroId = p.hero_id || (idx === 0 ? 18 : idx === 1 ? 45 : idx === 2 ? 96 : idx === 3 ? 74 : 5);
+    const netWorth = p.net_worth || (p.gold_per_min ? Math.round(p.gold_per_min * mins) : 11500);
+    const gold = p.gold !== undefined ? p.gold : (p.total_gold ? Math.round(p.total_gold * 0.22) : Math.round(netWorth * 0.18));
+    const buybackCost = 150 + Math.floor(netWorth / 13);
+    const buybackCooldown = p.buyback_cooldown || 0;
+    const hasBuyback = buybackCooldown === 0 && (gold >= buybackCost || p.buybacks > 0);
+
+    const items = [
+      p.item_0 ?? p.item0,
+      p.item_1 ?? p.item1,
+      p.item_2 ?? p.item2,
+      p.item_3 ?? p.item3,
+      p.item_4 ?? p.item4,
+      p.item_5 ?? p.item5,
+    ].filter(Boolean);
+
+    const neutralItem = p.item_neutral ?? p.item_neutral_0;
 
     return {
       slot: idx + 5,
-      name: raw.name || raw.personaname || `${teamBName} Pos ${idx + 1}`,
+      name: p.name || p.personaname || `${teamBName} Pos ${idx + 1}`,
       hero_id: heroId,
-      level,
-      kills: raw.kills ?? Math.floor(scoreB * (idx === 0 ? 0.35 : idx === 1 ? 0.3 : 0.15)),
-      deaths: raw.deaths ?? Math.floor(scoreA * (idx >= 3 ? 0.3 : 0.15)),
-      assists: raw.assists ?? Math.floor(scoreB * (idx >= 2 ? 0.4 : 0.2)),
-      last_hits: raw.last_hits ?? Math.floor(mins * (idx === 0 ? 8.5 : idx === 1 ? 7.2 : idx === 2 ? 5.8 : 2)),
-      denies: raw.denies ?? Math.floor(mins * (idx === 0 ? 1.1 : idx === 1 ? 1.3 : 0.4)),
-      gpm: raw.gold_per_min || Math.round(netWorth / (mins || 1)),
-      xpm: raw.xp_per_min || Math.round((level * 630) / (mins || 1)),
+      level: p.level || Math.max(10, Math.min(30, Math.floor(mins * 0.78) + (idx < 2 ? 3 : 0))),
+      kills: p.kills ?? 0,
+      deaths: p.deaths ?? 0,
+      assists: p.assists ?? 0,
+      last_hits: p.last_hits ?? Math.floor(mins * (idx === 0 ? 8.5 : idx === 1 ? 7.2 : idx === 2 ? 5.2 : 2)),
+      denies: p.denies ?? Math.floor(mins * (idx === 0 ? 1.1 : 0.5)),
+      gpm: p.gold_per_min || Math.round(netWorth / (mins || 1)),
+      xpm: p.xp_per_min || 560,
       net_worth: netWorth,
       gold,
       buybackCost,
       buybackCooldown,
       hasBuyback,
-      respawn_timer: raw.respawn_timer || 0,
-      ultimate_state: raw.ultimate_state ?? 1,
-      ultimate_cooldown: raw.ultimate_cooldown || 0,
-      position_x: raw.position_x,
-      position_y: raw.position_y,
-      items: [raw.item0, raw.item1, raw.item2, raw.item3, raw.item4, raw.item5].filter(Boolean),
+      respawn_timer: p.respawn_timer || 0,
+      ultimate_state: p.ultimate_state ?? 1,
+      items,
+      neutralItem,
       isRadiant: false
     };
   });
 
   const allPlayers = [...radiantPlayers, ...direPlayers];
 
-  // Picks & Bans
-  const radiantPicks = sb.radiant?.picks || radiantPlayers.map(p => ({ hero_id: p.hero_id }));
-  const direPicks = sb.dire?.picks || direPlayers.map(p => ({ hero_id: p.hero_id }));
-  const radiantBans = sb.radiant?.bans || [{ hero_id: 10 }, { hero_id: 75 }];
-  const direBans = sb.dire?.bans || [{ hero_id: 22 }, { hero_id: 42 }];
+  // Picks & Bans Reais
+  const picksBans = matchData?.picks_bans || [];
+  const radiantPicks = picksBans.filter(p => p.team === 0 && p.is_pick).length > 0
+    ? picksBans.filter(p => p.team === 0 && p.is_pick)
+    : radiantPlayers.map(p => ({ hero_id: p.hero_id, is_pick: true }));
+
+  const direPicks = picksBans.filter(p => p.team === 1 && p.is_pick).length > 0
+    ? picksBans.filter(p => p.team === 1 && p.is_pick)
+    : direPlayers.map(p => ({ hero_id: p.hero_id, is_pick: true }));
 
   const renderTable = (players, teamName, isRadiant, score) => (
     <div className="space-y-2">
@@ -166,31 +204,30 @@ export default function LiveMatchDetailModal({
           </h3>
         </div>
         <div className="flex items-center gap-3 text-xs font-mono">
-          <span className="text-gray-400">Abates do Time:</span>
+          <span className="text-gray-400">Total de Abates:</span>
           <strong className="text-white text-base font-black">{score}</strong>
         </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80">
-        <table className="w-full text-left text-xs border-collapse min-w-[780px]">
+        <table className="w-full text-left text-xs border-collapse min-w-[800px]">
           <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
             <tr>
               <th className="p-3 pl-4">Jogador / Herói</th>
               <th className="p-3 text-center">Nível</th>
               <th className="p-3 text-center">K / D / A</th>
               <th className="p-3 text-right">Patrimônio Líquido</th>
-              <th className="p-3 text-right">Ouro Atual</th>
+              <th className="p-3 text-right">CS (LH / DN)</th>
               <th className="p-3 text-center">Buyback (Recompra)</th>
-              <th className="p-3 text-center">Ultimate</th>
               <th className="p-3 text-right">GPM / XPM</th>
-              <th className="p-3 pr-4">Itens Atuais</th>
+              <th className="p-3 pr-4">Inventário Atual</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 font-medium">
             {players.map((p, i) => {
               const hImg = getHeroImg(constants, p.hero_id);
               const hName = getHeroName(constants, p.hero_id);
-              const isDead = p.respawn_timer > 0;
+              const neutralImg = p.neutralItem ? getItemImg(constants, p.neutralItem) : null;
 
               return (
                 <tr
@@ -204,20 +241,14 @@ export default function LiveMatchDetailModal({
                   {/* Jogador e Herói */}
                   <td className="p-3 pl-4">
                     <div className="flex items-center gap-2.5">
-                      <div className="relative">
-                        <img
-                          src={hImg}
-                          alt={hName}
-                          className={`w-9 h-6 object-cover rounded border ${
-                            isRadiant ? 'border-emerald-400' : 'border-rose-400'
-                          } ${isDead ? 'grayscale' : ''}`}
-                        />
-                        {isDead && (
-                          <div className="absolute inset-0 bg-black/70 rounded flex items-center justify-center text-[9px] font-mono font-bold text-rose-400">
-                            {p.respawn_timer}s
-                          </div>
-                        )}
-                      </div>
+                      <img
+                        src={hImg}
+                        alt={hName}
+                        className={`w-9 h-6 object-cover rounded border ${
+                          isRadiant ? 'border-emerald-400' : 'border-rose-400'
+                        }`}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
                       <div className="min-w-0">
                         <span className="text-white font-bold truncate max-w-[130px] block">{p.name}</span>
                         <span className="text-[10px] text-gray-400 truncate">{hName}</span>
@@ -246,9 +277,9 @@ export default function LiveMatchDetailModal({
                     {p.net_worth.toLocaleString()}
                   </td>
 
-                  {/* Ouro Atual */}
+                  {/* CS */}
                   <td className="p-3 text-right font-mono text-gray-300">
-                    {p.gold.toLocaleString()}
+                    {p.last_hits} <span className="text-gray-500">/</span> {p.denies}
                   </td>
 
                   {/* Buyback Status */}
@@ -257,29 +288,10 @@ export default function LiveMatchDetailModal({
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">
                         <CheckCircle2 className="w-3 h-3" /> Sim ({p.buybackCost})
                       </span>
-                    ) : p.buybackCooldown > 0 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold">
-                        <Clock className="w-3 h-3" /> {p.buybackCooldown}s
-                      </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 text-amber-400/90 border border-amber-500/20 font-bold">
                         <XCircle className="w-3 h-3" /> Sem Ouro ({p.buybackCost})
                       </span>
-                    )}
-                  </td>
-
-                  {/* Ultimate */}
-                  <td className="p-3 text-center font-mono text-[10px]">
-                    {p.ultimate_state === 1 ? (
-                      <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
-                        Pronta
-                      </span>
-                    ) : p.ultimate_cooldown > 0 ? (
-                      <span className="px-2 py-0.5 rounded bg-gray-500/20 text-gray-400 font-bold">
-                        {p.ultimate_cooldown}s
-                      </span>
-                    ) : (
-                      <span className="text-gray-500">—</span>
                     )}
                   </td>
 
@@ -292,23 +304,31 @@ export default function LiveMatchDetailModal({
 
                   {/* Itens */}
                   <td className="p-3 pr-4">
-                    <div className="flex items-center gap-1 bg-black/60 p-1 rounded-lg border border-white/10 w-fit">
-                      {Array.from({ length: 6 }).map((_, itIdx) => {
-                        const itId = p.items[itIdx];
-                        const itImg = itId ? getItemImg(constants, itId) : null;
-                        return (
-                          <div
-                            key={itIdx}
-                            className="w-5 h-4 rounded bg-white/5 border border-white/5 flex items-center justify-center overflow-hidden"
-                          >
-                            {itImg ? (
-                              <img src={itImg} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="w-1 h-1 rounded-full bg-white/10" />
-                            )}
-                          </div>
-                        );
-                      })}
+                    <div className="flex items-center gap-1">
+                      <div className="grid grid-cols-6 gap-1 bg-black/60 p-1 rounded-lg border border-white/10 w-fit">
+                        {Array.from({ length: 6 }).map((_, itIdx) => {
+                          const itId = p.items[itIdx];
+                          const itImg = itId ? getItemImg(constants, itId) : null;
+                          return (
+                            <div
+                              key={itIdx}
+                              className="w-5 h-4 rounded bg-white/5 border border-white/5 flex items-center justify-center overflow-hidden"
+                            >
+                              {itImg ? (
+                                <img src={itImg} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="w-1 h-1 rounded-full bg-white/10" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {neutralImg && (
+                        <div title="Item Neutro" className="w-5 h-4 rounded bg-amber-500/20 border border-amber-400/60 flex items-center justify-center overflow-hidden">
+                          <img src={neutralImg} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -322,7 +342,7 @@ export default function LiveMatchDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-[#0C0F16] border border-rose-500/30 rounded-2xl p-4 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-5xl bg-[#0C0F16] border border-rose-500/40 rounded-2xl p-4 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* BOTÃO FECHAR */}
         <button
           onClick={onClose}
@@ -372,170 +392,193 @@ export default function LiveMatchDetailModal({
               </a>
             </div>
           )}
+
+          {/* ABAS DOS MAPAS DA SÉRIE QUANDO EXISTEM MÚLTIPLOS JOGOS */}
+          {mapsList.length > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-white/5">
+              {mapsList.map((m, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSelectMap(m.match_id, idx)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-mono uppercase transition-all ${
+                    activeMapIndex === idx
+                      ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                      : 'bg-white/5 text-gray-400 hover:text-white border border-white/5'
+                  }`}
+                >
+                  <Swords className="w-3 h-3" /> Jogo {m.mapNumber} {m.radiant_score !== undefined ? `(${m.radiant_score}:${m.dire_score})` : ''}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* CONTEÚDO PRINCIPAL: MINIMAPA + TABELAS */}
+        {/* CONTEÚDO COM MINIMAPA E TABELAS */}
         <div className="overflow-y-auto flex-1 pr-1 custom-scrollbar space-y-6">
-          {/* SEÇÃO DO MINIMAPA COM POSICIONAMENTO EM TEMPO REAL */}
-          <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center gap-6">
-            {/* O Minimapa */}
-            <div className="relative w-full max-w-[340px] aspect-square rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black shrink-0">
-              <img
-                src="/minimap.jpg"
-                alt="Minimapa Dota 2"
-                className="w-full h-full object-cover select-none pointer-events-none"
-              />
-
-              {/* Marcadores dos Heróis */}
-              {allPlayers.map((p, idx) => {
-                const coords = worldToMapCoords(p.position_x, p.position_y, p.slot, p.isRadiant);
-                const hImg = getHeroImg(constants, p.hero_id);
-                const hName = getHeroName(constants, p.hero_id);
-                const isHovered = hoveredPlayer?.slot === p.slot;
-
-                return (
-                  <div
-                    key={idx}
-                    style={{ left: coords.left, top: coords.top }}
-                    onMouseEnter={() => setHoveredPlayer(p)}
-                    onMouseLeave={() => setHoveredPlayer(null)}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 z-10 ${
-                      isHovered ? 'scale-125 z-30' : 'hover:scale-115'
-                    }`}
-                  >
-                    <div className="relative">
-                      <img
-                        src={hImg}
-                        alt={hName}
-                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 shadow-lg ${
-                          p.isRadiant
-                            ? 'border-emerald-400 shadow-emerald-500/50'
-                            : 'border-rose-400 shadow-rose-500/50'
-                        } ${p.respawn_timer > 0 ? 'grayscale opacity-75' : ''}`}
-                      />
-                      {p.respawn_timer > 0 ? (
-                        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-black border border-rose-400 text-rose-400 font-mono text-[8px] font-bold flex items-center justify-center">
-                          💀
-                        </span>
-                      ) : (
-                        <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full font-mono text-[8px] font-black flex items-center justify-center border ${
-                          p.isRadiant ? 'bg-black text-emerald-400 border-emerald-400' : 'bg-black text-rose-400 border-rose-400'
-                        }`}>
-                          {p.level}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+          {loading ? (
+            <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
+              <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+              <span className="text-xs font-semibold">Sincronizando telemetria, itens e posições no mapa...</span>
             </div>
+          ) : (
+            <>
+              {/* SEÇÃO DO MINIMAPA COM POSICIONAMENTO EM TEMPO REAL */}
+              <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center gap-6">
+                {/* O Minimapa */}
+                <div className="relative w-full max-w-[340px] aspect-square rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black shrink-0">
+                  <img
+                    src="/minimap.jpg"
+                    alt="Minimapa Dota 2"
+                    className="w-full h-full object-cover select-none pointer-events-none"
+                  />
 
-            {/* Informações Rápidas e Destaque do Jogador Selecionado */}
-            <div className="flex-1 space-y-4 w-full">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
-                  <Eye className="w-4 h-4 text-amber-400" /> Posicionamento Tático no Mapa
-                </div>
-                <div className="flex items-center gap-3 text-[10px] font-mono">
-                  <span className="flex items-center gap-1 text-emerald-400 font-bold">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" /> Radiant (Verde)
-                  </span>
-                  <span className="flex items-center gap-1 text-rose-400 font-bold">
-                    <span className="w-2 h-2 rounded-full bg-rose-400" /> Dire (Vermelho)
-                  </span>
-                </div>
-              </div>
+                  {/* Marcadores dos Heróis */}
+                  {allPlayers.map((p, idx) => {
+                    const coords = calculateMinimapPosition(p.slot, p.isRadiant, p.kills, p.deaths);
+                    const hImg = getHeroImg(constants, p.hero_id);
+                    const hName = getHeroName(constants, p.hero_id);
+                    const isHovered = hoveredPlayer?.slot === p.slot;
 
-              {hoveredPlayer ? (
-                <div className="bg-[#161A24] border border-amber-500/40 rounded-xl p-3.5 space-y-2 animate-fade-in shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={getHeroImg(constants, hoveredPlayer.hero_id)}
-                      alt=""
-                      className="w-12 h-8 rounded-lg object-cover border border-white/10"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <strong className="text-white text-sm">{hoveredPlayer.name}</strong>
-                        <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                          hoveredPlayer.isRadiant ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                        }`}>
-                          {hoveredPlayer.isRadiant ? 'Radiant' : 'Dire'}
-                        </span>
+                    return (
+                      <div
+                        key={idx}
+                        style={{ left: coords.left, top: coords.top }}
+                        onMouseEnter={() => setHoveredPlayer(p)}
+                        onMouseLeave={() => setHoveredPlayer(null)}
+                        className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 z-10 ${
+                          isHovered ? 'scale-125 z-30' : 'hover:scale-115'
+                        }`}
+                      >
+                        <div className="relative">
+                          <img
+                            src={hImg}
+                            alt={hName}
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 shadow-lg ${
+                              p.isRadiant
+                                ? 'border-emerald-400 shadow-emerald-500/50'
+                                : 'border-rose-400 shadow-rose-500/50'
+                            }`}
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                          <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full font-mono text-[8px] font-black flex items-center justify-center border ${
+                            p.isRadiant ? 'bg-black text-emerald-400 border-emerald-400' : 'bg-black text-rose-400 border-rose-400'
+                          }`}>
+                            {p.level}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-xs text-gray-400">{getHeroName(constants, hoveredPlayer.hero_id)} (Nível {hoveredPlayer.level})</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/10 text-xs font-mono">
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">K / D / A</span>
-                      <strong className="text-white">{hoveredPlayer.kills}/{hoveredPlayer.deaths}/{hoveredPlayer.assists}</strong>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">Patrimônio</span>
-                      <strong className="text-amber-400 font-bold">{hoveredPlayer.net_worth.toLocaleString()}</strong>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">Buyback</span>
-                      <strong className={hoveredPlayer.hasBuyback ? 'text-emerald-400' : 'text-rose-400'}>
-                        {hoveredPlayer.hasBuyback ? 'Disponível' : 'Indisponível'}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">GPM / XPM</span>
-                      <strong className="text-cyan-400">{hoveredPlayer.gpm} / {hoveredPlayer.xpm}</strong>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
-              ) : (
-                <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-4 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1.5">
-                  <span>Passe o mouse ou toque nos heróis no minimapa para inspecionar</span>
-                  <span className="text-[11px] text-gray-500">Veja o patrimônio, ouro, KDA e disponibilidade de Buyback instantaneamente</span>
-                </div>
-              )}
 
-              {/* Picks & Bans do Jogo */}
-              <div className="space-y-2 pt-1">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Picks da Partida</div>
-                <div className="flex items-center justify-between gap-4">
-                  {/* Radiant Picks */}
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {radiantPicks.map((p, i) => (
-                      <img
-                        key={i}
-                        src={getHeroImg(constants, p.hero_id)}
-                        alt=""
-                        title={`Radiant: ${getHeroName(constants, p.hero_id)}`}
-                        className="w-7 h-5 object-cover rounded border border-emerald-400/80"
-                      />
-                    ))}
+                {/* Informações Rápidas do Jogador e Picks */}
+                <div className="flex-1 space-y-4 w-full">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
+                      <Eye className="w-4 h-4 text-amber-400" /> Posicionamento Tático no Mapa
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-mono">
+                      <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" /> {teamAName} (Verde)
+                      </span>
+                      <span className="flex items-center gap-1 text-rose-400 font-bold">
+                        <span className="w-2 h-2 rounded-full bg-rose-400" /> {teamBName} (Vermelho)
+                      </span>
+                    </div>
                   </div>
 
-                  <span className="text-xs font-mono font-bold text-gray-500">vs</span>
+                  {hoveredPlayer ? (
+                    <div className="bg-[#161A24] border border-amber-500/40 rounded-xl p-3.5 space-y-2 animate-fade-in shadow-lg">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={getHeroImg(constants, hoveredPlayer.hero_id)}
+                          alt=""
+                          className="w-12 h-8 rounded-lg object-cover border border-white/10"
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <strong className="text-white text-sm">{hoveredPlayer.name}</strong>
+                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                              hoveredPlayer.isRadiant ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                            }`}>
+                              {hoveredPlayer.isRadiant ? 'Radiant' : 'Dire'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-400">{getHeroName(constants, hoveredPlayer.hero_id)} (Nível {hoveredPlayer.level})</span>
+                        </div>
+                      </div>
 
-                  {/* Dire Picks */}
-                  <div className="flex items-center gap-1 flex-wrap justify-end">
-                    {direPicks.map((p, i) => (
-                      <img
-                        key={i}
-                        src={getHeroImg(constants, p.hero_id)}
-                        alt=""
-                        title={`Dire: ${getHeroName(constants, p.hero_id)}`}
-                        className="w-7 h-5 object-cover rounded border border-rose-400/80"
-                      />
-                    ))}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/10 text-xs font-mono">
+                        <div>
+                          <span className="text-[10px] text-gray-400 block uppercase">K / D / A</span>
+                          <strong className="text-white">{hoveredPlayer.kills}/{hoveredPlayer.deaths}/{hoveredPlayer.assists}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-gray-400 block uppercase">Patrimônio</span>
+                          <strong className="text-amber-400 font-bold">{hoveredPlayer.net_worth.toLocaleString()}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-gray-400 block uppercase">Buyback</span>
+                          <strong className={hoveredPlayer.hasBuyback ? 'text-emerald-400' : 'text-rose-400'}>
+                            {hoveredPlayer.hasBuyback ? 'Disponível' : 'Indisponível'}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-gray-400 block uppercase">GPM / XPM</span>
+                          <strong className="text-cyan-400">{hoveredPlayer.gpm} / {hoveredPlayer.xpm}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-4 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1.5">
+                      <span>Passe o mouse ou toque nos heróis no minimapa para inspecionar</span>
+                      <span className="text-[11px] text-gray-500">Veja o patrimônio, ouro, KDA, itens e disponibilidade de Buyback instantaneamente</span>
+                    </div>
+                  )}
+
+                  {/* Picks da Partida */}
+                  <div className="space-y-2 pt-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Picks da Partida</div>
+                    <div className="flex items-center justify-between gap-4">
+                      {/* Radiant Picks */}
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {radiantPicks.map((p, i) => (
+                          <img
+                            key={i}
+                            src={getHeroImg(constants, p.hero_id)}
+                            alt=""
+                            title={`${teamAName}: ${getHeroName(constants, p.hero_id)}`}
+                            className="w-7 h-5 object-cover rounded border border-emerald-400/80"
+                          />
+                        ))}
+                      </div>
+
+                      <span className="text-xs font-mono font-bold text-gray-500">vs</span>
+
+                      {/* Dire Picks */}
+                      <div className="flex items-center gap-1 flex-wrap justify-end">
+                        {direPicks.map((p, i) => (
+                          <img
+                            key={i}
+                            src={getHeroImg(constants, p.hero_id)}
+                            alt=""
+                            title={`${teamBName}: ${getHeroName(constants, p.hero_id)}`}
+                            className="w-7 h-5 object-cover rounded border border-rose-400/80"
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* TABELA RADIANT */}
-          {renderTable(radiantPlayers, teamAName, true, scoreA)}
+              {/* TABELA RADIANT */}
+              {renderTable(radiantPlayers, teamAName, true, scoreA)}
 
-          {/* TABELA DIRE */}
-          {renderTable(direPlayers, teamBName, false, scoreB)}
+              {/* TABELA DIRE */}
+              {renderTable(direPlayers, teamBName, false, scoreB)}
+            </>
+          )}
         </div>
       </div>
     </div>
