@@ -103,12 +103,14 @@ export default function MatchDetailModal({
                     </td>
 
                     {/* KDA */}
-                    <td className="p-3 text-center font-mono">
-                      <span className="font-bold text-white">{p.kills}</span>
-                      <span className="text-gray-500"> / </span>
-                      <span className="font-bold text-rose-400">{p.deaths}</span>
-                      <span className="text-gray-500"> / </span>
-                      <span className="font-bold text-cyan-400">{p.assists}</span>
+                    <td className="p-3 text-center font-mono whitespace-nowrap">
+                      <div className="inline-flex items-center justify-center gap-1 font-mono text-xs">
+                        <span className="font-bold text-white min-w-[18px] text-right">{p.kills}</span>
+                        <span className="text-gray-500 font-normal">/</span>
+                        <span className="font-bold text-rose-400 min-w-[18px] text-center">{p.deaths}</span>
+                        <span className="text-gray-500 font-normal">/</span>
+                        <span className="font-bold text-cyan-400 min-w-[18px] text-left">{p.assists}</span>
+                      </div>
                     </td>
 
                     {/* Net Worth */}
