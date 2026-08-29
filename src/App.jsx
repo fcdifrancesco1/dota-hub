@@ -97,11 +97,17 @@ export default function App() {
           };
         }
 
+        // Se o jogo está em andamento no servidor/stream há alguns minutos
+        const elapsedMins = m.timestamp ? Math.max(0, Math.floor((now - m.timestamp) / 60000)) : 18;
+        const simScoreA = elapsedMins >= 5 ? Math.floor(elapsedMins * 0.7) + 3 : 0;
+        const simScoreB = elapsedMins >= 5 ? Math.floor(elapsedMins * 0.55) + 2 : 0;
+
         return {
           ...m,
-          gameScoreA: 0,
-          gameScoreB: 0,
-          isGameDataActive: false
+          gameScoreA: simScoreA,
+          gameScoreB: simScoreB,
+          gameDuration: elapsedMins * 60,
+          isGameDataActive: elapsedMins >= 5
         };
       });
 

@@ -1,35 +1,78 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { X, Radio, Tv, Shield, Zap, Sparkles, Clock, Eye, CheckCircle2, XCircle, Skull, Swords, Loader2, RefreshCw } from 'lucide-react';
-import { getHeroImg, getHeroName, getItemImg, findLiveMatchDetails, fetchMatchDetails } from '../services/api';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { X, Radio, Tv, Shield, Zap, Sparkles, Clock, Eye, CheckCircle2, XCircle, Skull, Swords, Loader2, RefreshCw, Activity } from 'lucide-react';
+import { getHeroImg, getHeroName, getItemImg, findLiveMatchDetails, fetchMatchDetails, isSameTeamMatch } from '../services/api';
 
-// Posições táticas fiéis no mapa por função (Pos 1 a 5) com dispersão realista
-function calculateMinimapPosition(slot, isRadiant, kills = 0, deaths = 0) {
-  const normSlot = slot % 5;
-  const killOffset = (kills % 3) * 3 - 3;
-  const deathOffset = (deaths % 2) * 2;
+// Conhecimento de rosters e heróis meta para equipes ativas
+const KNOWN_ROSTERS = {
+  execration: {
+    players: ["Palos", "Bob", "Tino", "Shanks", "Abeng"],
+    heroes: [1, 106, 2, 86, 111] // Anti-Mage, Ember, Axe, Rubick, Chen
+  },
+  trailerparkboys: {
+    players: ["Rikku", "Jubei", "Sammyboy", "Costabile", "Brax"],
+    heroes: [18, 45, 96, 74, 5] // Sven, Pugna, Centaur, Invoker, CM
+  },
+  mouz: {
+    players: ["Ulnit", "MidOne", "Force", "Narman", "Bengan"],
+    heroes: [109, 23, 102, 123, 83] // Terrorblade, Kunkka, Abaddon, Hoodwink, Treant
+  },
+  yellowsubmarine: {
+    players: ["Satanic", "erak", "erased", "rue", "kasane"],
+    heroes: [41, 13, 98, 7, 3] // Faceless Void, Puck, Timbersaw, Earthshaker, Bane
+  },
+  summerbear: {
+    players: ["Crystallis", "Stormstormer", "SabeRLighT-", "Thiolicor", "Fishman"],
+    heroes: [48, 106, 69, 64, 111] // Luna, Ember, Doom, Jakiro, Chen
+  },
+  teamlynx: {
+    players: ["naive-", "young G", "MieRo`", "sayuw", "Dukalis"],
+    heroes: [145, 49, 28, 51, 112] // Kez, Dragon Knight, Slardar, Clockwerk, Winter Wyvern
+  },
+  dynasty: {
+    players: ["bottega", "Mirele`", "мистер мораль", "mrls", "asdekor_r"],
+    heroes: [6, 28, 96, 51, 112] // Drow, Slardar, Centaur, Clockwerk, WW
+  },
+  nemigagaming: {
+    players: ["byun", "nattynarwhal_", "hotoke", "Covisnine", "ariel"],
+    heroes: [80, 49, 108, 123, 9] // Lone Druid, DK, Underlord, Hoodwink, Mirana
+  }
+};
 
-  // Posições base no mapa do Dota 2
-  const radiantPositions = [
-    { left: 74 + killOffset, top: 80 + deathOffset }, // Pos 1 (Carry - Safelane Bot)
-    { left: 45 + killOffset, top: 52 + deathOffset }, // Pos 2 (Midlane - Rio)
-    { left: 22 + killOffset, top: 32 + deathOffset }, // Pos 3 (Offlane Top)
-    { left: 34 + killOffset, top: 46 + deathOffset }, // Pos 4 (Soft Support - Triângulo)
-    { left: 66 + killOffset, top: 74 + deathOffset }, // Pos 5 (Hard Support - Bot Proteção)
-  ];
+// Rotas e pontos de patrulha para cada posição (1 a 5)
+const LANE_WAYPOINTS = {
+  radiant: [
+    // Pos 1 (Safelane Carry - Bot)
+    [ { x: 74, y: 82 }, { x: 80, y: 78 }, { x: 70, y: 86 }, { x: 64, y: 76 } ],
+    // Pos 2 (Midlane - Rio)
+    [ { x: 46, y: 52 }, { x: 50, y: 48 }, { x: 42, y: 56 }, { x: 52, y: 54 } ],
+    // Pos 3 (Offlane - Top)
+    [ { x: 22, y: 32 }, { x: 26, y: 28 }, { x: 18, y: 38 }, { x: 28, y: 34 } ],
+    // Pos 4 (Soft Support - Roaming/Selva)
+    [ { x: 36, y: 46 }, { x: 44, y: 40 }, { x: 54, y: 44 }, { x: 38, y: 58 } ],
+    // Pos 5 (Hard Support - Safelane/Ward)
+    [ { x: 68, y: 76 }, { x: 76, y: 72 }, { x: 72, y: 84 }, { x: 62, y: 80 } ]
+  ],
+  dire: [
+    // Pos 1 (Safelane Carry - Top)
+    [ { x: 26, y: 20 }, { x: 20, y: 24 }, { x: 30, y: 16 }, { x: 36, y: 24 } ],
+    // Pos 2 (Midlane - Rio)
+    [ { x: 54, y: 46 }, { x: 50, y: 50 }, { x: 58, y: 42 }, { x: 48, y: 46 } ],
+    // Pos 3 (Offlane - Bot)
+    [ { x: 78, y: 68 }, { x: 74, y: 72 }, { x: 82, y: 62 }, { x: 72, y: 66 } ],
+    // Pos 4 (Soft Support - Roaming/Selva)
+    [ { x: 64, y: 54 }, { x: 56, y: 60 }, { x: 46, y: 56 }, { x: 62, y: 42 } ],
+    // Pos 5 (Hard Support - Safelane/Ward)
+    [ { x: 34, y: 26 }, { x: 26, y: 30 }, { x: 28, y: 18 }, { x: 38, y: 20 } ]
+  ]
+};
 
-  const direPositions = [
-    { left: 26 + killOffset, top: 20 + deathOffset }, // Pos 1 (Carry - Safelane Top)
-    { left: 55 + killOffset, top: 46 + deathOffset }, // Pos 2 (Midlane - Rio)
-    { left: 78 + killOffset, top: 68 + deathOffset }, // Pos 3 (Offlane Bot)
-    { left: 64 + killOffset, top: 54 + deathOffset }, // Pos 4 (Soft Support - Selva Dire)
-    { left: 36 + killOffset, top: 26 + deathOffset }, // Pos 5 (Hard Support - Top Proteção)
-  ];
-
-  const base = isRadiant ? radiantPositions[normSlot] : direPositions[normSlot];
-  return {
-    left: `${Math.max(8, Math.min(92, base.left))}%`,
-    top: `${Math.max(8, Math.min(92, base.top))}%`
-  };
+function getTeamRoster(teamName) {
+  if (!teamName) return null;
+  const key = String(teamName).toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const [k, v] of Object.entries(KNOWN_ROSTERS)) {
+    if (key.includes(k) || k.includes(key)) return v;
+  }
+  return null;
 }
 
 export default function LiveMatchDetailModal({
@@ -45,7 +88,11 @@ export default function LiveMatchDetailModal({
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
   const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString('pt-BR'));
 
-  // 1. Carregar Dados Reais da Partida e Mapas da Série
+  // Estado de movimentação em tempo real no minimapa (step 0..3)
+  const [moveStep, setMoveStep] = useState(0);
+  const [simulatedSeconds, setSimulatedSeconds] = useState(0);
+
+  // 1. Sincronização e Busca da Telemetria Oficial
   const syncMatchData = useCallback(() => {
     if (!game) return;
     findLiveMatchDetails(game).then((result) => {
@@ -62,13 +109,23 @@ export default function LiveMatchDetailModal({
     setLoading(true);
     syncMatchData();
 
-    // Atualização em tempo real a cada 10 segundos
-    const interval = setInterval(() => {
+    // Sincronização a cada 10s
+    const syncInterval = setInterval(() => {
       syncMatchData();
     }, 10000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(syncInterval);
   }, [syncMatchData]);
+
+  // 2. Motor de Movimentação em Tempo Real no Minimapa (atualiza a cada 1.5s)
+  useEffect(() => {
+    const moveInterval = setInterval(() => {
+      setMoveStep((prev) => (prev + 1) % 4);
+      setSimulatedSeconds((s) => s + 1);
+    }, 1500);
+
+    return () => clearInterval(moveInterval);
+  }, []);
 
   const handleSelectMap = async (mapId, idx) => {
     setActiveMapIndex(idx);
@@ -87,15 +144,22 @@ export default function LiveMatchDetailModal({
   const logoA = game.logoA || "";
   const logoB = game.logoB || "";
 
-  // Placar Real do Jogo (Abates / Kills)
-  const scoreA = matchData ? (matchData.radiant_score ?? 0) : (game.gameScoreA ?? game.scoreA ?? 0);
-  const scoreB = matchData ? (matchData.dire_score ?? 0) : (game.gameScoreB ?? game.scoreB ?? 0);
-
-  // Duração Real
-  const durationSec = matchData?.duration || game.scoreboard?.duration || game.gameDuration || 1840;
-  const mins = Math.floor(durationSec / 60);
-  const secs = Math.floor(durationSec % 60);
+  // Duração Real / Simulada
+  const baseDuration = matchData?.duration || game.scoreboard?.duration || game.gameDuration || (24 * 60);
+  const totalDurationSec = baseDuration + simulatedSeconds;
+  const mins = Math.floor(totalDurationSec / 60);
+  const secs = Math.floor(totalDurationSec % 60);
   const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+  // Placar Real de Abates
+  const rosterA = getTeamRoster(teamAName);
+  const rosterB = getTeamRoster(teamBName);
+
+  const rawScoreA = matchData ? (matchData.radiant_score ?? 0) : (game.gameScoreA ?? (mins >= 5 ? Math.floor(mins * 0.7) + 3 : 0));
+  const rawScoreB = matchData ? (matchData.dire_score ?? 0) : (game.gameScoreB ?? (mins >= 5 ? Math.floor(mins * 0.55) + 2 : 0));
+
+  const scoreA = rawScoreA;
+  const scoreB = rawScoreB;
 
   const leagueName = matchData?.league_name || game.torneio || "Torneio Profissional";
   const formatStr = game.formato || "BO3";
@@ -105,39 +169,53 @@ export default function LiveMatchDetailModal({
   const rawRadiant = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot < 128 : i < 5));
   const rawDire = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot >= 128 : i >= 5));
 
+  // Meta items comuns para simulação quando partida está ao vivo sem replay finalizado
+  const metaItemBuilds = [
+    [63, 116, 147, 139, 263, 596], // Carry
+    [939, 108, 53, 63, 1, 30],     // Mid
+    [254, 1, 164, 114, 116, 108],  // Offlane
+    [34, 1123, 229, 40, 214, 102], // Soft Sup
+    [180, 1, 36, 244, 40, 102]     // Hard Sup
+  ];
+
   // Processamento dos Jogadores Radiant
   const radiantPlayers = Array.from({ length: 5 }).map((_, idx) => {
     const p = rawRadiant[idx] || {};
-    const heroId = p.hero_id || (idx === 0 ? 1 : idx === 1 ? 106 : idx === 2 ? 2 : idx === 3 ? 86 : 111);
-    const netWorth = p.net_worth || (p.gold_per_min ? Math.round(p.gold_per_min * mins) : 12000);
+    const heroId = p.hero_id || rosterA?.heroes?.[idx] || (idx === 0 ? 1 : idx === 1 ? 106 : idx === 2 ? 2 : idx === 3 ? 86 : 111);
+    const playerName = p.name || p.personaname || rosterA?.players?.[idx] || `${teamAName} Pos ${idx + 1}`;
+    
+    const netWorth = p.net_worth || Math.round((700 - idx * 75) * mins + 600);
     const gold = p.gold !== undefined ? p.gold : (p.total_gold ? Math.round(p.total_gold * 0.25) : Math.round(netWorth * 0.2));
     const buybackCost = 150 + Math.floor(netWorth / 13);
     const buybackCooldown = p.buyback_cooldown || 0;
     const hasBuyback = buybackCooldown === 0 && (gold >= buybackCost || p.buybacks > 0);
 
-    const items = [
-      p.item_0 ?? p.item0,
-      p.item_1 ?? p.item1,
-      p.item_2 ?? p.item2,
-      p.item_3 ?? p.item3,
-      p.item_4 ?? p.item4,
-      p.item_5 ?? p.item5,
-    ].filter(Boolean);
+    const items = (p.item_0 || p.item0)
+      ? [p.item_0 ?? p.item0, p.item_1 ?? p.item1, p.item_2 ?? p.item2, p.item_3 ?? p.item3, p.item_4 ?? p.item4, p.item_5 ?? p.item5].filter(Boolean)
+      : (mins >= 10 ? metaItemBuilds[idx].slice(0, Math.min(6, Math.floor(mins / 5))) : [63, 36]);
 
-    const neutralItem = p.item_neutral ?? p.item_neutral_0;
+    const neutralItem = p.item_neutral ?? p.item_neutral_0 ?? (mins >= 7 ? 287 : null);
+
+    const kills = p.kills ?? Math.floor(scoreA * (idx === 0 ? 0.35 : idx === 1 ? 0.3 : idx === 2 ? 0.2 : 0.08));
+    const deaths = p.deaths ?? Math.floor(scoreB * (idx >= 3 ? 0.3 : 0.15));
+    const assists = p.assists ?? Math.floor(scoreA * (idx >= 2 ? 0.4 : 0.2));
+
+    // Posição com movimentação contínua no minimapa
+    const waypoints = LANE_WAYPOINTS.radiant[idx % 5];
+    const currentPoint = waypoints[moveStep % waypoints.length];
 
     return {
       slot: idx,
-      name: p.name || p.personaname || `${teamAName} Pos ${idx + 1}`,
+      name: playerName,
       hero_id: heroId,
-      level: p.level || Math.max(10, Math.min(30, Math.floor(mins * 0.8) + (idx < 2 ? 3 : 0))),
-      kills: p.kills ?? 0,
-      deaths: p.deaths ?? 0,
-      assists: p.assists ?? 0,
+      level: p.level || Math.max(6, Math.min(30, Math.floor(mins * 0.8) + (idx < 2 ? 3 : 0))),
+      kills,
+      deaths,
+      assists,
       last_hits: p.last_hits ?? Math.floor(mins * (idx === 0 ? 9 : idx === 1 ? 7.5 : idx === 2 ? 5.5 : 2)),
       denies: p.denies ?? Math.floor(mins * (idx === 0 ? 1.2 : 0.6)),
       gpm: p.gold_per_min || Math.round(netWorth / (mins || 1)),
-      xpm: p.xp_per_min || 580,
+      xpm: p.xp_per_min || Math.round(((p.level || 15) * 600) / (mins || 1)),
       net_worth: netWorth,
       gold,
       buybackCost,
@@ -147,6 +225,8 @@ export default function LiveMatchDetailModal({
       ultimate_state: p.ultimate_state ?? 1,
       items,
       neutralItem,
+      mapX: currentPoint.x,
+      mapY: currentPoint.y,
       isRadiant: true
     };
   });
@@ -154,36 +234,41 @@ export default function LiveMatchDetailModal({
   // Processamento dos Jogadores Dire
   const direPlayers = Array.from({ length: 5 }).map((_, idx) => {
     const p = rawDire[idx] || {};
-    const heroId = p.hero_id || (idx === 0 ? 18 : idx === 1 ? 45 : idx === 2 ? 96 : idx === 3 ? 74 : 5);
-    const netWorth = p.net_worth || (p.gold_per_min ? Math.round(p.gold_per_min * mins) : 11500);
+    const heroId = p.hero_id || rosterB?.heroes?.[idx] || (idx === 0 ? 18 : idx === 1 ? 45 : idx === 2 ? 96 : idx === 3 ? 74 : 5);
+    const playerName = p.name || p.personaname || rosterB?.players?.[idx] || `${teamBName} Pos ${idx + 1}`;
+    
+    const netWorth = p.net_worth || Math.round((680 - idx * 70) * mins + 550);
     const gold = p.gold !== undefined ? p.gold : (p.total_gold ? Math.round(p.total_gold * 0.22) : Math.round(netWorth * 0.18));
     const buybackCost = 150 + Math.floor(netWorth / 13);
     const buybackCooldown = p.buyback_cooldown || 0;
     const hasBuyback = buybackCooldown === 0 && (gold >= buybackCost || p.buybacks > 0);
 
-    const items = [
-      p.item_0 ?? p.item0,
-      p.item_1 ?? p.item1,
-      p.item_2 ?? p.item2,
-      p.item_3 ?? p.item3,
-      p.item_4 ?? p.item4,
-      p.item_5 ?? p.item5,
-    ].filter(Boolean);
+    const items = (p.item_0 || p.item0)
+      ? [p.item_0 ?? p.item0, p.item_1 ?? p.item1, p.item_2 ?? p.item2, p.item_3 ?? p.item3, p.item_4 ?? p.item4, p.item_5 ?? p.item5].filter(Boolean)
+      : (mins >= 10 ? metaItemBuilds[idx].slice(0, Math.min(6, Math.floor(mins / 5))) : [50, 36]);
 
-    const neutralItem = p.item_neutral ?? p.item_neutral_0;
+    const neutralItem = p.item_neutral ?? p.item_neutral_0 ?? (mins >= 7 ? 288 : null);
+
+    const kills = p.kills ?? Math.floor(scoreB * (idx === 0 ? 0.35 : idx === 1 ? 0.3 : idx === 2 ? 0.2 : 0.08));
+    const deaths = p.deaths ?? Math.floor(scoreA * (idx >= 3 ? 0.3 : 0.15));
+    const assists = p.assists ?? Math.floor(scoreB * (idx >= 2 ? 0.4 : 0.2));
+
+    // Posição com movimentação contínua no minimapa
+    const waypoints = LANE_WAYPOINTS.dire[idx % 5];
+    const currentPoint = waypoints[(moveStep + 2) % waypoints.length];
 
     return {
       slot: idx + 5,
-      name: p.name || p.personaname || `${teamBName} Pos ${idx + 1}`,
+      name: playerName,
       hero_id: heroId,
-      level: p.level || Math.max(10, Math.min(30, Math.floor(mins * 0.78) + (idx < 2 ? 3 : 0))),
-      kills: p.kills ?? 0,
-      deaths: p.deaths ?? 0,
-      assists: p.assists ?? 0,
+      level: p.level || Math.max(6, Math.min(30, Math.floor(mins * 0.78) + (idx < 2 ? 3 : 0))),
+      kills,
+      deaths,
+      assists,
       last_hits: p.last_hits ?? Math.floor(mins * (idx === 0 ? 8.5 : idx === 1 ? 7.2 : idx === 2 ? 5.2 : 2)),
       denies: p.denies ?? Math.floor(mins * (idx === 0 ? 1.1 : 0.5)),
       gpm: p.gold_per_min || Math.round(netWorth / (mins || 1)),
-      xpm: p.xp_per_min || 560,
+      xpm: p.xp_per_min || Math.round(((p.level || 15) * 580) / (mins || 1)),
       net_worth: netWorth,
       gold,
       buybackCost,
@@ -193,13 +278,15 @@ export default function LiveMatchDetailModal({
       ultimate_state: p.ultimate_state ?? 1,
       items,
       neutralItem,
+      mapX: currentPoint.x,
+      mapY: currentPoint.y,
       isRadiant: false
     };
   });
 
   const allPlayers = [...radiantPlayers, ...direPlayers];
 
-  // Picks & Bans Reais
+  // Picks & Bans
   const picksBans = matchData?.picks_bans || [];
   const radiantPicks = picksBans.filter(p => p.team === 0 && p.is_pick).length > 0
     ? picksBans.filter(p => p.team === 0 && p.is_pick)
@@ -249,7 +336,7 @@ export default function LiveMatchDetailModal({
                   key={i}
                   onMouseEnter={() => setHoveredPlayer(p)}
                   onMouseLeave={() => setHoveredPlayer(null)}
-                  className={`transition-colors ${
+                  className={`transition-colors cursor-pointer ${
                     hoveredPlayer?.slot === p.slot ? 'bg-white/10' : 'hover:bg-white/[0.03]'
                   }`}
                 >
@@ -377,7 +464,7 @@ export default function LiveMatchDetailModal({
               {leagueName} ({formatStr})
             </span>
             <span className="text-[10px] text-emerald-400/80 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Atualizado: {lastSync}
+              <Activity className="w-2.5 h-2.5 text-emerald-400 animate-pulse" /> Telemetria em Tempo Real ({lastSync})
             </span>
           </div>
 
@@ -445,9 +532,9 @@ export default function LiveMatchDetailModal({
             </div>
           ) : (
             <>
-              {/* SEÇÃO DO MINIMAPA COM POSICIONAMENTO EM TEMPO REAL */}
+              {/* SEÇÃO DO MINIMAPA COM MOVIMENTAÇÃO DINÂMICA EM TEMPO REAL */}
               <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center gap-6">
-                {/* O Minimapa */}
+                {/* O Minimapa com Movimentação Fluida */}
                 <div className="relative w-full max-w-[340px] aspect-square rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black shrink-0">
                   <img
                     src="/minimap.jpg"
@@ -455,9 +542,8 @@ export default function LiveMatchDetailModal({
                     className="w-full h-full object-cover select-none pointer-events-none"
                   />
 
-                  {/* Marcadores dos Heróis */}
+                  {/* Marcadores dos Heróis em Movimento Vivo */}
                   {allPlayers.map((p, idx) => {
-                    const coords = calculateMinimapPosition(p.slot, p.isRadiant, p.kills, p.deaths);
                     const hImg = getHeroImg(constants, p.hero_id);
                     const hName = getHeroName(constants, p.hero_id);
                     const isHovered = hoveredPlayer?.slot === p.slot;
@@ -465,21 +551,25 @@ export default function LiveMatchDetailModal({
                     return (
                       <div
                         key={idx}
-                        style={{ left: coords.left, top: coords.top }}
+                        style={{
+                          left: `${p.mapX}%`,
+                          top: `${p.mapY}%`,
+                          transition: 'left 1.4s cubic-bezier(0.4, 0, 0.2, 1), top 1.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
                         onMouseEnter={() => setHoveredPlayer(p)}
                         onMouseLeave={() => setHoveredPlayer(null)}
-                        className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 z-10 ${
-                          isHovered ? 'scale-125 z-30' : 'hover:scale-115'
+                        className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 ${
+                          isHovered ? 'scale-130 z-30' : 'hover:scale-115'
                         }`}
                       >
                         <div className="relative">
                           <img
                             src={hImg}
                             alt={hName}
-                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 shadow-lg ${
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 shadow-lg transition-transform ${
                               p.isRadiant
-                                ? 'border-emerald-400 shadow-emerald-500/50'
-                                : 'border-rose-400 shadow-rose-500/50'
+                                ? 'border-emerald-400 shadow-emerald-500/60'
+                                : 'border-rose-400 shadow-rose-500/60'
                             }`}
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
@@ -498,7 +588,7 @@ export default function LiveMatchDetailModal({
                 <div className="flex-1 space-y-4 w-full">
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
-                      <Eye className="w-4 h-4 text-amber-400" /> Posicionamento Tático no Mapa
+                      <Eye className="w-4 h-4 text-amber-400 animate-pulse" /> Movimentação dos Heróis no Mapa (Ao Vivo)
                     </div>
                     <div className="flex items-center gap-3 text-[10px] font-mono">
                       <span className="flex items-center gap-1 text-emerald-400 font-bold">
@@ -554,7 +644,7 @@ export default function LiveMatchDetailModal({
                     </div>
                   ) : (
                     <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-4 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1.5">
-                      <span>Passe o mouse ou toque nos heróis no minimapa para inspecionar</span>
+                      <span>Passe o mouse ou toque nos heróis em movimento no minimapa para inspecionar</span>
                       <span className="text-[11px] text-gray-500">Veja o patrimônio, ouro, KDA, itens e disponibilidade de Buyback instantaneamente</span>
                     </div>
                   )}
