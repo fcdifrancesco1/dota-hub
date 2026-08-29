@@ -79,96 +79,96 @@ function getTacticalPosition(slot, isRadiant, cycle, mins = 20) {
   const radiantWaypoints = [
     // Pos 1 (Carry) - Safelane Bot -> Selva -> T2/T3 Push -> Roshan
     [
-      { x: 76, y: 84 }, // Laning Bot
-      { x: 68, y: 76 }, // Selva Radiant
-      { x: 82, y: 72 }, // Selva Profunda
-      { x: 56, y: 48 }, // Push Mid / Rio
-      { x: 38, y: 34 }, // Push Top
-      { x: 32, y: 22 }  // Base Inimiga / Roshan
+      { x: 76, y: 84 },
+      { x: 68, y: 76 },
+      { x: 82, y: 72 },
+      { x: 56, y: 48 },
+      { x: 38, y: 34 },
+      { x: 32, y: 22 }
     ],
     // Pos 2 (Midlane) - Rio / Runas -> Gank Bot -> Gank Top -> Roshan
     [
-      { x: 46, y: 52 }, // Midlane
-      { x: 42, y: 44 }, // Runa Top / Rio
-      { x: 58, y: 54 }, // Runa Bot / Rio
-      { x: 70, y: 72 }, // Gank Bot
-      { x: 32, y: 34 }, // Gank Top
-      { x: 36, y: 28 }  // Teamfight Roshan
+      { x: 46, y: 52 },
+      { x: 42, y: 44 },
+      { x: 58, y: 54 },
+      { x: 70, y: 72 },
+      { x: 32, y: 34 },
+      { x: 36, y: 28 }
     ],
     // Pos 3 (Offlane) - Offlane Top -> Contestação Runa -> Selva Dire -> Frontline
     [
-      { x: 24, y: 34 }, // Offlane Top
-      { x: 30, y: 28 }, // Torre T1 Dire
-      { x: 48, y: 46 }, // Mid Rio
-      { x: 38, y: 42 }, // Selva Dire
-      { x: 62, y: 64 }, // Rotação Bot
-      { x: 34, y: 24 }  // High Ground Push
+      { x: 24, y: 34 },
+      { x: 30, y: 28 },
+      { x: 48, y: 46 },
+      { x: 38, y: 42 },
+      { x: 62, y: 64 },
+      { x: 34, y: 24 }
     ],
     // Pos 4 (Soft Support) - Roaming -> Triângulo -> Warding -> Smoke Gank
     [
-      { x: 38, y: 48 }, // Triângulo Radiant
-      { x: 44, y: 38 }, // Ward Rio Top
-      { x: 54, y: 58 }, // Ward Rio Bot
-      { x: 68, y: 74 }, // Assistência Bot
-      { x: 26, y: 30 }, // Assistência Top
-      { x: 48, y: 42 }  // Iniciação
+      { x: 38, y: 48 },
+      { x: 44, y: 38 },
+      { x: 54, y: 58 },
+      { x: 68, y: 74 },
+      { x: 26, y: 30 },
+      { x: 48, y: 42 }
     ],
     // Pos 5 (Hard Support) - Safelane Proteção -> Pull Camps -> Cobertura Mid -> Teamfight
     [
-      { x: 72, y: 80 }, // Safelane Bot
-      { x: 64, y: 82 }, // Pull Camp
-      { x: 74, y: 68 }, // Ward Selva
-      { x: 52, y: 50 }, // Cobertura Mid
-      { x: 36, y: 38 }, // Suporte Ofensivo Top
-      { x: 62, y: 68 }  // Posicionamento Traseiro
+      { x: 72, y: 80 },
+      { x: 64, y: 82 },
+      { x: 74, y: 68 },
+      { x: 52, y: 50 },
+      { x: 36, y: 38 },
+      { x: 62, y: 68 }
     ]
   ];
 
   const direWaypoints = [
     // Pos 1 (Carry) - Safelane Top -> Selva Dire -> T2/T3 Push -> Base
     [
-      { x: 24, y: 18 }, // Safelane Top
-      { x: 32, y: 24 }, // Selva Dire
-      { x: 18, y: 28 }, // Selva Top
-      { x: 44, y: 52 }, // Push Mid / Rio
-      { x: 62, y: 66 }, // Push Bot
-      { x: 68, y: 78 }  // Base Inimiga / Roshan
+      { x: 24, y: 18 },
+      { x: 32, y: 24 },
+      { x: 18, y: 28 },
+      { x: 44, y: 52 },
+      { x: 62, y: 66 },
+      { x: 68, y: 78 }
     ],
     // Pos 2 (Midlane) - Rio / Runas -> Gank Top -> Gank Bot -> Roshan
     [
-      { x: 54, y: 48 }, // Midlane
-      { x: 58, y: 56 }, // Runa Bot / Rio
-      { x: 42, y: 44 }, // Runa Top / Rio
-      { x: 30, y: 28 }, // Gank Top
-      { x: 68, y: 66 }, // Gank Bot
-      { x: 34, y: 26 }  // Teamfight Roshan
+      { x: 54, y: 48 },
+      { x: 58, y: 56 },
+      { x: 42, y: 44 },
+      { x: 30, y: 28 },
+      { x: 68, y: 66 },
+      { x: 34, y: 26 }
     ],
     // Pos 3 (Offlane) - Offlane Bot -> Contestação Runa -> Selva Radiant -> Frontline
     [
-      { x: 76, y: 66 }, // Offlane Bot
-      { x: 70, y: 72 }, // Torre T1 Radiant
-      { x: 52, y: 54 }, // Mid Rio
-      { x: 62, y: 58 }, // Selva Radiant
-      { x: 38, y: 36 }, // Rotação Top
-      { x: 66, y: 76 }  // High Ground Push
+      { x: 76, y: 66 },
+      { x: 70, y: 72 },
+      { x: 52, y: 54 },
+      { x: 62, y: 58 },
+      { x: 38, y: 36 },
+      { x: 66, y: 76 }
     ],
     // Pos 4 (Soft Support) - Roaming -> Triângulo Dire -> Warding -> Smoke Gank
     [
-      { x: 62, y: 52 }, // Triângulo Dire
-      { x: 56, y: 62 }, // Ward Rio Bot
-      { x: 46, y: 42 }, // Ward Rio Top
-      { x: 32, y: 26 }, // Assistência Top
-      { x: 74, y: 70 }, // Assistência Bot
-      { x: 52, y: 58 }  // Iniciação
+      { x: 62, y: 52 },
+      { x: 56, y: 62 },
+      { x: 46, y: 42 },
+      { x: 32, y: 26 },
+      { x: 74, y: 70 },
+      { x: 52, y: 58 }
     ],
     // Pos 5 (Hard Support) - Safelane Proteção -> Pull Camps -> Cobertura Mid -> Teamfight
     [
-      { x: 28, y: 20 }, // Safelane Top
-      { x: 36, y: 18 }, // Pull Camp
-      { x: 26, y: 32 }, // Ward Selva
-      { x: 48, y: 50 }, // Cobertura Mid
-      { x: 64, y: 62 }, // Suporte Ofensivo Bot
-      { x: 38, y: 32 }  // Posicionamento Traseiro
+      { x: 28, y: 20 },
+      { x: 36, y: 18 },
+      { x: 26, y: 32 },
+      { x: 48, y: 50 },
+      { x: 64, y: 62 },
+      { x: 38, y: 32 }
     ]
   ];
 
@@ -765,7 +765,7 @@ export default function LiveMatchDetailModal({
                     className="w-full h-full object-cover select-none pointer-events-none"
                   />
 
-                  {/* Marcadores dos Heróis */}
+                  {/* Marcadores dos Heróis com Hit-Box Estática (Zero Jitter/Tremor) */}
                   {allPlayers.map((p, idx) => {
                     const hImg = getHeroImg(constants, p.hero_id);
                     const hName = getHeroName(constants, p.hero_id);
@@ -781,15 +781,15 @@ export default function LiveMatchDetailModal({
                         }}
                         onMouseEnter={() => setHoveredPlayer(p)}
                         onMouseLeave={() => setHoveredPlayer(null)}
-                        className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 ${
-                          isHovered ? 'scale-130 z-30' : 'hover:scale-115'
-                        }`}
+                        className="absolute -translate-x-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center cursor-pointer z-10"
                       >
-                        <div className="relative">
+                        <div className={`relative transition-transform duration-200 pointer-events-none ${
+                          isHovered ? 'scale-125 z-30' : ''
+                        }`}>
                           <img
                             src={hImg}
                             alt={hName}
-                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 shadow-lg transition-transform ${
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 shadow-lg ${
                               p.isRadiant
                                 ? 'border-emerald-400 shadow-emerald-500/60'
                                 : 'border-rose-400 shadow-rose-500/60'
@@ -823,54 +823,65 @@ export default function LiveMatchDetailModal({
                     </div>
                   </div>
 
-                  {hoveredPlayer ? (
-                    <div className="bg-[#161A24] border border-amber-500/40 rounded-xl p-3.5 space-y-2 animate-fade-in shadow-lg">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={getHeroImg(constants, hoveredPlayer.hero_id)}
-                          alt=""
-                          className="w-12 h-8 rounded-lg object-cover border border-white/10"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <strong className="text-white text-sm">{hoveredPlayer.name}</strong>
-                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                              hoveredPlayer.isRadiant ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                            }`}>
-                              {hoveredPlayer.isRadiant ? 'Radiant' : 'Dire'}
+                  {/* Card de Inspeção com Altura Estável e Fixa (Zero Layout Shift / Zero Vibração) */}
+                  <div className="h-[105px] shrink-0 flex flex-col justify-center">
+                    {hoveredPlayer ? (
+                      <div className="bg-[#161A24] border border-amber-500/40 rounded-xl p-3 shadow-lg h-full flex flex-col justify-between">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={getHeroImg(constants, hoveredPlayer.hero_id)}
+                            alt=""
+                            className="w-11 h-7 rounded-lg object-cover border border-white/10 shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <strong className="text-white text-sm truncate">{hoveredPlayer.name}</strong>
+                              <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded shrink-0 ${
+                                hoveredPlayer.isRadiant ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                              }`}>
+                                {hoveredPlayer.isRadiant ? 'Radiant' : 'Dire'}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-gray-400 truncate block">
+                              {getHeroName(constants, hoveredPlayer.hero_id)} (Nível {hoveredPlayer.level})
                             </span>
                           </div>
-                          <span className="text-xs text-gray-400">{getHeroName(constants, hoveredPlayer.hero_id)} (Nível {hoveredPlayer.level})</span>
                         </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/10 text-xs font-mono">
-                        <div>
-                          <span className="text-[10px] text-gray-400 block uppercase">K / D / A</span>
-                          <strong className="text-white">{hoveredPlayer.kills} / {hoveredPlayer.deaths} / {hoveredPlayer.assists}</strong>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-gray-400 block uppercase">Patrimônio</span>
-                          <strong className="text-amber-400 font-bold">{hoveredPlayer.net_worth.toLocaleString()}</strong>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-gray-400 block uppercase">Buyback</span>
-                          <strong className={hoveredPlayer.hasBuyback ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
-                            {hoveredPlayer.hasBuyback ? 'Disponível' : 'Indisponível'}
-                          </strong>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-gray-400 block uppercase">GPM / XPM</span>
-                          <strong className="text-cyan-400">{hoveredPlayer.gpm} / {hoveredPlayer.xpm}</strong>
+                        <div className="grid grid-cols-4 gap-1.5 pt-1.5 border-t border-white/10 text-xs font-mono">
+                          <div>
+                            <span className="text-[9px] text-gray-400 block uppercase">K / D / A</span>
+                            <strong className="text-white text-[11px] whitespace-nowrap">
+                              {hoveredPlayer.kills} / {hoveredPlayer.deaths} / {hoveredPlayer.assists}
+                            </strong>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-gray-400 block uppercase">Patrimônio</span>
+                            <strong className="text-amber-400 font-bold text-[11px]">
+                              {hoveredPlayer.net_worth.toLocaleString()}
+                            </strong>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-gray-400 block uppercase">Buyback</span>
+                            <strong className={`text-[11px] font-bold ${hoveredPlayer.hasBuyback ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {hoveredPlayer.hasBuyback ? 'Disponível' : 'Sem Ouro'}
+                            </strong>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-gray-400 block uppercase">GPM / XPM</span>
+                            <strong className="text-cyan-400 text-[11px]">
+                              {hoveredPlayer.gpm} / {hoveredPlayer.xpm}
+                            </strong>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-3 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1">
-                      <span>Passe o mouse ou toque nos heróis no minimapa para inspecionar</span>
-                      <span className="text-[10px] text-gray-500">Veja patrimônio, ouro, KDA, itens e disponibilidade de Buyback instantaneamente</span>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-3 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1 h-full">
+                        <span className="font-semibold text-gray-300">Passe o mouse nos heróis no minimapa para inspecionar</span>
+                        <span className="text-[10px] text-gray-500">Veja patrimônio, ouro, KDA, itens e disponibilidade de Buyback instantaneamente</span>
+                      </div>
+                    )}
+                  </div>
 
                   {/* 1. Picks da Partida */}
                   <div className="space-y-1.5 pt-1">
