@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Radio, Tv, Shield, Zap, Sparkles, Clock, Eye, CheckCircle2, XCircle, Skull, Swords, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, Radio, Tv, Shield, Zap, Sparkles, Clock, Eye, CheckCircle2, XCircle, Skull, Swords, Loader2, RefreshCw } from 'lucide-react';
 import { getHeroImg, getHeroName, getItemImg, findLiveMatchDetails, fetchMatchDetails } from '../services/api';
 
 // Posições táticas fiéis no mapa por função (Pos 1 a 5) com dispersão realista
@@ -43,17 +43,32 @@ export default function LiveMatchDetailModal({
   const [mapsList, setMapsList] = useState([]);
   const [activeMapIndex, setActiveMapIndex] = useState(0);
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
+  const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString('pt-BR'));
 
   // 1. Carregar Dados Reais da Partida e Mapas da Série
-  useEffect(() => {
+  const syncMatchData = useCallback(() => {
     if (!game) return;
-    setLoading(true);
     findLiveMatchDetails(game).then((result) => {
-      setMatchData(result.matchData);
-      setMapsList(result.maps || []);
+      if (result.matchData) {
+        setMatchData(result.matchData);
+        setMapsList(result.maps || []);
+      }
+      setLastSync(new Date().toLocaleTimeString('pt-BR'));
       setLoading(false);
     });
   }, [game]);
+
+  useEffect(() => {
+    setLoading(true);
+    syncMatchData();
+
+    // Atualização em tempo real a cada 10 segundos
+    const interval = setInterval(() => {
+      syncMatchData();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [syncMatchData]);
 
   const handleSelectMap = async (mapId, idx) => {
     setActiveMapIndex(idx);
@@ -72,12 +87,12 @@ export default function LiveMatchDetailModal({
   const logoA = game.logoA || "";
   const logoB = game.logoB || "";
 
-  // Placar Real
-  const scoreA = matchData ? matchData.radiant_score : (game.scoreA ?? 0);
-  const scoreB = matchData ? matchData.dire_score : (game.scoreB ?? 0);
+  // Placar Real do Jogo (Abates / Kills)
+  const scoreA = matchData ? (matchData.radiant_score ?? 0) : (game.gameScoreA ?? game.scoreA ?? 0);
+  const scoreB = matchData ? (matchData.dire_score ?? 0) : (game.gameScoreB ?? game.scoreB ?? 0);
 
   // Duração Real
-  const durationSec = matchData?.duration || game.scoreboard?.duration || game.duration || 1840;
+  const durationSec = matchData?.duration || game.scoreboard?.duration || game.gameDuration || 1840;
   const mins = Math.floor(durationSec / 60);
   const secs = Math.floor(durationSec % 60);
   const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -86,7 +101,7 @@ export default function LiveMatchDetailModal({
   const formatStr = game.formato || "BO3";
 
   // Extração dos Jogadores Reais
-  const rawPlayers = matchData?.players || game.scoreboard?.radiant?.players || [];
+  const rawPlayers = matchData?.players || (game.scoreboard ? [...(game.scoreboard.radiant?.players || []), ...(game.scoreboard.dire?.players || [])] : []);
   const rawRadiant = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot < 128 : i < 5));
   const rawDire = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot >= 128 : i >= 5));
 
@@ -353,7 +368,7 @@ export default function LiveMatchDetailModal({
 
         {/* CABEÇALHO DO AO VIVO */}
         <div className="text-center border-b border-white/10 pb-4 mb-4 relative z-10 shrink-0">
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             <span className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest text-rose-400 bg-rose-500/20 border border-rose-500/30 px-3 py-1 rounded-full animate-pulse">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
               Partida Ao Vivo · {timeFormatted}
@@ -361,17 +376,25 @@ export default function LiveMatchDetailModal({
             <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
               {leagueName} ({formatStr})
             </span>
+            <span className="text-[10px] text-emerald-400/80 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Atualizado: {lastSync}
+            </span>
           </div>
 
-          {/* Placar Principal */}
+          {/* Placar Principal do Jogo (Abates) */}
           <div className="flex items-center justify-center gap-4 sm:gap-8 mt-3">
             <div className="text-right flex-1 truncate flex items-center justify-end gap-3">
               <span className="text-base sm:text-xl font-black text-white truncate block">{teamAName}</span>
               {logoA && <img src={logoA} alt="" className="w-8 h-8 object-contain shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
             </div>
 
-            <div className="px-5 py-2 rounded-xl bg-black/80 border border-rose-500/40 font-mono text-xl sm:text-3xl font-black text-amber-400 shrink-0 shadow-lg shadow-rose-500/10">
-              {scoreA} <span className="text-gray-500 mx-1">:</span> {scoreB}
+            <div className="flex flex-col items-center shrink-0">
+              <div className="px-5 py-2 rounded-xl bg-black/80 border border-rose-500/40 font-mono text-xl sm:text-3xl font-black text-amber-400 shadow-lg shadow-rose-500/10">
+                {scoreA} <span className="text-gray-500 mx-1">:</span> {scoreB}
+              </div>
+              <span className="text-[9px] text-gray-400 font-mono mt-1 uppercase tracking-wider">
+                Placar de Abates
+              </span>
             </div>
 
             <div className="text-left flex-1 truncate flex items-center justify-start gap-3">

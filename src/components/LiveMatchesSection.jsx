@@ -36,7 +36,6 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {liveGames.map((g, idx) => {
-            // Suporte a partidas da Liquipedia e da OpenDota (GOTV)
             const isLiquipedia = !!g.timeA;
 
             const rName = isLiquipedia
@@ -50,10 +49,15 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
             const dLogo = isLiquipedia ? g.logoB : "";
 
             const sb = g.scoreboard || {};
-            const rScore = isLiquipedia ? (g.scoreA ?? 0) : sb.radiant ? sb.radiant.score : (g.radiant_score ?? 0);
-            const dScore = isLiquipedia ? (g.scoreB ?? 0) : sb.dire ? sb.dire.score : (g.dire_score ?? 0);
+            // O placar principal é SEMPRE o Placar de Abates do Jogo (Game Score Kills)
+            const rScore = g.gameScoreA !== undefined
+              ? g.gameScoreA
+              : (sb.radiant ? sb.radiant.score : (g.radiant_score ?? g.scoreA ?? 0));
+            const dScore = g.gameScoreB !== undefined
+              ? g.gameScoreB
+              : (sb.dire ? sb.dire.score : (g.dire_score ?? g.scoreB ?? 0));
 
-            const mins = !isLiquipedia ? Math.floor((sb.duration || g.duration || 0) / 60) : null;
+            const mins = g.gameDuration ? Math.floor(g.gameDuration / 60) : (!isLiquipedia ? Math.floor((sb.duration || g.duration || 0) / 60) : null);
             const leagueName = g.torneio || (g.league_tier ? `Liga Tier ${g.league_tier}` : "Torneio Dota 2");
             const formatStr = g.formato || "BO3";
 
@@ -70,17 +74,17 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
                 <div className="flex items-center justify-between text-[10px] border-b border-white/5 pb-2.5">
                   <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-rose-400">
                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                    AO VIVO {mins !== null ? `· ${mins} min` : ''}
+                    AO VIVO {mins ? `· ${mins} min` : '· Em andamento'}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-400 truncate max-w-[150px] font-semibold">{leagueName}</span>
-                    <span className="font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-gray-400 truncate max-w-[140px] font-semibold">{leagueName}</span>
+                    <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
                       {formatStr}
                     </span>
                   </div>
                 </div>
 
-                {/* Confronto e Placar */}
+                {/* Confronto e Placar do Jogo (Abates) */}
                 <div className="flex items-center justify-between gap-3 py-1 relative z-10">
                   <div className="flex-1 text-left truncate flex items-center gap-2">
                     {rLogo ? (
@@ -94,8 +98,13 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
                     </div>
                   </div>
 
-                  <div className="px-3.5 py-1.5 bg-black/80 border border-rose-500/30 rounded-xl text-sm sm:text-base font-mono font-black text-amber-400 shrink-0 shadow-inner">
-                    {rScore} <span className="text-gray-500 mx-0.5">:</span> {dScore}
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="px-3.5 py-1 bg-black/80 border border-rose-500/30 rounded-xl text-base sm:text-lg font-mono font-black text-amber-400 shadow-inner">
+                      {rScore} <span className="text-gray-500 mx-0.5">:</span> {dScore}
+                    </div>
+                    <span className="text-[8px] text-gray-400 font-mono mt-0.5 uppercase tracking-wider">
+                      Placar do Jogo
+                    </span>
                   </div>
 
                   <div className="flex-1 text-right truncate flex items-center justify-end gap-2">
@@ -125,12 +134,12 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
                     </a>
                   ) : (
                     <span className="text-gray-400 text-[10px] flex items-center gap-1">
-                      <Radio className="w-3 h-3 text-rose-400" /> Transmissão em andamento
+                      <Radio className="w-3 h-3 text-rose-400" /> Transmissão ao vivo
                     </span>
                   )}
 
                   <span className="text-gray-400 group-hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] font-bold">
-                    Detalhes <Eye className="w-3.5 h-3.5" />
+                    Ver Telemetria <Eye className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </div>

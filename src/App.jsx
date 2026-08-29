@@ -15,7 +15,9 @@ import {
   fetchConstants,
   fetchProMatches,
   fetchLiveGames,
-  fetchUpcomingMatches
+  fetchUpcomingMatches,
+  isSeriesMatch,
+  isSameTeamMatch
 } from './services/api';
 
 export default function App() {
@@ -58,6 +60,7 @@ export default function App() {
       ]);
 
       const now = Date.now();
+      const rawMatches = proData.rawMatches || [];
 
       // Separar jogos ao vivo reais da Liquipedia (placar ativo ou horário dentro da janela ao vivo)
       const liveFromWiki = (allWikiMatches || []).filter((m) => {
@@ -73,12 +76,46 @@ export default function App() {
         return !hasLiveScore && !isInLiveWindow;
       });
 
-      // Unificar partidas ao vivo no centro (OpenDota GOTV + Liquipedia Live Ticker)
-      const unifiedLive = [...(gotvLiveData || []), ...liveFromWiki];
+      // Enriquecer partidas ao vivo com os ABATES DO JOGO (GAME SCORE) e telemetry id
+      const enrichedLive = liveFromWiki.map((m) => {
+        const matchingRaw = rawMatches.find((rm) =>
+          isSeriesMatch(m.timeA, m.timeB, rm.radiant_name, rm.dire_name)
+        );
+
+        if (matchingRaw) {
+          const isTimeARadiant = isSameTeamMatch(m.timeA, matchingRaw.radiant_name);
+          const gameScoreA = isTimeARadiant ? matchingRaw.radiant_score : matchingRaw.dire_score;
+          const gameScoreB = isTimeARadiant ? matchingRaw.dire_score : matchingRaw.radiant_score;
+
+          return {
+            ...m,
+            match_id: matchingRaw.match_id,
+            gameScoreA: gameScoreA ?? 0,
+            gameScoreB: gameScoreB ?? 0,
+            gameDuration: matchingRaw.duration,
+            isGameDataActive: true
+          };
+        }
+
+        return {
+          ...m,
+          gameScoreA: 0,
+          gameScoreB: 0,
+          isGameDataActive: false
+        };
+      });
+
+      // Inclui também quaisquer jogos do DotaTV (liveLeagueGames)
+      (gotvLiveData || []).forEach(gotvGame => {
+        const alreadyExists = enrichedLive.some(u => isSeriesMatch(u.timeA, u.timeB, gotvGame.radiant_team?.name, gotvGame.dire_team?.name));
+        if (!alreadyExists) {
+          enrichedLive.push(gotvGame);
+        }
+      });
 
       setFinishedSeries(proData.finishedSeries || []);
       setTournamentsList(proData.tournaments || []);
-      setLiveGames(unifiedLive);
+      setLiveGames(enrichedLive);
       setUpcomingMatches(strictlyUpcoming);
       setLastUpdated(new Date().toLocaleTimeString('pt-BR'));
     } catch (err) {
@@ -92,10 +129,10 @@ export default function App() {
   useEffect(() => {
     loadData();
 
-    // Polling de partidas ao vivo a cada 30 segundos
+    // Polling de partidas ao vivo a cada 20 segundos
     const liveInterval = setInterval(async () => {
       loadData(false);
-    }, 30000);
+    }, 20000);
 
     return () => clearInterval(liveInterval);
   }, [loadData]);

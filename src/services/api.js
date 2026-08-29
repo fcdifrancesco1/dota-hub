@@ -34,9 +34,22 @@ export function normalizeTeamKey(name) {
   if (!name) return "";
   return String(name)
     .toLowerCase()
-    .replace(/\b(team|gaming|esports|esport|gg|club|academy)\b/g, '')
+    .replace(/\s*\([^)]*\)/g, '') // remove parenteses ex (stack), (esports)
+    .replace(/\b(team|gaming|esports|esport|gg|club|academy|stack|boys|the|pro|clan|dota)\b/g, '')
     .replace(/[^a-z0-9]/g, '')
     .trim();
+}
+
+export function isSameTeamMatch(t1, t2) {
+  const c1 = normalizeTeamKey(t1);
+  const c2 = normalizeTeamKey(t2);
+  if (!c1 || !c2) return false;
+  return c1 === c2 || c1.includes(c2) || c2.includes(c1);
+}
+
+export function isSeriesMatch(teamA1, teamB1, teamA2, teamB2) {
+  return (isSameTeamMatch(teamA1, teamA2) && isSameTeamMatch(teamB1, teamB2)) ||
+         (isSameTeamMatch(teamA1, teamB2) && isSameTeamMatch(teamB1, teamA2));
 }
 
 export function getHeroImg(constants, heroId) {
@@ -93,7 +106,7 @@ export function clusterMatchesIntoSeries(rawMatches) {
     const matchTime = m.start_time;
 
     let targetSeries = seriesList.find((s) => {
-      const sameTeams = (s.teamAKey === tA && s.teamBKey === tB) || (s.teamAKey === tB && s.teamBKey === tA);
+      const sameTeams = isSeriesMatch(s.timeA, s.timeB, m.radiant_name, m.dire_name);
       const sameLeague = !m.leagueid || !s.leagueId || m.leagueid === s.leagueId;
       const lastGameTime = s.games[s.games.length - 1].start_time;
       const withinTime = (matchTime - lastGameTime) <= (3.5 * 3600) && (matchTime >= lastGameTime);
@@ -124,7 +137,7 @@ export function clusterMatchesIntoSeries(rawMatches) {
 
     targetSeries.games.push(m);
     const radWon = m.radiant_win;
-    const isRadTeamA = (m.radiant_team_id === targetSeries.preferredIdA);
+    const isRadTeamA = isSameTeamMatch(m.radiant_name, targetSeries.timeA);
 
     if (isRadTeamA) {
       if (radWon) targetSeries.scoreA++; else targetSeries.scoreB++;
@@ -146,6 +159,8 @@ export function clusterMatchesIntoSeries(rawMatches) {
       mapNumber: idx + 1,
       match_id: String(g.match_id),
       start_time: g.start_time,
+      radiant_score: g.radiant_score,
+      dire_score: g.dire_score,
       radiant_win: g.radiant_win,
       duration: g.duration
     }))
@@ -154,21 +169,22 @@ export function clusterMatchesIntoSeries(rawMatches) {
 
 // 3. Buscar Partidas Profissionais Recentes
 export async function fetchProMatches() {
-  const cached = getCached("pro_matches_v6", 2 * 60 * 1000);
+  const cached = getCached("pro_matches_v7", 60 * 1000);
   if (cached) return cached;
 
   try {
     const res = await fetch(`${OPENDOTA_BASE}/proMatches`);
     if (res.ok) {
       const list = await res.json();
-      const clustered = clusterMatchesIntoSeries(Array.isArray(list) ? list : []);
+      const rawList = Array.isArray(list) ? list : [];
+      const clustered = clusterMatchesIntoSeries(rawList);
       const valid = clustered
         .filter(s => s.games.length >= 2 || (s.scoreA + s.scoreB === 1))
         .reverse();
 
       // Agrupamento por Liga
       const leaguesMap = {};
-      (list || []).forEach((m) => {
+      rawList.forEach((m) => {
         const lId = m.leagueid || m.league_name;
         if (!lId) return;
         if (!leaguesMap[lId]) {
@@ -189,23 +205,24 @@ export async function fetchProMatches() {
       }));
 
       const result = {
+        rawMatches: rawList,
         finishedSeries: valid.slice(0, 15),
         tournaments: tournaments.slice(0, 15)
       };
 
-      setCache("pro_matches_v6", result);
+      setCache("pro_matches_v7", result);
       return result;
     }
   } catch (err) {
     console.error("Erro ao buscar proMatches:", err);
   }
-  return { finishedSeries: [], tournaments: [] };
+  return { rawMatches: [], finishedSeries: [], tournaments: [] };
 }
 
 // 4. Buscar Detalhes Completos do Replay da Partida
 export async function fetchMatchDetails(matchId) {
   if (!matchId) return null;
-  const cached = getCached(`match_${matchId}`, 60 * 60 * 1000);
+  const cached = getCached(`match_${matchId}`, 30 * 60 * 1000);
   if (cached) return cached;
 
   try {
@@ -390,6 +407,8 @@ function parseLiquipediaHtml(html) {
           logoA,
           logoB,
           formato,
+          seriesScoreA: scoreA,
+          seriesScoreB: scoreB,
           scoreA,
           scoreB,
           torneio,
@@ -406,7 +425,7 @@ function parseLiquipediaHtml(html) {
 
 // 7. Buscar Próximos Jogos Reais da Liquipedia
 export async function fetchUpcomingMatches() {
-  const cached = getCached("upcoming_real_matches_v2", 2 * 60 * 1000);
+  const cached = getCached("upcoming_real_matches_v3", 60 * 1000);
   if (cached) return cached;
 
   try {
@@ -441,7 +460,7 @@ export async function fetchUpcomingMatches() {
     }
 
     if (list.length > 0) {
-      setCache("upcoming_real_matches_v2", list);
+      setCache("upcoming_real_matches_v3", list);
     }
     return list;
   } catch {
@@ -449,12 +468,12 @@ export async function fetchUpcomingMatches() {
   }
 }
 
-// 8. Buscar Telemetria em Tempo Real de Partida Ao Vivo
+// 8. Buscar Telemetria em Tempo Real de Partida Ao Vivo (com matching robusto)
 export async function findLiveMatchDetails(game) {
   if (!game) return { matchData: null, maps: [] };
 
-  const normA = normalizeTeamKey(game.timeA || game.radiant_team?.name || game.radiant_team?.team_name);
-  const normB = normalizeTeamKey(game.timeB || game.dire_team?.name || game.dire_team?.team_name);
+  const nameA = game.timeA || game.radiant_team?.name || game.radiant_team?.team_name || "Radiant";
+  const nameB = game.timeB || game.dire_team?.name || game.dire_team?.team_name || "Dire";
 
   // 1. Se o objeto já possui match_id explícito
   if (game.match_id) {
@@ -468,11 +487,11 @@ export async function findLiveMatchDetails(game) {
     if (proRes.ok) {
       const list = await proRes.json();
       const matched = (list || []).filter(m => {
-        const rad = normalizeTeamKey(m.radiant_name || m.radiant_team_id);
-        const dire = normalizeTeamKey(m.dire_name || m.dire_team_id);
+        const rad = m.radiant_name || m.radiant_team_id;
+        const dire = m.dire_name || m.dire_team_id;
         const matchTime = m.start_time;
-        const isRecent = Math.abs(Date.now() - matchTime * 1000) < (24 * 3600 * 1000);
-        return isRecent && ((rad.includes(normA) && dire.includes(normB)) || (rad.includes(normB) && dire.includes(normA)));
+        const isRecent = Math.abs(Date.now() - matchTime * 1000) < (36 * 3600 * 1000);
+        return isRecent && isSeriesMatch(nameA, nameB, rad, dire);
       });
 
       if (matched.length > 0) {
@@ -494,6 +513,24 @@ export async function findLiveMatchDetails(game) {
   } catch (e) {
     console.error("Erro ao buscar mapas recentes da série ao vivo:", e);
   }
+
+  // 3. Fallback: Se não encontrou partida no proMatches, buscar se há dados no liveLeagueGames
+  try {
+    const liveRes = await fetch(`${OPENDOTA_BASE}/liveLeagueGames`);
+    if (liveRes.ok) {
+      const liveJson = await liveRes.json();
+      const games = liveJson?.result?.games || [];
+      const liveGame = games.find(g => {
+        const rad = g.radiant_team?.team_name || g.radiant_team?.name;
+        const dire = g.dire_team?.team_name || g.dire_team?.name;
+        return isSeriesMatch(nameA, nameB, rad, dire);
+      });
+
+      if (liveGame) {
+        return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id || '') }] };
+      }
+    }
+  } catch (e) {}
 
   return { matchData: null, maps: [] };
 }
