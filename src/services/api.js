@@ -3,6 +3,8 @@ const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
 
 // Cache em memória com TTL
 const memoryCache = new Map();
+const CACHE_PREFIX = "dota_cache_";
+const MAX_CACHE_ENTRIES = 80;
 
 function getCached(key, ttlMs = 5 * 60 * 1000) {
   const item = memoryCache.get(key);
@@ -10,7 +12,7 @@ function getCached(key, ttlMs = 5 * 60 * 1000) {
     return item.data;
   }
   try {
-    const lsItem = localStorage.getItem(`dota_cache_${key}`);
+    const lsItem = localStorage.getItem(`${CACHE_PREFIX}${key}`);
     if (lsItem) {
       const parsed = JSON.parse(lsItem);
       if (Date.now() - parsed.ts < ttlMs) {
@@ -22,11 +24,35 @@ function getCached(key, ttlMs = 5 * 60 * 1000) {
   return null;
 }
 
+// Evita que o localStorage cresça indefinidamente (ex.: um "match_<id>" por
+// partida vista). Quando o número de entradas passa do limite, remove as
+// mais antigas primeiro.
+function pruneCache() {
+  try {
+    const entries = Object.keys(localStorage)
+      .filter((k) => k.startsWith(CACHE_PREFIX))
+      .map((k) => {
+        let ts = 0;
+        try {
+          ts = JSON.parse(localStorage.getItem(k))?.ts || 0;
+        } catch (e) {}
+        return { key: k, ts };
+      })
+      .sort((a, b) => a.ts - b.ts);
+
+    const excess = entries.length - MAX_CACHE_ENTRIES;
+    if (excess > 0) {
+      entries.slice(0, excess).forEach((e) => localStorage.removeItem(e.key));
+    }
+  } catch (e) {}
+}
+
 function setCache(key, data) {
   const payload = { ts: Date.now(), data };
   memoryCache.set(key, payload);
   try {
-    localStorage.setItem(`dota_cache_${key}`, JSON.stringify(payload));
+    localStorage.setItem(`${CACHE_PREFIX}${key}`, JSON.stringify(payload));
+    pruneCache();
   } catch (e) {}
 }
 
@@ -330,134 +356,17 @@ export async function fetchLiveGames() {
   }
 }
 
-// Parser de Jogos Reais da Liquipedia
-function parseLiquipediaHtml(html) {
-  const matches = [];
-  const matchBlocks = html.split('<div class="match-info">').slice(1);
-
-  matchBlocks.forEach((block) => {
-    try {
-      const tsMatch = block.match(/data-timestamp="(\d+)"/);
-      const timestamp = tsMatch ? parseInt(tsMatch[1], 10) * 1000 : null;
-
-      const leftBlockMatch = block.match(/class="match-info-header-opponent[^"]*match-info-header-opponent-left"([\s\S]*?)<div class="match-info-header-scoreholder"/);
-      const rightBlockMatch = block.match(/class="match-info-header-opponent"[^>]*>([\s\S]*?)<\/div><\/div><div class="match-info-tournament"/);
-
-      let timeA = "TBD";
-      let logoA = "";
-      if (leftBlockMatch) {
-        const leftBlock = leftBlockMatch[1];
-        const titleMatch = leftBlock.match(/class="team-template-image-icon[^"]*"[^>]*><a[^>]*title="([^"]+)"/);
-        const nameMatch = leftBlock.match(/<span class="name"[^>]*><a[^>]*>([^<]+)<\/a>/);
-        timeA = (titleMatch ? titleMatch[1] : (nameMatch ? nameMatch[1] : "TBD")).trim();
-        timeA = timeA.replace(/\(page does not exist\)/gi, '').trim();
-
-        const imgMatch = leftBlock.match(/<img[^>]*src="([^"]+)"/);
-        if (imgMatch) {
-          logoA = imgMatch[1].startsWith('http') ? imgMatch[1] : `https://liquipedia.net${imgMatch[1]}`;
-        }
-      }
-
-      let timeB = "TBD";
-      let logoB = "";
-      if (rightBlockMatch) {
-        const rightBlock = rightBlockMatch[1];
-        const titleMatch = rightBlock.match(/class="team-template-image-icon[^"]*"[^>]*><a[^>]*title="([^"]+)"/);
-        const nameMatch = rightBlock.match(/<span class="name"[^>]*><a[^>]*>([^<]+)<\/a>/);
-        timeB = (titleMatch ? titleMatch[1] : (nameMatch ? nameMatch[1] : "TBD")).trim();
-        timeB = timeB.replace(/\(page does not exist\)/gi, '').trim();
-
-        const imgMatch = rightBlock.match(/<img[^>]*src="([^"]+)"/);
-        if (imgMatch) {
-          logoB = imgMatch[1].startsWith('http') ? imgMatch[1] : `https://liquipedia.net${imgMatch[1]}`;
-        }
-      }
-
-      const formatMatch = block.match(/\((Bo\d+)\)/i);
-      const formato = formatMatch ? formatMatch[1].toUpperCase() : "BO3";
-
-      const scoreMatch = block.match(/class="match-info-header-score">(\d+)<\/span><span class="match-info-header-scoreholder-divider">:<\/span><span class="match-info-header-score">(\d+)<\/span>/);
-      const scoreA = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
-      const scoreB = scoreMatch ? parseInt(scoreMatch[2], 10) : 0;
-
-      let torneio = "Torneio Profissional";
-      const tourneyNameMatch = block.match(/class="match-info-tournament-name"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/);
-      if (tourneyNameMatch) {
-        torneio = tourneyNameMatch[1].replace(/ - [A-Za-z]+ \d+$/i, '').trim();
-      } else {
-        const tourneyBlock = block.match(/class="match-info-tournament"[\s\S]*?<\/div>/);
-        if (tourneyBlock) {
-          const tTitle = tourneyBlock[0].match(/title="([^"#]+)/);
-          if (tTitle) {
-            torneio = tTitle[1].replace(/_/g, ' ').replace(/\//g, ' ').trim();
-          }
-        }
-      }
-
-      let streamUrl = "";
-      const streamMatch = block.match(/href="([^"]*Special:Stream\/[^"]+)"/);
-      if (streamMatch) {
-        streamUrl = `https://liquipedia.net${streamMatch[1]}`;
-      }
-
-      if (timeA && timeB && (timeA !== "TBD" || timeB !== "TBD")) {
-        matches.push({
-          timeA,
-          timeB,
-          logoA,
-          logoB,
-          formato,
-          seriesScoreA: scoreA,
-          seriesScoreB: scoreB,
-          scoreA,
-          scoreB,
-          torneio,
-          streamUrl,
-          data: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
-          timestamp
-        });
-      }
-    } catch (err) {}
-  });
-
-  return matches;
-}
-
-// 7. Buscar Próximos Jogos Reais da Liquipedia
+// 7. Buscar Próximos Jogos Reais da Liquipedia (via rota serverless /api/upcoming,
+// que centraliza o parsing do HTML da Liquipedia em api/_lib/parseLiquipediaMatches.js)
 export async function fetchUpcomingMatches() {
   const cached = getCached("upcoming_real_matches_v3", 60 * 1000);
   if (cached) return cached;
 
   try {
-    let list = [];
-    try {
-      const res = await fetch("/api/upcoming");
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) list = data;
-      }
-    } catch (e) {}
-
-    // Fallback direto via Liquipedia com CORS
-    if (!list.length) {
-      try {
-        const resWiki = await fetch(
-          "https://liquipedia.net/dota2/api.php?action=parse&page=Liquipedia:Matches&format=json&origin=*",
-          {
-            headers: {
-              "Accept": "application/json"
-            }
-          }
-        );
-        if (resWiki.ok) {
-          const dataWiki = await resWiki.json();
-          const html = dataWiki?.parse?.text?.["*"] || "";
-          list = parseLiquipediaHtml(html);
-        }
-      } catch (e) {
-        console.error("Falha ao consultar Liquipedia diretamente:", e);
-      }
-    }
+    const res = await fetch("/api/upcoming");
+    if (!res.ok) return [];
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : [];
 
     if (list.length > 0) {
       setCache("upcoming_real_matches_v3", list);

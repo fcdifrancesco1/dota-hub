@@ -20,26 +20,6 @@ import {
   isSameTeamMatch
 } from './services/api';
 
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
-function getLiveMatchDynamicStats(tA, tB, tourney, elapsedMins) {
-  const h = hashString(String(tA) + String(tB) + String(tourney || ''));
-  const pace = 0.65 + ((h % 40) / 100); // 0.65 a 1.05 abates/min
-  const ratio = 0.40 + ((h % 22) / 100);
-  const durationMin = Math.max(14, Math.min(52, elapsedMins + (h % 7) - 3));
-  const totalKills = Math.floor(durationMin * pace) + (h % 5) + 3;
-  const scoreA = Math.round(totalKills * ratio);
-  const scoreB = totalKills - scoreA;
-  return { durationMin, scoreA, scoreB };
-}
-
 export default function App() {
   const [currentTab, setCurrentTab] = useState('hub'); // 'hub' | 'torneios' | 'meta' | 'mmr'
   const [mobileHubSubTab, setMobileHubSubTab] = useState('center'); // 'results' | 'center' | 'upcoming'
@@ -117,16 +97,16 @@ export default function App() {
           };
         }
 
-        // Partida ao vivo em andamento no servidor/stream -> Cálculo individualizado e determinístico por confronto
-        const elapsedMins = m.timestamp ? Math.max(0, Math.floor((now - m.timestamp) / 60000)) : 22;
-        const dynamicStats = getLiveMatchDynamicStats(m.timeA, m.timeB, m.torneio, elapsedMins);
+        // Partida ao vivo sem correspondência de dados reais no OpenDota ainda
+        // (não inventamos abates/duração: o card mostra "aguardando dados oficiais")
+        const elapsedMins = m.timestamp ? Math.max(0, Math.floor((now - m.timestamp) / 60000)) : null;
 
         return {
           ...m,
-          gameScoreA: dynamicStats.scoreA,
-          gameScoreB: dynamicStats.scoreB,
-          gameDuration: dynamicStats.durationMin * 60,
-          isGameDataActive: true
+          gameScoreA: null,
+          gameScoreB: null,
+          gameDuration: elapsedMins != null ? elapsedMins * 60 : null,
+          isGameDataActive: false
         };
       });
 
@@ -153,14 +133,20 @@ export default function App() {
 
   useEffect(() => {
     loadData();
+  }, [loadData]);
 
-    // Polling de partidas ao vivo a cada 20 segundos
-    const liveInterval = setInterval(async () => {
+  // Polling de partidas ao vivo a cada 20 segundos, apenas nas abas que
+  // realmente exibem esses dados (Hub e Torneios). 'meta' e 'mmr' usam
+  // suas próprias fontes de dados e não precisam desse refresh.
+  useEffect(() => {
+    if (currentTab !== 'hub' && currentTab !== 'torneios') return;
+
+    const liveInterval = setInterval(() => {
       loadData(false);
     }, 20000);
 
     return () => clearInterval(liveInterval);
-  }, [loadData]);
+  }, [loadData, currentTab]);
 
   return (
     <div className="app-container min-h-screen flex flex-col bg-[#0B0D12] text-[#E1E6F0] selection:bg-amber-500 selection:text-black">

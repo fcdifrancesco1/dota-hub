@@ -49,13 +49,14 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
             const dLogo = isLiquipedia ? g.logoB : "";
 
             const sb = g.scoreboard || {};
-            // O placar principal é SEMPRE o Placar de Abates do Jogo (Game Score Kills)
-            const rScore = g.gameScoreA !== undefined
+            // O placar principal é SEMPRE o Placar de Abates real do Jogo (Game Score Kills)
+            const rScore = g.gameScoreA !== undefined && g.gameScoreA !== null
               ? g.gameScoreA
-              : (sb.radiant ? sb.radiant.score : (g.radiant_score ?? g.scoreA ?? 0));
-            const dScore = g.gameScoreB !== undefined
+              : (sb.radiant ? sb.radiant.score : (g.radiant_score ?? (isLiquipedia ? null : g.scoreA) ?? null));
+            const dScore = g.gameScoreB !== undefined && g.gameScoreB !== null
               ? g.gameScoreB
-              : (sb.dire ? sb.dire.score : (g.dire_score ?? g.scoreB ?? 0));
+              : (sb.dire ? sb.dire.score : (g.dire_score ?? (isLiquipedia ? null : g.scoreB) ?? null));
+            const hasRealScore = rScore !== null && dScore !== null;
 
             const mins = g.gameDuration ? Math.floor(g.gameDuration / 60) : (!isLiquipedia ? Math.floor((sb.duration || g.duration || 0) / 60) : null);
             const leagueName = g.torneio || (g.league_tier ? `Liga Tier ${g.league_tier}` : "Torneio Dota 2");
@@ -99,11 +100,17 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
                   </div>
 
                   <div className="flex flex-col items-center shrink-0">
-                    <div className="px-3.5 py-1 bg-black/80 border border-rose-500/30 rounded-xl text-base sm:text-lg font-mono font-black text-amber-400 shadow-inner">
-                      {rScore} <span className="text-gray-500 mx-0.5">:</span> {dScore}
-                    </div>
+                    {hasRealScore ? (
+                      <div className="px-3.5 py-1 bg-black/80 border border-rose-500/30 rounded-xl text-base sm:text-lg font-mono font-black text-amber-400 shadow-inner">
+                        {rScore} <span className="text-gray-500 mx-0.5">:</span> {dScore}
+                      </div>
+                    ) : (
+                      <div className="px-3 py-1 bg-black/60 border border-white/10 rounded-xl text-[10px] font-mono font-bold text-gray-400 shadow-inner">
+                        Aguardando dados
+                      </div>
+                    )}
                     <span className="text-[8px] text-gray-400 font-mono mt-0.5 uppercase tracking-wider">
-                      Placar do Jogo
+                      {hasRealScore ? 'Placar do Jogo' : 'Ainda sem telemetria oficial'}
                     </span>
                   </div>
 
