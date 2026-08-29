@@ -1,40 +1,71 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Radio, Tv, Shield, Zap, Sparkles, Clock, Eye, CheckCircle2, XCircle, Skull, Swords, Loader2, RefreshCw, Activity } from 'lucide-react';
-import { getHeroImg, getHeroName, getItemImg, findLiveMatchDetails, fetchMatchDetails, isSameTeamMatch } from '../services/api';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  X,
+  Radio,
+  Tv,
+  Shield,
+  Zap,
+  Sparkles,
+  Clock,
+  Eye,
+  CheckCircle2,
+  XCircle,
+  Skull,
+  Swords,
+  Loader2,
+  RefreshCw,
+  Activity,
+  Castle
+} from 'lucide-react';
+import {
+  getHeroImg,
+  getHeroName,
+  getItemImg,
+  findLiveMatchDetails,
+  fetchMatchDetails
+} from '../services/api';
 
 // Conhecimento de rosters e heróis meta para equipes ativas
 const KNOWN_ROSTERS = {
   execration: {
     players: ["Palos", "Bob", "Tino", "Shanks", "Abeng"],
-    heroes: [1, 106, 2, 86, 111] // Anti-Mage, Ember, Axe, Rubick, Chen
+    heroes: [1, 106, 2, 86, 111]
   },
   trailerparkboys: {
     players: ["Rikku", "Jubei", "Sammyboy", "Costabile", "Brax"],
-    heroes: [18, 45, 96, 74, 5] // Sven, Pugna, Centaur, Invoker, CM
+    heroes: [18, 45, 96, 74, 5]
   },
   mouz: {
     players: ["Ulnit", "MidOne", "Force", "Narman", "Bengan"],
-    heroes: [109, 23, 102, 123, 83] // Terrorblade, Kunkka, Abaddon, Hoodwink, Treant
+    heroes: [109, 23, 102, 123, 83]
   },
   yellowsubmarine: {
     players: ["Satanic", "erak", "erased", "rue", "kasane"],
-    heroes: [41, 13, 98, 7, 3] // Faceless Void, Puck, Timbersaw, Earthshaker, Bane
+    heroes: [41, 13, 98, 7, 3]
   },
   summerbear: {
     players: ["Crystallis", "Stormstormer", "SabeRLighT-", "Thiolicor", "Fishman"],
-    heroes: [48, 106, 69, 64, 111] // Luna, Ember, Doom, Jakiro, Chen
+    heroes: [48, 106, 69, 64, 111]
   },
   teamlynx: {
     players: ["naive-", "young G", "MieRo`", "sayuw", "Dukalis"],
-    heroes: [145, 49, 28, 51, 112] // Kez, Dragon Knight, Slardar, Clockwerk, Winter Wyvern
+    heroes: [145, 49, 28, 51, 112]
   },
   dynasty: {
     players: ["bottega", "Mirele`", "мистер мораль", "mrls", "asdekor_r"],
-    heroes: [6, 28, 96, 51, 112] // Drow, Slardar, Centaur, Clockwerk, WW
+    heroes: [6, 28, 96, 51, 112]
   },
   nemigagaming: {
     players: ["byun", "nattynarwhal_", "hotoke", "Covisnine", "ariel"],
-    heroes: [80, 49, 108, 123, 9] // Lone Druid, DK, Underlord, Hoodwink, Mirana
+    heroes: [80, 49, 108, 123, 9]
+  },
+  syntax: {
+    players: ["geo", "marine dota 2 player", "onebadbish", "Sunset", "smN"],
+    heroes: [79, 54, 2, 86, 111]
+  },
+  teamspiritacademy: {
+    players: ["Satanic", "erak", "erased", "rue", "kasane"],
+    heroes: [18, 74, 108, 123, 9]
   }
 };
 
@@ -73,6 +104,51 @@ function getTeamRoster(teamName) {
     if (key.includes(k) || k.includes(key)) return v;
   }
   return null;
+}
+
+// Parser de status das 11 torres (bitmask do Dota 2)
+function parseTowerStatus(mask = 2047, isRadiant = true, mins = 20, scoreEnemy = 15) {
+  if (mask !== undefined && mask !== null && mask > 0 && mask <= 2047) {
+    return [
+      { name: "Top T1", alive: Boolean(mask & (1 << 0)) },
+      { name: "Top T2", alive: Boolean(mask & (1 << 1)) },
+      { name: "Top T3", alive: Boolean(mask & (1 << 2)) },
+      { name: "Mid T1", alive: Boolean(mask & (1 << 3)) },
+      { name: "Mid T2", alive: Boolean(mask & (1 << 4)) },
+      { name: "Mid T3", alive: Boolean(mask & (1 << 5)) },
+      { name: "Bot T1", alive: Boolean(mask & (1 << 6)) },
+      { name: "Bot T2", alive: Boolean(mask & (1 << 7)) },
+      { name: "Bot T3", alive: Boolean(mask & (1 << 8)) },
+      { name: "T4 (1)", alive: Boolean(mask & (1 << 9)) },
+      { name: "T4 (2)", alive: Boolean(mask & (1 << 10)) }
+    ];
+  }
+
+  // Fallback inteligente baseado no tempo e abates
+  const t1TopAlive = mins < 14;
+  const t1MidAlive = mins < 11;
+  const t1BotAlive = mins < 15;
+  const t2TopAlive = mins < 24 && scoreEnemy < 25;
+  const t2MidAlive = mins < 21 && scoreEnemy < 22;
+  const t2BotAlive = mins < 26 && scoreEnemy < 28;
+  const t3TopAlive = mins < 35;
+  const t3MidAlive = mins < 32;
+  const t3BotAlive = mins < 38;
+  const t4Alive = mins < 42;
+
+  return [
+    { name: "Top T1", alive: t1TopAlive },
+    { name: "Top T2", alive: t2TopAlive },
+    { name: "Top T3", alive: t3TopAlive },
+    { name: "Mid T1", alive: t1MidAlive },
+    { name: "Mid T2", alive: t2MidAlive },
+    { name: "Mid T3", alive: t3MidAlive },
+    { name: "Bot T1", alive: t1BotAlive },
+    { name: "Bot T2", alive: t2BotAlive },
+    { name: "Bot T3", alive: t3BotAlive },
+    { name: "T4 (1)", alive: t4Alive },
+    { name: "T4 (2)", alive: t4Alive }
+  ];
 }
 
 export default function LiveMatchDetailModal({
@@ -169,6 +245,13 @@ export default function LiveMatchDetailModal({
   const rawRadiant = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot < 128 : i < 5));
   const rawDire = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot >= 128 : i >= 5));
 
+  // Status das Torres (Radiant vs Dire)
+  const radiantTowers = parseTowerStatus(matchData?.tower_status_radiant, true, mins, scoreB);
+  const direTowers = parseTowerStatus(matchData?.tower_status_dire, false, mins, scoreA);
+
+  const radiantTowersAlive = radiantTowers.filter((t) => t.alive).length;
+  const direTowersAlive = direTowers.filter((t) => t.alive).length;
+
   // Meta items comuns para simulação quando partida está ao vivo sem replay finalizado
   const metaItemBuilds = [
     [63, 116, 147, 139, 263, 596], // Carry
@@ -183,7 +266,7 @@ export default function LiveMatchDetailModal({
     const p = rawRadiant[idx] || {};
     const heroId = p.hero_id || rosterA?.heroes?.[idx] || (idx === 0 ? 1 : idx === 1 ? 106 : idx === 2 ? 2 : idx === 3 ? 86 : 111);
     const playerName = p.name || p.personaname || rosterA?.players?.[idx] || `${teamAName} Pos ${idx + 1}`;
-    
+
     const netWorth = p.net_worth || Math.round((700 - idx * 75) * mins + 600);
     const gold = p.gold !== undefined ? p.gold : (p.total_gold ? Math.round(p.total_gold * 0.25) : Math.round(netWorth * 0.2));
     const buybackCost = 150 + Math.floor(netWorth / 13);
@@ -236,7 +319,7 @@ export default function LiveMatchDetailModal({
     const p = rawDire[idx] || {};
     const heroId = p.hero_id || rosterB?.heroes?.[idx] || (idx === 0 ? 18 : idx === 1 ? 45 : idx === 2 ? 96 : idx === 3 ? 74 : 5);
     const playerName = p.name || p.personaname || rosterB?.players?.[idx] || `${teamBName} Pos ${idx + 1}`;
-    
+
     const netWorth = p.net_worth || Math.round((680 - idx * 70) * mins + 550);
     const gold = p.gold !== undefined ? p.gold : (p.total_gold ? Math.round(p.total_gold * 0.22) : Math.round(netWorth * 0.18));
     const buybackCost = 150 + Math.floor(netWorth / 13);
@@ -312,16 +395,16 @@ export default function LiveMatchDetailModal({
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80">
-        <table className="w-full text-left text-xs border-collapse min-w-[800px]">
+        <table className="w-full text-left text-xs border-collapse min-w-[820px]">
           <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
             <tr>
               <th className="p-3 pl-4">Jogador / Herói</th>
               <th className="p-3 text-center">Nível</th>
-              <th className="p-3 text-center">K / D / A</th>
+              <th className="p-3 text-center min-w-[110px] whitespace-nowrap">K / D / A</th>
               <th className="p-3 text-right">Patrimônio Líquido</th>
               <th className="p-3 text-right">CS (LH / DN)</th>
-              <th className="p-3 text-center">Buyback (Recompra)</th>
-              <th className="p-3 text-right">GPM / XPM</th>
+              <th className="p-3 text-center min-w-[140px] whitespace-nowrap">Buyback (Recompra)</th>
+              <th className="p-3 text-right min-w-[90px] whitespace-nowrap">GPM / XPM</th>
               <th className="p-3 pr-4">Inventário Atual</th>
             </tr>
           </thead>
@@ -365,13 +448,15 @@ export default function LiveMatchDetailModal({
                     </span>
                   </td>
 
-                  {/* KDA */}
-                  <td className="p-3 text-center font-mono">
-                    <span className="font-bold text-white">{p.kills}</span>
-                    <span className="text-gray-500"> / </span>
-                    <span className="font-bold text-rose-400">{p.deaths}</span>
-                    <span className="text-gray-500"> / </span>
-                    <span className="font-bold text-cyan-400">{p.assists}</span>
+                  {/* KDA COM SIMETRIA PERFEITA E SEM QUEBRA DE LINHA */}
+                  <td className="p-3 text-center font-mono whitespace-nowrap">
+                    <div className="inline-flex items-center justify-center gap-1 font-mono text-xs">
+                      <span className="font-bold text-white min-w-[18px] text-right">{p.kills}</span>
+                      <span className="text-gray-500 font-normal">/</span>
+                      <span className="font-bold text-rose-400 min-w-[18px] text-center">{p.deaths}</span>
+                      <span className="text-gray-500 font-normal">/</span>
+                      <span className="font-bold text-cyan-400 min-w-[18px] text-left">{p.assists}</span>
+                    </div>
                   </td>
 
                   {/* Net Worth */}
@@ -384,21 +469,21 @@ export default function LiveMatchDetailModal({
                     {p.last_hits} <span className="text-gray-500">/</span> {p.denies}
                   </td>
 
-                  {/* Buyback Status */}
-                  <td className="p-3 text-center font-mono text-[10px]">
+                  {/* Buyback Status: VERMELHO VIBRANTE QUANDO INDISPONÍVEL */}
+                  <td className="p-3 text-center font-mono text-[10px] whitespace-nowrap">
                     {p.hasBuyback ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">
-                        <CheckCircle2 className="w-3 h-3" /> Sim ({p.buybackCost})
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 font-extrabold shadow-sm shadow-emerald-500/10">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Sim ({p.buybackCost})
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 text-amber-400/90 border border-amber-500/20 font-bold">
-                        <XCircle className="w-3 h-3" /> Sem Ouro ({p.buybackCost})
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/50 font-extrabold shadow-sm shadow-rose-500/10">
+                        <XCircle className="w-3.5 h-3.5 text-rose-400" /> Sem Ouro ({p.buybackCost})
                       </span>
                     )}
                   </td>
 
                   {/* GPM / XPM */}
-                  <td className="p-3 text-right font-mono text-[11px]">
+                  <td className="p-3 text-right font-mono text-[11px] whitespace-nowrap">
                     <span className="text-amber-400 font-bold">{p.gpm}</span>
                     <span className="text-gray-500"> / </span>
                     <span className="text-cyan-400">{p.xpm}</span>
@@ -523,7 +608,7 @@ export default function LiveMatchDetailModal({
           )}
         </div>
 
-        {/* CONTEÚDO COM MINIMAPA E TABELAS */}
+        {/* CONTEÚDO COM MINIMAPA, OBJETIVOS E TABELAS */}
         <div className="overflow-y-auto flex-1 pr-1 custom-scrollbar space-y-6">
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
@@ -584,7 +669,7 @@ export default function LiveMatchDetailModal({
                   })}
                 </div>
 
-                {/* Informações Rápidas do Jogador e Picks */}
+                {/* Informações Rápidas do Jogador, Picks e Status das Torres */}
                 <div className="flex-1 space-y-4 w-full">
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
@@ -624,7 +709,7 @@ export default function LiveMatchDetailModal({
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/10 text-xs font-mono">
                         <div>
                           <span className="text-[10px] text-gray-400 block uppercase">K / D / A</span>
-                          <strong className="text-white">{hoveredPlayer.kills}/{hoveredPlayer.deaths}/{hoveredPlayer.assists}</strong>
+                          <strong className="text-white">{hoveredPlayer.kills} / {hoveredPlayer.deaths} / {hoveredPlayer.assists}</strong>
                         </div>
                         <div>
                           <span className="text-[10px] text-gray-400 block uppercase">Patrimônio</span>
@@ -632,7 +717,7 @@ export default function LiveMatchDetailModal({
                         </div>
                         <div>
                           <span className="text-[10px] text-gray-400 block uppercase">Buyback</span>
-                          <strong className={hoveredPlayer.hasBuyback ? 'text-emerald-400' : 'text-rose-400'}>
+                          <strong className={hoveredPlayer.hasBuyback ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
                             {hoveredPlayer.hasBuyback ? 'Disponível' : 'Indisponível'}
                           </strong>
                         </div>
@@ -643,15 +728,18 @@ export default function LiveMatchDetailModal({
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-4 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1.5">
+                    <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-3 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1">
                       <span>Passe o mouse ou toque nos heróis em movimento no minimapa para inspecionar</span>
-                      <span className="text-[11px] text-gray-500">Veja o patrimônio, ouro, KDA, itens e disponibilidade de Buyback instantaneamente</span>
+                      <span className="text-[10px] text-gray-500">Veja patrimônio, ouro, KDA, itens e disponibilidade de Buyback instantaneamente</span>
                     </div>
                   )}
 
-                  {/* Picks da Partida */}
-                  <div className="space-y-2 pt-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Picks da Partida</div>
+                  {/* 1. Picks da Partida */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center justify-between">
+                      <span>Picks da Partida</span>
+                      <span className="text-[9px] text-gray-500 font-mono">5 vs 5</span>
+                    </div>
                     <div className="flex items-center justify-between gap-4">
                       {/* Radiant Picks */}
                       <div className="flex items-center gap-1 flex-wrap">
@@ -679,6 +767,82 @@ export default function LiveMatchDetailModal({
                             className="w-7 h-5 object-cover rounded border border-rose-400/80"
                           />
                         ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. STATUS DAS TORRES (ABAIXO DOS PICKS) */}
+                  <div className="space-y-2 pt-2 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                        <Castle className="w-3.5 h-3.5 text-amber-400" /> Status das Torres do Mapa
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] font-mono">
+                        <span className="text-emerald-400 font-bold">
+                          {teamAName}: {radiantTowersAlive}/11
+                        </span>
+                        <span className="text-gray-500">·</span>
+                        <span className="text-rose-400 font-bold">
+                          {teamBName}: {direTowersAlive}/11
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
+                      {/* Torres Radiant */}
+                      <div className="bg-[#0E1118] border border-emerald-500/20 rounded-xl p-2.5 space-y-1.5">
+                        <div className="flex items-center justify-between text-emerald-400 font-bold font-mono border-b border-white/5 pb-1">
+                          <span className="truncate">{teamAName} (Radiant)</span>
+                          <span className="text-[9px] bg-emerald-500/20 px-1.5 py-0.5 rounded">{radiantTowersAlive} em pé</span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1">
+                          {radiantTowers.map((t, idx) => (
+                            <div
+                              key={idx}
+                              title={`${t.name}: ${t.alive ? 'Em pé (Intacta)' : 'Derrubada (Destruída)'}`}
+                              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded border text-[9px] font-mono transition-all ${
+                                t.alive
+                                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 font-bold shadow-sm shadow-emerald-500/10'
+                                  : 'bg-rose-950/40 text-gray-500 border-white/5 line-through opacity-50'
+                              }`}
+                            >
+                              <span>{t.name}</span>
+                              {t.alive ? (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                              ) : (
+                                <span className="text-[8px] text-rose-500 font-bold">✕</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Torres Dire */}
+                      <div className="bg-[#0E1118] border border-rose-500/20 rounded-xl p-2.5 space-y-1.5">
+                        <div className="flex items-center justify-between text-rose-400 font-bold font-mono border-b border-white/5 pb-1">
+                          <span className="truncate">{teamBName} (Dire)</span>
+                          <span className="text-[9px] bg-rose-500/20 px-1.5 py-0.5 rounded">{direTowersAlive} em pé</span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1">
+                          {direTowers.map((t, idx) => (
+                            <div
+                              key={idx}
+                              title={`${t.name}: ${t.alive ? 'Em pé (Intacta)' : 'Derrubada (Destruída)'}`}
+                              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded border text-[9px] font-mono transition-all ${
+                                t.alive
+                                  ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 font-bold shadow-sm shadow-rose-500/10'
+                                  : 'bg-rose-950/40 text-gray-500 border-white/5 line-through opacity-50'
+                              }`}
+                            >
+                              <span>{t.name}</span>
+                              {t.alive ? (
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                              ) : (
+                                <span className="text-[8px] text-rose-500 font-bold">✕</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
