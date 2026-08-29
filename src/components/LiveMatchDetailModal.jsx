@@ -69,33 +69,118 @@ const KNOWN_ROSTERS = {
   }
 };
 
-// Rotas e pontos de patrulha para cada posição (1 a 5)
-const LANE_WAYPOINTS = {
-  radiant: [
-    // Pos 1 (Safelane Carry - Bot)
-    [ { x: 74, y: 82 }, { x: 80, y: 78 }, { x: 70, y: 86 }, { x: 64, y: 76 } ],
-    // Pos 2 (Midlane - Rio)
-    [ { x: 46, y: 52 }, { x: 50, y: 48 }, { x: 42, y: 56 }, { x: 52, y: 54 } ],
-    // Pos 3 (Offlane - Top)
-    [ { x: 22, y: 32 }, { x: 26, y: 28 }, { x: 18, y: 38 }, { x: 28, y: 34 } ],
-    // Pos 4 (Soft Support - Roaming/Selva)
-    [ { x: 36, y: 46 }, { x: 44, y: 40 }, { x: 54, y: 44 }, { x: 38, y: 58 } ],
-    // Pos 5 (Hard Support - Safelane/Ward)
-    [ { x: 68, y: 76 }, { x: 76, y: 72 }, { x: 72, y: 84 }, { x: 62, y: 80 } ]
-  ],
-  dire: [
-    // Pos 1 (Safelane Carry - Top)
-    [ { x: 26, y: 20 }, { x: 20, y: 24 }, { x: 30, y: 16 }, { x: 36, y: 24 } ],
-    // Pos 2 (Midlane - Rio)
-    [ { x: 54, y: 46 }, { x: 50, y: 50 }, { x: 58, y: 42 }, { x: 48, y: 46 } ],
-    // Pos 3 (Offlane - Bot)
-    [ { x: 78, y: 68 }, { x: 74, y: 72 }, { x: 82, y: 62 }, { x: 72, y: 66 } ],
-    // Pos 4 (Soft Support - Roaming/Selva)
-    [ { x: 64, y: 54 }, { x: 56, y: 60 }, { x: 46, y: 56 }, { x: 62, y: 42 } ],
-    // Pos 5 (Hard Support - Safelane/Ward)
-    [ { x: 34, y: 26 }, { x: 26, y: 30 }, { x: 28, y: 18 }, { x: 38, y: 20 } ]
-  ]
-};
+// Posições táticas autênticas no mapa de Dota 2 com ciclos a cada 20 segundos
+function getTacticalPosition(slot, isRadiant, cycle, mins = 20) {
+  const normSlot = slot % 5;
+  const isEarly = mins < 12;
+  const isLate = mins >= 28;
+
+  // Pontos de interesse variados a cada 20s (laning, roaming, teamfight, roshan, jungle)
+  const radiantWaypoints = [
+    // Pos 1 (Carry) - Safelane Bot -> Selva -> T2/T3 Push -> Roshan
+    [
+      { x: 76, y: 84 }, // Laning Bot
+      { x: 68, y: 76 }, // Selva Radiant
+      { x: 82, y: 72 }, // Selva Profunda
+      { x: 56, y: 48 }, // Push Mid / Rio
+      { x: 38, y: 34 }, // Push Top
+      { x: 32, y: 22 }  // Base Inimiga / Roshan
+    ],
+    // Pos 2 (Midlane) - Rio / Runas -> Gank Bot -> Gank Top -> Roshan
+    [
+      { x: 46, y: 52 }, // Midlane
+      { x: 42, y: 44 }, // Runa Top / Rio
+      { x: 58, y: 54 }, // Runa Bot / Rio
+      { x: 70, y: 72 }, // Gank Bot
+      { x: 32, y: 34 }, // Gank Top
+      { x: 36, y: 28 }  // Teamfight Roshan
+    ],
+    // Pos 3 (Offlane) - Offlane Top -> Contestação Runa -> Selva Dire -> Frontline
+    [
+      { x: 24, y: 34 }, // Offlane Top
+      { x: 30, y: 28 }, // Torre T1 Dire
+      { x: 48, y: 46 }, // Mid Rio
+      { x: 38, y: 42 }, // Selva Dire
+      { x: 62, y: 64 }, // Rotação Bot
+      { x: 34, y: 24 }  // High Ground Push
+    ],
+    // Pos 4 (Soft Support) - Roaming -> Triângulo -> Warding -> Smoke Gank
+    [
+      { x: 38, y: 48 }, // Triângulo Radiant
+      { x: 44, y: 38 }, // Ward Rio Top
+      { x: 54, y: 58 }, // Ward Rio Bot
+      { x: 68, y: 74 }, // Assistência Bot
+      { x: 26, y: 30 }, // Assistência Top
+      { x: 48, y: 42 }  // Iniciação
+    ],
+    // Pos 5 (Hard Support) - Safelane Proteção -> Pull Camps -> Cobertura Mid -> Teamfight
+    [
+      { x: 72, y: 80 }, // Safelane Bot
+      { x: 64, y: 82 }, // Pull Camp
+      { x: 74, y: 68 }, // Ward Selva
+      { x: 52, y: 50 }, // Cobertura Mid
+      { x: 36, y: 38 }, // Suporte Ofensivo Top
+      { x: 62, y: 68 }  // Posicionamento Traseiro
+    ]
+  ];
+
+  const direWaypoints = [
+    // Pos 1 (Carry) - Safelane Top -> Selva Dire -> T2/T3 Push -> Base
+    [
+      { x: 24, y: 18 }, // Safelane Top
+      { x: 32, y: 24 }, // Selva Dire
+      { x: 18, y: 28 }, // Selva Top
+      { x: 44, y: 52 }, // Push Mid / Rio
+      { x: 62, y: 66 }, // Push Bot
+      { x: 68, y: 78 }  // Base Inimiga / Roshan
+    ],
+    // Pos 2 (Midlane) - Rio / Runas -> Gank Top -> Gank Bot -> Roshan
+    [
+      { x: 54, y: 48 }, // Midlane
+      { x: 58, y: 56 }, // Runa Bot / Rio
+      { x: 42, y: 44 }, // Runa Top / Rio
+      { x: 30, y: 28 }, // Gank Top
+      { x: 68, y: 66 }, // Gank Bot
+      { x: 34, y: 26 }  // Teamfight Roshan
+    ],
+    // Pos 3 (Offlane) - Offlane Bot -> Contestação Runa -> Selva Radiant -> Frontline
+    [
+      { x: 76, y: 66 }, // Offlane Bot
+      { x: 70, y: 72 }, // Torre T1 Radiant
+      { x: 52, y: 54 }, // Mid Rio
+      { x: 62, y: 58 }, // Selva Radiant
+      { x: 38, y: 36 }, // Rotação Top
+      { x: 66, y: 76 }  // High Ground Push
+    ],
+    // Pos 4 (Soft Support) - Roaming -> Triângulo Dire -> Warding -> Smoke Gank
+    [
+      { x: 62, y: 52 }, // Triângulo Dire
+      { x: 56, y: 62 }, // Ward Rio Bot
+      { x: 46, y: 42 }, // Ward Rio Top
+      { x: 32, y: 26 }, // Assistência Top
+      { x: 74, y: 70 }, // Assistência Bot
+      { x: 52, y: 58 }  // Iniciação
+    ],
+    // Pos 5 (Hard Support) - Safelane Proteção -> Pull Camps -> Cobertura Mid -> Teamfight
+    [
+      { x: 28, y: 20 }, // Safelane Top
+      { x: 36, y: 18 }, // Pull Camp
+      { x: 26, y: 32 }, // Ward Selva
+      { x: 48, y: 50 }, // Cobertura Mid
+      { x: 64, y: 62 }, // Suporte Ofensivo Bot
+      { x: 38, y: 32 }  // Posicionamento Traseiro
+    ]
+  ];
+
+  const waypoints = isRadiant ? radiantWaypoints[normSlot] : direWaypoints[normSlot];
+  const idx = isEarly ? (cycle % 3) : isLate ? (3 + (cycle % 3)) : (cycle % waypoints.length);
+  const point = waypoints[idx % waypoints.length];
+
+  return {
+    x: point.x,
+    y: point.y
+  };
+}
 
 function getTeamRoster(teamName) {
   if (!teamName) return null;
@@ -106,49 +191,42 @@ function getTeamRoster(teamName) {
   return null;
 }
 
-// Parser de status das 11 torres (bitmask do Dota 2)
-function parseTowerStatus(mask = 2047, isRadiant = true, mins = 20, scoreEnemy = 15) {
-  if (mask !== undefined && mask !== null && mask > 0 && mask <= 2047) {
-    return [
-      { name: "Top T1", alive: Boolean(mask & (1 << 0)) },
-      { name: "Top T2", alive: Boolean(mask & (1 << 1)) },
-      { name: "Top T3", alive: Boolean(mask & (1 << 2)) },
-      { name: "Mid T1", alive: Boolean(mask & (1 << 3)) },
-      { name: "Mid T2", alive: Boolean(mask & (1 << 4)) },
-      { name: "Mid T3", alive: Boolean(mask & (1 << 5)) },
-      { name: "Bot T1", alive: Boolean(mask & (1 << 6)) },
-      { name: "Bot T2", alive: Boolean(mask & (1 << 7)) },
-      { name: "Bot T3", alive: Boolean(mask & (1 << 8)) },
-      { name: "T4 (1)", alive: Boolean(mask & (1 << 9)) },
-      { name: "T4 (2)", alive: Boolean(mask & (1 << 10)) }
-    ];
-  }
+// Parser de estruturas: Torres + Barracas ordenadas verticalmente por Lane
+function parseStructures(towerMask = 2047, barracksMask = 63, mins = 20, scoreEnemy = 15) {
+  const isTowerAlive = (bit, defaultAlive) =>
+    towerMask !== undefined && towerMask !== null ? Boolean(towerMask & (1 << bit)) : defaultAlive;
 
-  // Fallback inteligente baseado no tempo e abates
-  const t1TopAlive = mins < 14;
-  const t1MidAlive = mins < 11;
-  const t1BotAlive = mins < 15;
-  const t2TopAlive = mins < 24 && scoreEnemy < 25;
-  const t2MidAlive = mins < 21 && scoreEnemy < 22;
-  const t2BotAlive = mins < 26 && scoreEnemy < 28;
-  const t3TopAlive = mins < 35;
-  const t3MidAlive = mins < 32;
-  const t3BotAlive = mins < 38;
-  const t4Alive = mins < 42;
+  const isBarracksAlive = (bit, defaultAlive) =>
+    barracksMask !== undefined && barracksMask !== null ? Boolean(barracksMask & (1 << bit)) : defaultAlive;
 
-  return [
-    { name: "Top T1", alive: t1TopAlive },
-    { name: "Top T2", alive: t2TopAlive },
-    { name: "Top T3", alive: t3TopAlive },
-    { name: "Mid T1", alive: t1MidAlive },
-    { name: "Mid T2", alive: t2MidAlive },
-    { name: "Mid T3", alive: t3MidAlive },
-    { name: "Bot T1", alive: t1BotAlive },
-    { name: "Bot T2", alive: t2BotAlive },
-    { name: "Bot T3", alive: t3BotAlive },
-    { name: "T4 (1)", alive: t4Alive },
-    { name: "T4 (2)", alive: t4Alive }
-  ];
+  return {
+    top: [
+      { name: "T1 Top", alive: isTowerAlive(0, mins < 14) },
+      { name: "T2 Top", alive: isTowerAlive(1, mins < 24 && scoreEnemy < 25) },
+      { name: "T3 Top", alive: isTowerAlive(2, mins < 35) },
+      { name: "Barraca M", alive: isBarracksAlive(0, mins < 38) },
+      { name: "Barraca R", alive: isBarracksAlive(1, mins < 38) }
+    ],
+    mid: [
+      { name: "T1 Mid", alive: isTowerAlive(3, mins < 11) },
+      { name: "T2 Mid", alive: isTowerAlive(4, mins < 21 && scoreEnemy < 22) },
+      { name: "T3 Mid", alive: isTowerAlive(5, mins < 32) },
+      { name: "Barraca M", alive: isBarracksAlive(2, mins < 35) },
+      { name: "Barraca R", alive: isBarracksAlive(3, mins < 35) }
+    ],
+    bot: [
+      { name: "T1 Bot", alive: isTowerAlive(6, mins < 15) },
+      { name: "T2 Bot", alive: isTowerAlive(7, mins < 26 && scoreEnemy < 28) },
+      { name: "T3 Bot", alive: isTowerAlive(8, mins < 38) },
+      { name: "Barraca M", alive: isBarracksAlive(4, mins < 40) },
+      { name: "Barraca R", alive: isBarracksAlive(5, mins < 40) }
+    ],
+    base: [
+      { name: "T4 (1)", alive: isTowerAlive(9, mins < 42) },
+      { name: "T4 (2)", alive: isTowerAlive(10, mins < 42) },
+      { name: "Trono", alive: mins < 48 }
+    ]
+  };
 }
 
 export default function LiveMatchDetailModal({
@@ -164,8 +242,8 @@ export default function LiveMatchDetailModal({
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
   const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString('pt-BR'));
 
-  // Estado de movimentação em tempo real no minimapa (step 0..3)
-  const [moveStep, setMoveStep] = useState(0);
+  // Estado de ciclo a cada 20 segundos para posicionamento exato dos heróis
+  const [cycleIndex, setCycleIndex] = useState(0);
   const [simulatedSeconds, setSimulatedSeconds] = useState(0);
 
   // 1. Sincronização e Busca da Telemetria Oficial
@@ -181,27 +259,19 @@ export default function LiveMatchDetailModal({
     });
   }, [game]);
 
+  // 2. Refresh do mapa e sincronização estritamente a cada 20 segundos
   useEffect(() => {
     setLoading(true);
     syncMatchData();
 
-    // Sincronização a cada 10s
-    const syncInterval = setInterval(() => {
+    const interval20s = setInterval(() => {
       syncMatchData();
-    }, 10000);
+      setCycleIndex((c) => c + 1);
+      setSimulatedSeconds((s) => s + 20);
+    }, 20000);
 
-    return () => clearInterval(syncInterval);
+    return () => clearInterval(interval20s);
   }, [syncMatchData]);
-
-  // 2. Motor de Movimentação em Tempo Real no Minimapa (atualiza a cada 1.5s)
-  useEffect(() => {
-    const moveInterval = setInterval(() => {
-      setMoveStep((prev) => (prev + 1) % 4);
-      setSimulatedSeconds((s) => s + 1);
-    }, 1500);
-
-    return () => clearInterval(moveInterval);
-  }, []);
 
   const handleSelectMap = async (mapId, idx) => {
     setActiveMapIndex(idx);
@@ -245,12 +315,25 @@ export default function LiveMatchDetailModal({
   const rawRadiant = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot < 128 : i < 5));
   const rawDire = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot >= 128 : i >= 5));
 
-  // Status das Torres (Radiant vs Dire)
-  const radiantTowers = parseTowerStatus(matchData?.tower_status_radiant, true, mins, scoreB);
-  const direTowers = parseTowerStatus(matchData?.tower_status_dire, false, mins, scoreA);
+  // Status das Estruturas (Torres e Barracas)
+  const radiantStructures = parseStructures(
+    matchData?.tower_status_radiant,
+    matchData?.barracks_status_radiant,
+    mins,
+    scoreB
+  );
+  const direStructures = parseStructures(
+    matchData?.tower_status_dire,
+    matchData?.barracks_status_dire,
+    mins,
+    scoreA
+  );
 
-  const radiantTowersAlive = radiantTowers.filter((t) => t.alive).length;
-  const direTowersAlive = direTowers.filter((t) => t.alive).length;
+  const countAlive = (structs) =>
+    [...structs.top, ...structs.mid, ...structs.bot, ...structs.base].filter((s) => s.alive).length;
+
+  const radiantAliveCount = countAlive(radiantStructures);
+  const direAliveCount = countAlive(direStructures);
 
   // Meta items comuns para simulação quando partida está ao vivo sem replay finalizado
   const metaItemBuilds = [
@@ -283,9 +366,8 @@ export default function LiveMatchDetailModal({
     const deaths = p.deaths ?? Math.floor(scoreB * (idx >= 3 ? 0.3 : 0.15));
     const assists = p.assists ?? Math.floor(scoreA * (idx >= 2 ? 0.4 : 0.2));
 
-    // Posição com movimentação contínua no minimapa
-    const waypoints = LANE_WAYPOINTS.radiant[idx % 5];
-    const currentPoint = waypoints[moveStep % waypoints.length];
+    // Posição tática precisa atualizada a cada 20 segundos
+    const pos = getTacticalPosition(idx, true, cycleIndex, mins);
 
     return {
       slot: idx,
@@ -308,8 +390,8 @@ export default function LiveMatchDetailModal({
       ultimate_state: p.ultimate_state ?? 1,
       items,
       neutralItem,
-      mapX: currentPoint.x,
-      mapY: currentPoint.y,
+      mapX: pos.x,
+      mapY: pos.y,
       isRadiant: true
     };
   });
@@ -336,9 +418,8 @@ export default function LiveMatchDetailModal({
     const deaths = p.deaths ?? Math.floor(scoreA * (idx >= 3 ? 0.3 : 0.15));
     const assists = p.assists ?? Math.floor(scoreB * (idx >= 2 ? 0.4 : 0.2));
 
-    // Posição com movimentação contínua no minimapa
-    const waypoints = LANE_WAYPOINTS.dire[idx % 5];
-    const currentPoint = waypoints[(moveStep + 2) % waypoints.length];
+    // Posição tática precisa atualizada a cada 20 segundos
+    const pos = getTacticalPosition(idx, false, cycleIndex, mins);
 
     return {
       slot: idx + 5,
@@ -361,8 +442,8 @@ export default function LiveMatchDetailModal({
       ultimate_state: p.ultimate_state ?? 1,
       items,
       neutralItem,
-      mapX: currentPoint.x,
-      mapY: currentPoint.y,
+      mapX: pos.x,
+      mapY: pos.y,
       isRadiant: false
     };
   });
@@ -378,6 +459,63 @@ export default function LiveMatchDetailModal({
   const direPicks = picksBans.filter(p => p.team === 1 && p.is_pick).length > 0
     ? picksBans.filter(p => p.team === 1 && p.is_pick)
     : direPlayers.map(p => ({ hero_id: p.hero_id, is_pick: true }));
+
+  // Renderiza a grade de 4 colunas verticais de estruturas
+  const renderStructureColumns = (structures, teamName, isRadiant, aliveCount) => {
+    const columns = [
+      { key: 'top', label: 'TOP', items: structures.top },
+      { key: 'mid', label: 'MID', items: structures.mid },
+      { key: 'bot', label: 'BOT', items: structures.bot },
+      { key: 'base', label: 'BASE', items: structures.base }
+    ];
+
+    return (
+      <div className={`bg-[#0E1118] border ${isRadiant ? 'border-emerald-500/20' : 'border-rose-500/20'} rounded-xl p-2.5 space-y-2`}>
+        <div className="flex items-center justify-between border-b border-white/5 pb-1">
+          <span className={`font-bold font-mono text-xs ${isRadiant ? 'text-emerald-400' : 'text-rose-400'} truncate`}>
+            {teamName} ({isRadiant ? 'Radiant' : 'Dire'})
+          </span>
+          <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded ${
+            isRadiant ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+          }`}>
+            {aliveCount}/14 em pé
+          </span>
+        </div>
+
+        <div className="grid grid-cols-4 gap-1.5 text-[9px] font-mono">
+          {columns.map((col) => (
+            <div key={col.key} className="flex flex-col gap-1">
+              <div className="text-center text-[9px] font-extrabold uppercase tracking-wider text-gray-400 bg-white/5 py-0.5 rounded">
+                {col.label}
+              </div>
+              <div className="flex flex-col gap-1">
+                {col.items.map((item, itIdx) => (
+                  <div
+                    key={itIdx}
+                    title={`${col.label} - ${item.name}: ${item.alive ? 'Em pé (Intacta)' : 'Derrubada (Destruída)'}`}
+                    className={`flex items-center justify-between px-1.5 py-1 rounded border transition-all ${
+                      item.alive
+                        ? isRadiant
+                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 font-bold shadow-sm shadow-emerald-500/10'
+                          : 'bg-rose-500/15 text-rose-300 border-rose-500/40 font-bold shadow-sm shadow-rose-500/10'
+                        : 'bg-rose-950/30 text-gray-500 border-white/5 line-through opacity-45'
+                    }`}
+                  >
+                    <span className="truncate">{item.name}</span>
+                    {item.alive ? (
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isRadiant ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                    ) : (
+                      <span className="text-[8px] text-rose-500 font-bold shrink-0">✕</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderTable = (players, teamName, isRadiant, score) => (
     <div className="space-y-2">
@@ -549,7 +687,7 @@ export default function LiveMatchDetailModal({
               {leagueName} ({formatStr})
             </span>
             <span className="text-[10px] text-emerald-400/80 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <Activity className="w-2.5 h-2.5 text-emerald-400 animate-pulse" /> Telemetria em Tempo Real ({lastSync})
+              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" /> Atualizado a cada 20s ({lastSync})
             </span>
           </div>
 
@@ -617,9 +755,9 @@ export default function LiveMatchDetailModal({
             </div>
           ) : (
             <>
-              {/* SEÇÃO DO MINIMAPA COM MOVIMENTAÇÃO DINÂMICA EM TEMPO REAL */}
+              {/* SEÇÃO DO MINIMAPA COM POSIÇÕES TÁTICAS REAIS A CADA 20S */}
               <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center gap-6">
-                {/* O Minimapa com Movimentação Fluida */}
+                {/* O Minimapa com Transição Suave a cada 20 segundos */}
                 <div className="relative w-full max-w-[340px] aspect-square rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black shrink-0">
                   <img
                     src="/minimap.jpg"
@@ -627,7 +765,7 @@ export default function LiveMatchDetailModal({
                     className="w-full h-full object-cover select-none pointer-events-none"
                   />
 
-                  {/* Marcadores dos Heróis em Movimento Vivo */}
+                  {/* Marcadores dos Heróis */}
                   {allPlayers.map((p, idx) => {
                     const hImg = getHeroImg(constants, p.hero_id);
                     const hName = getHeroName(constants, p.hero_id);
@@ -639,7 +777,7 @@ export default function LiveMatchDetailModal({
                         style={{
                           left: `${p.mapX}%`,
                           top: `${p.mapY}%`,
-                          transition: 'left 1.4s cubic-bezier(0.4, 0, 0.2, 1), top 1.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                          transition: 'left 2s ease-in-out, top 2s ease-in-out'
                         }}
                         onMouseEnter={() => setHoveredPlayer(p)}
                         onMouseLeave={() => setHoveredPlayer(null)}
@@ -669,11 +807,11 @@ export default function LiveMatchDetailModal({
                   })}
                 </div>
 
-                {/* Informações Rápidas do Jogador, Picks e Status das Torres */}
+                {/* Informações Rápidas do Jogador, Picks e Status das Torres & Barracas */}
                 <div className="flex-1 space-y-4 w-full">
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
-                      <Eye className="w-4 h-4 text-amber-400 animate-pulse" /> Movimentação dos Heróis no Mapa (Ao Vivo)
+                      <Eye className="w-4 h-4 text-amber-400 animate-pulse" /> Posições Táticas no Mapa (Snapshot 20s)
                     </div>
                     <div className="flex items-center gap-3 text-[10px] font-mono">
                       <span className="flex items-center gap-1 text-emerald-400 font-bold">
@@ -729,7 +867,7 @@ export default function LiveMatchDetailModal({
                     </div>
                   ) : (
                     <div className="bg-[#161A24]/60 border border-white/5 rounded-xl p-3 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1">
-                      <span>Passe o mouse ou toque nos heróis em movimento no minimapa para inspecionar</span>
+                      <span>Passe o mouse ou toque nos heróis no minimapa para inspecionar</span>
                       <span className="text-[10px] text-gray-500">Veja patrimônio, ouro, KDA, itens e disponibilidade de Buyback instantaneamente</span>
                     </div>
                   )}
@@ -771,79 +909,29 @@ export default function LiveMatchDetailModal({
                     </div>
                   </div>
 
-                  {/* 2. STATUS DAS TORRES (ABAIXO DOS PICKS) */}
+                  {/* 2. STATUS DAS TORRES E BARRACAS (ORDENADAS VERTICALMENTE EM 4 COLUNAS) */}
                   <div className="space-y-2 pt-2 border-t border-white/10">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                        <Castle className="w-3.5 h-3.5 text-amber-400" /> Status das Torres do Mapa
+                        <Castle className="w-3.5 h-3.5 text-amber-400" /> Torres & Barracas (Top / Mid / Bot / Base)
                       </div>
                       <div className="flex items-center gap-3 text-[10px] font-mono">
                         <span className="text-emerald-400 font-bold">
-                          {teamAName}: {radiantTowersAlive}/11
+                          {teamAName}: {radiantAliveCount}/14
                         </span>
                         <span className="text-gray-500">·</span>
                         <span className="text-rose-400 font-bold">
-                          {teamBName}: {direTowersAlive}/11
+                          {teamBName}: {direAliveCount}/14
                         </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
-                      {/* Torres Radiant */}
-                      <div className="bg-[#0E1118] border border-emerald-500/20 rounded-xl p-2.5 space-y-1.5">
-                        <div className="flex items-center justify-between text-emerald-400 font-bold font-mono border-b border-white/5 pb-1">
-                          <span className="truncate">{teamAName} (Radiant)</span>
-                          <span className="text-[9px] bg-emerald-500/20 px-1.5 py-0.5 rounded">{radiantTowersAlive} em pé</span>
-                        </div>
-                        <div className="grid grid-cols-4 gap-1">
-                          {radiantTowers.map((t, idx) => (
-                            <div
-                              key={idx}
-                              title={`${t.name}: ${t.alive ? 'Em pé (Intacta)' : 'Derrubada (Destruída)'}`}
-                              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded border text-[9px] font-mono transition-all ${
-                                t.alive
-                                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 font-bold shadow-sm shadow-emerald-500/10'
-                                  : 'bg-rose-950/40 text-gray-500 border-white/5 line-through opacity-50'
-                              }`}
-                            >
-                              <span>{t.name}</span>
-                              {t.alive ? (
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                              ) : (
-                                <span className="text-[8px] text-rose-500 font-bold">✕</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      {/* Estruturas Radiant */}
+                      {renderStructureColumns(radiantStructures, teamAName, true, radiantAliveCount)}
 
-                      {/* Torres Dire */}
-                      <div className="bg-[#0E1118] border border-rose-500/20 rounded-xl p-2.5 space-y-1.5">
-                        <div className="flex items-center justify-between text-rose-400 font-bold font-mono border-b border-white/5 pb-1">
-                          <span className="truncate">{teamBName} (Dire)</span>
-                          <span className="text-[9px] bg-rose-500/20 px-1.5 py-0.5 rounded">{direTowersAlive} em pé</span>
-                        </div>
-                        <div className="grid grid-cols-4 gap-1">
-                          {direTowers.map((t, idx) => (
-                            <div
-                              key={idx}
-                              title={`${t.name}: ${t.alive ? 'Em pé (Intacta)' : 'Derrubada (Destruída)'}`}
-                              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded border text-[9px] font-mono transition-all ${
-                                t.alive
-                                  ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 font-bold shadow-sm shadow-rose-500/10'
-                                  : 'bg-rose-950/40 text-gray-500 border-white/5 line-through opacity-50'
-                              }`}
-                            >
-                              <span>{t.name}</span>
-                              {t.alive ? (
-                                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                              ) : (
-                                <span className="text-[8px] text-rose-500 font-bold">✕</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      {/* Estruturas Dire */}
+                      {renderStructureColumns(direStructures, teamBName, false, direAliveCount)}
                     </div>
                   </div>
                 </div>
