@@ -3,7 +3,8 @@ export default async function handler(req, res) {
     let liveGames = [];
 
     const odRes = await fetch("https://api.opendota.com/api/liveLeagueGames", {
-      headers: { "Accept": "application/json" }
+      headers: { "Accept": "application/json" },
+      signal: AbortSignal.timeout(3500)
     });
     
     if (odRes.ok) {
@@ -13,9 +14,9 @@ export default async function handler(req, res) {
       liveGames = games.filter(g => g && (g.radiant_team || g.dire_team || (g.scoreboard && g.scoreboard.duration > 0)));
     }
 
-    res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=20");
+    res.setHeader("Cache-Control", "s-maxage=15, stale-while-revalidate=30");
     return res.status(200).json({ result: { games: liveGames } });
   } catch (error) {
-    return res.status(500).json({ error: error.message, result: { games: [] } });
+    return res.status(200).json({ result: { games: [] } });
   }
 }

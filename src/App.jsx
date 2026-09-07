@@ -17,7 +17,8 @@ import {
   fetchLiveGames,
   fetchUpcomingMatches,
   isSeriesMatch,
-  isSameTeamMatch
+  isSameTeamMatch,
+  getCachedFast
 } from './services/api';
 
 export default function App() {
@@ -25,13 +26,19 @@ export default function App() {
   const [mobileHubSubTab, setMobileHubSubTab] = useState('center'); // 'results' | 'center' | 'upcoming'
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [constants, setConstants] = useState({ heroes: {}, itemsById: {} });
-  const [finishedSeries, setFinishedSeries] = useState([]);
-  const [tournamentsList, setTournamentsList] = useState([]);
-  const [liveGames, setLiveGames] = useState([]);
-  const [upcomingMatches, setUpcomingMatches] = useState([]);
+  // Carregamento instantâneo a partir do cache local (Stale-While-Revalidate)
+  const cachedPro = getCachedFast('pro_matches_v7');
+  const cachedUpcoming = getCachedFast('upcoming_real_matches_v3');
+  const cachedConstants = getCachedFast('constants_v6');
 
-  const [loadingData, setLoadingData] = useState(true);
+  const [constants, setConstants] = useState(cachedConstants || { heroes: {}, itemsById: {} });
+  const [finishedSeries, setFinishedSeries] = useState(cachedPro?.finishedSeries || []);
+  const [tournamentsList, setTournamentsList] = useState(cachedPro?.tournaments || []);
+  const [liveGames, setLiveGames] = useState([]);
+  const [upcomingMatches, setUpcomingMatches] = useState(cachedUpcoming || []);
+
+  // Se já temos cache, não exibe tela de carregamento / esqueletos!
+  const [loadingData, setLoadingData] = useState(!cachedPro && !cachedUpcoming);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('');
 
@@ -40,27 +47,41 @@ export default function App() {
   const [selectedLiveGame, setSelectedLiveGame] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null); // { id, name }
 
-  // 1. Carregar Constantes de Heróis e Itens da Valve
+  // 1. Carregar Constantes de Heróis e Itens da Valve em segundo plano
   useEffect(() => {
     fetchConstants().then((data) => {
-      setConstants(data);
+      if (data && (Object.keys(data.heroes || {}).length > 0)) {
+        setConstants(data);
+      }
     });
   }, []);
 
-  // 2. Carregar Dados de Partidas, Séries e Torneios
+  // 2. Carregar Dados de Partidas, Séries e Torneios de forma desacoplada e fluida
   const loadData = useCallback(async (isManual = false) => {
     if (isManual) setLoadingRefresh(true);
-    else setLoadingData(true);
 
     try {
-      const [proData, gotvLiveData, allWikiMatches] = await Promise.all([
-        fetchProMatches(),
-        fetchLiveGames(),
-        fetchUpcomingMatches()
+      // 1. Dispara proMatches e atualiza imediatamente a coluna de resultados assim que chegar
+      const proPromise = fetchProMatches().then((proData) => {
+        if (proData?.finishedSeries?.length) {
+          setFinishedSeries(proData.finishedSeries);
+          setTournamentsList(proData.tournaments || []);
+        }
+        return proData;
+      });
+
+      // 2. Dispara jogos da Liquipedia e DotaTV em paralelo
+      const wikiPromise = fetchUpcomingMatches();
+      const livePromise = fetchLiveGames();
+
+      const [proData, allWikiMatches, gotvLiveData] = await Promise.all([
+        proPromise,
+        wikiPromise,
+        livePromise
       ]);
 
       const now = Date.now();
-      const rawMatches = proData.rawMatches || [];
+      const rawMatches = proData?.rawMatches || [];
 
       // Separar jogos ao vivo reais da Liquipedia (placar ativo ou horário dentro da janela ao vivo)
       const liveFromWiki = (allWikiMatches || []).filter((m) => {
@@ -97,8 +118,6 @@ export default function App() {
           };
         }
 
-        // Partida ao vivo sem correspondência de dados reais no OpenDota ainda
-        // (não inventamos abates/duração: o card mostra "aguardando dados oficiais")
         const elapsedMins = m.timestamp ? Math.max(0, Math.floor((now - m.timestamp) / 60000)) : null;
 
         return {
@@ -118,13 +137,11 @@ export default function App() {
         }
       });
 
-      setFinishedSeries(proData.finishedSeries || []);
-      setTournamentsList(proData.tournaments || []);
       setLiveGames(enrichedLive);
       setUpcomingMatches(strictlyUpcoming);
       setLastUpdated(new Date().toLocaleTimeString('pt-BR'));
     } catch (err) {
-      console.error('Erro ao carregar dados do Hub:', err);
+      console.warn('Aviso ao sincronizar dados em segundo plano:', err);
     } finally {
       setLoadingData(false);
       setLoadingRefresh(false);

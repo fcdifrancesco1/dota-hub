@@ -24,6 +24,37 @@ function getCached(key, ttlMs = 5 * 60 * 1000) {
   return null;
 }
 
+// Retorna dados do cache imediatamente (mesmo expirados) para renderização instantânea (Stale-While-Revalidate)
+export function getCachedFast(key) {
+  const item = memoryCache.get(key);
+  if (item && item.data) return item.data;
+  try {
+    const lsItem = localStorage.getItem(`${CACHE_PREFIX}${key}`);
+    if (lsItem) {
+      const parsed = JSON.parse(lsItem);
+      if (parsed && parsed.data) {
+        memoryCache.set(key, parsed);
+        return parsed.data;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+// Fetch resiliente com timeout automático para evitar bloqueios
+async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (e) {
+    clearTimeout(id);
+    throw e;
+  }
+}
+
 // Evita que o localStorage cresça indefinidamente (ex.: um "match_<id>" por
 // partida vista). Quando o número de entradas passa do limite, remove as
 // mais antigas primeiro.
@@ -95,13 +126,13 @@ export function getItemImg(constants, itemId) {
 
 // 1. Carregar Constantes de Heróis e Itens da Valve
 export async function fetchConstants() {
-  const cached = getCached("constants_v6", 24 * 3600 * 1000);
+  const cached = getCached("constants_v6", 48 * 3600 * 1000);
   if (cached) return cached;
 
   try {
     const [heroesRes, itemsRes] = await Promise.all([
-      fetch(`${OPENDOTA_BASE}/constants/heroes`),
-      fetch(`${OPENDOTA_BASE}/constants/items`)
+      fetchWithTimeout(`${OPENDOTA_BASE}/constants/heroes`, {}, 5000),
+      fetchWithTimeout(`${OPENDOTA_BASE}/constants/items`, {}, 5000)
     ]);
 
     const heroes = heroesRes.ok ? await heroesRes.json() : {};
@@ -116,8 +147,8 @@ export async function fetchConstants() {
     setCache("constants_v6", result);
     return result;
   } catch (err) {
-    console.error("Erro ao carregar constantes da Valve:", err);
-    return { heroes: {}, itemsById: {} };
+    console.warn("Aviso ao carregar constantes da Valve (usando cache anterior):", err);
+    return getCachedFast("constants_v6") || { heroes: {}, itemsById: {} };
   }
 }
 
@@ -193,13 +224,13 @@ export function clusterMatchesIntoSeries(rawMatches) {
   }));
 }
 
-// 3. Buscar Partidas Profissionais Recentes
+// 3. Buscar Partidas Profissionais Recentes (com timeout e cache de 3 min)
 export async function fetchProMatches() {
-  const cached = getCached("pro_matches_v7", 60 * 1000);
+  const cached = getCached("pro_matches_v7", 3 * 60 * 1000);
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${OPENDOTA_BASE}/proMatches`);
+    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 5000);
     if (res.ok) {
       const list = await res.json();
       const rawList = Array.isArray(list) ? list : [];
@@ -240,9 +271,9 @@ export async function fetchProMatches() {
       return result;
     }
   } catch (err) {
-    console.error("Erro ao buscar proMatches:", err);
+    console.warn("Aviso ao buscar proMatches (usando cache anterior):", err);
   }
-  return { rawMatches: [], finishedSeries: [], tournaments: [] };
+  return getCachedFast("pro_matches_v7") || { rawMatches: [], finishedSeries: [], tournaments: [] };
 }
 
 // 4. Buscar Detalhes Completos do Replay da Partida
@@ -333,48 +364,37 @@ export async function fetchHeroStats() {
 // 6. Buscar Partidas Ao Vivo
 export async function fetchLiveGames() {
   try {
-    let list = [];
-    try {
-      const res = await fetch("/api/live");
-      if (res.ok) {
-        const data = await res.json();
-        list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
-      }
-    } catch (e) {}
-
-    if (!list.length) {
-      const res = await fetch(`${OPENDOTA_BASE}/liveLeagueGames`);
-      if (res.ok) {
-        const data = await res.json();
-        list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
-      }
+    const res = await fetchWithTimeout("/api/live", {}, 3500);
+    if (res.ok) {
+      const data = await res.json();
+      const list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
+      return list.filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
     }
-
-    return (list || []).filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
-  } catch {
-    return [];
+  } catch (e) {
+    // Timeout ou erro de rede não trava a UI
   }
+  return [];
 }
 
-// 7. Buscar Próximos Jogos Reais da Liquipedia (via rota serverless /api/upcoming,
-// que centraliza o parsing do HTML da Liquipedia em api/_lib/parseLiquipediaMatches.js)
+// 7. Buscar Próximos Jogos Reais da Liquipedia (com timeout e cache de 3 min)
 export async function fetchUpcomingMatches() {
-  const cached = getCached("upcoming_real_matches_v3", 60 * 1000);
+  const cached = getCached("upcoming_real_matches_v3", 3 * 60 * 1000);
   if (cached) return cached;
 
   try {
-    const res = await fetch("/api/upcoming");
-    if (!res.ok) return [];
-    const data = await res.json();
-    const list = Array.isArray(data) ? data : [];
-
-    if (list.length > 0) {
-      setCache("upcoming_real_matches_v3", list);
+    const res = await fetchWithTimeout("/api/upcoming", {}, 5000);
+    if (res.ok) {
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      if (list.length > 0) {
+        setCache("upcoming_real_matches_v3", list);
+      }
+      return list;
     }
-    return list;
-  } catch {
-    return [];
+  } catch (err) {
+    console.warn("Aviso ao buscar upcoming (usando cache anterior):", err);
   }
+  return getCachedFast("upcoming_real_matches_v3") || [];
 }
 
 // 8. Buscar Telemetria em Tempo Real de Partida Ao Vivo (com matching robusto)
