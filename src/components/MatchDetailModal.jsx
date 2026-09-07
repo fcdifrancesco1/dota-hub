@@ -221,8 +221,12 @@ export default function MatchDetailModal({
           </span>
 
           <div className="flex items-center justify-center gap-4 sm:gap-8 mt-3">
-            <div className="text-right flex-1 truncate">
-              <span className={`text-base sm:text-xl font-black truncate block ${aWonSeries ? 'text-white' : 'text-gray-400'}`}>
+            <div
+              onClick={() => onOpenTeamProfile && onOpenTeamProfile(series.preferredIdA, series.timeA)}
+              className="text-right flex-1 truncate cursor-pointer group"
+              title={`Ver Perfil de ${series.timeA}`}
+            >
+              <span className={`text-base sm:text-xl font-black truncate block group-hover:text-amber-400 transition-colors ${aWonSeries ? 'text-white' : 'text-gray-400'}`}>
                 {series.timeA}
               </span>
             </div>
@@ -231,8 +235,12 @@ export default function MatchDetailModal({
               {series.scoreA} <span className="text-gray-500 mx-1">:</span> {series.scoreB}
             </div>
 
-            <div className="text-left flex-1 truncate">
-              <span className={`text-base sm:text-xl font-black truncate block ${bWonSeries ? 'text-white' : 'text-gray-400'}`}>
+            <div
+              onClick={() => onOpenTeamProfile && onOpenTeamProfile(series.preferredIdB, series.timeB)}
+              className="text-left flex-1 truncate cursor-pointer group"
+              title={`Ver Perfil de ${series.timeB}`}
+            >
+              <span className={`text-base sm:text-xl font-black truncate block group-hover:text-amber-400 transition-colors ${bWonSeries ? 'text-white' : 'text-gray-400'}`}>
                 {series.timeB}
               </span>
             </div>

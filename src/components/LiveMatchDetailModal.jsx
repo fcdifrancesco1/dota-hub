@@ -419,9 +419,13 @@ export default function LiveMatchDetailModal({
 
           {/* Placar Principal do Jogo (Abates) */}
           <div className="flex items-center justify-center gap-4 sm:gap-8 mt-3">
-            <div className="text-right flex-1 truncate flex items-center justify-end gap-3">
-              <span className="text-base sm:text-xl font-black text-white truncate block">{teamAName}</span>
-              {logoA && <img src={logoA} alt="" className="w-8 h-8 object-contain shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
+            <div
+              onClick={() => onOpenTeamProfile && onOpenTeamProfile(null, teamAName)}
+              className="text-right flex-1 truncate flex items-center justify-end gap-3 cursor-pointer group"
+              title={`Ver Perfil de ${teamAName}`}
+            >
+              <span className="text-base sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamAName}</span>
+              {logoA && <img src={logoA} alt="" className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform" onError={(e) => { e.target.style.display = 'none'; }} />}
             </div>
 
             <div className="flex flex-col items-center shrink-0">
@@ -439,9 +443,13 @@ export default function LiveMatchDetailModal({
               </span>
             </div>
 
-            <div className="text-left flex-1 truncate flex items-center justify-start gap-3">
-              {logoB && <img src={logoB} alt="" className="w-8 h-8 object-contain shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
-              <span className="text-base sm:text-xl font-black text-white truncate block">{teamBName}</span>
+            <div
+              onClick={() => onOpenTeamProfile && onOpenTeamProfile(null, teamBName)}
+              className="text-left flex-1 truncate flex items-center justify-start gap-3 cursor-pointer group"
+              title={`Ver Perfil de ${teamBName}`}
+            >
+              {logoB && <img src={logoB} alt="" className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform" onError={(e) => { e.target.style.display = 'none'; }} />}
+              <span className="text-base sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamBName}</span>
             </div>
           </div>
 

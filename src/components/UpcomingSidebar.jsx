@@ -133,18 +133,18 @@ export default function UpcomingSidebar({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (onOpenTeamProfile && m.teamAId) onOpenTeamProfile(m.teamAId, m.timeA);
+                          if (onOpenTeamProfile) onOpenTeamProfile(m.teamAId || null, m.timeA);
                         }}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/40 text-[10px] font-bold text-cyan-300 text-center truncate transition-all"
+                        className="p-2 rounded-lg bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/40 text-[10px] font-bold text-cyan-300 text-center truncate transition-all cursor-pointer active:scale-95 shadow-sm"
                       >
                         Perfil {m.timeA}
                       </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (onOpenTeamProfile && m.teamBId) onOpenTeamProfile(m.teamBId, m.timeB);
+                          if (onOpenTeamProfile) onOpenTeamProfile(m.teamBId || null, m.timeB);
                         }}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/40 text-[10px] font-bold text-rose-300 text-center truncate transition-all"
+                        className="p-2 rounded-lg bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/40 text-[10px] font-bold text-rose-300 text-center truncate transition-all cursor-pointer active:scale-95 shadow-sm"
                       >
                         Perfil {m.timeB}
                       </button>
