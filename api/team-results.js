@@ -1,7 +1,108 @@
+export function sortMatchesNewestFirst(matches) {
+  if (!Array.isArray(matches)) return [];
+  return [...matches].sort((a, b) => {
+    const tsA = a.timestamp ? (a.timestamp > 1e11 ? a.timestamp : a.timestamp * 1000) : 0;
+    const tsB = b.timestamp ? (b.timestamp > 1e11 ? b.timestamp : b.timestamp * 1000) : 0;
+    if (tsA && tsB) return tsB - tsA;
+
+    if (a.dateStr && b.dateStr && a.dateStr.includes('/') && b.dateStr.includes('/')) {
+      const [d1, m1, y1] = a.dateStr.split('/').map(Number);
+      const [d2, m2, y2] = b.dateStr.split('/').map(Number);
+      const timeA = new Date(y1, m1 - 1, d1).getTime();
+      const timeB = new Date(y2, m2 - 1, d2).getTime();
+      if (!isNaN(timeA) && !isNaN(timeB)) return timeB - timeA;
+    }
+
+    if (a.date && b.date) {
+      const timeA = new Date(a.date).getTime();
+      const timeB = new Date(b.date).getTime();
+      if (!isNaN(timeA) && !isNaN(timeB)) return timeB - timeA;
+    }
+
+    return 0;
+  });
+}
+
+export function parseLiquipediaPlayedMatches(html) {
+  if (!html) return [];
+  const rows = html.match(/<tr[^>]*table2(&#95;|_)(\1)row--body[^>]*>[\s\S]*?<\/tr>/gi) || [];
+
+  const parsed = rows.map(row => {
+    const tds = row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || [];
+    if (tds.length < 7) return null;
+
+    const tsMatch = row.match(/data-timestamp="(\d+)"/i);
+    const timestamp = tsMatch ? parseInt(tsMatch[1], 10) : 0;
+
+    let dateStr = '';
+    if (timestamp) {
+      const d = new Date(timestamp * 1000);
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      dateStr = `${day}/${month}/${year}`;
+    } else {
+      const rawDate = tds[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+        const [y, m, d] = rawDate.split('-');
+        dateStr = `${d}/${m}/${y}`;
+      } else {
+        dateStr = rawDate;
+      }
+    }
+
+    const tier = tds[1] ? tds[1].replace(/<[^>]+>/g, '').trim() : '';
+
+    const tourney = tds[4]
+      ? tds[4].replace(/<[^>]+>/g, '').replace(/&#160;/g, ' ').replace(/\s+/g, ' ').trim()
+      : 'Torneio Oficial';
+
+    const isWin = /result-win/i.test(row);
+    const isLoss = /result-loss/i.test(row);
+
+    const rawScore = tds[6] || '';
+    const score = rawScore
+      .replace(/<[^>]+>/g, '')
+      .replace(/&#160;/g, ' ')
+      .replace(/&#58;/g, ':')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const oppTd = tds[7] || '';
+    const oppNameMatch = oppTd.match(/<span class="name"[^>]*>([\s\S]*?)<\/span>/i);
+    let opponent = '';
+    if (oppNameMatch) {
+      opponent = oppNameMatch[1].replace(/<[^>]+>/g, '').trim();
+    } else {
+      const sortMatch = oppTd.match(/data-sort-value="([^"]+)"/i);
+      if (sortMatch) {
+        opponent = sortMatch[1].trim();
+      } else {
+        opponent = oppTd.replace(/<[^>]+>/g, '').trim();
+      }
+    }
+    opponent = opponent.replace(/&[a-z0-9#]+;/gi, '').trim();
+
+    return {
+      timestamp,
+      dateStr,
+      tier,
+      league_name: tourney || 'Torneio Liquipedia',
+      score,
+      opposing_team_name: opponent || 'Adversário',
+      radiant: true,
+      radiant_win: isWin ? true : (isLoss ? false : true)
+    };
+  }).filter(Boolean);
+
+  const sorted = sortMatchesNewestFirst(parsed);
+  return sorted.slice(0, 5);
+}
+
 export function parseLiquipediaResults(html) {
   const rows = html.match(/<tr[^>]*table2(&#95;|_)(\1)row--body[^>]*>[\s\S]*?<\/tr>/gi) || [];
 
-  return rows.slice(0, 15).map(row => {
+  const parsed = rows.map(row => {
     const tds = row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || [];
     if (tds.length < 5) return null;
 
@@ -52,6 +153,9 @@ export function parseLiquipediaResults(html) {
       radiant_win: won
     };
   }).filter(Boolean);
+
+  const sorted = sortMatchesNewestFirst(parsed);
+  return sorted.slice(0, 5);
 }
 
 export function toLiquipediaTeamPage(teamName) {
@@ -121,17 +225,41 @@ export default async function handler(req, res) {
   }
 
   const wikiPage = toLiquipediaTeamPage(teamQuery);
+  const headers = {
+    'User-Agent': 'DotaHubCommunity/2.0 (contact@dota-hub.vercel.app)',
+    'Accept': 'application/json'
+  };
 
   try {
+    // 1. Tentar primeiro na página Played_Matches (tem séries detalhadas)
+    try {
+      const playedResponse = await fetch(
+        `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Played_Matches&format=json`,
+        { headers, signal: AbortSignal.timeout(5000) }
+      );
+
+      if (playedResponse.ok) {
+        const playedData = await playedResponse.json();
+        if (!playedData.error && playedData.parse?.text?.['*']) {
+          const html = playedData.parse.text['*'];
+          const matches = parseLiquipediaPlayedMatches(html);
+          if (matches.length > 0) {
+            res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=86400');
+            return res.status(200).json({
+              team: wikiPage,
+              source: 'liquipedia',
+              page: 'Played_Matches',
+              results: matches.slice(0, 5)
+            });
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 2. Fallback para a página Results
     const response = await fetch(
       `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Results&format=json`,
-      {
-        headers: {
-          'User-Agent': 'DotaHubCommunity/2.0 (contact@dota-hub.vercel.app)',
-          'Accept': 'application/json'
-        },
-        signal: AbortSignal.timeout(6000)
-      }
+      { headers, signal: AbortSignal.timeout(5000) }
     );
 
     if (response.ok) {
@@ -140,11 +268,12 @@ export default async function handler(req, res) {
         const html = data.parse.text['*'];
         const results = parseLiquipediaResults(html);
 
-        res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=3600');
+        res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=86400');
         return res.status(200).json({
           team: wikiPage,
           source: 'liquipedia',
-          results
+          page: 'Results',
+          results: results.slice(0, 5)
         });
       }
     }

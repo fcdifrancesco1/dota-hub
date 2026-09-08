@@ -633,14 +633,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 10, games_played: 18, wins: 13 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'VISION', league_name: 'The International 2026 (Grande Final - 1º Lugar)', score: '3 : 2', placement: '1st', dateStr: '23/08/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Yandex', league_name: 'Esports World Cup 2026', score: '0 : 2', placement: '5th - 8th', dateStr: '16/07/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'NGX', league_name: 'The International 2026: Europe Qualifier', score: '2 : 1', placement: '1st - 2nd', dateStr: '25/06/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Yandex', league_name: 'BLAST SLAM VII', score: '0 : 2', placement: '7th - 8th', dateStr: '30/05/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Aurora', league_name: 'DreamLeague Season 29', score: '0 : 2', placement: '3rd', dateStr: '24/05/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Falcons', league_name: 'PGL Wallachia Season 8', score: '0 : 2', placement: '7th - 8th', dateStr: '24/04/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'GL', league_name: 'PREMIER SERIES', score: '1 : 2', placement: '7th - 8th', dateStr: '09/04/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'XG', league_name: 'ESL One Birmingham 2026', score: '1 : 2', placement: '5th - 6th', dateStr: '27/03/2026' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'VISION', league_name: 'TI 2026 - Main Event (Grande Final)', score: '3 : 2', dateStr: '23/08/2026', timestamp: 1787465700 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Yandex', league_name: 'TI 2026 - Main Event (Lower Bracket Final)', score: '2 : 0', dateStr: '23/08/2026', timestamp: 1787451000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'TI 2026 - Main Event', score: '2 : 0', dateStr: '22/08/2026', timestamp: 1787404200 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Liquid', league_name: 'TI 2026 - Main Event', score: '2 : 0', dateStr: '22/08/2026', timestamp: 1787364000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'VISION', league_name: 'TI 2026 - Main Event', score: '1 : 2', dateStr: '21/08/2026', timestamp: 1787307600 }
     ]
   },
   'mouz': {
@@ -659,14 +656,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 19, games_played: 15, wins: 9 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Nigma Galaxy', league_name: 'DreamLeague Season 24', dateStr: '04/09/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'FISSURE Universe', dateStr: '24/08/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'OG', league_name: 'PGL Wallachia Qualifiers', dateStr: '16/08/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: '1win Team', league_name: 'Elite League Season 2', dateStr: '03/08/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Natus Vincere', league_name: 'Clavision Snow Ruyi', dateStr: '31/07/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'DreamLeague Season 23', dateStr: '25/05/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Entity', league_name: 'ESL One Qualifiers', dateStr: '15/04/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Gaimin Gladiators', league_name: 'Riyadh Masters Qualifiers', dateStr: '04/06/2026' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'Synapse', league_name: 'EPL Masters II - Playoffs', score: '2 : 1', dateStr: '07/09/2026', timestamp: 1788780000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Natus Vincere', league_name: 'RES Unchained 5 EU', score: '0 : 2', dateStr: '30/08/2026', timestamp: 1788090000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Yellow Submarine', league_name: 'RES Unchained 5 EU', score: '2 : 0', dateStr: '29/08/2026', timestamp: 1788000000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'RE', league_name: 'EPL Masters I - Playoffs', score: '1 : 2', dateStr: '11/08/2026', timestamp: 1786450000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'PR', league_name: 'EPL Masters I - Playoffs', score: '2 : 1', dateStr: '10/08/2026', timestamp: 1786360000 }
     ]
   },
   'falcons': {
@@ -685,14 +679,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 98, games_played: 20, wins: 15 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Lower Bracket Semi', dateStr: '14/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Cloud9', league_name: 'The International - Lower Bracket R3', dateStr: '13/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Zero', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'FISSURE Universe: Ep. 3', dateStr: '24/08/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'TI 2026 - Main Event', score: '1 : 2', dateStr: '21/08/2026', timestamp: 1787320000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'TI 2026 - Main Event', score: '2 : 0', dateStr: '20/08/2026', timestamp: 1787220000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'TI 2026 - Main Event', score: '2 : 0', dateStr: '19/08/2026', timestamp: 1787130000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'TI 2026 - Elimination Round', score: '2 : 0', dateStr: '16/08/2026', timestamp: 1786870000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'TI 2026 - Round 4', score: '2 : 0', dateStr: '15/08/2026', timestamp: 1786780000 }
     ]
   },
   'liquid': {
@@ -711,14 +702,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 89, games_played: 19, wins: 14 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Grande Final (Campeão)', dateStr: '15/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Upper Bracket Final', dateStr: '14/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Cloud9', league_name: 'The International - Upper Bracket Semi', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'TI 2026 - Main Event', score: '0 : 2', dateStr: '22/08/2026', timestamp: 1787364000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'TI 2026 - Main Event', score: '2 : 1', dateStr: '21/08/2026', timestamp: 1787320000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Yandex', league_name: 'TI 2026 - Main Event', score: '0 : 2', dateStr: '20/08/2026', timestamp: 1787210000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'TI 2026 - Round 5', score: '2 : 1', dateStr: '15/08/2026', timestamp: 1786800000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'IW', league_name: 'TI 2026 - Round 4', score: '2 : 1', dateStr: '15/08/2026', timestamp: 1786760000 }
     ]
   },
   'gaimingladiators': {
@@ -737,14 +725,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 97, games_played: 18, wins: 13 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Grande Final', dateStr: '15/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'The International - Lower Bracket Final', dateStr: '15/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Upper Bracket Final', dateStr: '14/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'The International - Upper Bracket Semi', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'nouns', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'AVULUS', league_name: 'FISSURE Universe: Episode 6', score: '2 : 0', dateStr: '21/08/2026', timestamp: 1787320000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'FISSURE Universe: Episode 6', score: '0 : 2', dateStr: '21/08/2026', timestamp: 1787300000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'FISSURE Universe: Episode 6', score: '0 : 2', dateStr: '20/08/2026', timestamp: 1787230000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'BetBoom Team', league_name: 'FISSURE Universe: Episode 6', score: '0 : 2', dateStr: '19/08/2026', timestamp: 1787140000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'BetBoom Team', league_name: 'Clavision Masters 2026', score: '0 : 2', dateStr: '02/08/2026', timestamp: 1785670000 }
     ]
   },
   'betboom': {
@@ -763,14 +748,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 86, games_played: 17, wins: 11 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - Lower Bracket R1', dateStr: '10/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'nouns', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'FISSURE Universe: Ep. 3', dateStr: '22/08/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'Clavision Snow Ruyi', dateStr: '02/08/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'TI 2026 - Main Event', score: '0 : 2', dateStr: '22/08/2026', timestamp: 1787404200 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'TI 2026 - Elimination Round', score: '0 : 2', dateStr: '16/08/2026', timestamp: 1786870000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'TI 2026 - Round 5', score: '2 : 1', dateStr: '15/08/2026', timestamp: 1786790000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'FISSURE Universe: Episode 6', score: '2 : 0', dateStr: '19/08/2026', timestamp: 1787140000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'Clavision Masters 2026', score: '2 : 0', dateStr: '03/08/2026', timestamp: 1785760000 }
     ]
   },
   'tundra': {
@@ -789,14 +771,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 7, games_played: 18, wins: 12 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Lower Bracket Final', dateStr: '15/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'The International - Lower Bracket Semi', dateStr: '14/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Lower Bracket R3', dateStr: '13/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Upper Bracket Semi', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'TI 2026 - Main Event', score: '0 : 2', dateStr: '20/08/2026', timestamp: 1787220000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'TI 2026 - Elimination Round', score: '2 : 1', dateStr: '16/08/2026', timestamp: 1786880000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'TI 2026 - Round 5', score: '2 : 0', dateStr: '15/08/2026', timestamp: 1786795000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'FISSURE Universe: Episode 6', score: '2 : 0', dateStr: '18/08/2026', timestamp: 1787050000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'BetBoom Team', league_name: 'Clavision Masters 2026', score: '0 : 2', dateStr: '03/08/2026', timestamp: 1785760000 }
     ]
   },
   'xtreme': {
@@ -815,14 +794,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 111, games_played: 18, wins: 12 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Lower Bracket R3', dateStr: '13/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'Clavision Snow Ruyi (Final)', dateStr: '04/08/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'TI 2026 - Elimination Round', score: '1 : 2', dateStr: '16/08/2026', timestamp: 1786880000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'TI 2026 - Round 5', score: '2 : 1', dateStr: '15/08/2026', timestamp: 1786790000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'TI 2026 - Round 4', score: '2 : 0', dateStr: '15/08/2026', timestamp: 1786750000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'TI 2026 - Group Stage', score: '0 : 2', dateStr: '14/08/2026', timestamp: 1786660000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'TI 2026 - Group Stage', score: '2 : 0', dateStr: '13/08/2026', timestamp: 1786580000 }
     ]
   },
   'natusvincere': {
@@ -841,10 +817,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 5, games_played: 16, wins: 9 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Virtus.pro', league_name: 'DreamLeague Season 24 Qualifiers', dateStr: '03/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'MOUZ', league_name: 'Clavision Snow Ruyi', dateStr: '01/08/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'Clavision Snow Ruyi', dateStr: '31/07/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: '1win Team', league_name: 'PGL Wallachia Qualifiers', dateStr: '14/08/2026' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'MOUZ', league_name: 'RES Unchained 5 EU', score: '2 : 0', dateStr: '30/08/2026', timestamp: 1788090000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Virtus.pro', league_name: 'DreamLeague Season 24 Qualifiers', score: '2 : 1', dateStr: '03/09/2026', timestamp: 1788430000 },
+      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'PGL Wallachia Qualifiers', score: '2 : 0', dateStr: '14/08/2026', timestamp: 1786710000 },
+      { radiant: false, radiant_win: true, opposing_team_name: 'MOUZ', league_name: 'Clavision Snow Ruyi', score: '2 : 1', dateStr: '01/08/2026', timestamp: 1785590000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'Clavision Snow Ruyi', score: '0 : 2', dateStr: '31/07/2026', timestamp: 1785500000 }
     ]
   },
   'virtuspro': {
@@ -863,10 +840,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 86, games_played: 16, wins: 10 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Natus Vincere', league_name: 'DreamLeague Season 24 Qualifiers', dateStr: '03/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: '1win Team', league_name: 'FISSURE Universe', dateStr: '22/08/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'OG', league_name: 'Elite League', dateStr: '02/08/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'PGL Wallachia', dateStr: '15/05/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Natus Vincere', league_name: 'DreamLeague Season 24 Qualifiers', score: '1 : 2', dateStr: '03/09/2026', timestamp: 1788430000 },
+      { radiant: false, radiant_win: true, opposing_team_name: '1win Team', league_name: 'FISSURE Universe: Episode 6', score: '2 : 1', dateStr: '22/08/2026', timestamp: 1787400000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'OG', league_name: 'Elite League Season 2', score: '2 : 0', dateStr: '02/08/2026', timestamp: 1785670000 },
+      { radiant: false, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'PGL Wallachia', score: '0 : 2', dateStr: '15/05/2026', timestamp: 1778840000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Yellow Submarine', league_name: 'European Pro League', score: '2 : 1', dateStr: '28/04/2026', timestamp: 1777370000 }
     ]
   },
   'og': {
@@ -885,10 +863,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 103, games_played: 16, wins: 9 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Nigma Galaxy', league_name: 'DreamLeague Season 24 Qualifiers', dateStr: '02/09/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'FISSURE Universe', dateStr: '23/08/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'MOUZ', league_name: 'PGL Wallachia Qualifiers', dateStr: '16/08/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Team Secret', league_name: 'ESL One Qualifiers', dateStr: '24/04/2026' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'Nigma Galaxy', league_name: 'DreamLeague Season 24 Qualifiers', score: '2 : 0', dateStr: '02/09/2026', timestamp: 1788350000 },
+      { radiant: false, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'FISSURE Universe: Episode 6', score: '0 : 2', dateStr: '23/08/2026', timestamp: 1787490000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'MOUZ', league_name: 'PGL Wallachia Qualifiers', score: '2 : 1', dateStr: '16/08/2026', timestamp: 1786880000 },
+      { radiant: false, radiant_win: true, opposing_team_name: 'Team Secret', league_name: 'ESL One Qualifiers', score: '2 : 0', dateStr: '24/04/2026', timestamp: 1777030000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Gaimin Gladiators', league_name: 'DreamLeague Season 23', score: '1 : 2', dateStr: '12/04/2026', timestamp: 1775990000 }
     ]
   },
   'heroic': {
@@ -907,14 +886,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 75, games_played: 17, wins: 11 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Aurora', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Cloud9', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - SA Qualifiers', dateStr: '22/06/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'BOOM Esports', league_name: 'Riyadh Masters Qualifiers', dateStr: '03/06/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'PGL Wallachia', dateStr: '15/05/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Aurora', league_name: 'TI 2026 - Lower Bracket R1', score: '1 : 2', dateStr: '09/09/2026', timestamp: 1788950000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'TI 2026 - Seeding Decider', score: '0 : 2', dateStr: '06/09/2026', timestamp: 1788690000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'TI 2026 - Group Stage', score: '2 : 1', dateStr: '05/09/2026', timestamp: 1788610000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Cloud9', league_name: 'TI 2026 - Group Stage', score: '0 : 2', dateStr: '04/09/2026', timestamp: 1788520000 },
+      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'TI 2026 - Group Stage', score: '2 : 0', dateStr: '04/09/2026', timestamp: 1788480000 }
     ]
   },
   'aurora': {
@@ -933,14 +909,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 2, games_played: 16, wins: 10 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Cloud9', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - SEA Qualifiers', dateStr: '23/06/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Blacklist International', league_name: 'Riyadh Masters', dateStr: '18/07/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Xtreme Gaming', league_name: 'TI 2026 - Lower Bracket R1', score: '1 : 2', dateStr: '09/09/2026', timestamp: 1788970000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'TI 2026 - Lower Bracket R1', score: '2 : 1', dateStr: '09/09/2026', timestamp: 1788940000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Cloud9', league_name: 'TI 2026 - Seeding Decider', score: '0 : 2', dateStr: '07/09/2026', timestamp: 1788780000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'TI 2026 - Group Stage', score: '2 : 0', dateStr: '05/09/2026', timestamp: 1788610000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'TI 2026 - Group Stage', score: '0 : 2', dateStr: '04/09/2026', timestamp: 1788530000 }
     ]
   },
   'nigmagalaxy': {
@@ -959,10 +932,11 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 68, games_played: 16, wins: 9 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'MOUZ', league_name: 'DreamLeague Season 24', dateStr: '04/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'OG', league_name: 'DreamLeague Season 24 Qualifiers', dateStr: '02/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'PSG Quest', league_name: 'FISSURE Universe', dateStr: '21/08/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: '1win Team', league_name: 'Clavision Snow Ruyi', dateStr: '30/07/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'MOUZ', league_name: 'DreamLeague Season 24', score: '1 : 2', dateStr: '04/09/2026', timestamp: 1788520000 },
+      { radiant: false, radiant_win: true, opposing_team_name: 'OG', league_name: 'DreamLeague Season 24 Qualifiers', score: '2 : 1', dateStr: '02/09/2026', timestamp: 1788350000 },
+      { radiant: true, radiant_win: true, opposing_team_name: 'PSG Quest', league_name: 'FISSURE Universe: Episode 6', score: '2 : 0', dateStr: '21/08/2026', timestamp: 1787320000 },
+      { radiant: false, radiant_win: true, opposing_team_name: '1win Team', league_name: 'Clavision Snow Ruyi', score: '2 : 1', dateStr: '30/07/2026', timestamp: 1785410000 },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'TI 2026: Europe Qualifier', score: '1 : 2', dateStr: '25/06/2026', timestamp: 1782380000 }
     ]
   }
 };
@@ -1006,12 +980,12 @@ export function generateDynamicTeamProfile(teamName) {
   }
 
   const now = Date.now();
-  const matchesCount = 8;
+  const matchesCount = 5;
   const recentMatches = Array.from({ length: matchesCount }).map((_, i) => {
     const won = (hash + i * 3) % 5 !== 0;
     const opp = opponents[(hash + i) % opponents.length];
     const lge = leagues[(hash + i) % leagues.length];
-    const daysAgo = 1 + i * 3 + (hash % 3);
+    const daysAgo = 1 + i * 2;
     const matchDateObj = new Date(now - daysAgo * 24 * 3600 * 1000);
     const dateStr = matchDateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
@@ -1021,7 +995,9 @@ export function generateDynamicTeamProfile(teamName) {
       opposing_team_name: opp,
       league_name: lge,
       dateStr,
-      start_time: Math.floor(matchDateObj.getTime() / 1000)
+      score: won ? (i % 2 === 0 ? '2 : 0' : '2 : 1') : '1 : 2',
+      start_time: Math.floor(matchDateObj.getTime() / 1000),
+      timestamp: Math.floor(matchDateObj.getTime() / 1000)
     };
   });
 
@@ -1111,10 +1087,121 @@ export function toLiquipediaTeamPage(teamName) {
   return String(teamName).trim().replace(/\s+/g, '_');
 }
 
+export function sortMatchesNewestFirst(matches) {
+  if (!Array.isArray(matches)) return [];
+  return [...matches].sort((a, b) => {
+    // 1. Timestamp em segundos ou ms
+    const tsA = a.timestamp ? (a.timestamp > 1e11 ? a.timestamp : a.timestamp * 1000) : 0;
+    const tsB = b.timestamp ? (b.timestamp > 1e11 ? b.timestamp : b.timestamp * 1000) : 0;
+    if (tsA && tsB && tsA !== tsB) return tsB - tsA;
+
+    // 2. OpenDota start_time em segundos
+    if (a.start_time && b.start_time && a.start_time !== b.start_time) {
+      return b.start_time - a.start_time;
+    }
+
+    // 3. Formato DD/MM/YYYY
+    if (a.dateStr && b.dateStr && a.dateStr.includes('/') && b.dateStr.includes('/')) {
+      const pA = a.dateStr.split('/').map(Number);
+      const pB = b.dateStr.split('/').map(Number);
+      if (pA.length === 3 && pB.length === 3) {
+        const timeA = new Date(pA[2], pA[1] - 1, pA[0]).getTime();
+        const timeB = new Date(pB[2], pB[1] - 1, pB[0]).getTime();
+        if (!isNaN(timeA) && !isNaN(timeB) && timeA !== timeB) return timeB - timeA;
+      }
+    }
+
+    // 4. Formato YYYY-MM-DD
+    if (a.date && b.date) {
+      const timeA = new Date(a.date).getTime();
+      const timeB = new Date(b.date).getTime();
+      if (!isNaN(timeA) && !isNaN(timeB) && timeA !== timeB) return timeB - timeA;
+    }
+
+    return 0;
+  });
+}
+
+export function parseLiquipediaPlayedMatchesHtml(html) {
+  if (!html) return [];
+  const rows = html.match(/<tr[^>]*table2(&#95;|_)(\1)row--body[^>]*>[\s\S]*?<\/tr>/gi) || [];
+
+  const parsed = rows.map(row => {
+    const tds = row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || [];
+    if (tds.length < 7) return null;
+
+    const tsMatch = row.match(/data-timestamp="(\d+)"/i);
+    const timestamp = tsMatch ? parseInt(tsMatch[1], 10) : 0;
+
+    let dateStr = '';
+    if (timestamp) {
+      const d = new Date(timestamp * 1000);
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      dateStr = `${day}/${month}/${year}`;
+    } else {
+      const rawDate = tds[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+        const [y, m, d] = rawDate.split('-');
+        dateStr = `${d}/${m}/${y}`;
+      } else {
+        dateStr = rawDate;
+      }
+    }
+
+    const tier = tds[1] ? tds[1].replace(/<[^>]+>/g, '').trim() : '';
+
+    const tourney = tds[4]
+      ? tds[4].replace(/<[^>]+>/g, '').replace(/&#160;/g, ' ').replace(/\s+/g, ' ').trim()
+      : 'Torneio Oficial';
+
+    const isWin = /result-win/i.test(row);
+    const isLoss = /result-loss/i.test(row);
+
+    const rawScore = tds[6] || '';
+    const score = rawScore
+      .replace(/<[^>]+>/g, '')
+      .replace(/&#160;/g, ' ')
+      .replace(/&#58;/g, ':')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const oppTd = tds[7] || '';
+    const oppNameMatch = oppTd.match(/<span class="name"[^>]*>([\s\S]*?)<\/span>/i);
+    let opponent = '';
+    if (oppNameMatch) {
+      opponent = oppNameMatch[1].replace(/<[^>]+>/g, '').trim();
+    } else {
+      const sortMatch = oppTd.match(/data-sort-value="([^"]+)"/i);
+      if (sortMatch) {
+        opponent = sortMatch[1].trim();
+      } else {
+        opponent = oppTd.replace(/<[^>]+>/g, '').trim();
+      }
+    }
+    opponent = opponent.replace(/&[a-z0-9#]+;/gi, '').trim();
+
+    return {
+      timestamp,
+      dateStr,
+      tier,
+      league_name: tourney || 'Torneio Liquipedia',
+      score,
+      opposing_team_name: opponent || 'Adversário',
+      radiant: true,
+      radiant_win: isWin ? true : (isLoss ? false : true)
+    };
+  }).filter(Boolean);
+
+  const sorted = sortMatchesNewestFirst(parsed);
+  return sorted.slice(0, 5);
+}
+
 export function parseLiquipediaResultsHtml(html) {
   const rows = html.match(/<tr[^>]*table2(&#95;|_)(\1)row--body[^>]*>[\s\S]*?<\/tr>/gi) || [];
 
-  return rows.slice(0, 15).map(row => {
+  const parsed = rows.map(row => {
     const tds = row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || [];
     if (tds.length < 5) return null;
 
@@ -1165,14 +1252,17 @@ export function parseLiquipediaResultsHtml(html) {
       radiant_win: won
     };
   }).filter(Boolean);
+
+  const sorted = sortMatchesNewestFirst(parsed);
+  return sorted.slice(0, 5);
 }
 
 export async function fetchLiquipediaTeamResults(teamName) {
   if (!teamName) return [];
   const wikiPage = toLiquipediaTeamPage(teamName);
-  const cacheKey = `liquipedia_team_results_v2_${wikiPage}`;
-  const cached = getCached(cacheKey, 10 * 60 * 1000);
-  if (cached && cached.length > 0) return cached;
+  const cacheKey = `liquipedia_team_matches_v6_${wikiPage}`;
+  const cached = getCached(cacheKey, 20 * 60 * 1000);
+  if (cached && cached.length > 0) return cached.slice(0, 5);
 
   // 1. Rota serverless Vercel
   try {
@@ -1180,13 +1270,36 @@ export async function fetchLiquipediaTeamResults(teamName) {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.results) && data.results.length > 0) {
-        setCache(cacheKey, data.results);
-        return data.results;
+        const sorted = sortMatchesNewestFirst(data.results).slice(0, 5);
+        setCache(cacheKey, sorted);
+        return sorted;
       }
     }
   } catch (e) {}
 
   // 2. Fallback direto da Liquipedia via CORS (origin=*)
+  // 2a. Tentar Played_Matches primeiro
+  try {
+    const playedRes = await fetchWithTimeout(
+      `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Played_Matches&format=json&origin=*`,
+      { headers: { 'Accept': 'application/json' } },
+      4500
+    );
+    if (playedRes.ok) {
+      const data = await playedRes.json();
+      if (!data.error && data.parse?.text?.['*']) {
+        const html = data.parse.text['*'];
+        const matches = parseLiquipediaPlayedMatchesHtml(html);
+        if (matches.length > 0) {
+          const sorted = sortMatchesNewestFirst(matches).slice(0, 5);
+          setCache(cacheKey, sorted);
+          return sorted;
+        }
+      }
+    }
+  } catch (e) {}
+
+  // 2b. Tentar Results se Played_Matches falhar
   try {
     const directRes = await fetchWithTimeout(
       `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Results&format=json&origin=*`,
@@ -1199,8 +1312,9 @@ export async function fetchLiquipediaTeamResults(teamName) {
         const html = data.parse.text['*'];
         const results = parseLiquipediaResultsHtml(html);
         if (results.length > 0) {
-          setCache(cacheKey, results);
-          return results;
+          const sorted = sortMatchesNewestFirst(results).slice(0, 5);
+          setCache(cacheKey, sorted);
+          return sorted;
         }
       }
     }
@@ -1211,9 +1325,14 @@ export async function fetchLiquipediaTeamResults(teamName) {
 
 // 10. Buscar Perfil do Time (por ID ou Nome)
 export async function fetchTeamProfile(teamId, teamName = "") {
-  const cacheKey = `team_profile_v12_${teamId || 'name'}_${teamName || 'id'}`;
+  const cacheKey = `team_profile_v16_${teamId || 'name'}_${teamName || 'id'}`;
   const cached = getCached(cacheKey, 15 * 60 * 1000);
-  if (cached && cached.recentMatches?.length > 0 && cached.recentMatches[0]?.dateStr) return cached;
+  if (cached && cached.recentMatches?.length > 0 && cached.recentMatches[0]?.dateStr) {
+    return {
+      ...cached,
+      recentMatches: sortMatchesNewestFirst(cached.recentMatches).slice(0, 5)
+    };
+  }
 
   let resolvedId = teamId;
   let baseTeam = null;
@@ -1221,20 +1340,21 @@ export async function fetchTeamProfile(teamId, teamName = "") {
   const effectiveName = teamName || (teamId ? String(teamId) : "");
   const builtin = findBuiltinTeam(effectiveName);
 
-  // 1. Prioridade Máxima: Buscar histórico oficial atualizado da Liquipedia
+  // 1. Prioridade Máxima: Buscar histórico oficial atualizado da Liquipedia (5 últimas partidas, da mais recente à mais antiga)
   const liquipediaMatches = await fetchLiquipediaTeamResults(effectiveName || builtin?.name);
   if (liquipediaMatches && liquipediaMatches.length > 0) {
-    const wins = liquipediaMatches.filter(m => m.radiant_win).length;
-    const winRate = Math.round((wins / liquipediaMatches.length) * 100);
+    const top5 = sortMatchesNewestFirst(liquipediaMatches).slice(0, 5);
+    const wins = top5.filter(m => m.radiant_win).length;
+    const winRate = Math.round((wins / top5.length) * 100);
 
     const result = {
       name: builtin?.name || teamName || "Equipe Profissional",
       tag: builtin?.tag || (effectiveName.length <= 4 ? effectiveName.toUpperCase() : ""),
       logo_url: builtin?.logo_url || null,
       rating: builtin?.rating || 1500,
-      wins: builtin?.wins || wins * 5,
-      losses: builtin?.losses || (liquipediaMatches.length - wins) * 5,
-      recentMatches: liquipediaMatches,
+      wins: builtin?.wins || wins * 8,
+      losses: builtin?.losses || (top5.length - wins) * 8,
+      recentMatches: top5,
       recentWinRate: winRate,
       topHeroes: builtin?.topHeroes || [],
       isUnranked: false,
@@ -1273,12 +1393,12 @@ export async function fetchTeamProfile(teamId, teamName = "") {
       if (matches.length > 0) {
         const teamData = teamRes || baseTeam || {};
         const topHeroes = Array.isArray(heroesRes) ? heroesRes : [];
-        const last20 = matches.slice(0, 20).map((m) => ({
+        const top5 = sortMatchesNewestFirst(matches).slice(0, 5).map((m) => ({
           ...m,
           dateStr: m.dateStr || (m.start_time ? new Date(m.start_time * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : null)
         }));
-        const wins = last20.filter((m) => (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win)).length;
-        const winRate = Math.round((wins / last20.length) * 100);
+        const wins = top5.filter((m) => (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win)).length;
+        const winRate = Math.round((wins / top5.length) * 100);
 
         const result = {
           name: teamData.name || teamName,
@@ -1286,8 +1406,8 @@ export async function fetchTeamProfile(teamId, teamName = "") {
           logo_url: teamData.logo_url || builtin?.logo_url || null,
           rating: teamData.rating || builtin?.rating || 1400,
           wins: teamData.wins || wins,
-          losses: teamData.losses || (last20.length - wins),
-          recentMatches: last20,
+          losses: teamData.losses || (top5.length - wins),
+          recentMatches: top5,
           recentWinRate: winRate,
           topHeroes: topHeroes.length > 0 ? topHeroes.slice(0, 5) : (builtin?.topHeroes || []),
           isUnranked: false,
@@ -1302,13 +1422,18 @@ export async function fetchTeamProfile(teamId, teamName = "") {
 
   // 4. Se a Liquipedia e OpenDota estiverem offline:
   if (builtin) {
-    const builtinResult = { ...builtin, source: 'official' };
+    const builtinResult = {
+      ...builtin,
+      recentMatches: sortMatchesNewestFirst(builtin.recentMatches).slice(0, 5),
+      source: 'official'
+    };
     setCache(cacheKey, builtinResult);
     return builtinResult;
   }
 
   // 5. Para qualquer outra equipe (qualificatórias, divisão de acesso, etc.)
   const dynamicProfile = generateDynamicTeamProfile(teamName);
+  dynamicProfile.recentMatches = sortMatchesNewestFirst(dynamicProfile.recentMatches).slice(0, 5);
   setCache(cacheKey, dynamicProfile);
   return dynamicProfile;
 }
