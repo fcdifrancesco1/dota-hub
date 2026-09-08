@@ -92,16 +92,129 @@ export function normalizeTeamKey(name) {
   return String(name)
     .toLowerCase()
     .replace(/\s*\([^)]*\)/g, '') // remove parenteses ex (stack), (esports)
-    .replace(/\b(team|gaming|esports|esport|gg|club|academy|stack|boys|the|pro|clan|dota)\b/g, '')
+    .replace(/\.(1xbet|ggbet|parimatch|betboom)\b/gi, '')
+    .replace(/(^team\s+|\s+team$)/gi, '')
+    .replace(/\b(team|gaming|esports|esport|club|dota|dota\s*2)\b/gi, '')
     .replace(/[^a-z0-9]/g, '')
     .trim();
 }
 
+export const KNOWN_TEAM_ALIASES = {
+  'navi': ['natus vincere', 'na vi', 'natusvincere'],
+  'natus vincere': ['navi', 'natusvincere'],
+  'betboom': ['bb team', 'betboom team', 'bb', 'betboomteam'],
+  'betboom team': ['bb team', 'betboom', 'bb', 'betboomteam'],
+  'bb team': ['betboom', 'betboom team', 'bb', 'betboomteam'],
+  'gaimin gladiators': ['gg', 'gaimin', 'gaimingladiators'],
+  'gg': ['gaimin gladiators', 'gaimin', 'gaimingladiators'],
+  'virtus pro': ['vp', 'virtus.pro', 'virtuspro'],
+  'virtus.pro': ['vp', 'virtus pro', 'virtuspro'],
+  'vp': ['virtus.pro', 'virtus pro', 'virtuspro'],
+  'aurora': ['aurora.1xbet', 'aurora gaming', 'auroragaming'],
+  'aurora.1xbet': ['aurora'],
+  'cloud9': ['c9', 'cloud 9'],
+  'cloud 9': ['c9', 'cloud9'],
+  'c9': ['cloud 9', 'cloud9'],
+  'shopify rebellion': ['sr', 'shopify', 'shopifyrebellion'],
+  'evil geniuses': ['eg', 'evilgeniuses'],
+  'invictus gaming': ['ig', 'invictusgaming'],
+  'psg.lgd': ['lgd', 'lgd gaming', 'psglgd'],
+  'lgd': ['psg.lgd', 'lgd gaming'],
+  'team liquid': ['liquid', 'tl'],
+  'liquid': ['team liquid', 'tl'],
+  'team spirit': ['spirit', 'tspirit'],
+  'spirit': ['team spirit', 'tspirit'],
+  'team secret': ['secret'],
+  'secret': ['team secret'],
+  'xtreme gaming': ['xtreme', 'xg'],
+  'xtreme': ['xtreme gaming', 'xg'],
+  'tundra esports': ['tundra'],
+  'tundra': ['tundra esports'],
+  'beastcoast': ['bc'],
+  'nigma galaxy': ['nigma', 'ngx'],
+  'nigma': ['nigma galaxy', 'ngx'],
+  'fnatic': ['fnc']
+};
+
+const ROSTER_REGEX = /\b(academy|junior|seed|young|rejects|kids|prodigy)\b/i;
+export const isJuniorOrAcademy = (s) => ROSTER_REGEX.test(String(s || '')) || /\.(b|seed)\b/i.test(String(s || ''));
+
 export function isSameTeamMatch(t1, t2) {
-  const c1 = normalizeTeamKey(t1);
-  const c2 = normalizeTeamKey(t2);
+  if (!t1 || !t2) return false;
+  const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+  const c1 = clean(t1);
+  const c2 = clean(t2);
   if (!c1 || !c2) return false;
-  return c1 === c2 || c1.includes(c2) || c2.includes(c1);
+  if (c1 === c2) return true;
+
+  // Se uma equipe for junior/academy/seed e a outra não, NUNCA considere a mesma equipe!
+  if (isJuniorOrAcademy(t1) !== isJuniorOrAcademy(t2)) return false;
+
+  // Verificar dicionário de apelidos e tags conhecidas
+  const aliasList1 = KNOWN_TEAM_ALIASES[String(t1).toLowerCase().trim()] || KNOWN_TEAM_ALIASES[c1] || [];
+  if (aliasList1.some((a) => clean(a) === c2)) return true;
+
+  const aliasList2 = KNOWN_TEAM_ALIASES[String(t2).toLowerCase().trim()] || KNOWN_TEAM_ALIASES[c2] || [];
+  if (aliasList2.some((a) => clean(a) === c1)) return true;
+
+  // Comparação de nomes-raiz exatos (sem prefixos genéricos como "Team", "Gaming")
+  const core1 = normalizeTeamKey(t1);
+  const core2 = normalizeTeamKey(t2);
+  if (core1 && core2 && core1 === core2 && core1.length >= 3) {
+    return true;
+  }
+
+  return false;
+}
+
+export function resolveTeamFromList(teamName, allTeams) {
+  if (!teamName || !allTeams?.length) return null;
+  const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+  const cleanInput = clean(teamName);
+  const coreInput = normalizeTeamKey(teamName);
+  if (!cleanInput) return null;
+
+  const isTargetJunior = isJuniorOrAcademy(teamName);
+
+  // 1. Nome limpo idêntico
+  let found = allTeams.find((t) => {
+    if (isJuniorOrAcademy(t.name) !== isTargetJunior) return false;
+    return clean(t.name) === cleanInput;
+  });
+  if (found) return found;
+
+  // 2. Tag idêntica (somente se a busca for curta, ex: "OG", "NAVI", "VP", "LGD", "GG")
+  if (cleanInput.length >= 2 && cleanInput.length <= 6) {
+    found = allTeams.find((t) => {
+      if (isJuniorOrAcademy(t.name) !== isTargetJunior) return false;
+      return clean(t.tag) === cleanInput;
+    });
+    if (found) return found;
+  }
+
+  // 3. Dicionário de Apelidos Oficiais
+  for (const [key, aliases] of Object.entries(KNOWN_TEAM_ALIASES)) {
+    if (clean(key) === cleanInput || aliases.some((a) => clean(a) === cleanInput)) {
+      found = allTeams.find((t) => {
+        if (isJuniorOrAcademy(t.name) !== isTargetJunior) return false;
+        const tClean = clean(t.name);
+        const tTag = clean(t.tag);
+        return tClean === clean(key) || tTag === clean(key) || aliases.some((a) => clean(a) === tClean || clean(a) === tTag);
+      });
+      if (found) return found;
+    }
+  }
+
+  // 4. Nome-raiz exato (ex: "Team Falcons" -> "falcons" bate com "Falcons")
+  if (coreInput && coreInput.length >= 3) {
+    found = allTeams.find((t) => {
+      if (isJuniorOrAcademy(t.name) !== isTargetJunior) return false;
+      return normalizeTeamKey(t.name) === coreInput;
+    });
+    if (found) return found;
+  }
+
+  return null;
 }
 
 export function isSeriesMatch(teamA1, teamB1, teamA2, teamB2) {
@@ -496,20 +609,20 @@ export async function fetchOfficialLeaderboard(division = "europe") {
 
 // 10. Buscar Perfil do Time (por ID ou Nome)
 export async function fetchTeamProfile(teamId, teamName = "") {
-  const cacheKey = `team_profile_${teamId || 'name'}_${teamName || 'id'}`;
+  const cacheKey = `team_profile_v4_${teamId || 'name'}_${teamName || 'id'}`;
   const cached = getCached(cacheKey, 15 * 60 * 1000);
   if (cached) return cached;
 
   let resolvedId = teamId;
   let baseTeam = null;
 
-  // 1. Se não temos teamId, buscar na lista geral de times da OpenDota
+  // 1. Se não temos teamId, buscar de forma rigorosa na lista geral de times da OpenDota
   if (!resolvedId && teamName) {
     try {
-      const teamsRes = await fetch(`${OPENDOTA_BASE}/teams`);
+      const teamsRes = await fetchWithTimeout(`${OPENDOTA_BASE}/teams`, {}, 5000);
       if (teamsRes.ok) {
         const allTeams = await teamsRes.json();
-        const found = (allTeams || []).find(t => isSameTeamMatch(teamName, t.name) || isSameTeamMatch(teamName, t.tag));
+        const found = resolveTeamFromList(teamName, allTeams);
         if (found) {
           resolvedId = found.team_id;
           baseTeam = found;
@@ -520,13 +633,28 @@ export async function fetchTeamProfile(teamId, teamName = "") {
     }
   }
 
-  // 2. Se temos um resolvedId válido, consultar endpoints detalhados
+  // 2. Se ainda não temos teamId, verificar se a equipe participou de partidas profissionais recentes
+  const localProMatches = getCachedFast("pro_matches_v7")?.rawMatches || [];
+  if (!resolvedId && teamName && localProMatches.length > 0) {
+    const matchingProMatch = localProMatches.find((m) =>
+      isSameTeamMatch(m.radiant_name, teamName) || isSameTeamMatch(m.dire_name, teamName)
+    );
+    if (matchingProMatch) {
+      const isRad = isSameTeamMatch(matchingProMatch.radiant_name, teamName);
+      const possibleId = isRad ? matchingProMatch.radiant_team_id : matchingProMatch.dire_team_id;
+      if (possibleId) {
+        resolvedId = possibleId;
+      }
+    }
+  }
+
+  // 3. Se temos um resolvedId válido, consultar endpoints detalhados da OpenDota
   if (resolvedId) {
     try {
       const [teamRes, matchesRes, heroesRes] = await Promise.all([
-        fetch(`${OPENDOTA_BASE}/teams/${resolvedId}`).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`${OPENDOTA_BASE}/teams/${resolvedId}/matches`).then(r => r.ok ? r.json() : []).catch(() => []),
-        fetch(`${OPENDOTA_BASE}/teams/${resolvedId}/heroes`).then(r => r.ok ? r.json() : []).catch(() => [])
+        fetchWithTimeout(`${OPENDOTA_BASE}/teams/${resolvedId}`, {}, 5000).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+        fetchWithTimeout(`${OPENDOTA_BASE}/teams/${resolvedId}/matches`, {}, 5000).then((r) => (r.ok ? r.json() : [])).catch(() => []),
+        fetchWithTimeout(`${OPENDOTA_BASE}/teams/${resolvedId}/heroes`, {}, 5000).then((r) => (r.ok ? r.json() : [])).catch(() => [])
       ]);
 
       const teamData = teamRes || baseTeam || {};
@@ -534,7 +662,7 @@ export async function fetchTeamProfile(teamId, teamName = "") {
       const topHeroes = Array.isArray(heroesRes) ? heroesRes : [];
 
       const last20 = matches.slice(0, 20);
-      const wins = last20.filter(m => (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win)).length;
+      const wins = last20.filter((m) => (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win)).length;
       const winRate = last20.length > 0
         ? Math.round((wins / last20.length) * 100)
         : (teamData.wins ? Math.round((teamData.wins / (teamData.wins + (teamData.losses || 1))) * 100) : 56);
@@ -548,7 +676,8 @@ export async function fetchTeamProfile(teamId, teamName = "") {
         losses: teamData.losses || (last20.length - wins),
         recentMatches: last20,
         recentWinRate: winRate,
-        topHeroes: topHeroes.slice(0, 5)
+        topHeroes: topHeroes.slice(0, 5),
+        isUnranked: false
       };
 
       setCache(cacheKey, result);
@@ -558,44 +687,34 @@ export async function fetchTeamProfile(teamId, teamName = "") {
     }
   }
 
-  // 3. Fallback inteligente para novas equipes / qualificatórias regionais
-  let hash = 0;
-  const str = String(teamName || "DotaTeam");
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  hash = Math.abs(hash);
+  // 4. Fallback fiel para novas equipes / qualificatórias regionais (sem inventar outro time!)
+  const localMatches = (localProMatches || [])
+    .filter((m) => isSameTeamMatch(m.radiant_name, teamName) || isSameTeamMatch(m.dire_name, teamName))
+    .slice(0, 8)
+    .map((m) => {
+      const isRad = isSameTeamMatch(m.radiant_name, teamName);
+      return {
+        radiant: isRad,
+        radiant_win: m.radiant_win,
+        opposing_team_name: isRad ? (m.dire_name || "Adversário") : (m.radiant_name || "Adversário"),
+        league_name: m.league_name || "Torneio Dota 2"
+      };
+    });
 
-  const estimatedRating = 1180 + (hash % 280);
-  const estimatedWinRate = 48 + (hash % 24);
-  const sampleHeroIds = [1, 106, 48, 145, 96, 74, 86, 111, 2, 5];
-  const selectedHeroes = [
-    { hero_id: sampleHeroIds[(hash) % sampleHeroIds.length], games_played: 14 + (hash % 10), wins: 9 + (hash % 6) },
-    { hero_id: sampleHeroIds[(hash + 1) % sampleHeroIds.length], games_played: 12 + (hash % 8), wins: 7 + (hash % 5) },
-    { hero_id: sampleHeroIds[(hash + 2) % sampleHeroIds.length], games_played: 10 + (hash % 6), wins: 6 + (hash % 4) },
-    { hero_id: sampleHeroIds[(hash + 3) % sampleHeroIds.length], games_played: 8 + (hash % 5), wins: 5 + (hash % 3) },
-    { hero_id: sampleHeroIds[(hash + 4) % sampleHeroIds.length], games_played: 7 + (hash % 4), wins: 4 + (hash % 2) }
-  ];
-
-  const opponents = ["Thunder Awaken", "Infinity Esports", "Lava", "Boca Juniors", "Mad Kings", "Team Resilience", "Nemesis"];
-  const recentMatches = Array.from({ length: 8 }).map((_, i) => ({
-    radiant: i % 2 === 0,
-    radiant_win: (hash + i) % 3 !== 0,
-    opposing_team_name: opponents[(hash + i) % opponents.length],
-    league_name: "Qualificatória Regional / Torneio Dota 2"
-  }));
+  const localWins = localMatches.filter((m) => (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win)).length;
+  const localLosses = localMatches.length - localWins;
 
   const fallbackResult = {
-    name: teamName || "Equipe Profissional",
-    tag: (teamName || "").slice(0, 4).toUpperCase(),
+    name: teamName || "Equipe Competitiva",
+    tag: (teamName || "").replace(/[^a-zA-Z]/g, '').slice(0, 4).toUpperCase(),
     logo_url: null,
-    rating: estimatedRating,
-    wins: 34 + (hash % 20),
-    losses: 22 + (hash % 15),
-    recentMatches,
-    recentWinRate: estimatedWinRate,
-    topHeroes: selectedHeroes
+    rating: null,
+    isUnranked: true,
+    wins: localWins,
+    losses: localLosses,
+    recentMatches: localMatches,
+    recentWinRate: localMatches.length > 0 ? Math.round((localWins / localMatches.length) * 100) : null,
+    topHeroes: []
   };
 
   setCache(cacheKey, fallbackResult);

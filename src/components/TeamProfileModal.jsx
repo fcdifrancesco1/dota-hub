@@ -77,16 +77,29 @@ export default function TeamProfileModal({
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-amber-400">
-                  <Trophy className="w-3.5 h-3.5" /> Equipe Profissional {displayTag && <span className="text-gray-400 font-mono">[{displayTag}]</span>}
+                  <Trophy className="w-3.5 h-3.5" /> {profile.isUnranked ? 'Equipe Regional / Qualificatória' : 'Equipe Profissional'} {displayTag && <span className="text-gray-400 font-mono">[{displayTag}]</span>}
                 </div>
                 <h2 className="text-2xl font-black text-white mt-0.5 truncate">{displayName}</h2>
                 <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 mt-1.5 font-mono">
-                  <span>Rating Elo: <strong className="text-cyan-400 font-black">{Math.round(profile.rating || 1300)}</strong></span>
-                  <span>Win Rate Recente: <strong className="text-emerald-400 font-black">{profile.recentWinRate}%</strong></span>
-                  {(profile.wins !== undefined && profile.losses !== undefined) && (
-                    <span className="text-gray-500 text-[11px]">
-                      ({profile.wins}V - {profile.losses}D)
-                    </span>
+                  {profile.isUnranked ? (
+                    <>
+                      <span>Status: <strong className="text-amber-400 font-bold">Qualificatória / Divisão de Acesso</strong></span>
+                      {profile.recentWinRate != null ? (
+                        <span>Win Rate: <strong className="text-emerald-400 font-black">{profile.recentWinRate}%</strong></span>
+                      ) : (
+                        <span>Ranking: <strong className="text-gray-400 font-normal">Sem classificação mundial</strong></span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span>Rating Elo: <strong className="text-cyan-400 font-black">{Math.round(profile.rating || 1300)}</strong></span>
+                      <span>Win Rate Recente: <strong className="text-emerald-400 font-black">{profile.recentWinRate}%</strong></span>
+                      {(profile.wins !== undefined && profile.losses !== undefined) && (
+                        <span className="text-gray-500 text-[11px]">
+                          ({profile.wins}V - {profile.losses}D)
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -129,24 +142,31 @@ export default function TeamProfileModal({
               <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-cyan-400" /> Histórico de Partidas Oficiais
               </h3>
-              <div className="divide-y divide-white/5 bg-white/5 border border-white/10 rounded-xl overflow-hidden max-h-52 overflow-y-auto custom-scrollbar">
-                {(profile.recentMatches || []).slice(0, 10).map((m, idx) => {
-                  const won = (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win);
-                  const opponentName = m.opposing_team_name || "Adversário Competitivo";
+              {profile.recentMatches && profile.recentMatches.length > 0 ? (
+                <div className="divide-y divide-white/5 bg-white/5 border border-white/10 rounded-xl overflow-hidden max-h-52 overflow-y-auto custom-scrollbar">
+                  {profile.recentMatches.slice(0, 10).map((m, idx) => {
+                    const won = (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win);
+                    const opponentName = m.opposing_team_name || "Adversário Competitivo";
 
-                  return (
-                    <div key={idx} className="p-2.5 px-4 flex items-center justify-between text-xs hover:bg-white/[0.02] transition-colors">
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${won ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`}>
-                          {won ? 'VITÓRIA' : 'DERROTA'}
-                        </span>
-                        <span className="text-gray-300 font-medium">vs <strong className="text-white">{opponentName}</strong></span>
+                    return (
+                      <div key={idx} className="p-2.5 px-4 flex items-center justify-between text-xs hover:bg-white/[0.02] transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${won ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`}>
+                            {won ? 'VITÓRIA' : 'DERROTA'}
+                          </span>
+                          <span className="text-gray-300 font-medium">vs <strong className="text-white">{opponentName}</strong></span>
+                        </div>
+                        <span className="text-gray-500 text-[10px] font-mono truncate max-w-[160px]">{m.league_name || "Torneio Dota 2"}</span>
                       </div>
-                      <span className="text-gray-500 text-[10px] font-mono truncate max-w-[160px]">{m.league_name || "Torneio Dota 2"}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-center space-y-1">
+                  <p className="text-xs text-gray-300 font-medium">Nenhuma partida tier-1 sincronizada na base da OpenDota / Valve.</p>
+                  <p className="text-[11px] text-gray-500">Equipe nova participante de qualificatórias regionais abertas ou divisão de acesso.</p>
+                </div>
+              )}
             </div>
           </div>
         ) : (
