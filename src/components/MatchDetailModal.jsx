@@ -226,9 +226,16 @@ export default function MatchDetailModal({
 
         {/* CABEÇALHO DA SÉRIE */}
         <div className="text-center border-b border-white/10 pb-4 mb-4 relative z-10 shrink-0">
-          <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
-            {series.stage || "Torneio Profissional"}
-          </span>
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
+              {series.stage || "Torneio Profissional"}
+            </span>
+            {(series.dateStr || (currentMap?.start_time ? new Date(currentMap.start_time * 1000).toLocaleDateString('pt-BR') : null)) && (
+              <span className="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
+                {series.dateStr || new Date(currentMap.start_time * 1000).toLocaleDateString('pt-BR')}
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center justify-center gap-4 sm:gap-8 mt-3">
             <div

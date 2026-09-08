@@ -147,16 +147,27 @@ export default function TeamProfileModal({
                   {profile.recentMatches.slice(0, 10).map((m, idx) => {
                     const won = (m.radiant && m.radiant_win) || (!m.radiant && !m.radiant_win);
                     const opponentName = m.opposing_team_name || "Adversário Competitivo";
+                    const matchDate = m.dateStr || (m.start_time ? new Date(m.start_time * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : null);
 
                     return (
-                      <div key={idx} className="p-2.5 px-4 flex items-center justify-between text-xs hover:bg-white/[0.02] transition-colors">
-                        <div className="flex items-center gap-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${won ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`}>
+                      <div key={idx} className="p-2.5 px-4 flex items-center justify-between text-xs hover:bg-white/[0.02] transition-colors gap-2">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 ${won ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`}>
                             {won ? 'VITÓRIA' : 'DERROTA'}
                           </span>
-                          <span className="text-gray-300 font-medium">vs <strong className="text-white">{opponentName}</strong></span>
+                          <span className="text-gray-300 font-medium truncate">vs <strong className="text-white">{opponentName}</strong></span>
                         </div>
-                        <span className="text-gray-500 text-[10px] font-mono truncate max-w-[160px]">{m.league_name || "Torneio Dota 2"}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-gray-500 text-[10px] font-mono truncate max-w-[150px] hidden sm:inline" title={m.league_name}>
+                            {m.league_name || "Torneio Dota 2"}
+                          </span>
+                          {matchDate && (
+                            <span className="text-cyan-400/90 font-mono text-[10px] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 shrink-0 flex items-center gap-1 font-semibold">
+                              <Calendar className="w-2.5 h-2.5 text-cyan-400" />
+                              {matchDate}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
