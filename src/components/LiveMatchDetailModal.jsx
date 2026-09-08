@@ -19,6 +19,7 @@ import {
   fetchMatchDetails
 } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
+import LiveMinimap from './LiveMinimap';
 
 // Lê o primeiro valor definido entre possíveis nomes de campo da API (sem inventar números)
 function pick(obj, keys) {
@@ -152,7 +153,12 @@ export default function LiveMatchDetailModal({
   const buildPlayer = (p, idx, isRadiant) => {
     const teamName = isRadiant ? teamAName : teamBName;
     const heroId = pick(p, ['hero_id']);
-    const items = [p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].filter((v) => v !== undefined && v !== null);
+    const rawItems = [
+      p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5,
+      p.item0, p.item1, p.item2, p.item3, p.item4, p.item5,
+      ...(Array.isArray(p.items) ? p.items : [])
+    ].filter((v) => v !== undefined && v !== null && v !== 0 && v !== "");
+    const items = rawItems.slice(0, 6);
     const buybackCount = pick(p, ['buyback_count']);
 
     return {
@@ -165,12 +171,12 @@ export default function LiveMatchDetailModal({
       assists: pick(p, ['assists']),
       last_hits: pick(p, ['last_hits']),
       denies: pick(p, ['denies']),
-      gpm: pick(p, ['gold_per_min']),
-      xpm: pick(p, ['xp_per_min']),
-      net_worth: pick(p, ['net_worth']),
+      gpm: pick(p, ['gold_per_min', 'gpm']),
+      xpm: pick(p, ['xp_per_min', 'xpm']),
+      net_worth: pick(p, ['net_worth', 'gold']),
       buybackCount,
       items,
-      neutralItem: pick(p, ['item_neutral']),
+      neutralItem: pick(p, ['item_neutral', 'neutral_item']),
       isRadiant
     };
   };
@@ -179,10 +185,138 @@ export default function LiveMatchDetailModal({
   const direPlayers = rawDire.map((p, idx) => buildPlayer(p, idx, false));
   const hasPlayerData = radiantPlayers.length > 0 || direPlayers.length > 0;
 
-  // Picks & Bans reais
+  // Picks & Bans em formato Captain's Mode
   const picksBans = matchData?.picks_bans || [];
-  const radiantPicks = picksBans.filter(p => p.team === 0 && p.is_pick);
-  const direPicks = picksBans.filter(p => p.team === 1 && p.is_pick);
+
+  const renderCaptainsModeDraft = () => {
+    if (!picksBans || picksBans.length === 0) return null;
+
+    const sortedDraft = [...picksBans].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    const phase1 = sortedDraft.filter((d) => d.phase === 1 || (d.order && d.order <= 11));
+    const phase2 = sortedDraft.filter((d) => d.phase === 2 || (d.order && d.order > 11 && d.order <= 19));
+    const phase3 = sortedDraft.filter((d) => d.phase === 3 || (d.order && d.order > 19));
+
+    const phases = [
+      { num: 1, title: 'Fase 1: Abertura', subtitle: '7 Bans · 4 Picks', items: phase1 },
+      { num: 2, title: 'Fase 2: Mid Draft', subtitle: '4 Bans · 4 Picks', items: phase2 },
+      { num: 3, title: 'Fase 3: Decisão & Last Pick', subtitle: '3 Bans · 2 Picks', items: phase3 }
+    ];
+
+    const renderDraftItem = (item, idx) => {
+      const isPick = item.is_pick;
+      const isRadiant = item.team === 0;
+      const teamName = isRadiant ? teamAName : teamBName;
+      const hImg = item.hero_id ? getHeroImg(constants, item.hero_id) : '';
+      const hName = item.hero_id ? getHeroName(constants, item.hero_id) : `Herói ${item.hero_id}`;
+      const orderNum = item.order || (idx + 1);
+
+      return (
+        <div
+          key={`${item.order || idx}-${item.hero_id}`}
+          onClick={() => {
+            if (onSelectHero && constants?.heroes?.[item.hero_id]) {
+              onSelectHero(constants.heroes[item.hero_id]);
+            }
+          }}
+          className={`flex flex-col items-center p-1.5 rounded-xl border transition-all cursor-pointer group shrink-0 ${
+            isPick
+              ? isRadiant
+                ? 'bg-emerald-950/30 border-emerald-500/40 hover:border-emerald-400 hover:scale-105 shadow-sm shadow-emerald-500/10'
+                : 'bg-rose-950/30 border-rose-500/40 hover:border-rose-400 hover:scale-105 shadow-sm shadow-rose-500/10'
+              : 'bg-[#0E1118] border-white/10 hover:border-rose-500/40 hover:scale-105 opacity-80 hover:opacity-100'
+          }`}
+          title={`${orderNum}. ${isPick ? 'PICK' : 'BAN'}: ${hName} (${teamName})`}
+        >
+          <div className="flex items-center justify-between w-full gap-1 mb-1 px-0.5">
+            <span className="text-[8px] font-mono font-black text-gray-400">#{orderNum}</span>
+            <span
+              className={`text-[8px] font-mono font-black px-1 rounded uppercase ${
+                isPick
+                  ? isRadiant
+                    ? 'bg-emerald-500/30 text-emerald-300'
+                    : 'bg-rose-500/30 text-rose-300'
+                  : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+              }`}
+            >
+              {isPick ? 'PICK' : 'BAN'}
+            </span>
+          </div>
+
+          <div className="relative w-11 h-7 rounded overflow-hidden border border-white/10 flex items-center justify-center bg-black">
+            {hImg ? (
+              <img
+                src={hImg}
+                alt={hName}
+                className={`w-full h-full object-cover transition-all ${
+                  !isPick ? 'grayscale contrast-125 opacity-60 group-hover:grayscale-0' : ''
+                }`}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            ) : (
+              <span className="text-[9px] text-gray-500 font-mono">?</span>
+            )}
+
+            {!isPick && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span className="w-full h-0.5 bg-rose-500/80 -rotate-45 block" />
+              </div>
+            )}
+          </div>
+
+          <span className="text-[9px] font-bold text-gray-200 truncate max-w-[64px] mt-1 text-center group-hover:text-amber-400 transition-colors">
+            {hName}
+          </span>
+          <span
+            className={`text-[8px] font-mono truncate max-w-[64px] text-center ${
+              isRadiant ? 'text-emerald-400/90' : 'text-rose-400/90'
+            }`}
+          >
+            {teamName}
+          </span>
+        </div>
+      );
+    };
+
+    return (
+      <div className="bg-[#11141D] border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl">
+        <div className="flex items-center justify-between border-b border-white/5 pb-2.5 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Swords className="w-4 h-4 text-amber-400" />
+            <h3 className="text-xs font-black uppercase tracking-wider text-white">
+              Ordem do Draft (Captain's Mode: Picks & Bans)
+            </h3>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-mono">
+            <span className="flex items-center gap-1 text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" /> {teamAName} (Radiant)
+            </span>
+            <span className="text-gray-500">·</span>
+            <span className="flex items-center gap-1 text-rose-400">
+              <span className="w-2 h-2 rounded-full bg-rose-400" /> {teamBName} (Dire)
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {phases.map((ph) => {
+            if (!ph.items || ph.items.length === 0) return null;
+            return (
+              <div key={ph.num} className="bg-black/30 border border-white/5 rounded-xl p-2.5 space-y-2">
+                <div className="flex items-center justify-between px-1 text-[10px] font-mono">
+                  <span className="font-extrabold text-amber-400 uppercase tracking-wider">{ph.title}</span>
+                  <span className="text-gray-500">{ph.subtitle}</span>
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1">
+                  {ph.items.map(renderDraftItem)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   const renderStructureColumns = (structures, teamName, isRadiant, aliveCount) => {
     const columns = [
@@ -545,6 +679,18 @@ export default function LiveMatchDetailModal({
             </div>
           ) : (
             <>
+              {/* POSICIONAMENTO NO MAPA EM TEMPO REAL (MINIMAP) */}
+              <LiveMinimap
+                matchData={matchData}
+                constants={constants}
+                radiantStructures={radiantStructures}
+                direStructures={direStructures}
+                onSelectHero={onSelectHero}
+              />
+
+              {/* ORDEM DO DRAFT (CAPTAIN'S MODE: PICKS & BANS) */}
+              {renderCaptainsModeDraft()}
+
               {/* STATUS DAS TORRES E BARRACAS (SOMENTE QUANDO A API FORNECE OS DADOS) */}
               {(radiantStructures.hasData || direStructures.hasData) && (
                 <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3">
@@ -563,38 +709,6 @@ export default function LiveMatchDetailModal({
                     {renderStructureColumns(radiantStructures, teamAName, true, radiantAliveCount)}
                     {renderStructureColumns(direStructures, teamBName, false, direAliveCount)}
                   </div>
-
-                  {/* Picks da Partida (apenas quando a API retorna picks_bans) */}
-                  {(radiantPicks.length > 0 || direPicks.length > 0) && (
-                    <div className="space-y-1.5 pt-2 border-t border-white/10">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Picks da Partida</div>
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-1 flex-wrap">
-                          {radiantPicks.map((p, i) => (
-                            <img
-                              key={i}
-                              src={getHeroImg(constants, p.hero_id)}
-                              alt=""
-                              title={`${teamAName}: ${getHeroName(constants, p.hero_id)}`}
-                              className="w-7 h-5 object-cover rounded border border-emerald-400/80"
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs font-mono font-bold text-gray-500">vs</span>
-                        <div className="flex items-center gap-1 flex-wrap justify-end">
-                          {direPicks.map((p, i) => (
-                            <img
-                              key={i}
-                              src={getHeroImg(constants, p.hero_id)}
-                              alt=""
-                              title={`${teamBName}: ${getHeroName(constants, p.hero_id)}`}
-                              className="w-7 h-5 object-cover rounded border border-rose-400/80"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
