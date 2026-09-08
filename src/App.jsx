@@ -87,61 +87,67 @@ export default function App() {
       const now = Date.now();
       const rawMatches = proData?.rawMatches || [];
 
-      // Separar jogos ao vivo reais da Liquipedia (placar ativo ou horário dentro da janela ao vivo)
-      const liveFromWiki = (allWikiMatches || []).filter((m) => {
-        const hasLiveScore = (m.scoreA > 0 || m.scoreB > 0);
-        const isInLiveWindow = m.timestamp && (m.timestamp <= now + 15 * 60 * 1000) && (m.timestamp >= now - 3.5 * 3600 * 1000);
-        return hasLiveScore || isInLiveWindow;
-      });
+      // 1. Processar partidas ao vivo REAIS vindas do Dota Coordinator / Valve GOTV (/api/live)
+      const enrichedGotvLive = (gotvLiveData || []).map((gotvGame) => {
+        const radName = gotvGame.radiant_name || gotvGame.radiant_team?.team_name || gotvGame.radiant_team?.name;
+        const direName = gotvGame.dire_name || gotvGame.dire_team?.team_name || gotvGame.dire_team?.name;
 
-      // Separar estritamente os jogos futuros agendados
-      const strictlyUpcoming = (allWikiMatches || []).filter((m) => {
-        const hasLiveScore = (m.scoreA > 0 || m.scoreB > 0);
-        const isInLiveWindow = m.timestamp && (m.timestamp <= now + 15 * 60 * 1000) && (m.timestamp >= now - 3.5 * 3600 * 1000);
-        return !hasLiveScore && !isInLiveWindow;
-      });
-
-      // Enriquecer partidas ao vivo com os ABATES DO JOGO (GAME SCORE) INDIVIDUALIZADOS
-      const enrichedLive = liveFromWiki.map((m) => {
-        const matchingRaw = rawMatches.find((rm) =>
-          isSeriesMatch(m.timeA, m.timeB, rm.radiant_name, rm.dire_name)
+        // Tenta enriquecer com metadados da Liquipedia (logos oficiais, torneio, formato, stream)
+        const matchingWiki = (allWikiMatches || []).find((w) =>
+          isSeriesMatch(w.timeA, w.timeB, radName, direName)
         );
 
-        if (matchingRaw) {
-          const isTimeARadiant = isSameTeamMatch(m.timeA, matchingRaw.radiant_name);
-          const gameScoreA = isTimeARadiant ? matchingRaw.radiant_score : matchingRaw.dire_score;
-          const gameScoreB = isTimeARadiant ? matchingRaw.dire_score : matchingRaw.radiant_score;
-
+        if (matchingWiki) {
+          const isTimeARadiant = isSameTeamMatch(matchingWiki.timeA, radName);
           return {
-            ...m,
-            match_id: matchingRaw.match_id,
-            gameScoreA: gameScoreA ?? 0,
-            gameScoreB: gameScoreB ?? 0,
-            gameDuration: matchingRaw.duration,
+            ...gotvGame,
+            timeA: matchingWiki.timeA,
+            timeB: matchingWiki.timeB,
+            logoA: matchingWiki.logoA,
+            logoB: matchingWiki.logoB,
+            torneio: matchingWiki.torneio || gotvGame.league_name,
+            formato: matchingWiki.formato || gotvGame.formato || "BO3",
+            streamUrl: matchingWiki.streamUrl || gotvGame.streamUrl,
+            series_score: (matchingWiki.scoreA > 0 || matchingWiki.scoreB > 0) ? `${matchingWiki.scoreA} - ${matchingWiki.scoreB}` : null,
+            gameScoreA: isTimeARadiant ? gotvGame.radiant_score : gotvGame.dire_score,
+            gameScoreB: isTimeARadiant ? gotvGame.dire_score : gotvGame.radiant_score,
             isGameDataActive: true
           };
         }
 
-        const elapsedMins = m.timestamp ? Math.max(0, Math.floor((now - m.timestamp) / 60000)) : null;
-
         return {
-          ...m,
-          gameScoreA: null,
-          gameScoreB: null,
-          gameDuration: elapsedMins != null ? elapsedMins * 60 : null,
-          isGameDataActive: false
+          ...gotvGame,
+          timeA: radName,
+          timeB: direName,
+          torneio: gotvGame.league_name || "Torneio Dota 2",
+          formato: gotvGame.formato || "BO3",
+          gameScoreA: gotvGame.radiant_score,
+          gameScoreB: gotvGame.dire_score,
+          isGameDataActive: true
         };
       });
 
-      // Inclui também quaisquer jogos do DotaTV (liveLeagueGames)
-      (gotvLiveData || []).forEach(gotvGame => {
-        const alreadyExists = enrichedLive.some(u => isSeriesMatch(u.timeA, u.timeB, gotvGame.radiant_team?.name, gotvGame.dire_team?.name));
-        if (!alreadyExists) {
-          enrichedLive.push(gotvGame);
-        }
+      // 2. Partidas que tenham placar ativo de série em andamento confirmado pela Liquipedia
+      // (somente se scoreA > 0 ou scoreB > 0, nunca baseado apenas em horário passado)
+      const confirmedWikiLive = (allWikiMatches || []).filter((m) => {
+        const hasLiveScore = (m.scoreA > 0 || m.scoreB > 0);
+        const alreadyInGotv = enrichedGotvLive.some((g) =>
+          isSeriesMatch(m.timeA, m.timeB, g.timeA, g.timeB)
+        );
+        return hasLiveScore && !alreadyInGotv;
       });
 
-      setLiveGames(enrichedLive);
+      const finalLiveGames = [...enrichedGotvLive, ...confirmedWikiLive];
+
+      // 3. Separar estritamente os jogos agendados que NÃO estão em andamento
+      const strictlyUpcoming = (allWikiMatches || []).filter((m) => {
+        const isLive = finalLiveGames.some((g) =>
+          isSeriesMatch(m.timeA, m.timeB, g.timeA, g.timeB)
+        );
+        return !isLive;
+      });
+
+      setLiveGames(finalLiveGames);
       setUpcomingMatches(strictlyUpcoming);
       setLastUpdated(new Date().toLocaleTimeString('pt-BR'));
     } catch (err) {
