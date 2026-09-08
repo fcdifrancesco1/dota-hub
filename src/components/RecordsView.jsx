@@ -132,10 +132,24 @@ export default function RecordsView({
                   <h3 className="text-xl font-black text-white">
                     {records[0].hero_id ? getHeroName(constants, records[0].hero_id) : 'Partida Profissional'}
                   </h3>
-                  <span className="text-[11px] font-mono text-gray-400">
-                    Match ID: <strong className="text-gray-200">{records[0].match_id}</strong>
-                    {records[0].start_time && ` · ${new Date(records[0].start_time * 1000).toLocaleDateString('pt-BR')}`}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-gray-400 mt-0.5">
+                    <span>Match ID:</span>
+                    <a
+                      href={`https://www.opendota.com/matches/${records[0].match_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-400 hover:text-cyan-300 font-bold inline-flex items-center gap-1 transition-colors hover:underline"
+                      title="Ver Partida na OpenDota"
+                    >
+                      {records[0].match_id}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                    {records[0].start_time && (
+                      <span className="text-gray-500">
+                        · {new Date(records[0].start_time * 1000).toLocaleDateString('pt-BR')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
