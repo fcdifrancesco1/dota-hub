@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, TrendingUp } from 'lucide-react';
+import TeamLogo from '../utils/teamLogos';
 
 export default function TeamsSidebar({ teams, onSelectTeam, selectedTeam }) {
   return (
@@ -27,11 +28,7 @@ export default function TeamsSidebar({ teams, onSelectTeam, selectedTeam }) {
             >
               <div className="flex items-center gap-3">
                 <span className="text-xs font-bold text-dota-dim w-4">{idx + 1}</span>
-                {team.logo_url ? (
-                  <img src={team.logo_url} alt={team.name} className="w-6 h-6 object-contain rounded" />
-                ) : (
-                  <Shield className="w-6 h-6 text-dota-dim" />
-                )}
+                <TeamLogo teamName={team.name} teamId={team.team_id} logoUrl={team.logo_url} className="w-6 h-6 rounded shrink-0" />
                 <span className="text-sm font-semibold truncate max-w-[130px]">{team.name}</span>
               </div>
               <span className="text-xs font-mono text-dota-dim font-bold">{Math.round(team.rating)}</span>

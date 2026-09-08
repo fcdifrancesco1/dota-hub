@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Shield, Trophy, TrendingUp, Swords, Loader2, Sparkles, Calendar, Award } from 'lucide-react';
 import { fetchTeamProfile, getHeroImg, getHeroName, sortMatchesNewestFirst } from '../services/api';
+import TeamLogo from '../utils/teamLogos';
 
 export default function TeamProfileModal({
   teamId,
@@ -62,18 +63,12 @@ export default function TeamProfileModal({
           <div className="space-y-6">
             {/* CABEÇALHO DO TIME */}
             <div className="flex items-center gap-4 border-b border-white/10 pb-5">
-              {profile.logo_url ? (
-                <img
-                  src={profile.logo_url}
-                  alt={displayName}
-                  className="w-16 h-16 object-contain rounded-xl bg-white/5 p-1 border border-white/10 shrink-0"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
-                  <Shield className="w-8 h-8 text-amber-400" />
-                </div>
-              )}
+              <TeamLogo
+                teamName={displayName}
+                teamId={profile.team_id}
+                logoUrl={profile.logo_url}
+                className="w-16 h-16 rounded-xl bg-white/5 p-1 border border-white/10 shrink-0"
+              />
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-amber-400">
@@ -171,6 +166,7 @@ export default function TeamProfileModal({
                                   {m.score}
                                 </span>
                               )}
+                              <TeamLogo teamName={opponentName} className="w-4 h-4 rounded shrink-0" />
                               <span className="text-gray-300 font-medium truncate">vs <strong className="text-white">{opponentName}</strong></span>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">

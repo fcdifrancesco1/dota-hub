@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Shield } from 'lucide-react';
+import TeamLogo from '../utils/teamLogos';
 
 export default function PlayerStatsModal({ team, stats, loading, onClose }) {
   if (!team) return null;
@@ -12,11 +13,7 @@ export default function PlayerStatsModal({ team, stats, loading, onClose }) {
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          {team.logo_url ? (
-            <img src={team.logo_url} alt={team.name} className="w-10 h-10 object-contain" />
-          ) : (
-            <Shield className="w-10 h-10 text-dota-accent" />
-          )}
+          <TeamLogo teamName={team.name} teamId={team.team_id} logoUrl={team.logo_url} className="w-10 h-10 shrink-0" />
           <div>
             <h3 className="text-xl font-bold text-white">{team.name}</h3>
             <span className="text-xs text-dota-accent font-mono">Estatísticas das Últimas 100 Partidas Oficiais</span>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Swords, ChevronDown, ChevronUp, Shield, Tv } from 'lucide-react';
 import { SkeletonCard } from './SkeletonLoader';
+import TeamLogo from '../utils/teamLogos';
 
 export default function UpcomingSidebar({
   upcoming = [],
@@ -77,30 +78,12 @@ export default function UpcomingSidebar({
                 >
                   <div className="space-y-2 flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      {m.logoA ? (
-                        <img
-                          src={m.logoA}
-                          alt=""
-                          className="w-4 h-4 object-contain shrink-0"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      ) : (
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                      )}
+                      <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-4 h-4 shrink-0" />
                       <span className="text-xs font-bold text-white truncate">{m.timeA}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {m.logoB ? (
-                        <img
-                          src={m.logoB}
-                          alt=""
-                          className="w-4 h-4 object-contain shrink-0"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      ) : (
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
-                      )}
+                      <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-4 h-4 shrink-0" />
                       <span className="text-xs font-bold text-white truncate">{m.timeB}</span>
                     </div>
                   </div>

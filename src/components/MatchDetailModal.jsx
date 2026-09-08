@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Trophy, Clock, Swords, Shield, ExternalLink, Loader2, Award, Zap, Package, Sparkles, AlertTriangle } from 'lucide-react';
 import AdvantageGraph from './AdvantageGraph';
 import { getHeroImg, getHeroName, getItemImg, fetchMatchDetails } from '../services/api';
+import TeamLogo from '../utils/teamLogos';
 
 export default function MatchDetailModal({
   series,
@@ -38,8 +39,9 @@ export default function MatchDetailModal({
       <div className="space-y-2 mt-4">
         <div className="flex items-center justify-between border-b border-white/10 pb-2 px-1">
           <div className="flex items-center gap-2">
+            <TeamLogo teamName={teamName} className="w-5 h-5 rounded shrink-0" />
             <span
-              className={`w-3 h-3 rounded-full ${
+              className={`w-2.5 h-2.5 rounded-full ${
                 isRadiant ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' : 'bg-rose-500 shadow-sm shadow-rose-500/50'
               }`}
             />
@@ -240,12 +242,17 @@ export default function MatchDetailModal({
           <div className="flex items-center justify-center gap-4 sm:gap-8 mt-3">
             <div
               onClick={() => onOpenTeamProfile && onOpenTeamProfile(series.preferredIdA, series.timeA)}
-              className="text-right flex-1 truncate cursor-pointer group"
+              className="text-right flex-1 truncate cursor-pointer group flex items-center justify-end gap-2.5 sm:gap-3"
               title={`Ver Perfil de ${series.timeA}`}
             >
               <span className={`text-base sm:text-xl font-black truncate block group-hover:text-amber-400 transition-colors ${aWonSeries ? 'text-white' : 'text-gray-400'}`}>
                 {series.timeA}
               </span>
+              <TeamLogo
+                teamName={series.timeA}
+                teamId={series.preferredIdA}
+                className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0"
+              />
             </div>
 
             <div className="px-4 py-1.5 rounded-xl bg-white/5 border border-white/10 font-mono text-lg sm:text-2xl font-black text-amber-400 shrink-0">
@@ -254,9 +261,14 @@ export default function MatchDetailModal({
 
             <div
               onClick={() => onOpenTeamProfile && onOpenTeamProfile(series.preferredIdB, series.timeB)}
-              className="text-left flex-1 truncate cursor-pointer group"
+              className="text-left flex-1 truncate cursor-pointer group flex items-center justify-start gap-2.5 sm:gap-3"
               title={`Ver Perfil de ${series.timeB}`}
             >
+              <TeamLogo
+                teamName={series.timeB}
+                teamId={series.preferredIdB}
+                className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0"
+              />
               <span className={`text-base sm:text-xl font-black truncate block group-hover:text-amber-400 transition-colors ${bWonSeries ? 'text-white' : 'text-gray-400'}`}>
                 {series.timeB}
               </span>
@@ -439,11 +451,15 @@ export default function MatchDetailModal({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                  <div className="bg-white/[0.03] border border-white/5 rounded-xl p-3">
-                    <span className="text-[10px] text-gray-400 uppercase font-mono block">Confronto</span>
-                    <span className="text-sm font-black text-white mt-1 block">
-                      {series.timeA} <span className="text-amber-400">vs</span> {series.timeB}
-                    </span>
+                  <div className="bg-white/[0.03] border border-white/5 rounded-xl p-3 flex flex-col items-center justify-center">
+                    <span className="text-[10px] text-gray-400 uppercase font-mono block mb-1">Confronto</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <TeamLogo teamName={series.timeA} teamId={series.preferredIdA} className="w-5 h-5 shrink-0" />
+                      <span className="text-xs sm:text-sm font-black text-white">{series.timeA}</span>
+                      <span className="text-amber-400 text-xs font-bold">vs</span>
+                      <span className="text-xs sm:text-sm font-black text-white">{series.timeB}</span>
+                      <TeamLogo teamName={series.timeB} teamId={series.preferredIdB} className="w-5 h-5 shrink-0" />
+                    </div>
                   </div>
 
                   <div className="bg-white/[0.03] border border-white/5 rounded-xl p-3">

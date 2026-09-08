@@ -17,6 +17,7 @@ import {
   findLiveMatchDetails,
   fetchMatchDetails
 } from '../services/api';
+import TeamLogo from '../utils/teamLogos';
 
 // Lê o primeiro valor definido entre possíveis nomes de campo da API (sem inventar números)
 function pick(obj, keys) {
@@ -249,6 +250,7 @@ export default function LiveMatchDetailModal({
     <div className="space-y-2">
       <div className="flex items-center justify-between border-b border-white/10 pb-2 px-1">
         <div className="flex items-center gap-2">
+          <TeamLogo teamName={teamName} className="w-5 h-5 rounded shrink-0" />
           <span className={`w-3 h-3 rounded-full ${isRadiant ? 'bg-emerald-400' : 'bg-rose-500'} animate-pulse`} />
           <h3 className={`text-sm font-black uppercase tracking-wider ${isRadiant ? 'text-emerald-400' : 'text-rose-400'}`}>
             {teamName} ({isRadiant ? 'Radiant' : 'Dire'})
@@ -435,7 +437,11 @@ export default function LiveMatchDetailModal({
               title={`Ver Perfil de ${teamAName}`}
             >
               <span className="text-base sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamAName}</span>
-              {logoA && <img src={logoA} alt="" className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform" onError={(e) => { e.target.style.display = 'none'; }} />}
+              <TeamLogo
+                teamName={teamAName}
+                logoUrl={logoA}
+                className="w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
+              />
             </div>
 
             <div className="flex flex-col items-center shrink-0">
@@ -458,7 +464,11 @@ export default function LiveMatchDetailModal({
               className="text-left flex-1 truncate flex items-center justify-start gap-3 cursor-pointer group"
               title={`Ver Perfil de ${teamBName}`}
             >
-              {logoB && <img src={logoB} alt="" className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform" onError={(e) => { e.target.style.display = 'none'; }} />}
+              <TeamLogo
+                teamName={teamBName}
+                logoUrl={logoB}
+                className="w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
+              />
               <span className="text-base sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamBName}</span>
             </div>
           </div>

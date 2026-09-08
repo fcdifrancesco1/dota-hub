@@ -1,6 +1,7 @@
 import React from 'react';
 import { Radio, Eye, Tv, Swords, ExternalLink } from 'lucide-react';
 import { SkeletonCard } from './SkeletonLoader';
+import TeamLogo from '../utils/teamLogos';
 
 export default function LiveMatchesSection({ liveGames = [], loading = false, onSelectLiveGame }) {
   return (
@@ -94,18 +95,11 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2.5 sm:gap-3 py-1 relative z-10">
                   {/* Time A (Esquerda) */}
                   <div className="flex items-center gap-2.5 min-w-0 justify-start">
-                    {rLogo ? (
-                      <div className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 flex items-center justify-center shrink-0">
-                        <img
-                          src={rLogo}
-                          alt=""
-                          className="w-full h-full object-contain"
-                          onError={(e) => { e.currentTarget.parentElement.style.display = 'none'; }}
-                        />
-                      </div>
-                    ) : (
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-                    )}
+                    <TeamLogo
+                      teamName={rName}
+                      logoUrl={rLogo}
+                      className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5"
+                    />
                     <div className="min-w-0">
                       <span className="text-xs sm:text-sm font-black text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={rName}>
                         {rName}
@@ -116,19 +110,25 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
                     </div>
                   </div>
 
-                  {/* Placar Central (Simétrico e Centralizado) */}
-                  <div className="flex flex-col items-center justify-center px-1.5 sm:px-2 shrink-0 text-center">
+                  {/* Placar Central do Jogo (Abates) */}
+                  <div className="flex flex-col items-center justify-center shrink-0 px-2 sm:px-4">
                     {hasRealScore ? (
-                      <div className="px-3.5 py-1 bg-black/80 border border-rose-500/30 rounded-xl text-base sm:text-lg font-mono font-black text-amber-400 shadow-inner tracking-wider">
-                        {rScore} <span className="text-gray-500 mx-0.5">:</span> {dScore}
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl bg-black/80 border border-rose-500/40 shadow-md shadow-rose-500/10">
+                        <span className="font-mono text-base sm:text-xl font-black text-emerald-400">
+                          {rScore}
+                        </span>
+                        <span className="text-gray-500 text-xs sm:text-sm font-bold">:</span>
+                        <span className="font-mono text-base sm:text-xl font-black text-rose-400">
+                          {dScore}
+                        </span>
                       </div>
                     ) : (
-                      <div className="px-2.5 py-1 bg-black/60 border border-white/10 rounded-xl text-[10px] font-mono font-bold text-gray-400 shadow-inner whitespace-nowrap">
-                        Aguardando dados
+                      <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 text-[10px] font-mono text-gray-400">
+                        VS
                       </div>
                     )}
-                    <span className="text-[8px] sm:text-[9px] text-gray-400 font-mono mt-1 uppercase tracking-wider whitespace-nowrap">
-                      {hasRealScore ? 'Placar do Jogo' : 'Ainda sem telemetria'}
+                    <span className="text-[8px] sm:text-[9px] text-gray-500 font-mono mt-1 uppercase tracking-wider">
+                      {hasRealScore ? 'Abates' : 'Confronto'}
                     </span>
                   </div>
 
@@ -142,18 +142,11 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
                         Time B
                       </span>
                     </div>
-                    {dLogo ? (
-                      <div className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 flex items-center justify-center shrink-0">
-                        <img
-                          src={dLogo}
-                          alt=""
-                          className="w-full h-full object-contain"
-                          onError={(e) => { e.currentTarget.parentElement.style.display = 'none'; }}
-                        />
-                      </div>
-                    ) : (
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-400 shrink-0 shadow-[0_0_8px_rgba(251,113,133,0.5)]" />
-                    )}
+                    <TeamLogo
+                      teamName={dName}
+                      logoUrl={dLogo}
+                      className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5"
+                    />
                   </div>
                 </div>
 

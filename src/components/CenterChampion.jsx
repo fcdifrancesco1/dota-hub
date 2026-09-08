@@ -7,7 +7,7 @@ export default function CenterChampion({ onOpenTeamProfile }) {
     year: "2025/2026",
     teamId: 7119388,
     teamName: "Team Spirit",
-    teamLogo: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/team_logos/7119388.png",
+    teamLogo: "/team-logos/spirit.png",
     roster: [
       { pos: 1, nick: "Yatoro", role: "Carry", kda: "6.8", gpm: 785, photo: "/yatoro.png" },
       { pos: 2, nick: "Larl", role: "Midlane", kda: "5.9", gpm: 690, photo: "/larl.png" },

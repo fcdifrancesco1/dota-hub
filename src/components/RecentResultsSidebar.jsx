@@ -1,6 +1,7 @@
 import React from 'react';
 import { History, Trophy, Swords, ChevronRight } from 'lucide-react';
 import { SkeletonCard } from './SkeletonLoader';
+import TeamLogo from '../utils/teamLogos';
 
 export default function RecentResultsSidebar({
   series = [],
@@ -67,6 +68,7 @@ export default function RecentResultsSidebar({
                 {/* Linha Time A */}
                 <div className="flex items-center justify-between gap-2 py-1">
                   <div className="flex items-center gap-2 truncate">
+                    <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} className="w-5 h-5 shrink-0" />
                     <span className={`text-xs font-bold truncate ${aWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
                       {s.timeA}
                     </span>
@@ -87,6 +89,7 @@ export default function RecentResultsSidebar({
                 {/* Linha Time B */}
                 <div className="flex items-center justify-between gap-2 py-1">
                   <div className="flex items-center gap-2 truncate">
+                    <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} className="w-5 h-5 shrink-0" />
                     <span className={`text-xs font-bold truncate ${bWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
                       {s.timeB}
                     </span>
