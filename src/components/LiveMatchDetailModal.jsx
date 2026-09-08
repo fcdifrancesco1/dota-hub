@@ -8,7 +8,8 @@ import {
   Loader2,
   RefreshCw,
   Castle,
-  Radio
+  Radio,
+  Eye
 } from 'lucide-react';
 import {
   getHeroImg,
@@ -425,8 +426,29 @@ export default function LiveMatchDetailModal({
               {leagueName} ({formatStr})
             </span>
             <span className="text-[10px] text-emerald-400/80 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" /> Sincronizado com a API a cada 20s ({lastSync})
+              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" /> Sincronizado a cada 20s ({lastSync})
             </span>
+            {matchData?.spectators > 0 && (
+              <span className="text-[10px] text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Eye className="w-2.5 h-2.5" /> {matchData.spectators.toLocaleString()} espectadores GOTV
+              </span>
+            )}
+            {matchData?.roshan_respawn_timer !== undefined && matchData?.roshan_respawn_timer !== null && (
+              matchData.roshan_respawn_timer > 0 ? (
+                <span className="text-[10px] text-amber-400 font-mono bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                  Roshan Renascendo ({Math.floor(matchData.roshan_respawn_timer / 60)}m {matchData.roshan_respawn_timer % 60}s)
+                </span>
+              ) : (
+                <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                  Roshan no Pit
+                </span>
+              )
+            )}
+            {matchData?.is_live_telemetry && (
+              <span className="text-[10px] text-purple-400 font-mono bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
+                Valve GOTV Oficial
+              </span>
+            )}
           </div>
 
           {/* Placar Principal do Jogo (Abates) */}

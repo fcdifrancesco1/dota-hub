@@ -519,20 +519,45 @@ export async function fetchUpcomingMatches() {
   return getCachedFast("upcoming_real_matches_v3") || [];
 }
 
-// 8. Buscar Telemetria em Tempo Real de Partida Ao Vivo (com matching robusto)
+// 8. Buscar Telemetria em Tempo Real de Partida Ao Vivo (com matching robusto e telemetria oficial Valve)
 export async function findLiveMatchDetails(game) {
   if (!game) return { matchData: null, maps: [] };
 
-  const nameA = game.timeA || game.radiant_team?.name || game.radiant_team?.team_name || "Radiant";
-  const nameB = game.timeB || game.dire_team?.name || game.dire_team?.team_name || "Dire";
+  const nameA = game.timeA || game.radiant_team?.name || game.radiant_team?.team_name || game.radiant_name || "Radiant";
+  const nameB = game.timeB || game.dire_team?.name || game.dire_team?.team_name || game.dire_name || "Dire";
 
-  // 1. Se o objeto já possui match_id explícito
+  // 1. Se temos match_id, consulta primeiro o endpoint oficial /api/live?match_id=... (telemetria direta da Valve)
   if (game.match_id) {
-    const data = await fetchMatchDetails(game.match_id);
-    return { matchData: data, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+    try {
+      const liveRes = await fetchWithTimeout(`/api/live?match_id=${game.match_id}`, {}, 3500);
+      if (liveRes.ok) {
+        const liveJson = await liveRes.json();
+        const games = liveJson?.result?.games || [];
+        const liveGame = games.find(g => String(g.match_id) === String(game.match_id));
+        if (liveGame && (liveGame.scoreboard || (liveGame.players && liveGame.players.length > 0))) {
+          return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+        }
+      }
+    } catch (e) {}
+
+    // Se a partida já possui telemetria no próprio objeto (cache ou snapshot recebido)
+    if (game.is_live_telemetry || game.scoreboard) {
+      return { matchData: game, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+    }
+
+    // Se não estiver mais ativa no GOTV ao vivo (já encerrou), busca o relatório pós-jogo completo
+    const finishedData = await fetchMatchDetails(game.match_id);
+    if (finishedData) {
+      return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+    }
   }
 
-  // 2. Busca nos proMatches recentes para encontrar os mapas daquela série
+  // 2. Se o objeto recebido já tem telemetria e scoreboard
+  if (game.is_live_telemetry || game.scoreboard) {
+    return { matchData: game, maps: [{ mapNumber: 1, match_id: String(game.match_id || '') }] };
+  }
+
+  // 3. Busca nas partidas recentes (proMatches) para encontrar os mapas daquela série
   try {
     const proRes = await fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 3500);
     if (proRes.ok) {
@@ -565,15 +590,15 @@ export async function findLiveMatchDetails(game) {
     console.warn("Aviso ao buscar mapas recentes da série ao vivo:", e);
   }
 
-  // 3. Fallback: Se não encontrou partida no proMatches, buscar se há dados no liveLeagueGames
+  // 4. Fallback final: verificar se há jogo ao vivo no endpoint /api/live compatível com os times
   try {
-    const liveRes = await fetchWithTimeout(`${OPENDOTA_BASE}/liveLeagueGames`, {}, 3500);
+    const liveRes = await fetchWithTimeout(`/api/live`, {}, 3500);
     if (liveRes.ok) {
       const liveJson = await liveRes.json();
       const games = liveJson?.result?.games || [];
       const liveGame = games.find(g => {
-        const rad = g.radiant_team?.team_name || g.radiant_team?.name;
-        const dire = g.dire_team?.team_name || g.dire_team?.name;
+        const rad = g.radiant_team?.team_name || g.radiant_team?.name || g.radiant_name;
+        const dire = g.dire_team?.team_name || g.dire_team?.name || g.dire_name;
         return isSeriesMatch(nameA, nameB, rad, dire);
       });
 
