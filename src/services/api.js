@@ -633,14 +633,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 10, games_played: 18, wins: 13 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International', dateStr: '06/09/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'Riyadh Masters', dateStr: '21/07/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Liquid', league_name: 'PGL Wallachia', dateStr: '18/05/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'DreamLeague Season 24', dateStr: '02/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'ESL One Birmingham', dateStr: '28/04/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'The International', dateStr: '04/09/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Natus Vincere', league_name: 'Clavision Snow Ruyi', dateStr: '01/08/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Virtus.pro', league_name: 'DreamLeague Season 23', dateStr: '22/05/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Lower Bracket R1', dateStr: '10/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'nouns', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Liquid', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'FISSURE Universe: Ep. 3', dateStr: '24/08/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'Clavision Snow Ruyi (Final)', dateStr: '04/08/2026' }
     ]
   },
   'mouz': {
@@ -685,12 +685,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 98, games_played: 20, wins: 15 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Liquid', league_name: 'The International', dateStr: '07/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'Riyadh Masters', dateStr: '21/07/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'DreamLeague Season 24', dateStr: '03/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Xtreme Gaming', league_name: 'PGL Wallachia', dateStr: '19/05/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'ESL One Birmingham', dateStr: '28/04/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'DreamLeague Season 23', dateStr: '26/05/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Lower Bracket Semi', dateStr: '14/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Cloud9', league_name: 'The International - Lower Bracket R3', dateStr: '13/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Zero', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'FISSURE Universe: Ep. 3', dateStr: '24/08/2026' }
     ]
   },
   'liquid': {
@@ -709,11 +711,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 89, games_played: 19, wins: 14 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International', dateStr: '07/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'The International', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'The International', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Xtreme Gaming', league_name: 'Riyadh Masters', dateStr: '20/07/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'PGL Wallachia', dateStr: '17/05/2026' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Grande Final (Campeão)', dateStr: '15/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Upper Bracket Final', dateStr: '14/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Cloud9', league_name: 'The International - Upper Bracket Semi', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' }
     ]
   },
   'gaimingladiators': {
@@ -732,10 +737,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 97, games_played: 18, wins: 13 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International', dateStr: '07/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'The International', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'Riyadh Masters', dateStr: '21/07/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'PGL Wallachia', dateStr: '19/05/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Grande Final', dateStr: '15/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'The International - Lower Bracket Final', dateStr: '15/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Upper Bracket Final', dateStr: '14/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'The International - Upper Bracket Semi', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'nouns', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' }
     ]
   },
   'betboom': {
@@ -754,10 +763,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 86, games_played: 17, wins: 11 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'DreamLeague Season 24', dateStr: '05/09/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'DreamLeague Season 24', dateStr: '03/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'PGL Wallachia', dateStr: '16/05/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'The International', dateStr: '04/09/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - Lower Bracket R1', dateStr: '10/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'nouns', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'FISSURE Universe: Ep. 3', dateStr: '22/08/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'Clavision Snow Ruyi', dateStr: '02/08/2026' }
     ]
   },
   'tundra': {
@@ -776,10 +789,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 7, games_played: 18, wins: 12 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'The International', dateStr: '06/09/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International', dateStr: '06/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'The International', dateStr: '05/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'OG', league_name: 'FISSURE Universe', dateStr: '24/08/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Lower Bracket Final', dateStr: '15/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'The International - Lower Bracket Semi', dateStr: '14/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Lower Bracket R3', dateStr: '13/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Upper Bracket Semi', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' }
     ]
   },
   'xtreme': {
@@ -798,10 +815,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 111, games_played: 18, wins: 12 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'The International', dateStr: '05/09/2026' },
-      { radiant: false, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'PGL Wallachia', dateStr: '19/05/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Team Falcons', league_name: 'Riyadh Masters', dateStr: '19/07/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Lower Bracket R3', dateStr: '13/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Spirit', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Upper Bracket R1', dateStr: '08/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'Clavision Snow Ruyi (Final)', dateStr: '04/08/2026' }
     ]
   },
   'natusvincere': {
@@ -886,10 +907,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 75, games_played: 17, wins: 11 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Beastcoast', league_name: 'The International - SA Qualifiers', dateStr: '01/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'BOOM Esports', league_name: 'PGL Wallachia', dateStr: '15/05/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'The International', dateStr: '04/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Tundra Esports', league_name: 'Riyadh Masters', dateStr: '17/07/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Aurora', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Tundra Esports', league_name: 'The International - Seeding Decider', dateStr: '06/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Cloud9', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: '1win Team', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - SA Qualifiers', dateStr: '22/06/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'BOOM Esports', league_name: 'Riyadh Masters Qualifiers', dateStr: '03/06/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'PGL Wallachia', dateStr: '15/05/2026' }
     ]
   },
   'aurora': {
@@ -908,10 +933,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 2, games_played: 16, wins: 10 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - SEA', dateStr: '02/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'Blacklist International', league_name: 'Riyadh Masters', dateStr: '18/07/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'The International', dateStr: '04/09/2026' },
-      { radiant: false, radiant_win: true, opposing_team_name: 'BetBoom Team', league_name: 'DreamLeague Season 23', dateStr: '23/05/2026' }
+      { radiant: true, radiant_win: false, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'HEROIC', league_name: 'The International - Lower Bracket R1', dateStr: '09/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Cloud9', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Spirit', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Team Liquid', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Talon Esports', league_name: 'The International - SEA Qualifiers', dateStr: '23/06/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Blacklist International', league_name: 'Riyadh Masters', dateStr: '18/07/2026' }
     ]
   },
   'nigmagalaxy': {
@@ -1024,9 +1053,9 @@ export function generateDynamicTeamProfile(teamName) {
 
 // 10. Buscar Perfil do Time (por ID ou Nome)
 export async function fetchTeamProfile(teamId, teamName = "") {
-  const cacheKey = `team_profile_v7_${teamId || 'name'}_${teamName || 'id'}`;
+  const cacheKey = `team_profile_v9_${teamId || 'name'}_${teamName || 'id'}`;
   const cached = getCached(cacheKey, 15 * 60 * 1000);
-  if (cached && cached.recentMatches?.length > 0) return cached;
+  if (cached && cached.recentMatches?.length > 0 && cached.recentMatches[0]?.dateStr) return cached;
 
   let resolvedId = teamId;
   let baseTeam = null;
