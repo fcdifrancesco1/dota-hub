@@ -34,7 +34,7 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
           </span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {liveGames.map((g, idx) => {
             const isLiquipedia = !!g.timeA;
 
@@ -66,87 +66,117 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
               <div
                 key={idx}
                 onClick={() => onSelectLiveGame && onSelectLiveGame(g)}
-                className="group bg-[#161A24]/90 hover:bg-[#1C2230] border border-rose-500/30 hover:border-rose-400 rounded-2xl p-4.5 cursor-pointer transition-all duration-200 shadow-md hover:shadow-xl hover:shadow-rose-500/10 hover:-translate-y-1 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between gap-3"
+                className="group bg-[#161A24]/90 hover:bg-[#1C2230] border border-rose-500/30 hover:border-rose-400 rounded-2xl p-5 sm:p-6 cursor-pointer transition-all duration-200 shadow-md hover:shadow-xl hover:shadow-rose-500/10 hover:-translate-y-1 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between gap-4"
               >
                 {/* Indicador de glow sutil ao vivo */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl pointer-events-none" />
 
                 {/* Topo do Card */}
-                <div className="flex items-center justify-between text-[10px] border-b border-white/5 pb-2.5">
-                  <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-rose-400">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                    AO VIVO {mins ? `· ${mins} min` : '· Em andamento'}
+                <div className="flex items-center justify-between text-xs border-b border-white/10 pb-3">
+                  <span className="flex items-center gap-2 font-black uppercase tracking-wider text-rose-400 text-[10px] sm:text-[11px]">
+                    <span className="relative flex h-2 w-2 shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+                    </span>
+                    AO VIVO {mins ? `· ${mins} MIN` : '· EM ANDAMENTO'}
                   </span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-gray-400 truncate max-w-[140px] font-semibold">{leagueName}</span>
-                    <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                  <div className="flex items-center gap-2 min-w-0 justify-end">
+                    <span className="text-gray-400 truncate max-w-[130px] sm:max-w-[170px] font-semibold text-[10px] sm:text-[11px]" title={leagueName}>
+                      {leagueName}
+                    </span>
+                    <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold shrink-0">
                       {formatStr}
                     </span>
                   </div>
                 </div>
 
-                {/* Confronto e Placar do Jogo (Abates) */}
-                <div className="flex items-center justify-between gap-3 py-1 relative z-10">
-                  <div className="flex-1 text-left truncate flex items-center gap-2">
+                {/* Confronto e Placar do Jogo (Abates) - Grid 100% Simétrico */}
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2.5 sm:gap-3 py-1 relative z-10">
+                  {/* Time A (Esquerda) */}
+                  <div className="flex items-center gap-2.5 min-w-0 justify-start">
                     {rLogo ? (
-                      <img src={rLogo} alt="" className="w-5 h-5 object-contain shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />
+                      <div className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 flex items-center justify-center shrink-0">
+                        <img
+                          src={rLogo}
+                          alt=""
+                          className="w-full h-full object-contain"
+                          onError={(e) => { e.currentTarget.parentElement.style.display = 'none'; }}
+                        />
+                      </div>
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                     )}
-                    <div className="truncate">
-                      <span className="text-xs font-black text-white truncate block">{rName}</span>
-                      <span className="text-[9px] text-emerald-400 font-bold uppercase">Time A</span>
+                    <div className="min-w-0">
+                      <span className="text-xs sm:text-sm font-black text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={rName}>
+                        {rName}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">
+                        Time A
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-center shrink-0">
+                  {/* Placar Central (Simétrico e Centralizado) */}
+                  <div className="flex flex-col items-center justify-center px-1.5 sm:px-2 shrink-0 text-center">
                     {hasRealScore ? (
-                      <div className="px-3.5 py-1 bg-black/80 border border-rose-500/30 rounded-xl text-base sm:text-lg font-mono font-black text-amber-400 shadow-inner">
+                      <div className="px-3.5 py-1 bg-black/80 border border-rose-500/30 rounded-xl text-base sm:text-lg font-mono font-black text-amber-400 shadow-inner tracking-wider">
                         {rScore} <span className="text-gray-500 mx-0.5">:</span> {dScore}
                       </div>
                     ) : (
-                      <div className="px-3 py-1 bg-black/60 border border-white/10 rounded-xl text-[10px] font-mono font-bold text-gray-400 shadow-inner">
+                      <div className="px-2.5 py-1 bg-black/60 border border-white/10 rounded-xl text-[10px] font-mono font-bold text-gray-400 shadow-inner whitespace-nowrap">
                         Aguardando dados
                       </div>
                     )}
-                    <span className="text-[8px] text-gray-400 font-mono mt-0.5 uppercase tracking-wider">
-                      {hasRealScore ? 'Placar do Jogo' : 'Ainda sem telemetria oficial'}
+                    <span className="text-[8px] sm:text-[9px] text-gray-400 font-mono mt-1 uppercase tracking-wider whitespace-nowrap">
+                      {hasRealScore ? 'Placar do Jogo' : 'Ainda sem telemetria'}
                     </span>
                   </div>
 
-                  <div className="flex-1 text-right truncate flex items-center justify-end gap-2">
-                    <div className="truncate">
-                      <span className="text-xs font-black text-white truncate block">{dName}</span>
-                      <span className="text-[9px] text-rose-400 font-bold uppercase">Time B</span>
+                  {/* Time B (Direita) */}
+                  <div className="flex items-center gap-2.5 min-w-0 justify-end text-right">
+                    <div className="min-w-0">
+                      <span className="text-xs sm:text-sm font-black text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={dName}>
+                        {dName}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-rose-400 font-bold uppercase tracking-wider block">
+                        Time B
+                      </span>
                     </div>
                     {dLogo ? (
-                      <img src={dLogo} alt="" className="w-5 h-5 object-contain shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />
+                      <div className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 flex items-center justify-center shrink-0">
+                        <img
+                          src={dLogo}
+                          alt=""
+                          className="w-full h-full object-contain"
+                          onError={(e) => { e.currentTarget.parentElement.style.display = 'none'; }}
+                        />
+                      </div>
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-400 shrink-0 shadow-[0_0_8px_rgba(251,113,133,0.5)]" />
                     )}
                   </div>
                 </div>
 
                 {/* Rodapé: Botão de Stream ou Acompanhar */}
-                <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px]">
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
                   {g.streamUrl ? (
                     <a
                       href={g.streamUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-extrabold text-xs transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-black text-xs transition-all shadow-sm"
                     >
                       <Tv className="w-3.5 h-3.5" /> Assistir Stream Oficial
                     </a>
                   ) : (
-                    <span className="text-gray-400 text-[10px] flex items-center gap-1">
-                      <Radio className="w-3 h-3 text-rose-400" /> Transmissão ao vivo
+                    <span className="text-gray-400 text-[10px] sm:text-[11px] flex items-center gap-1.5 font-medium">
+                      <Radio className="w-3.5 h-3.5 text-rose-400 animate-pulse" /> Transmissão ao vivo
                     </span>
                   )}
 
-                  <span className="text-gray-400 group-hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] font-bold">
-                    Ver Telemetria <Eye className="w-3.5 h-3.5" />
+                  <span className="text-gray-400 group-hover:text-amber-400 transition-colors flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
+                    Ver Telemetria <Eye className="w-3.5 h-3.5 text-cyan-400" />
                   </span>
                 </div>
               </div>

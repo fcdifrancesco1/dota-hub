@@ -176,7 +176,7 @@ export default function CombosView({
             return (
               <div
                 key={idx}
-                className="bg-[#141824] hover:bg-[#181E2E] border border-white/10 hover:border-amber-500/50 rounded-2xl p-4.5 space-y-3 transition-all shadow-md group"
+                className="bg-[#141824] hover:bg-[#181E2E] border border-white/10 hover:border-amber-500/50 rounded-2xl p-5 space-y-3 transition-all shadow-md group"
               >
                 {/* Header da Dupla */}
                 <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
