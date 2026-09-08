@@ -633,14 +633,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 10, games_played: 18, wins: 13 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: false, opposing_team_name: 'Xtreme Gaming', league_name: 'The International - Lower Bracket R2', dateStr: '11/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'G2 x iG', league_name: 'The International - Lower Bracket R1', dateStr: '10/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'nouns', league_name: 'The International - Seeding Decider', dateStr: '07/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Liquid', league_name: 'The International - Fase de Grupos', dateStr: '05/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Aurora', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'beastcoast', league_name: 'The International - Fase de Grupos', dateStr: '04/09/2026' },
-      { radiant: true, radiant_win: false, opposing_team_name: 'Team Falcons', league_name: 'FISSURE Universe: Ep. 3', dateStr: '24/08/2026' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Xtreme Gaming', league_name: 'Clavision Snow Ruyi (Final)', dateStr: '04/08/2026' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Grande Final (Campeã 3-0)', dateStr: '29/10/2023' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'LGD Gaming', league_name: 'The International - Upper Bracket Final (2-0)', dateStr: '28/10/2023' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Team Liquid', league_name: 'The International - Upper Bracket Semi (2-0)', dateStr: '22/10/2023' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Virtus.pro', league_name: 'The International - Upper Bracket R1 (2-1)', dateStr: '20/10/2023' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Shopify Rebellion', league_name: 'The International - Fase de Classificação (2-0)', dateStr: '15/10/2023' },
+      { radiant: true, radiant_win: true, opposing_team_name: '9Pandas', league_name: 'The International - Fase de Grupos (2-0)', dateStr: '13/10/2023' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Entity', league_name: 'The International - Fase de Grupos (2-0)', dateStr: '13/10/2023' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'Evil Geniuses', league_name: 'The International - Fase de Grupos (2-0)', dateStr: '12/10/2023' }
     ]
   },
   'mouz': {
@@ -1053,7 +1053,7 @@ export function generateDynamicTeamProfile(teamName) {
 
 // 10. Buscar Perfil do Time (por ID ou Nome)
 export async function fetchTeamProfile(teamId, teamName = "") {
-  const cacheKey = `team_profile_v9_${teamId || 'name'}_${teamName || 'id'}`;
+  const cacheKey = `team_profile_v10_${teamId || 'name'}_${teamName || 'id'}`;
   const cached = getCached(cacheKey, 15 * 60 * 1000);
   if (cached && cached.recentMatches?.length > 0 && cached.recentMatches[0]?.dateStr) return cached;
 
