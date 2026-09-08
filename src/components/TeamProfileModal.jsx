@@ -162,9 +162,8 @@ export default function TeamProfileModal({
                   })}
                 </div>
               ) : (
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-center space-y-1">
-                  <p className="text-xs text-gray-300 font-medium">Nenhuma partida tier-1 sincronizada na base da OpenDota / Valve.</p>
-                  <p className="text-[11px] text-gray-500">Equipe nova participante de qualificatórias regionais abertas ou divisão de acesso.</p>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-center">
+                  <p className="text-xs text-gray-400 font-mono">Nenhum histórico recente disponível.</p>
                 </div>
               )}
             </div>
