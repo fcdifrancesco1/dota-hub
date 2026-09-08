@@ -633,14 +633,14 @@ export const BUILTIN_PRO_TEAMS = {
       { hero_id: 10, games_played: 18, wins: 13 }
     ],
     recentMatches: [
-      { radiant: true, radiant_win: true, opposing_team_name: 'Gaimin Gladiators', league_name: 'The International - Grande Final (Campeã 3-0)', dateStr: '29/10/2023' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'LGD Gaming', league_name: 'The International - Upper Bracket Final (2-0)', dateStr: '28/10/2023' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Team Liquid', league_name: 'The International - Upper Bracket Semi (2-0)', dateStr: '22/10/2023' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Virtus.pro', league_name: 'The International - Upper Bracket R1 (2-1)', dateStr: '20/10/2023' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Shopify Rebellion', league_name: 'The International - Fase de Classificação (2-0)', dateStr: '15/10/2023' },
-      { radiant: true, radiant_win: true, opposing_team_name: '9Pandas', league_name: 'The International - Fase de Grupos (2-0)', dateStr: '13/10/2023' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Entity', league_name: 'The International - Fase de Grupos (2-0)', dateStr: '13/10/2023' },
-      { radiant: true, radiant_win: true, opposing_team_name: 'Evil Geniuses', league_name: 'The International - Fase de Grupos (2-0)', dateStr: '12/10/2023' }
+      { radiant: true, radiant_win: true, opposing_team_name: 'VISION', league_name: 'The International 2026 (Grande Final - 1º Lugar)', score: '3 : 2', placement: '1st', dateStr: '23/08/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Yandex', league_name: 'Esports World Cup 2026', score: '0 : 2', placement: '5th - 8th', dateStr: '16/07/2026' },
+      { radiant: true, radiant_win: true, opposing_team_name: 'NGX', league_name: 'The International 2026: Europe Qualifier', score: '2 : 1', placement: '1st - 2nd', dateStr: '25/06/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Yandex', league_name: 'BLAST SLAM VII', score: '0 : 2', placement: '7th - 8th', dateStr: '30/05/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Aurora', league_name: 'DreamLeague Season 29', score: '0 : 2', placement: '3rd', dateStr: '24/05/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'Falcons', league_name: 'PGL Wallachia Season 8', score: '0 : 2', placement: '7th - 8th', dateStr: '24/04/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'GL', league_name: 'PREMIER SERIES', score: '1 : 2', placement: '7th - 8th', dateStr: '09/04/2026' },
+      { radiant: true, radiant_win: false, opposing_team_name: 'XG', league_name: 'ESL One Birmingham 2026', score: '1 : 2', placement: '5th - 6th', dateStr: '27/03/2026' }
     ]
   },
   'mouz': {
@@ -1051,17 +1051,199 @@ export function generateDynamicTeamProfile(teamName) {
   };
 }
 
+export function toLiquipediaTeamPage(teamName) {
+  if (!teamName) return '';
+  const clean = String(teamName).toLowerCase().trim();
+
+  const map = {
+    'team spirit': 'Team_Spirit',
+    'spirit': 'Team_Spirit',
+    'tspirit': 'Team_Spirit',
+    'team liquid': 'Team_Liquid',
+    'liquid': 'Team_Liquid',
+    'tl': 'Team_Liquid',
+    'gaimin gladiators': 'Gaimin_Gladiators',
+    'gg': 'Gaimin_Gladiators',
+    'gaimin': 'Gaimin_Gladiators',
+    'team falcons': 'Team_Falcons',
+    'falcons': 'Team_Falcons',
+    'flcn': 'Team_Falcons',
+    'tundra esports': 'Tundra_Esports',
+    'tundra': 'Tundra_Esports',
+    'xtreme gaming': 'Xtreme_Gaming',
+    'xtreme': 'Xtreme_Gaming',
+    'xg': 'Xtreme_Gaming',
+    'mouz': 'MOUZ',
+    'mousesports': 'MOUZ',
+    'betboom team': 'BetBoom_Team',
+    'betboom': 'BetBoom_Team',
+    'bb team': 'BetBoom_Team',
+    'bb': 'BetBoom_Team',
+    'natus vincere': 'Natus_Vincere',
+    'navi': 'Natus_Vincere',
+    'na vi': 'Natus_Vincere',
+    'virtus.pro': 'Virtus.pro',
+    'virtus pro': 'Virtus.pro',
+    'vp': 'Virtus.pro',
+    'og': 'OG',
+    'heroic': 'HEROIC',
+    'aurora': 'Aurora',
+    'aurora gaming': 'Aurora',
+    'nigma galaxy': 'Nigma_Galaxy',
+    'nigma': 'Nigma_Galaxy',
+    'ngx': 'Nigma_Galaxy',
+    'cloud9': 'Cloud9',
+    'c9': 'Cloud9',
+    'beastcoast': 'Beastcoast',
+    'bc': 'Beastcoast',
+    'shopify rebellion': 'Shopify_Rebellion',
+    'sr': 'Shopify_Rebellion',
+    '1win': '1win_Team',
+    '1win team': '1win_Team',
+    'talon esports': 'Talon_Esports',
+    'talon': 'Talon_Esports',
+    'entity': 'Entity',
+    'team secret': 'Team_Secret',
+    'secret': 'Team_Secret'
+  };
+
+  if (map[clean]) return map[clean];
+  return String(teamName).trim().replace(/\s+/g, '_');
+}
+
+export function parseLiquipediaResultsHtml(html) {
+  const rows = html.match(/<tr[^>]*table2(&#95;|_)(\1)row--body[^>]*>[\s\S]*?<\/tr>/gi) || [];
+
+  return rows.slice(0, 15).map(row => {
+    const tds = row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || [];
+    if (tds.length < 5) return null;
+
+    const rawDate = tds[0].replace(/<[^>]+>/g, '').trim();
+    let dateStr = rawDate;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+      const [y, m, d] = rawDate.split('-');
+      dateStr = `${d}/${m}/${y}`;
+    }
+
+    const rawPlacement = tds[1].replace(/<[^>]+>/g, '').replace(/&#160;/g, ' ').trim();
+    const placement = rawPlacement.replace(/&[a-z0-9#]+;/gi, '').trim();
+    const tier = tds[2] ? tds[2].replace(/<[^>]+>/g, '').trim() : '';
+
+    let tourney = tds[4] ? tds[4].replace(/<[^>]+>/g, '').trim() : '';
+    if (!tourney && tds[3]) tourney = tds[3].replace(/<[^>]+>/g, '').trim();
+
+    const score = tds[5]
+      ? tds[5]
+          .replace(/<[^>]+>/g, '')
+          .replace(/&#160;/g, ' ')
+          .replace(/&#58;/g, ':')
+          .replace(/\s+/g, ' ')
+          .trim()
+      : '';
+
+    const opp = tds[6] ? tds[6].replace(/<[^>]+>/g, '').replace(/&[a-z0-9#]+;/gi, '').trim() : '';
+
+    let won = false;
+    if (placement.startsWith('1st') || placement.toLowerCase().includes('w')) {
+      won = true;
+    } else if (score.includes(':')) {
+      const parts = score.split(':').map(p => parseInt(p.trim(), 10));
+      if (!isNaN(parts[0]) && !isNaN(parts[1])) {
+        won = parts[0] > parts[1];
+      }
+    }
+
+    return {
+      date: rawDate,
+      dateStr,
+      placement,
+      tier,
+      league_name: tourney || 'Torneio Liquipedia',
+      score,
+      opposing_team_name: opp || 'Adversário',
+      radiant: true,
+      radiant_win: won
+    };
+  }).filter(Boolean);
+}
+
+export async function fetchLiquipediaTeamResults(teamName) {
+  if (!teamName) return [];
+  const wikiPage = toLiquipediaTeamPage(teamName);
+  const cacheKey = `liquipedia_team_results_v2_${wikiPage}`;
+  const cached = getCached(cacheKey, 10 * 60 * 1000);
+  if (cached && cached.length > 0) return cached;
+
+  // 1. Rota serverless Vercel
+  try {
+    const res = await fetchWithTimeout(`/api/team-results?team=${encodeURIComponent(wikiPage)}`, {}, 4000);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.results) && data.results.length > 0) {
+        setCache(cacheKey, data.results);
+        return data.results;
+      }
+    }
+  } catch (e) {}
+
+  // 2. Fallback direto da Liquipedia via CORS (origin=*)
+  try {
+    const directRes = await fetchWithTimeout(
+      `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Results&format=json&origin=*`,
+      { headers: { 'Accept': 'application/json' } },
+      4500
+    );
+    if (directRes.ok) {
+      const data = await directRes.json();
+      if (!data.error && data.parse?.text?.['*']) {
+        const html = data.parse.text['*'];
+        const results = parseLiquipediaResultsHtml(html);
+        if (results.length > 0) {
+          setCache(cacheKey, results);
+          return results;
+        }
+      }
+    }
+  } catch (e) {}
+
+  return [];
+}
+
 // 10. Buscar Perfil do Time (por ID ou Nome)
 export async function fetchTeamProfile(teamId, teamName = "") {
-  const cacheKey = `team_profile_v10_${teamId || 'name'}_${teamName || 'id'}`;
+  const cacheKey = `team_profile_v12_${teamId || 'name'}_${teamName || 'id'}`;
   const cached = getCached(cacheKey, 15 * 60 * 1000);
   if (cached && cached.recentMatches?.length > 0 && cached.recentMatches[0]?.dateStr) return cached;
 
   let resolvedId = teamId;
   let baseTeam = null;
 
-  // 1. Verificar se temos dados oficiais na base nativa de times pro
-  const builtin = findBuiltinTeam(teamName);
+  const effectiveName = teamName || (teamId ? String(teamId) : "");
+  const builtin = findBuiltinTeam(effectiveName);
+
+  // 1. Prioridade Máxima: Buscar histórico oficial atualizado da Liquipedia
+  const liquipediaMatches = await fetchLiquipediaTeamResults(effectiveName || builtin?.name);
+  if (liquipediaMatches && liquipediaMatches.length > 0) {
+    const wins = liquipediaMatches.filter(m => m.radiant_win).length;
+    const winRate = Math.round((wins / liquipediaMatches.length) * 100);
+
+    const result = {
+      name: builtin?.name || teamName || "Equipe Profissional",
+      tag: builtin?.tag || (effectiveName.length <= 4 ? effectiveName.toUpperCase() : ""),
+      logo_url: builtin?.logo_url || null,
+      rating: builtin?.rating || 1500,
+      wins: builtin?.wins || wins * 5,
+      losses: builtin?.losses || (liquipediaMatches.length - wins) * 5,
+      recentMatches: liquipediaMatches,
+      recentWinRate: winRate,
+      topHeroes: builtin?.topHeroes || [],
+      isUnranked: false,
+      source: 'liquipedia'
+    };
+
+    setCache(cacheKey, result);
+    return result;
+  }
 
   // 2. Se não temos teamId, buscar na lista geral de times da OpenDota (com timeout rápido de 2500ms)
   if (!resolvedId && teamName) {
@@ -1108,7 +1290,8 @@ export async function fetchTeamProfile(teamId, teamName = "") {
           recentMatches: last20,
           recentWinRate: winRate,
           topHeroes: topHeroes.length > 0 ? topHeroes.slice(0, 5) : (builtin?.topHeroes || []),
-          isUnranked: false
+          isUnranked: false,
+          source: 'opendota'
         };
 
         setCache(cacheKey, result);
@@ -1117,14 +1300,14 @@ export async function fetchTeamProfile(teamId, teamName = "") {
     } catch (e) {}
   }
 
-  // 4. Se a OpenDota estiver offline/lenta ou sem partidas:
-  // Se for um time profissional consagrado, usa o perfil oficial pré-carregado
+  // 4. Se a Liquipedia e OpenDota estiverem offline:
   if (builtin) {
-    setCache(cacheKey, builtin);
-    return builtin;
+    const builtinResult = { ...builtin, source: 'official' };
+    setCache(cacheKey, builtinResult);
+    return builtinResult;
   }
 
-  // 5. Para qualquer outra equipe (qualificatórias, divisão de acesso, etc.), gera perfil completo com histórico de partidas e heróis
+  // 5. Para qualquer outra equipe (qualificatórias, divisão de acesso, etc.)
   const dynamicProfile = generateDynamicTeamProfile(teamName);
   setCache(cacheKey, dynamicProfile);
   return dynamicProfile;
