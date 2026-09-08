@@ -3,7 +3,7 @@ import { BarChart3, Trophy, Flame, Shield, Swords, Sparkles, Filter, Search, Arr
 import { fetchHeroStats } from '../services/api';
 import { SkeletonTable } from './SkeletonLoader';
 
-export default function HeroMetaView({ searchQuery = "" }) {
+export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
   const [heroes, setHeroes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
@@ -177,6 +177,14 @@ export default function HeroMetaView({ searchQuery = "" }) {
         </div>
       </div>
 
+      {/* DICA DE INTERATIVIDADE */}
+      <div className="flex items-center justify-between text-xs text-amber-300 font-mono bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl">
+        <span className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>Clique em qualquer herói para abrir a <strong>Enciclopédia Completa</strong>: Habilidades oficiais, Upgrades de Aghanim, Talentos e Counters!</span>
+        </span>
+      </div>
+
       {/* TABELA GERAL DO META */}
       {loading ? (
         <SkeletonTable rows={10} cols={6} />
@@ -244,7 +252,12 @@ export default function HeroMetaView({ searchQuery = "" }) {
                 };
 
                 return (
-                  <tr key={h.id} className="hover:bg-white/[0.03] transition-colors">
+                  <tr
+                    key={h.id}
+                    onClick={() => onSelectHero && onSelectHero(h)}
+                    className="hover:bg-white/[0.06] transition-colors cursor-pointer group"
+                    title={`Clique para ver detalhes completos de ${h.name}`}
+                  >
                     {/* Badge do Tier */}
                     <td className="p-3 pl-4">
                       <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-black text-xs font-mono border ${tierStyles[h.tier] || tierStyles['B']}`}>
@@ -258,11 +271,14 @@ export default function HeroMetaView({ searchQuery = "" }) {
                         <img
                           src={h.img}
                           alt={h.name}
-                          className="w-10 h-6 object-cover rounded border border-white/10 shrink-0"
+                          className="w-10 h-6 object-cover rounded border border-white/10 shrink-0 group-hover:border-amber-400 transition-colors"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div>
-                          <strong className="text-white text-xs block">{h.name}</strong>
+                          <div className="flex items-center gap-1.5">
+                            <strong className="text-white text-xs block group-hover:text-amber-400 transition-colors">{h.name}</strong>
+                            <span className="opacity-0 group-hover:opacity-100 text-[10px] text-amber-400 font-mono transition-opacity">→</span>
+                          </div>
                           <span className="text-[10px] text-gray-400">{h.attackType}</span>
                         </div>
                       </div>

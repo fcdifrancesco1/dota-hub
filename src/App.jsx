@@ -9,7 +9,10 @@ import LiveMatchDetailModal from './components/LiveMatchDetailModal';
 import HeroMetaView from './components/HeroMetaView';
 import TournamentsView from './components/TournamentsView';
 import MmrRankingView from './components/MmrRankingView';
+import RecordsView from './components/RecordsView';
+import CombosView from './components/CombosView';
 import TeamProfileModal from './components/TeamProfileModal';
+import HeroDetailModal from './components/HeroDetailModal';
 
 import {
   fetchConstants,
@@ -46,6 +49,7 @@ export default function App() {
   const [selectedSeries, setSelectedSeries] = useState(null);
   const [selectedLiveGame, setSelectedLiveGame] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null); // { id, name }
+  const [selectedHero, setSelectedHero] = useState(null); // { id, localized_name, ... }
 
   // 1. Carregar Constantes de Heróis e Itens da Valve em segundo plano
   useEffect(() => {
@@ -273,7 +277,10 @@ export default function App() {
       {/* 3. VISUALIZAÇÃO: META DO PATCH / TIER LIST */}
       {currentTab === 'meta' && (
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          <HeroMetaView searchQuery={searchQuery} />
+          <HeroMetaView
+            searchQuery={searchQuery}
+            onSelectHero={(h) => setSelectedHero(h)}
+          />
         </div>
       )}
 
@@ -281,6 +288,26 @@ export default function App() {
       {currentTab === 'mmr' && (
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <MmrRankingView searchQuery={searchQuery} />
+        </div>
+      )}
+
+      {/* 5. VISUALIZAÇÃO: RECORDES MUNDIAIS (HISTÓRICO COMPETITIVO) */}
+      {currentTab === 'records' && (
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <RecordsView
+            constants={constants}
+            onSelectHero={(h) => setSelectedHero(h)}
+          />
+        </div>
+      )}
+
+      {/* 6. VISUALIZAÇÃO: COMBOS & SINERGIAS DE HERÓIS */}
+      {currentTab === 'combos' && (
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <CombosView
+            constants={constants}
+            onSelectHero={(h) => setSelectedHero(h)}
+          />
         </div>
       )}
 
@@ -293,6 +320,7 @@ export default function App() {
           onOpenTeamProfile={(teamId, teamName) =>
             setSelectedTeam({ id: teamId, name: teamName })
           }
+          onSelectHero={(h) => setSelectedHero(h)}
         />
       )}
 
@@ -305,6 +333,7 @@ export default function App() {
           onOpenTeamProfile={(teamId, teamName) =>
             setSelectedTeam({ id: teamId, name: teamName })
           }
+          onSelectHero={(h) => setSelectedHero(h)}
         />
       )}
 
@@ -315,6 +344,17 @@ export default function App() {
           teamName={selectedTeam.name}
           constants={constants}
           onClose={() => setSelectedTeam(null)}
+          onSelectHero={(h) => setSelectedHero(h)}
+        />
+      )}
+
+      {/* MODAL ENCICLOPÉDIA DE HERÓI (HABILIDADES, AGHANIM, TALENTOS, BENCHMARKS, COUNTERS) */}
+      {selectedHero && (
+        <HeroDetailModal
+          hero={selectedHero}
+          constants={constants}
+          onClose={() => setSelectedHero(null)}
+          onSelectAnotherHero={(h) => setSelectedHero(h)}
         />
       )}
     </div>

@@ -70,7 +70,8 @@ export default function LiveMatchDetailModal({
   game,
   constants,
   onClose,
-  onOpenTeamProfile
+  onOpenTeamProfile,
+  onSelectHero
 }) {
   const [loading, setLoading] = useState(true);
   const [matchData, setMatchData] = useState(null);
@@ -283,22 +284,31 @@ export default function LiveMatchDetailModal({
                 <tr key={i} className="transition-colors hover:bg-white/[0.03]">
                   {/* Jogador e Herói */}
                   <td className="p-3 pl-4">
-                    <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (onSelectHero && constants?.heroes?.[p.hero_id]) {
+                          onSelectHero(constants.heroes[p.hero_id]);
+                        }
+                      }}
+                      className="flex items-center gap-2.5 text-left group hover:opacity-85 transition-opacity"
+                      title={constants?.heroes?.[p.hero_id] ? "Ver enciclopédia do herói" : undefined}
+                    >
                       {hImg && (
                         <img
                           src={hImg}
                           alt={hName}
                           className={`w-9 h-6 object-cover rounded border ${
                             isRadiant ? 'border-emerald-400' : 'border-rose-400'
-                          }`}
+                          } group-hover:ring-2 group-hover:ring-amber-400/50 transition-all`}
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       )}
                       <div className="min-w-0">
                         <span className="text-white font-bold truncate max-w-[130px] block">{p.name}</span>
-                        <span className="text-[10px] text-gray-400 truncate">{hName}</span>
+                        <span className="text-[10px] text-gray-400 truncate group-hover:text-amber-400 transition-colors">{hName}</span>
                       </div>
-                    </div>
+                    </button>
                   </td>
 
                   {/* Nível */}

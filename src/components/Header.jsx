@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Trophy, Award, BarChart3, Search, RefreshCw, X, Menu } from 'lucide-react';
+import { Flame, Trophy, Award, BarChart3, Search, RefreshCw, X, Menu, Users, Swords } from 'lucide-react';
 
 export default function Header({
   currentTab,
@@ -16,7 +16,9 @@ export default function Header({
     { id: 'hub', label: 'Hub Principal', icon: Flame },
     { id: 'torneios', label: 'Torneios', icon: Trophy },
     { id: 'meta', label: 'Meta do Patch', icon: BarChart3 },
-    { id: 'mmr', label: 'Ranking MMR', icon: Award }
+    { id: 'records', label: 'Recordes', icon: Award },
+    { id: 'combos', label: 'Combos', icon: Users },
+    { id: 'mmr', label: 'Ranking MMR', icon: Swords }
   ];
 
   return (

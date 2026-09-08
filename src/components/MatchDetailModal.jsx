@@ -7,7 +7,8 @@ export default function MatchDetailModal({
   series,
   constants,
   onClose,
-  onOpenTeamProfile
+  onOpenTeamProfile,
+  onSelectHero
 }) {
   const [activeMapIndex, setActiveMapIndex] = useState(0);
   const [loadedMatchData, setLoadedMatchData] = useState(null);
@@ -81,18 +82,27 @@ export default function MatchDetailModal({
                   <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
                     {/* Jogador e Herói */}
                     <td className="p-3 pl-4">
-                      <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onSelectHero && constants?.heroes?.[p.hero_id]) {
+                            onSelectHero(constants.heroes[p.hero_id]);
+                          }
+                        }}
+                        className="flex items-center gap-2.5 text-left group hover:opacity-85 transition-opacity"
+                        title={constants?.heroes?.[p.hero_id] ? "Ver enciclopédia do herói" : undefined}
+                      >
                         <img
                           src={heroImg}
                           alt={heroName}
-                          className="w-10 h-6 object-cover rounded border border-white/10 shrink-0"
+                          className="w-10 h-6 object-cover rounded border border-white/10 shrink-0 group-hover:border-amber-400/60 transition-colors"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div className="min-w-0">
                           <div className="text-white font-bold truncate max-w-[130px]">{playerName}</div>
-                          <div className="text-[10px] text-gray-400 truncate">{heroName}</div>
+                          <div className="text-[10px] text-gray-400 truncate group-hover:text-amber-400 transition-colors">{heroName}</div>
                         </div>
-                      </div>
+                      </button>
                     </td>
 
                     {/* Nível */}

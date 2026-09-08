@@ -601,3 +601,216 @@ export async function fetchTeamProfile(teamId, teamName = "") {
   setCache(cacheKey, fallbackResult);
   return fallbackResult;
 }
+
+// 11. Buscar Detalhes Completos do Herói (Habilidades, Aghanim, Talentos, Benchmarks, Counters)
+export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
+  if (!heroId) return null;
+  const cacheKey = `hero_full_details_${heroId}`;
+  const cached = getCached(cacheKey, 60 * 60 * 1000);
+  if (cached) return cached;
+
+  try {
+    const [heroAbilitiesRes, abilitiesRes, aghsRes, benchmarksRes, matchupsRes] = await Promise.all([
+      fetchWithTimeout(`${OPENDOTA_BASE}/constants/hero_abilities`, {}, 6000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetchWithTimeout(`${OPENDOTA_BASE}/constants/abilities`, {}, 6000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetchWithTimeout(`${OPENDOTA_BASE}/constants/aghs_desc`, {}, 5000).then(r => r.ok ? r.json() : []).catch(() => []),
+      fetchWithTimeout(`${OPENDOTA_BASE}/benchmarks?hero_id=${heroId}`, {}, 5000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetchWithTimeout(`${OPENDOTA_BASE}/heroes/${heroId}/matchups`, {}, 5000).then(r => r.ok ? r.json() : []).catch(() => [])
+    ]);
+
+    // Resolver chave interna do herói
+    let resolvedKey = heroInternalName;
+    if (!resolvedKey || !heroAbilitiesRes[resolvedKey]) {
+      const keys = Object.keys(heroAbilitiesRes);
+      resolvedKey = keys.find(k => k.includes(String(heroInternalName).toLowerCase())) ||
+                    keys.find(k => heroAbilitiesRes[k]?.hero_id === heroId) ||
+                    keys[0];
+    }
+
+    const heroData = heroAbilitiesRes[resolvedKey] || {};
+    const abilityNames = (heroData.abilities || []).filter(a => a && !a.includes('generic_hidden'));
+
+    const abilitiesList = abilityNames.map(name => {
+      const raw = abilitiesRes[name] || {};
+      return {
+        name,
+        dname: raw.dname || name.replace(/_/g, ' '),
+        desc: raw.desc || '',
+        behavior: Array.isArray(raw.behavior) ? raw.behavior.join(', ') : (raw.behavior || ''),
+        dmg_type: raw.dmg_type || '',
+        bkbpierce: raw.bkbpierce || '',
+        mc: Array.isArray(raw.mc) ? raw.mc.join(' / ') : (raw.mc || ''),
+        cd: Array.isArray(raw.cd) ? raw.cd.join(' / ') : (raw.cd || ''),
+        img: raw.img ? `${STEAM_CDN}${raw.img}` : `${STEAM_CDN}/apps/dota2/images/dota_react/abilities/${name}.png`,
+        attrib: raw.attrib || []
+      };
+    });
+
+    // Aghanim's Scepter e Shard
+    let aghsData = {};
+    if (Array.isArray(aghsRes)) {
+      aghsData = aghsRes.find(a => a.hero_id === heroId || a.hero_name === resolvedKey) || {};
+    } else if (aghsRes && typeof aghsRes === 'object') {
+      const shortKey = resolvedKey.replace('npc_dota_hero_', '');
+      aghsData = aghsRes[shortKey] || aghsRes[resolvedKey] || {};
+    }
+
+    // Árvore de Talentos
+    const rawTalents = heroData.talents || [];
+    const talents = [4, 3, 2, 1].map(lvl => {
+      const pair = rawTalents.filter(t => t.level === lvl);
+      return {
+        level: lvl === 1 ? 10 : lvl === 2 ? 15 : lvl === 3 ? 20 : 25,
+        left: abilitiesRes[pair[0]?.name]?.dname || pair[0]?.name || 'Talento',
+        right: abilitiesRes[pair[1]?.name]?.dname || pair[1]?.name || 'Talento'
+      };
+    });
+
+    // Matchups (Melhores e Maiores Counters)
+    const validMatchups = (Array.isArray(matchupsRes) ? matchupsRes : []).filter(m => m.games_played >= 8);
+    validMatchups.sort((a, b) => (b.wins / b.games_played) - (a.wins / a.games_played));
+
+    const bestMatchups = validMatchups.slice(0, 5).map(m => ({
+      hero_id: m.hero_id,
+      games_played: m.games_played,
+      wins: m.wins,
+      winRate: Number(((m.wins / m.games_played) * 100).toFixed(1))
+    }));
+
+    const worstMatchups = validMatchups.slice(-5).reverse().map(m => ({
+      hero_id: m.hero_id,
+      games_played: m.games_played,
+      wins: m.wins,
+      winRate: Number(((m.wins / m.games_played) * 100).toFixed(1))
+    }));
+
+    // Benchmarks de Performance (Percentis)
+    const rawBench = benchmarksRes?.result || {};
+    const extractPercentile = (metricName) => {
+      const list = rawBench[metricName] || [];
+      const p50 = list.find(item => Math.abs(item.percentile - 0.5) < 0.08)?.value || 0;
+      const p75 = list.find(item => Math.abs(item.percentile - 0.75) < 0.08)?.value || 0;
+      const p90 = list.find(item => Math.abs(item.percentile - 0.9) < 0.08)?.value || 0;
+      return { p50: Math.round(p50), p75: Math.round(p75), p90: Math.round(p90) };
+    };
+
+    const benchmarks = {
+      gpm: extractPercentile('gold_per_min'),
+      xpm: extractPercentile('xp_per_min'),
+      kpm: extractPercentile('kills_per_min'),
+      lpm: extractPercentile('last_hits_per_min'),
+      damage: extractPercentile('hero_damage_per_min')
+    };
+
+    const result = {
+      hero_id: heroId,
+      abilities: abilitiesList,
+      aghs: {
+        has_scepter: aghsData.has_scepter ?? true,
+        scepter_desc: aghsData.scepter_desc || 'Aprimora uma habilidade existente ou adiciona um novo poder ao herói.',
+        scepter_skill_name: aghsData.scepter_skill_name || 'Habilidade Cetro',
+        has_shard: aghsData.has_shard ?? true,
+        shard_desc: aghsData.shard_desc || 'Concede melhorias táticas ou novos efeitos passivos ao herói.',
+        shard_skill_name: aghsData.shard_skill_name || 'Habilidade Fragmento'
+      },
+      talents,
+      bestMatchups,
+      worstMatchups,
+      benchmarks
+    };
+
+    setCache(cacheKey, result);
+    return result;
+  } catch (err) {
+    console.error("Erro ao carregar detalhes completos do herói:", err);
+    return getCachedFast(cacheKey) || null;
+  }
+}
+
+// 12. Buscar Recordes Mundiais do Dota 2
+export async function fetchDotaRecords(recordType = "kills") {
+  const cacheKey = `records_${recordType}`;
+  const cached = getCached(cacheKey, 30 * 60 * 1000);
+  if (cached) return cached;
+
+  try {
+    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/records/${recordType}`, {}, 5000);
+    if (res.ok) {
+      const data = await res.json();
+      const list = (Array.isArray(data) ? data : []).slice(0, 50);
+      setCache(cacheKey, list);
+      return list;
+    }
+  } catch (err) {
+    console.warn("Aviso ao carregar recordes do Dota 2:", err);
+  }
+  return getCachedFast(cacheKey) || [];
+}
+
+// 13. Sinergias e Combos de Heróis Populares
+export const POPULAR_HERO_COMBOS = [
+  {
+    heroAId: 41, // Faceless Void
+    heroBId: 74, // Invoker
+    synergy: "Chronosphere + Cataclysm",
+    description: "Paralisação total em área permitindo dano solar puro devastador em todos os alvos congelados.",
+    lane: "Safelane + Midlane",
+    tier: "S+"
+  },
+  {
+    heroAId: 97, // Magnus
+    heroBId: 48, // Luna
+    synergy: "Reverse Polarity + Eclipse",
+    description: "Agrupamento de 5 heróis no centro do RP, seguido de feixes lunares e Glaives quicando em todos os inimigos.",
+    lane: "Offlane + Safelane",
+    tier: "S+"
+  },
+  {
+    heroAId: 86, // Rubick
+    heroBId: 106, // Ember Spirit
+    synergy: "Telekinesis + Searing Chains",
+    description: "Controle de grupo em cadeia contínuo com alta mobilidade e ganks precoces imparáveis.",
+    lane: "Suporte + Midlane",
+    tier: "S"
+  },
+  {
+    heroAId: 1, // Anti-Mage
+    heroBId: 111, // Oracle
+    synergy: "False Promise + Mana Break",
+    description: "Proteção absoluta contra ganks mágicos, permitindo que o Anti-Mage farme e sobreviva até o late game.",
+    lane: "Safelane Duo",
+    tier: "S"
+  },
+  {
+    heroAId: 99, // Bristleback
+    heroBId: 84, // Ogre Magi
+    synergy: "Bloodlust + Warpath",
+    description: "Velocidade de movimento e ataque absurdas, transformando o Bristleback em um tanque imparável de espinhos.",
+    lane: "Offlane Duo",
+    tier: "S"
+  },
+  {
+    heroAId: 129, // Mars
+    heroBId: 110, // Phoenix
+    synergy: "Arena of Blood + Supernova",
+    description: "A Arena tranca os adversários sem escape enquanto a Supernova castiga e atordoa toda a equipe inimiga.",
+    lane: "Offlane + Suporte",
+    tier: "S+"
+  },
+  {
+    heroAId: 18, // Sven
+    heroBId: 90, // Keeper of the Light
+    synergy: "Chakra Magic + Storm Hammer",
+    description: "Mana infinita e redução de tempo de recarga para Sven lançar martelos de atordoamento constantes na lane.",
+    lane: "Safelane Duo",
+    tier: "A"
+  },
+  {
+    heroAId: 68, // Ancient Apparition
+    heroBId: 71, // Spirit Breaker
+    synergy: "Charge of Darkness + Ice Blast",
+    description: "Visão global garantida pela investida do Spirit Breaker, alinhando a explosão de gelo do AA à distância.",
+    lane: "Roaming / Global",
+    tier: "S"
+  }
+];

@@ -6,7 +6,8 @@ export default function TeamProfileModal({
   teamId,
   teamName = "Time",
   constants,
-  onClose
+  onClose,
+  onSelectHero
 }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -104,9 +105,14 @@ export default function TeamProfileModal({
                     const winRate = h.games_played > 0 ? ((h.wins / h.games_played) * 100).toFixed(0) : 0;
 
                     return (
-                      <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-2.5 flex flex-col items-center text-center hover:border-amber-400/40 transition-colors">
-                        <img src={heroImg} alt={heroName} className="w-10 h-6 object-cover rounded mb-1.5 shadow-sm" />
-                        <span className="text-[11px] font-bold text-white truncate w-full">{heroName}</span>
+                      <div
+                        key={i}
+                        onClick={() => onSelectHero && onSelectHero({ id: h.hero_id, name: heroName })}
+                        className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-400/60 rounded-xl p-2.5 flex flex-col items-center text-center transition-all cursor-pointer group"
+                        title={`Ver Guia & Detalhes de ${heroName}`}
+                      >
+                        <img src={heroImg} alt={heroName} className="w-10 h-6 object-cover rounded mb-1.5 shadow-sm group-hover:scale-105 transition-transform" />
+                        <span className="text-[11px] font-bold text-white group-hover:text-amber-300 truncate w-full transition-colors">{heroName}</span>
                         <div className="text-[10px] font-mono text-gray-400 mt-1">
                           <span className="text-emerald-400 font-bold">{winRate}% WR</span>
                           <span className="block text-[9px] text-gray-500">({h.games_played} jogos)</span>
