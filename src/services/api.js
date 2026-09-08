@@ -405,14 +405,14 @@ export async function fetchMatchDetails(matchId) {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${OPENDOTA_BASE}/matches/${matchId}`);
+    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/matches/${matchId}`, {}, 4000);
     if (res.ok) {
       const data = await res.json();
       setCache(`match_${matchId}`, data);
       return data;
     }
   } catch (err) {
-    console.error("Erro ao carregar detalhes da partida:", err);
+    console.warn("Aviso ao carregar detalhes da partida (OpenDota pode estar instável):", err);
   }
   return null;
 }
@@ -423,7 +423,7 @@ export async function fetchHeroStats() {
   if (cached) return cached;
 
   try {
-    const res = await fetch(`${OPENDOTA_BASE}/heroStats`);
+    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/heroStats`, {}, 4000);
     if (res.ok) {
       const list = await res.json();
       
@@ -534,7 +534,7 @@ export async function findLiveMatchDetails(game) {
 
   // 2. Busca nos proMatches recentes para encontrar os mapas daquela série
   try {
-    const proRes = await fetch(`${OPENDOTA_BASE}/proMatches`);
+    const proRes = await fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 3500);
     if (proRes.ok) {
       const list = await proRes.json();
       const matched = (list || []).filter(m => {
@@ -562,12 +562,12 @@ export async function findLiveMatchDetails(game) {
       }
     }
   } catch (e) {
-    console.error("Erro ao buscar mapas recentes da série ao vivo:", e);
+    console.warn("Aviso ao buscar mapas recentes da série ao vivo:", e);
   }
 
   // 3. Fallback: Se não encontrou partida no proMatches, buscar se há dados no liveLeagueGames
   try {
-    const liveRes = await fetch(`${OPENDOTA_BASE}/liveLeagueGames`);
+    const liveRes = await fetchWithTimeout(`${OPENDOTA_BASE}/liveLeagueGames`, {}, 3500);
     if (liveRes.ok) {
       const liveJson = await liveRes.json();
       const games = liveJson?.result?.games || [];

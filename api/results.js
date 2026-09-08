@@ -10,7 +10,8 @@ function normalizeTeamKey(name) {
 export default async function handler(req, res) {
   try {
     const proRes = await fetch("https://api.opendota.com/api/proMatches", {
-      headers: { "Accept": "application/json" }
+      headers: { "Accept": "application/json" },
+      signal: AbortSignal.timeout(4000)
     });
     
     if (!proRes.ok) {

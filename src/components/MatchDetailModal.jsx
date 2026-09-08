@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trophy, Clock, Swords, Shield, ExternalLink, Loader2, Award, Zap, Package, Sparkles } from 'lucide-react';
+import { X, Trophy, Clock, Swords, Shield, ExternalLink, Loader2, Award, Zap, Package, Sparkles, AlertTriangle } from 'lucide-react';
 import AdvantageGraph from './AdvantageGraph';
 import { getHeroImg, getHeroName, getItemImg, fetchMatchDetails } from '../services/api';
 
@@ -413,8 +413,112 @@ export default function MatchDetailModal({
               )}
             </>
           ) : (
-            <div className="text-center py-12 text-gray-400 text-xs">
-              Não foi possível carregar as estatísticas deste mapa.
+            <div className="space-y-4 py-2">
+              {/* ALERTA DE INSTABILIDADE DA OPENDOTA */}
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5">
+                <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-xs sm:text-sm font-bold text-amber-300 uppercase tracking-wide">
+                    Servidores da OpenDota Temporariamente Indisponíveis
+                  </h4>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    A API pública da OpenDota (responsável pelo processamento e leitura aprofundada dos replays da Valve) está temporariamente inacessível ou passando por instabilidade. As tabelas detalhadas dos 10 jogadores, inventários de itens e gráficos de ouro/XP serão reativados assim que a OpenDota normalizar seus servidores.
+                  </p>
+                </div>
+              </div>
+
+              {/* CARD DE DADOS CONSOLIDADOS DO MAPA E SÉRIE */}
+              <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                    Dados Consolidados da Série
+                  </span>
+                  <span className="text-[11px] font-mono text-gray-400">
+                    {series.stage || "Torneio Profissional"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                  <div className="bg-white/[0.03] border border-white/5 rounded-xl p-3">
+                    <span className="text-[10px] text-gray-400 uppercase font-mono block">Confronto</span>
+                    <span className="text-sm font-black text-white mt-1 block">
+                      {series.timeA} <span className="text-amber-400">vs</span> {series.timeB}
+                    </span>
+                  </div>
+
+                  <div className="bg-white/[0.03] border border-white/5 rounded-xl p-3">
+                    <span className="text-[10px] text-gray-400 uppercase font-mono block">Placar da Série</span>
+                    <span className="text-lg font-black font-mono text-amber-400 mt-0.5 block">
+                      {series.scoreA} : {series.scoreB}
+                    </span>
+                  </div>
+
+                  <div className="bg-white/[0.03] border border-white/5 rounded-xl p-3">
+                    <span className="text-[10px] text-gray-400 uppercase font-mono block">Vencedor da Série</span>
+                    <span className="text-sm font-black text-emerald-400 mt-1 block">
+                      {series.winner || (series.scoreA > series.scoreB ? series.timeA : series.timeB)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* DETALHES DO MAPA SELECIONADO */}
+                <div className="bg-black/30 border border-white/5 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Swords className="w-4 h-4 text-amber-400" />
+                    <span className="text-white font-bold">
+                      Jogo {currentMap?.mapNumber || activeMapIndex + 1}
+                    </span>
+                    {currentMap?.radiant_score != null && currentMap?.dire_score != null && (
+                      <span className="font-mono text-gray-300 ml-2 bg-white/5 px-2 py-0.5 rounded">
+                        Abates: <strong className="text-white">{currentMap.radiant_score}</strong> : <strong className="text-white">{currentMap.dire_score}</strong>
+                      </span>
+                    )}
+                  </div>
+
+                  {currentMap?.duration ? (
+                    <div className="flex items-center gap-1.5 text-gray-400 font-mono text-[11px]">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      Duração: <strong className="text-white">{Math.round(currentMap.duration / 60)} min</strong>
+                    </div>
+                  ) : null}
+
+                  {currentMap?.match_id && (
+                    <div className="font-mono text-[11px] text-gray-400">
+                      Match ID: <strong className="text-amber-400">{currentMap.match_id}</strong>
+                    </div>
+                  )}
+                </div>
+
+                {/* BOTÕES DE LINKS EXTERNOS PARA CONSULTA ALTERNATIVA */}
+                {currentMap?.match_id && (
+                  <div className="pt-2 border-t border-white/5 flex flex-wrap items-center justify-center gap-3">
+                    <a
+                      href={`https://www.dotabuff.com/matches/${currentMap.match_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold transition-all"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Ver Partida no Dotabuff
+                    </a>
+                    <a
+                      href={`https://stratz.com/matches/${currentMap.match_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition-all"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Ver Partida no Stratz
+                    </a>
+                    <a
+                      href={`https://www.opendota.com/matches/${currentMap.match_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Abrir no OpenDota
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
