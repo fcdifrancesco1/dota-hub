@@ -86,8 +86,12 @@ export default function LiveMatchDetailModal({
   const syncMatchData = useCallback(() => {
     if (!game) return;
     findLiveMatchDetails(game).then((result) => {
-      setMatchData(result.matchData || null);
-      setMapsList(result.maps || []);
+      if (result?.matchData) {
+        setMatchData({ ...result.matchData, _syncTimestamp: Date.now() });
+      } else {
+        setMatchData(null);
+      }
+      setMapsList(result?.maps || []);
       setLastSync(new Date().toLocaleTimeString('pt-BR'));
       setLoading(false);
     });
@@ -686,6 +690,7 @@ export default function LiveMatchDetailModal({
                 radiantStructures={radiantStructures}
                 direStructures={direStructures}
                 onSelectHero={onSelectHero}
+                onManualSync={syncMatchData}
               />
 
               {/* ORDEM DO DRAFT (CAPTAIN'S MODE: PICKS & BANS) */}

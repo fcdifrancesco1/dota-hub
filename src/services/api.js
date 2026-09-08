@@ -529,11 +529,28 @@ export async function findLiveMatchDetails(game) {
   // 1. Se temos match_id, consulta primeiro o endpoint oficial /api/live?match_id=... (telemetria direta da Valve)
   if (game.match_id) {
     try {
-      const liveRes = await fetchWithTimeout(`/api/live?match_id=${game.match_id}`, {}, 3500);
+      const liveRes = await fetchWithTimeout(`/api/live?match_id=${game.match_id}&_t=${Date.now()}`, {}, 6000);
       if (liveRes.ok) {
         const liveJson = await liveRes.json();
         const games = liveJson?.result?.games || [];
         const liveGame = games.find(g => String(g.match_id) === String(game.match_id));
+        if (liveGame && (liveGame.scoreboard || (liveGame.players && liveGame.players.length > 0))) {
+          return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+        }
+      }
+    } catch (e) {}
+
+    // Fallback: busca por nome de time na lista ao vivo
+    try {
+      const liveRes = await fetchWithTimeout(`/api/live?_t=${Date.now()}`, {}, 6000);
+      if (liveRes.ok) {
+        const liveJson = await liveRes.json();
+        const games = liveJson?.result?.games || [];
+        const liveGame = games.find(g => {
+          const rad = g.radiant_team?.team_name || g.radiant_team?.name || g.radiant_name;
+          const dire = g.dire_team?.team_name || g.dire_team?.name || g.dire_name;
+          return isSeriesMatch(nameA, nameB, rad, dire);
+        });
         if (liveGame && (liveGame.scoreboard || (liveGame.players && liveGame.players.length > 0))) {
           return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
         }
