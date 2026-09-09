@@ -1302,13 +1302,14 @@ export function parseLiquipediaResultsHtml(html) {
 export async function fetchLiquipediaTeamResults(teamName) {
   if (!teamName) return [];
   const wikiPage = toLiquipediaTeamPage(teamName);
-  const cacheKey = `liquipedia_team_matches_v6_${wikiPage}`;
-  const cached = getCached(cacheKey, 20 * 60 * 1000);
+  const cacheKey = `liquipedia_team_matches_v7_${wikiPage}`;
+  // 1. Cache Local no Navegador (1 hora) para navegação fluida e sem excesso de requisições
+  const cached = getCached(cacheKey, 60 * 60 * 1000);
   if (cached && cached.length > 0) return cached.slice(0, 5);
 
-  // 1. Rota serverless Vercel
+  // 2. Consulta através da rota serverless segura com fila e rate-limit oficial
   try {
-    const res = await fetchWithTimeout(`/api/team-results?team=${encodeURIComponent(wikiPage)}`, {}, 4000);
+    const res = await fetchWithTimeout(`/api/team-results?team=${encodeURIComponent(wikiPage)}`, {}, 6000);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.results) && data.results.length > 0) {
@@ -1317,52 +1318,12 @@ export async function fetchLiquipediaTeamResults(teamName) {
         return sorted;
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn(`[Liquipedia Team] Erro ao consultar /api/team-results para ${wikiPage}:`, e.message);
+  }
 
-  // 2. Fallback direto da Liquipedia via CORS (origin=*)
-  // 2a. Tentar Played_Matches primeiro
-  try {
-    const playedRes = await fetchWithTimeout(
-      `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Played_Matches&format=json&origin=*`,
-      { headers: { 'Accept': 'application/json' } },
-      4500
-    );
-    if (playedRes.ok) {
-      const data = await playedRes.json();
-      if (!data.error && data.parse?.text?.['*']) {
-        const html = data.parse.text['*'];
-        const matches = parseLiquipediaPlayedMatchesHtml(html);
-        if (matches.length > 0) {
-          const sorted = sortMatchesNewestFirst(matches).slice(0, 5);
-          setCache(cacheKey, sorted);
-          return sorted;
-        }
-      }
-    }
-  } catch (e) {}
-
-  // 2b. Tentar Results se Played_Matches falhar
-  try {
-    const directRes = await fetchWithTimeout(
-      `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Results&format=json&origin=*`,
-      { headers: { 'Accept': 'application/json' } },
-      4500
-    );
-    if (directRes.ok) {
-      const data = await directRes.json();
-      if (!data.error && data.parse?.text?.['*']) {
-        const html = data.parse.text['*'];
-        const results = parseLiquipediaResultsHtml(html);
-        if (results.length > 0) {
-          const sorted = sortMatchesNewestFirst(results).slice(0, 5);
-          setCache(cacheKey, sorted);
-          return sorted;
-        }
-      }
-    }
-  } catch (e) {}
-
-  return [];
+  // NUNCA chamar liquipedia.net diretamente do navegador (evita erro 429 e bloqueio de IP)
+  return getCachedFast(cacheKey) || [];
 }
 
 // 10. Buscar Perfil do Time (por ID ou Nome)

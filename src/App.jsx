@@ -88,7 +88,16 @@ export default function App() {
       const rawMatches = proData?.rawMatches || [];
 
       // 1. Processar partidas ao vivo REAIS vindas do Dota Coordinator / Valve GOTV (/api/live)
-      const enrichedGotvLive = (gotvLiveData || []).map((gotvGame) => {
+      // Ordena decrescente por match_id para garantir que o mapa mais recente tenha prioridade
+      const sortedGotv = [...(gotvLiveData || [])]
+        .filter(g => !g.deactivate_time || Number(g.deactivate_time) === 0)
+        .sort((a, b) => {
+          const idA = BigInt(String(a.match_id || 0).replace(/\D/g, "") || 0);
+          const idB = BigInt(String(b.match_id || 0).replace(/\D/g, "") || 0);
+          return idA > idB ? -1 : idA < idB ? 1 : 0;
+        });
+
+      const enrichedGotvLive = sortedGotv.map((gotvGame) => {
         const radName = gotvGame.radiant_name || gotvGame.radiant_team?.team_name || gotvGame.radiant_team?.name;
         const direName = gotvGame.dire_name || gotvGame.dire_team?.team_name || gotvGame.dire_team?.name;
 
@@ -137,7 +146,26 @@ export default function App() {
         return hasLiveScore && !alreadyInGotv;
       });
 
-      const finalLiveGames = [...enrichedGotvLive, ...confirmedWikiLive];
+      // 3. Deduplicação estrita de séries ao vivo: nunca exibir jogo terminado ao lado do jogo atual
+      const deduplicatedLive = [];
+      const seenSeries = new Set();
+      const combinedLive = [...enrichedGotvLive, ...confirmedWikiLive];
+
+      for (const game of combinedLive) {
+        const tA = (game.timeA || game.radiant_name || "").toLowerCase().trim();
+        const tB = (game.timeB || game.dire_name || "").toLowerCase().trim();
+
+        if (tA && tB && tA !== "radiant" && tB !== "dire") {
+          const seriesKey = [tA, tB].sort().join(" vs ");
+          if (seenSeries.has(seriesKey)) {
+            continue; // Já temos o mapa mais recente desta série
+          }
+          seenSeries.add(seriesKey);
+        }
+        deduplicatedLive.push(game);
+      }
+
+      const finalLiveGames = deduplicatedLive;
 
       // 3. Separar estritamente os jogos agendados que NÃO estão em andamento
       const strictlyUpcoming = (allWikiMatches || []).filter((m) => {

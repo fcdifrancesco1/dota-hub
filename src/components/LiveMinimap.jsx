@@ -3,53 +3,71 @@ import { Shield, Skull, Eye, Compass, Castle, RefreshCw } from 'lucide-react';
 import { getHeroImg, getHeroName } from '../services/api';
 
 // Coordenadas calibradas diretamente sobre o mapa oficial de Dota 2 (public/minimap.jpg)
-// Base Radiant: inferior esquerda (x: ~14%, y: ~82%)
-// Base Dire: superior direita (x: ~84%, y: ~17%)
+// Base Radiant: inferior esquerda (x: ~14%, y: ~85%)
+// Base Dire: superior direita (x: ~85%, y: ~15%)
 const CALIBRATED_TOWERS = {
   radiant: {
     top: [
-      { name: "T1 Top", x: 13, y: 38 },
-      { name: "T2 Top", x: 13, y: 53 },
-      { name: "T3 Top", x: 14, y: 66 }
+      { name: "T1 Top", x: 12, y: 36 },
+      { name: "T2 Top", x: 12, y: 49 },
+      { name: "T3 Top", x: 13, y: 64 }
     ],
     mid: [
-      { name: "T1 Mid", x: 41, y: 57 },
-      { name: "T2 Mid", x: 30, y: 65 },
-      { name: "T3 Mid", x: 22, y: 73 }
+      { name: "T1 Mid", x: 40, y: 58 },
+      { name: "T2 Mid", x: 28, y: 66 },
+      { name: "T3 Mid", x: 20, y: 73 }
     ],
     bot: [
-      { name: "T1 Bot", x: 82, y: 84 },
-      { name: "T2 Bot", x: 54, y: 84 },
-      { name: "T3 Bot", x: 26, y: 83 }
+      { name: "T1 Bot", x: 82, y: 85 },
+      { name: "T2 Bot", x: 54, y: 85 },
+      { name: "T3 Bot", x: 28, y: 84 }
     ],
     base: [
-      { name: "T4 (1)", x: 16, y: 79 },
-      { name: "T4 (2)", x: 18, y: 81 },
-      { name: "Trono", x: 14, y: 82 }
+      { name: "T4 (1)", x: 17, y: 82 },
+      { name: "T4 (2)", x: 19, y: 84 },
+      { name: "Trono", x: 14, y: 85 }
     ]
   },
   dire: {
     top: [
-      { name: "T1 Top", x: 20, y: 15 },
-      { name: "T2 Top", x: 46, y: 14 },
-      { name: "T3 Top", x: 69, y: 15 }
+      { name: "T1 Top", x: 20, y: 12 },
+      { name: "T2 Top", x: 44, y: 12 },
+      { name: "T3 Top", x: 67, y: 13 }
     ],
     mid: [
-      { name: "T1 Mid", x: 55, y: 44 },
-      { name: "T2 Mid", x: 64, y: 35 },
-      { name: "T3 Mid", x: 71, y: 26 }
+      { name: "T1 Mid", x: 53, y: 44 },
+      { name: "T2 Mid", x: 63, y: 36 },
+      { name: "T3 Mid", x: 70, y: 27 }
     ],
     bot: [
-      { name: "T1 Bot", x: 84, y: 62 },
-      { name: "T2 Bot", x: 84, y: 46 },
-      { name: "T3 Bot", x: 83, y: 28 }
+      { name: "T1 Bot", x: 84, y: 63 },
+      { name: "T2 Bot", x: 84, y: 47 },
+      { name: "T3 Bot", x: 83, y: 29 }
     ],
     base: [
-      { name: "T4 (1)", x: 80, y: 19 },
-      { name: "T4 (2)", x: 82, y: 22 },
-      { name: "Trono", x: 84, y: 17 }
+      { name: "T4 (1)", x: 81, y: 18 },
+      { name: "T4 (2)", x: 83, y: 21 },
+      { name: "Trono", x: 85, y: 15 }
     ]
   }
+};
+
+// Posições no Santuário da Fonte para heróis mortos de cada equipe
+const FOUNTAIN_COORDS = {
+  radiant: [
+    { x: 8.0, y: 91.5 },
+    { x: 9.8, y: 90.0 },
+    { x: 11.5, y: 88.5 },
+    { x: 7.8, y: 88.0 },
+    { x: 10.2, y: 92.5 }
+  ],
+  dire: [
+    { x: 92.0, y: 8.5 },
+    { x: 90.2, y: 10.0 },
+    { x: 88.5, y: 11.5 },
+    { x: 92.2, y: 12.0 },
+    { x: 89.8, y: 7.5 }
+  ]
 };
 
 // Pit oficial do Roshan no mapa clássico (caverna no rio noroeste)
@@ -134,9 +152,15 @@ function interpolatePosition(waypoints, timeSec, loopDuration = 18) {
   };
 }
 
-// Calcula a coordenada tática em tempo real para o herói
-function calculateHeroPosition(player, idx, isRadiant, currentSec = 1800, rawX, rawY) {
-  // 1. Prioridade para coordenadas brutas vindas da Valve GOTV (quando disponíveis)
+// Calcula a coordenada tática em tempo real para o herói (com suporte a morte na fonte)
+function calculateHeroPosition(player, idx, isRadiant, currentSec = 1800, rawX, rawY, isDead = false) {
+  // Quando o herói está morto, ele permanece posicionado na Fonte da sua equipe
+  if (isDead) {
+    const list = isRadiant ? FOUNTAIN_COORDS.radiant : FOUNTAIN_COORDS.dire;
+    return list[idx % 5];
+  }
+
+  // 1. Prioridade para coordenadas brutas vindas da Valve GOTV (quando disponíveis e vivo)
   if (rawX !== undefined && rawY !== undefined && rawX !== 0 && rawY !== 0) {
     const clampedX = Math.max(-8200, Math.min(8200, rawX));
     const clampedY = Math.max(-8200, Math.min(8200, rawY));
@@ -465,7 +489,11 @@ export default function LiveMinimap({
 
         {/* HERÓIS RADIANT (COM TRANSIÇÃO DINÂMICA EM TEMPO REAL) */}
         {showRadiant && radiantPlayers.map((p, idx) => {
-          const coords = calculateHeroPosition(p, idx, true, currentDurationSec, p.position_x, p.position_y);
+          const rawRespawn = p.respawn_timer ?? 0;
+          const remainingRespawn = rawRespawn > 0 ? Math.max(0, Math.ceil(rawRespawn - elapsedSec)) : 0;
+          const isDead = remainingRespawn > 0 || p.is_alive === false || (p.death_timer && p.death_timer > 0);
+
+          const coords = calculateHeroPosition(p, idx, true, currentDurationSec, p.position_x, p.position_y, isDead);
           const hImg = p.hero_id ? getHeroImg(constants, p.hero_id) : "";
           const hName = p.hero_id ? getHeroName(constants, p.hero_id) : `Herói ${idx + 1}`;
           const isHovered = hoveredEntity === `rad-${idx}`;
@@ -488,23 +516,50 @@ export default function LiveMinimap({
               className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
             >
               <div className="relative">
-                <div className={`w-8 h-8 rounded-full p-0.5 bg-[#0A0D14] border-2 ${
-                  isHovered ? 'border-amber-400 scale-125 z-30 ring-2 ring-amber-400 shadow-xl' : 'border-emerald-400 shadow-md shadow-emerald-500/50'
-                } transition-all overflow-hidden flex items-center justify-center`}>
+                <div
+                  style={{
+                    filter: isDead ? 'grayscale(100%) contrast(125%) opacity(70%)' : 'none'
+                  }}
+                  className={`w-8 h-8 rounded-full p-0.5 bg-[#0A0D14] border-2 ${
+                    isDead
+                      ? 'border-gray-500 shadow-md shadow-black/80'
+                      : isHovered
+                      ? 'border-amber-400 scale-125 z-30 ring-2 ring-amber-400 shadow-xl'
+                      : 'border-emerald-400 shadow-md shadow-emerald-500/50'
+                  } transition-all overflow-hidden flex items-center justify-center`}
+                >
                   {hImg ? (
                     <img src={hImg} alt={hName} className="w-full h-full object-cover rounded-full" />
                   ) : (
-                    <span className="text-[9px] font-bold text-emerald-400">{idx + 1}</span>
+                    <span className={`text-[9px] font-bold ${isDead ? 'text-gray-400' : 'text-emerald-400'}`}>{idx + 1}</span>
                   )}
                 </div>
 
-                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-black font-black text-[8px] flex items-center justify-center font-mono shadow border border-black/40">
-                  {idx + 1}
-                </span>
+                {isDead ? (
+                  <span className="absolute -top-1 -right-1 bg-red-950/95 text-red-300 border border-red-500/80 font-mono font-black text-[7px] px-1 py-0.2 rounded-full shadow flex items-center gap-0.5 whitespace-nowrap z-30">
+                    💀 {remainingRespawn > 0 ? `${remainingRespawn}s` : 'Fonte'}
+                  </span>
+                ) : (
+                  <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-black font-black text-[8px] flex items-center justify-center font-mono shadow border border-black/40">
+                    {idx + 1}
+                  </span>
+                )}
 
-                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center bg-[#0C0F17] border border-emerald-400/60 p-2 rounded-xl text-[10px] text-white whitespace-nowrap shadow-2xl z-40 pointer-events-none min-w-[120px]">
-                  <span className="font-extrabold text-emerald-300">{p.name}</span>
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center bg-[#0C0F17] border border-emerald-400/60 p-2 rounded-xl text-[10px] text-white whitespace-nowrap shadow-2xl z-40 pointer-events-none min-w-[125px]">
+                  <div className="flex items-center gap-1">
+                    <span className="font-extrabold text-emerald-300">{p.name}</span>
+                    {isDead && (
+                      <span className="text-[8px] bg-red-950 text-red-400 border border-red-500/60 px-1 rounded font-black">
+                        MORTO
+                      </span>
+                    )}
+                  </div>
                   <span className="text-gray-300 text-[9px]">{hName} (Pos {idx + 1})</span>
+                  {isDead && (
+                    <span className="text-red-400 font-mono text-[9px] mt-0.5 font-bold">
+                      Renasce na Fonte em {remainingRespawn > 0 ? `${remainingRespawn}s` : 'instantes'}
+                    </span>
+                  )}
                   <div className="flex items-center gap-2 mt-1 text-[9px] font-mono text-gray-400">
                     <span>KDA: <strong className="text-white">{p.kills ?? 0}/{p.deaths ?? 0}/{p.assists ?? 0}</strong></span>
                     <span>Net: <strong className="text-amber-400">{p.net_worth ? p.net_worth.toLocaleString() : '—'}</strong></span>
@@ -517,7 +572,11 @@ export default function LiveMinimap({
 
         {/* HERÓIS DIRE (COM TRANSIÇÃO DINÂMICA EM TEMPO REAL) */}
         {showDire && direPlayers.map((p, idx) => {
-          const coords = calculateHeroPosition(p, idx, false, currentDurationSec, p.position_x, p.position_y);
+          const rawRespawn = p.respawn_timer ?? 0;
+          const remainingRespawn = rawRespawn > 0 ? Math.max(0, Math.ceil(rawRespawn - elapsedSec)) : 0;
+          const isDead = remainingRespawn > 0 || p.is_alive === false || (p.death_timer && p.death_timer > 0);
+
+          const coords = calculateHeroPosition(p, idx, false, currentDurationSec, p.position_x, p.position_y, isDead);
           const hImg = p.hero_id ? getHeroImg(constants, p.hero_id) : "";
           const hName = p.hero_id ? getHeroName(constants, p.hero_id) : `Herói ${idx + 1}`;
           const isHovered = hoveredEntity === `dire-${idx}`;
@@ -540,23 +599,50 @@ export default function LiveMinimap({
               className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
             >
               <div className="relative">
-                <div className={`w-8 h-8 rounded-full p-0.5 bg-[#0A0D14] border-2 ${
-                  isHovered ? 'border-amber-400 scale-125 z-30 ring-2 ring-amber-400 shadow-xl' : 'border-rose-500 shadow-md shadow-rose-500/50'
-                } transition-all overflow-hidden flex items-center justify-center`}>
+                <div
+                  style={{
+                    filter: isDead ? 'grayscale(100%) contrast(125%) opacity(70%)' : 'none'
+                  }}
+                  className={`w-8 h-8 rounded-full p-0.5 bg-[#0A0D14] border-2 ${
+                    isDead
+                      ? 'border-gray-500 shadow-md shadow-black/80'
+                      : isHovered
+                      ? 'border-amber-400 scale-125 z-30 ring-2 ring-amber-400 shadow-xl'
+                      : 'border-rose-500 shadow-md shadow-rose-500/50'
+                  } transition-all overflow-hidden flex items-center justify-center`}
+                >
                   {hImg ? (
                     <img src={hImg} alt={hName} className="w-full h-full object-cover rounded-full" />
                   ) : (
-                    <span className="text-[9px] font-bold text-rose-400">{idx + 1}</span>
+                    <span className={`text-[9px] font-bold ${isDead ? 'text-gray-400' : 'text-rose-400'}`}>{idx + 1}</span>
                   )}
                 </div>
 
-                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-rose-500 text-white font-black text-[8px] flex items-center justify-center font-mono shadow border border-black/40">
-                  {idx + 1}
-                </span>
+                {isDead ? (
+                  <span className="absolute -top-1 -right-1 bg-red-950/95 text-red-300 border border-red-500/80 font-mono font-black text-[7px] px-1 py-0.2 rounded-full shadow flex items-center gap-0.5 whitespace-nowrap z-30">
+                    💀 {remainingRespawn > 0 ? `${remainingRespawn}s` : 'Fonte'}
+                  </span>
+                ) : (
+                  <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-rose-500 text-white font-black text-[8px] flex items-center justify-center font-mono shadow border border-black/40">
+                    {idx + 1}
+                  </span>
+                )}
 
-                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center bg-[#0C0F17] border border-rose-500/60 p-2 rounded-xl text-[10px] text-white whitespace-nowrap shadow-2xl z-40 pointer-events-none min-w-[120px]">
-                  <span className="font-extrabold text-rose-300">{p.name}</span>
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center bg-[#0C0F17] border border-rose-500/60 p-2 rounded-xl text-[10px] text-white whitespace-nowrap shadow-2xl z-40 pointer-events-none min-w-[125px]">
+                  <div className="flex items-center gap-1">
+                    <span className="font-extrabold text-rose-300">{p.name}</span>
+                    {isDead && (
+                      <span className="text-[8px] bg-red-950 text-red-400 border border-red-500/60 px-1 rounded font-black">
+                        MORTO
+                      </span>
+                    )}
+                  </div>
                   <span className="text-gray-300 text-[9px]">{hName} (Pos {idx + 1})</span>
+                  {isDead && (
+                    <span className="text-red-400 font-mono text-[9px] mt-0.5 font-bold">
+                      Renasce na Fonte em {remainingRespawn > 0 ? `${remainingRespawn}s` : 'instantes'}
+                    </span>
+                  )}
                   <div className="flex items-center gap-2 mt-1 text-[9px] font-mono text-gray-400">
                     <span>KDA: <strong className="text-white">{p.kills ?? 0}/{p.deaths ?? 0}/{p.assists ?? 0}</strong></span>
                     <span>Net: <strong className="text-amber-400">{p.net_worth ? p.net_worth.toLocaleString() : '—'}</strong></span>
@@ -570,7 +656,7 @@ export default function LiveMinimap({
 
       {/* LEGENDA INFORMATIVA ABAIXO DO MAPA */}
       <div className="flex items-center justify-between text-[10px] text-gray-400 font-mono px-2 pt-1 border-t border-white/5 flex-wrap gap-2">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/80" />
             <strong className="text-white">Radiant:</strong> {matchData.radiant_name || 'Radiant'}
@@ -578,6 +664,10 @@ export default function LiveMinimap({
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/80" />
             <strong className="text-white">Dire:</strong> {matchData.dire_name || 'Dire'}
+          </span>
+          <span className="flex items-center gap-1 text-gray-400">
+            <span>💀</span>
+            <span>Morto na Fonte (P&B)</span>
           </span>
         </div>
         <span className="text-gray-500 hidden sm:inline">

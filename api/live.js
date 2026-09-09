@@ -533,8 +533,47 @@ function normalizeOpenDotaLive(g) {
     dire_players: direPlayers,
     picks_bans,
     is_live_telemetry: true,
-    isGameDataActive: true
+    isGameDataActive: true,
+    deactivate_time: g.deactivate_time || 0
   };
+}
+
+// Filtra partidas encerradas e deduplica séries mantendo apenas o mapa mais recente
+function filterAndDeduplicateLiveGames(games) {
+  if (!Array.isArray(games)) return [];
+
+  // 1. Descartar partidas que já foram desativadas / finalizadas
+  const activeOnly = games.filter(g => {
+    if (!g) return false;
+    const deact = g.deactivate_time;
+    if (deact && Number(deact) > 0) return false;
+    return true;
+  });
+
+  // 2. Agrupar por confronto de times (série) e manter apenas o mapa mais recente (maior match_id)
+  const seriesMap = new Map();
+  for (const g of activeOnly) {
+    const nameA = (g.radiant_name || g.radiant_team?.team_name || "").toLowerCase().trim();
+    const nameB = (g.dire_name || g.dire_team?.team_name || "").toLowerCase().trim();
+
+    if (nameA && nameB && nameA !== "radiant" && nameB !== "dire") {
+      const seriesKey = [nameA, nameB].sort().join("___");
+      const existing = seriesMap.get(seriesKey);
+      if (!existing) {
+        seriesMap.set(seriesKey, g);
+      } else {
+        const idG = BigInt(String(g.match_id || 0).replace(/\D/g, "") || 0);
+        const idExisting = BigInt(String(existing.match_id || 0).replace(/\D/g, "") || 0);
+        if (idG > idExisting) {
+          seriesMap.set(seriesKey, g);
+        }
+      }
+    } else {
+      seriesMap.set(String(g.match_id), g);
+    }
+  }
+
+  return Array.from(seriesMap.values());
 }
 
 export default async function handler(req, res) {
@@ -562,7 +601,8 @@ export default async function handler(req, res) {
           const steamData = await steamRes.json();
           const rawGames = steamData?.result?.games || [];
           if (rawGames.length > 0) {
-            games = rawGames.map(normalizeValveLiveGame).filter(Boolean);
+            const normalized = rawGames.map(normalizeValveLiveGame).filter(Boolean);
+            games = filterAndDeduplicateLiveGames(normalized);
             source = "steam_valve_official";
           }
         }
@@ -599,7 +639,8 @@ export default async function handler(req, res) {
             );
 
             if (tournamentMatches.length > 0) {
-              games = tournamentMatches.map(normalizeOpenDotaLive).filter(Boolean);
+              const normalized = tournamentMatches.map(normalizeOpenDotaLive).filter(Boolean);
+              games = filterAndDeduplicateLiveGames(normalized);
               source = "dota_coordinator_tournaments";
             } else {
               // Se nenhum torneio estiver em andamento neste instante exato, exibe os jogos ao vivo mais assistidos
@@ -608,7 +649,8 @@ export default async function handler(req, res) {
                 .sort((a, b) => (b.spectators || 0) - (a.spectators || 0))
                 .slice(0, 4);
 
-              games = topWatched.map(normalizeOpenDotaLive).filter(Boolean);
+              const normalized = topWatched.map(normalizeOpenDotaLive).filter(Boolean);
+              games = filterAndDeduplicateLiveGames(normalized);
               source = "dota_coordinator_top_live";
             }
           }

@@ -1,3 +1,5 @@
+import { fetchLiquipediaApi } from './_lib/liquipediaClient.js';
+
 export function sortMatchesNewestFirst(matches) {
   if (!Array.isArray(matches)) return [];
   return [...matches].sort((a, b) => {
@@ -225,50 +227,32 @@ export default async function handler(req, res) {
   }
 
   const wikiPage = toLiquipediaTeamPage(teamQuery);
-  const headers = {
-    'User-Agent': 'DotaHubCommunity/2.0 (contact@dota-hub.vercel.app)',
-    'Accept': 'application/json'
-  };
+  const TTL_2_HOURS = 2 * 60 * 60 * 1000;
 
   try {
     // 1. Tentar primeiro na página Played_Matches (tem séries detalhadas)
     try {
-      const playedResponse = await fetch(
-        `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Played_Matches&format=json`,
-        { headers, signal: AbortSignal.timeout(5000) }
-      );
-
-      if (playedResponse.ok) {
-        const playedData = await playedResponse.json();
-        if (!playedData.error && playedData.parse?.text?.['*']) {
-          const html = playedData.parse.text['*'];
-          const matches = parseLiquipediaPlayedMatches(html);
-          if (matches.length > 0) {
-            res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=86400');
-            return res.status(200).json({
-              team: wikiPage,
-              source: 'liquipedia',
-              page: 'Played_Matches',
-              results: matches.slice(0, 5)
-            });
-          }
+      const playedResult = await fetchLiquipediaApi(`${wikiPage}/Played_Matches`, { ttlMs: TTL_2_HOURS });
+      if (playedResult?.html) {
+        const matches = parseLiquipediaPlayedMatches(playedResult.html);
+        if (matches.length > 0) {
+          res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate=86400');
+          return res.status(200).json({
+            team: wikiPage,
+            source: 'liquipedia',
+            page: 'Played_Matches',
+            results: matches.slice(0, 5)
+          });
         }
       }
     } catch (e) {}
 
     // 2. Fallback para a página Results
-    const response = await fetch(
-      `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(wikiPage)}/Results&format=json`,
-      { headers, signal: AbortSignal.timeout(5000) }
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      if (!data.error && data.parse?.text?.['*']) {
-        const html = data.parse.text['*'];
-        const results = parseLiquipediaResults(html);
-
-        res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=86400');
+    const resultsResult = await fetchLiquipediaApi(`${wikiPage}/Results`, { ttlMs: TTL_2_HOURS });
+    if (resultsResult?.html) {
+      const results = parseLiquipediaResults(resultsResult.html);
+      if (results.length > 0) {
+        res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate=86400');
         return res.status(200).json({
           team: wikiPage,
           source: 'liquipedia',
@@ -277,6 +261,7 @@ export default async function handler(req, res) {
         });
       }
     }
+
     return res.status(200).json({ team: wikiPage, results: [], source: 'none' });
   } catch (error) {
     return res.status(200).json({ team: wikiPage, results: [], error: error.message });
