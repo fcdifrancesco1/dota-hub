@@ -447,6 +447,95 @@ function generateCaptainsModeDraft(radHeroes, direHeroes) {
   });
 }
 
+// Decodifica o building_state de 32 bits do Dota 2 Coordinator (CMsgConnectedPlayers)
+// para as bitmasks oficiais da Valve (11 bits para torres, 6 bits para barracas)
+function decodeBuildingState(b, duration = 0) {
+  // Antes do início oficial da partida (fase de draft ou pre-horn, tempo <= 0), todas as estruturas estão 100% de pé
+  if (duration <= 0 || !b) {
+    return {
+      tower_status_radiant: 2047,
+      barracks_status_radiant: 63,
+      tower_status_dire: 2047,
+      barracks_status_dire: 63
+    };
+  }
+
+  function decodeTeam(mask) {
+    // Se a máscara for 0 ou 0x49 (estado inicial padrão onde todas as T1 estão ativas), todas as 11 torres e 6 barracas estão de pé
+    if (!mask || mask === 0x49) {
+      return { tower_status: 2047, barracks_status: 63 };
+    }
+
+    let tower = 0;
+    let rax = 0;
+    let anyBreached = false;
+
+    // As 3 lanes: 0: TOP, 1: MID, 2: BOT
+    for (let lane = 0; lane < 3; lane++) {
+      const bits = (mask >> (lane * 3)) & 7;
+      let t1 = true, t2 = true, t3 = true, rMelee = true, rRanged = true;
+
+      if (bits === 1) {
+        // 001: T1 de pé e ativa -> todas as 3 torres e barracas da lane intactas
+        t1 = true; t2 = true; t3 = true;
+      } else if (bits === 2) {
+        // 010: T1 caiu, T2 na linha de frente intacta
+        t1 = false; t2 = true; t3 = true;
+      } else if (bits === 3 || bits === 4 || bits === 5 || bits === 6) {
+        // T1 e T2 caíram, T3 de pé
+        t1 = false; t2 = false; t3 = true;
+      } else if (bits === 7 || bits === 0) {
+        // 111 ou 000: T1, T2 e T3 caíram (lane invadida)
+        t1 = false; t2 = false; t3 = false;
+        rMelee = false;
+        rRanged = false;
+        anyBreached = true;
+      }
+
+      const t1Bit = lane * 3;
+      const t2Bit = lane * 3 + 1;
+      const t3Bit = lane * 3 + 2;
+      const rMBit = lane * 2;
+      const rRBit = lane * 2 + 1;
+
+      if (t1) tower |= (1 << t1Bit);
+      if (t2) tower |= (1 << t2Bit);
+      if (t3) tower |= (1 << t3Bit);
+      if (rMelee) rax |= (1 << rMBit);
+      if (rRanged) rax |= (1 << rRBit);
+    }
+
+    // Torres T4 da Base (bits 9 e 10)
+    // No Dota 2, as T4 são invulneráveis enquanto nenhuma lane teve T3 derrubada
+    if (!anyBreached) {
+      tower |= (1 << 9) | (1 << 10);
+    } else {
+      const t4Bits = (mask >> 9) & 3;
+      if (t4Bits === 3) {
+        tower |= (1 << 9) | (1 << 10);
+      } else if (t4Bits === 1) {
+        tower |= (1 << 9);
+      } else if (t4Bits === 2) {
+        tower |= (1 << 10);
+      } else {
+        tower |= (1 << 9) | (1 << 10);
+      }
+    }
+
+    return { tower_status: tower, barracks_status: rax };
+  }
+
+  const rad = decodeTeam(b & 0xFFFF);
+  const dire = decodeTeam((b >>> 16) & 0xFFFF);
+
+  return {
+    tower_status_radiant: rad.tower_status,
+    barracks_status_radiant: rad.barracks_status,
+    tower_status_dire: dire.tower_status,
+    barracks_status_dire: dire.barracks_status
+  };
+}
+
 // Normaliza o payload oficial do Dota 2 Coordinator (/api/live)
 function normalizeOpenDotaLive(g) {
   if (!g) return null;
@@ -456,12 +545,14 @@ function normalizeOpenDotaLive(g) {
   const direScore = g.dire_score ?? 0;
   const radLead = g.radiant_lead ?? 0;
 
-  // Bitmasks oficiais de Torres e Barracas (Valve Building State)
+  // Decodifica bitmasks oficiais de Torres e Barracas da Valve a partir do building_state do Coordinator
   const b = g.building_state || 0;
-  const tower_status_radiant = b & 0x7FF;
-  const barracks_status_radiant = (b >> 11) & 0x3F;
-  const tower_status_dire = (b >>> 16) & 0x7FF;
-  const barracks_status_dire = ((b >>> 16) >> 11) & 0x3F;
+  const {
+    tower_status_radiant,
+    barracks_status_radiant,
+    tower_status_dire,
+    barracks_status_dire
+  } = decodeBuildingState(b, duration);
 
   const rawPlayers = Array.isArray(g.players) ? g.players : [];
   const radTeamName = g.team_name_radiant || "Radiant";

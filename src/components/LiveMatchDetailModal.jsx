@@ -28,14 +28,29 @@ function pick(obj, keys) {
   return null;
 }
 
-// Status real das Torres/Barracas a partir das bitmasks da OpenDota.
-// Quando a bitmask não está disponível, o status fica "desconhecido" (não é adivinhado).
-function parseStructures(towerMask, barracksMask) {
-  const hasTowerData = towerMask !== undefined && towerMask !== null;
-  const hasBarracksData = barracksMask !== undefined && barracksMask !== null;
+// Status real das Torres/Barracas a partir das bitmasks oficiais da Valve / OpenDota.
+// Quando a partida está em draft ou pré-jogo (duration <= 0), todas as 11 torres e 6 barracas estão 100% de pé.
+function parseStructures(towerMask, barracksMask, gameDuration = null) {
+  let tMask = towerMask;
+  let bMask = barracksMask;
 
-  const tower = (bit) => (hasTowerData ? Boolean(towerMask & (1 << bit)) : null);
-  const rax = (bit) => (hasBarracksData ? Boolean(barracksMask & (1 << bit)) : null);
+  // Se a partida está em draft ou antes do cronômetro oficial (game_time <= 0), todas as estruturas estão de pé
+  if (gameDuration !== null && Number(gameDuration) <= 0) {
+    tMask = 2047;
+    bMask = 63;
+  }
+
+  const hasTowerData = tMask !== undefined && tMask !== null;
+  const hasBarracksData = bMask !== undefined && bMask !== null;
+
+  const tower = (bit) => (hasTowerData ? Boolean(tMask & (1 << bit)) : null);
+  const rax = (bit) => (hasBarracksData ? Boolean(bMask & (1 << bit)) : null);
+
+  // Trono (Ancient): No Dota 2 a bitmask oficial de torres possui 11 bits (0 a 10 = 2047).
+  // O Trono só cai quando a partida é derrotada e as T4 caíram. Enquanto a partida está ativa, o Trono está de pé.
+  const throneAlive = hasTowerData
+    ? (Boolean(tMask & (1 << 9)) || Boolean(tMask & (1 << 10)) || tMask > 0)
+    : null;
 
   return {
     hasData: hasTowerData || hasBarracksData,
@@ -63,7 +78,7 @@ function parseStructures(towerMask, barracksMask) {
     base: [
       { name: "T4 (1)", alive: tower(9) },
       { name: "T4 (2)", alive: tower(10) },
-      { name: "Trono", alive: tower(11) }
+      { name: "Trono", alive: throneAlive }
     ]
   };
 }
@@ -144,8 +159,8 @@ export default function LiveMatchDetailModal({
   const rawRadiant = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot < 128 : i < 5));
   const rawDire = rawPlayers.filter((p, i) => (p.player_slot !== undefined ? p.player_slot >= 128 : i >= 5));
 
-  const radiantStructures = parseStructures(matchData?.tower_status_radiant, matchData?.barracks_status_radiant);
-  const direStructures = parseStructures(matchData?.tower_status_dire, matchData?.barracks_status_dire);
+  const radiantStructures = parseStructures(matchData?.tower_status_radiant, matchData?.barracks_status_radiant, durationSec);
+  const direStructures = parseStructures(matchData?.tower_status_dire, matchData?.barracks_status_dire, durationSec);
 
   const countAlive = (structs) =>
     [...structs.top, ...structs.mid, ...structs.bot, ...structs.base].filter((s) => s.alive === true).length;
@@ -338,7 +353,7 @@ export default function LiveMatchDetailModal({
           <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded ${
             isRadiant ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
           }`}>
-            {aliveCount}/14 em pé
+            {aliveCount}/18 em pé
           </span>
         </div>
 
@@ -700,9 +715,9 @@ export default function LiveMatchDetailModal({
                       <Castle className="w-3.5 h-3.5 text-amber-400" /> Torres & Barracas (Top / Mid / Bot / Base)
                     </div>
                     <div className="flex items-center gap-3 text-[10px] font-mono">
-                      <span className="text-emerald-400 font-bold">{teamAName}: {radiantAliveCount}/14</span>
+                      <span className="text-emerald-400 font-bold">{teamAName}: {radiantAliveCount}/18</span>
                       <span className="text-gray-500">·</span>
-                      <span className="text-rose-400 font-bold">{teamBName}: {direAliveCount}/14</span>
+                      <span className="text-rose-400 font-bold">{teamBName}: {direAliveCount}/18</span>
                     </div>
                   </div>
 
