@@ -7,7 +7,8 @@ export default function RecentResultsSidebar({
   series = [],
   loading = false,
   onSelectSeries,
-  searchQuery = ""
+  searchQuery = "",
+  tournamentFilter = "all"
 }) {
   const filtered = series.filter(s => {
     if (!searchQuery) return true;
@@ -41,7 +42,9 @@ export default function RecentResultsSidebar({
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 px-4 text-xs text-gray-400">
-            Nenhuma série encontrada {searchQuery ? `para "${searchQuery}"` : ""}.
+            {tournamentFilter && tournamentFilter !== 'all'
+              ? `Nenhum resultado recente para "${tournamentFilter}".`
+              : `Nenhuma série encontrada ${searchQuery ? `para "${searchQuery}"` : ""}.`}
           </div>
         ) : (
           filtered.map((s, idx) => {

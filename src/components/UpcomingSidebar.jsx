@@ -7,7 +7,8 @@ export default function UpcomingSidebar({
   upcoming = [],
   loading = false,
   onOpenTeamProfile,
-  searchQuery = ""
+  searchQuery = "",
+  tournamentFilter = "all"
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null);
 
@@ -42,7 +43,9 @@ export default function UpcomingSidebar({
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 px-4 text-xs text-gray-400">
-            Nenhum confronto agendado no momento {searchQuery ? `para "${searchQuery}"` : ""}.
+            {tournamentFilter && tournamentFilter !== 'all'
+              ? `Nenhum confronto agendado para "${tournamentFilter}".`
+              : `Nenhum confronto agendado no momento ${searchQuery ? `para "${searchQuery}"` : ""}.`}
           </div>
         ) : (
           filtered.map((m, idx) => {

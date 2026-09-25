@@ -132,9 +132,47 @@ export const KNOWN_TEAM_ALIASES = {
   'tundra': ['tundra esports'],
   'beastcoast': ['bc'],
   'nigma galaxy': ['nigma', 'ngx'],
-  'nigma': ['nigma galaxy', 'ngx'],
-  'fnatic': ['fnc']
+  'fnatic': ['fnc'],
+  'tpabomah': ['travoman', 'team travoman', 'travoman team', 'team tpabomah'],
+  'travoman': ['tpabomah', 'team tpabomah', 'travoman team', 'team travoman'],
+  'team travoman': ['team tpabomah', 'tpabomah', 'travoman'],
+  'team tpabomah': ['team travoman', 'travoman', 'tpabomah'],
+  '1w': ['1win', '1win team', '1w team'],
+  '1win': ['1w', '1win team', '1w team'],
+  '1w team': ['1w', '1win', '1win team'],
+  'cake': ['team cake', 'cake team'],
+  'team cake': ['cake', 'cake team'],
+  'solo': ['team solo', 'solo team'],
+  'team solo': ['solo', 'solo team'],
+  'stray': ['team stray', 'stray team'],
+  'team stray': ['stray', 'stray team'],
+  'daxak': ['team daxak', 'daxak team'],
+  'team daxak': ['daxak', 'daxak team'],
+  'gpk': ['team gpk', 'gpk team'],
+  'team gpk': ['gpk', 'gpk team'],
+  'ns': ['team ns', 'ns team'],
+  'team ns': ['ns', 'ns team'],
+  'rostik': ['team rostik', 'rostik team'],
+  'team rostik': ['rostik', 'rostik team'],
+  'ybn': ['team ybn', 'ybn team'],
+  'team ybn': ['ybn', 'ybn team'],
+  'nemesis': ['team nemesis', 'nemesis team'],
+  'team nemesis': ['nemesis', 'nemesis team'],
+  'lynx': ['team lynx', 'lynx team'],
+  'team lynx': ['lynx', 'lynx team']
 };
+
+export function simplifyTourneyName(t) {
+  if (!t) return "";
+  let s = String(t).trim();
+  s = s.replace(/\s*-\s*(Playoffs|Group\s+[A-Z0-9]+|Phase\s+\d+|Stage\s+\d+|Round\s+\d+|September\s+\d+|October\s+\d+|Day\s+\d+).*$/i, '');
+  if (/pgl\s*wallachia/i.test(s)) return 'PGL Wallachia S9';
+  if (/betboom\s*streamers|bb\s*streamers/i.test(s)) return 'BB Streamers Battle 15';
+  if (/european\s*pro\s*league|epl/i.test(s)) return 'EPL Season 40';
+  if (/blast\s*slam/i.test(s)) return 'BLAST SLAM VIII';
+  if (/the\s*international/i.test(s)) return 'The International 2026';
+  return s.trim();
+}
 
 const ROSTER_REGEX = /\b(academy|junior|seed|young|rejects|kids|prodigy)\b/i;
 export const isJuniorOrAcademy = (s) => ROSTER_REGEX.test(String(s || '')) || /\.(b|seed)\b/i.test(String(s || ''));

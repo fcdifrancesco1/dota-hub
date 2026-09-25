@@ -3,7 +3,12 @@ import { Radio, Eye, Tv, Swords, ExternalLink } from 'lucide-react';
 import { SkeletonCard } from './SkeletonLoader';
 import TeamLogo from '../utils/teamLogos';
 
-export default function LiveMatchesSection({ liveGames = [], loading = false, onSelectLiveGame }) {
+export default function LiveMatchesSection({
+  liveGames = [],
+  loading = false,
+  onSelectLiveGame,
+  tournamentFilter = "all"
+}) {
   return (
     <section className="w-full max-w-4xl space-y-3.5">
       <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
@@ -29,9 +34,15 @@ export default function LiveMatchesSection({ liveGames = [], loading = false, on
       ) : liveGames.length === 0 ? (
         <div className="bg-[#0E1118]/70 border border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2 backdrop-blur-xl">
           <Radio className="w-8 h-8 text-amber-500/40 animate-pulse" />
-          <span className="text-sm font-bold text-white">Nenhuma partida oficial ao vivo no momento</span>
+          <span className="text-sm font-bold text-white">
+            {tournamentFilter && tournamentFilter !== 'all'
+              ? `Nenhuma partida ao vivo para "${tournamentFilter}"`
+              : "Nenhuma partida oficial ao vivo no momento"}
+          </span>
           <span className="text-xs text-gray-400 max-w-md">
-            As transmissões de torneios profissionais aparecem aqui automaticamente quando estiverem em andamento. Confira os próximos confrontos na coluna à direita!
+            {tournamentFilter && tournamentFilter !== 'all'
+              ? `Assim que uma partida deste torneio iniciar, ela aparecerá aqui em tempo real. Veja os resultados e próximos confrontos nas colunas laterais!`
+              : "As transmissões de torneios profissionais aparecem aqui automaticamente quando estiverem em andamento. Confira os próximos confrontos na coluna à direita!"}
           </span>
         </div>
       ) : (

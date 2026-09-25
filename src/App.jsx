@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Trophy, X } from 'lucide-react';
 import Header from './components/Header';
 import RecentResultsSidebar from './components/RecentResultsSidebar';
 import CenterChampion from './components/CenterChampion';
@@ -21,6 +22,7 @@ import {
   fetchUpcomingMatches,
   isSeriesMatch,
   isSameTeamMatch,
+  simplifyTourneyName,
   getCachedFast
 } from './services/api';
 
@@ -28,17 +30,27 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState('hub'); // 'hub' | 'torneios' | 'meta' | 'mmr'
   const [mobileHubSubTab, setMobileHubSubTab] = useState('center'); // 'results' | 'center' | 'upcoming'
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTournamentFilter, setSelectedTournamentFilter] = useState('all');
 
   // Carregamento instantâneo a partir do cache local (Stale-While-Revalidate)
   const cachedPro = getCachedFast('pro_matches_v7');
   const cachedUpcoming = getCachedFast('upcoming_real_matches_v3');
   const cachedConstants = getCachedFast('constants_v6');
 
+  // Filtra o cache inicial para não exibir confrontos já encerrados antes da resposta da API
+  const initialUpcoming = (cachedUpcoming || []).filter((m) => {
+    if (m.isCompleted || m.winner) return false;
+    const isFinished = (cachedPro?.finishedSeries || []).some((s) =>
+      isSeriesMatch(m.timeA, m.timeB, s.timeA, s.timeB)
+    );
+    return !isFinished;
+  });
+
   const [constants, setConstants] = useState(cachedConstants || { heroes: {}, itemsById: {} });
   const [finishedSeries, setFinishedSeries] = useState(cachedPro?.finishedSeries || []);
   const [tournamentsList, setTournamentsList] = useState(cachedPro?.tournaments || []);
   const [liveGames, setLiveGames] = useState([]);
-  const [upcomingMatches, setUpcomingMatches] = useState(cachedUpcoming || []);
+  const [upcomingMatches, setUpcomingMatches] = useState(initialUpcoming);
 
   // Se já temos cache, não exibe tela de carregamento / esqueletos!
   const [loadingData, setLoadingData] = useState(!cachedPro && !cachedUpcoming);
@@ -167,12 +179,41 @@ export default function App() {
 
       const finalLiveGames = deduplicatedLive;
 
-      // 3. Separar estritamente os jogos agendados que NÃO estão em andamento
+      // 3. Separar estritamente os jogos agendados que NÃO estão em andamento nem foram finalizados
+      const currentFinished = proData?.finishedSeries?.length ? proData.finishedSeries : finishedSeries;
+      const nowTs = Date.now();
+
       const strictlyUpcoming = (allWikiMatches || []).filter((m) => {
+        // A. Se a partida está ocorrendo ao vivo agora
         const isLive = finalLiveGames.some((g) =>
           isSeriesMatch(m.timeA, m.timeB, g.timeA, g.timeB)
         );
-        return !isLive;
+        if (isLive) return false;
+
+        // B. Se a série já terminou e está na coluna de resultados recentes (finishedSeries)
+        const isAlreadyFinished = (currentFinished || []).some((s) =>
+          isSeriesMatch(m.timeA, m.timeB, s.timeA, s.timeB)
+        );
+        if (isAlreadyFinished) return false;
+
+        // C. Se já foi marcada como concluída na Liquipedia
+        if (m.isCompleted || m.winner) return false;
+
+        // D. Placar que indica série já concluída
+        const sA = Number(m.scoreA) || 0;
+        const sB = Number(m.scoreB) || 0;
+        const fmt = (m.formato || "BO3").toUpperCase();
+        if (fmt === "BO1" && (sA >= 1 || sB >= 1)) return false;
+        if (fmt === "BO3" && (sA >= 2 || sB >= 2)) return false;
+        if (fmt === "BO5" && (sA >= 3 || sB >= 3)) return false;
+        if (fmt === "BO2" && (sA + sB >= 2)) return false;
+
+        // E. Partida agendada há mais de 3 horas que não está ao vivo
+        if (m.timestamp && (nowTs - m.timestamp > 3 * 3600 * 1000)) {
+          return false;
+        }
+
+        return true;
       });
 
       setLiveGames(finalLiveGames);
@@ -184,7 +225,7 @@ export default function App() {
       setLoadingData(false);
       setLoadingRefresh(false);
     }
-  }, []);
+  }, [finishedSeries]);
 
   useEffect(() => {
     loadData();
@@ -202,6 +243,47 @@ export default function App() {
 
     return () => clearInterval(liveInterval);
   }, [loadData, currentTab]);
+
+  // Opções disponíveis para o filtro de torneios na tela inicial
+  const tournamentOptions = useMemo(() => {
+    const counts = {};
+    const addTourney = (name) => {
+      const clean = simplifyTourneyName(name);
+      if (clean && clean !== "Torneio Dota 2" && clean !== "Torneio Profissional") {
+        counts[clean] = (counts[clean] || 0) + 1;
+      }
+    };
+
+    (finishedSeries || []).forEach((s) => addTourney(s.stage || s.leagueName));
+    (liveGames || []).forEach((g) => addTourney(g.torneio || g.league_name));
+    (upcomingMatches || []).forEach((m) => addTourney(m.torneio));
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+  }, [finishedSeries, liveGames, upcomingMatches]);
+
+  // Listas filtradas conforme o torneio selecionado na tela inicial
+  const filteredFinishedSeries = useMemo(() => {
+    if (selectedTournamentFilter === 'all') return finishedSeries;
+    return finishedSeries.filter(
+      (s) => simplifyTourneyName(s.stage || s.leagueName) === selectedTournamentFilter
+    );
+  }, [finishedSeries, selectedTournamentFilter]);
+
+  const filteredLiveGames = useMemo(() => {
+    if (selectedTournamentFilter === 'all') return liveGames;
+    return liveGames.filter(
+      (g) => simplifyTourneyName(g.torneio || g.league_name) === selectedTournamentFilter
+    );
+  }, [liveGames, selectedTournamentFilter]);
+
+  const filteredUpcomingMatches = useMemo(() => {
+    if (selectedTournamentFilter === 'all') return upcomingMatches;
+    return upcomingMatches.filter(
+      (m) => simplifyTourneyName(m.torneio) === selectedTournamentFilter
+    );
+  }, [upcomingMatches, selectedTournamentFilter]);
 
   return (
     <div className="app-container min-h-screen flex flex-col bg-[#0B0D12] text-[#E1E6F0] selection:bg-amber-500 selection:text-black">
@@ -247,13 +329,85 @@ export default function App() {
             </button>
           </div>
 
+          {/* BARRA DE FILTRO POR TORNEIO NA TELA INICIAL */}
+          {tournamentOptions.length > 0 && (
+            <div className="bg-[#0E1118]/90 border-b border-white/10 px-3 sm:px-6 py-2.5 backdrop-blur-md shrink-0">
+              <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-0.5">
+                <span className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-amber-400 shrink-0 mr-1">
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Torneio:</span>
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedTournamentFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    selectedTournamentFilter === 'all'
+                      ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20 font-extrabold'
+                      : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
+                  }`}
+                >
+                  <span>Todos os Torneios</span>
+                  <span
+                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                      selectedTournamentFilter === 'all'
+                        ? 'bg-black/20 text-black font-extrabold'
+                        : 'bg-white/10 text-gray-400'
+                    }`}
+                  >
+                    {finishedSeries.length + liveGames.length + upcomingMatches.length}
+                  </span>
+                </button>
+
+                {tournamentOptions.map((opt) => {
+                  const isSelected = selectedTournamentFilter === opt.name;
+                  return (
+                    <button
+                      key={opt.name}
+                      type="button"
+                      onClick={() => setSelectedTournamentFilter(isSelected ? 'all' : opt.name)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                        isSelected
+                          ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20 font-extrabold'
+                          : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
+                      }`}
+                    >
+                      <span>{opt.name}</span>
+                      <span
+                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                          isSelected
+                            ? 'bg-black/20 text-black font-extrabold'
+                            : 'bg-white/10 text-gray-400'
+                        }`}
+                      >
+                        {opt.count}
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {selectedTournamentFilter !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTournamentFilter('all')}
+                    title="Remover filtro de torneio"
+                    className="flex items-center gap-1 text-[11px] font-bold text-gray-400 hover:text-rose-400 px-2 py-1 rounded-lg hover:bg-white/5 transition-colors shrink-0 ml-auto cursor-pointer"
+                  >
+                    <X className="w-3 h-3" /> Limpar
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="main-grid">
             {/* COLUNA ESQUERDA: RESULTADOS RECENTES */}
             <div className={`${mobileHubSubTab === 'results' ? 'block' : 'hidden'} lg:block h-full`}>
               <RecentResultsSidebar
-                series={finishedSeries}
+                series={filteredFinishedSeries}
                 loading={loadingData}
                 searchQuery={searchQuery}
+                tournamentFilter={selectedTournamentFilter}
                 onSelectSeries={(s) => setSelectedSeries(s)}
               />
             </div>
@@ -273,8 +427,9 @@ export default function App() {
 
               {/* Grid de Partidas Ao Vivo no Centro */}
               <LiveMatchesSection
-                liveGames={liveGames}
+                liveGames={filteredLiveGames}
                 loading={loadingData}
+                tournamentFilter={selectedTournamentFilter}
                 onSelectLiveGame={(game) => {
                   setSelectedLiveGame(game);
                 }}
@@ -284,9 +439,10 @@ export default function App() {
             {/* COLUNA DIREITA: JOGOS AGENDADOS (ESTRITAMENTE FUTUROS) */}
             <div className={`${mobileHubSubTab === 'upcoming' ? 'block' : 'hidden'} lg:block h-full`}>
               <UpcomingSidebar
-                upcoming={upcomingMatches}
+                upcoming={filteredUpcomingMatches}
                 loading={loadingData}
                 searchQuery={searchQuery}
+                tournamentFilter={selectedTournamentFilter}
                 onOpenTeamProfile={(teamId, teamName) =>
                   setSelectedTeam({ id: teamId, name: teamName })
                 }
