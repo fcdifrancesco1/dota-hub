@@ -19,6 +19,35 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
     });
   }, []);
 
+  const MID_HERO_IDS = new Set([
+    11, 13, 15, 17, 19, 21, 22, 23, 25, 34, 35, 36, 39, 43, 45, 46, 47, 49,
+    52, 59, 61, 65, 73, 74, 75, 76, 80, 82, 97, 98, 101, 106, 107, 113, 114,
+    120, 126, 135, 136, 137, 138, 100, 14
+  ]);
+
+  const OFFLANE_HERO_IDS = new Set([
+    2, 7, 14, 16, 23, 28, 29, 36, 38, 40, 43, 49, 51, 55, 57, 60, 61, 65,
+    69, 71, 77, 78, 84, 85, 96, 97, 98, 99, 102, 104, 107, 108, 110, 120,
+    123, 129, 135, 136, 137
+  ]);
+
+  const matchesRole = (hero, role) => {
+    if (!role || role === 'all') return true;
+    if (role === 'Mid') {
+      return MID_HERO_IDS.has(hero.id) || (hero.roles?.includes('Nuker') && (hero.roles?.includes('Escape') || hero.roles?.includes('Carry')));
+    }
+    if (role === 'Offlane') {
+      return OFFLANE_HERO_IDS.has(hero.id) || ((hero.roles?.includes('Initiator') || hero.roles?.includes('Durable')) && !hero.roles?.includes('Support'));
+    }
+    if (role === 'Carry') {
+      return hero.roles?.includes('Carry');
+    }
+    if (role === 'Support') {
+      return hero.roles?.includes('Support');
+    }
+    return hero.roles?.includes(role);
+  };
+
   const rolesList = [
     { id: 'all', label: 'Todas as Funções' },
     { id: 'Carry', label: 'Carry (Pos 1)' },
@@ -48,7 +77,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
         return false;
       }
       // Filtro de Função
-      if (selectedRole !== 'all' && !h.roles.includes(selectedRole)) {
+      if (!matchesRole(h, selectedRole)) {
         return false;
       }
       // Filtro de Atributo

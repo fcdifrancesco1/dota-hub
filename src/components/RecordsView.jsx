@@ -10,7 +10,8 @@ import {
   Crosshair,
   Loader2,
   ExternalLink,
-  Trophy
+  Trophy,
+  CheckCircle2
 } from 'lucide-react';
 import { fetchDotaRecords, getHeroImg, getHeroName } from '../services/api';
 
@@ -18,7 +19,7 @@ const RECORD_TYPES = [
   { id: 'kills', label: 'Mais Abates (Kills)', icon: Crosshair, unit: 'kills' },
   { id: 'gold_per_min', label: 'Maior GPM', icon: Coins, unit: 'GPM' },
   { id: 'xp_per_min', label: 'Maior XPM', icon: Zap, unit: 'XPM' },
-  { id: 'duration', label: 'Partida Mais Longa', icon: Clock, unit: 'min' },
+  { id: 'duration', label: 'Partida Mais Longa', icon: Clock, unit: 'tempo' },
   { id: 'last_hits', label: 'Mais Last Hits (CS)', icon: Swords, unit: 'LH' },
   { id: 'hero_damage', label: 'Dano a Heróis', icon: Flame, unit: 'dano' },
   { id: 'tower_damage', label: 'Dano a Torres', icon: Shield, unit: 'dano' }
@@ -62,16 +63,16 @@ export default function RecordsView({
             Hall da Fama Oficial do Dota 2
           </div>
           <h1 className="text-2xl font-black text-white tracking-wide mt-1">
-            Recordes Históricos Mundiais
+            Recordes Oficiais em Torneios Profissionais
           </h1>
           <p className="text-xs text-gray-400 mt-1">
-            Os maiores marcos numéricos já registrados na história das partidas profissionais e de alto nível de Dota 2.
+            Os maiores marcos numéricos já registrados exclusivamente no circuito profissional (The International, Majors Oficiais, ESL One, PGL, BLAST, StarSeries).
           </p>
         </div>
 
-        {/* Total de Recordes */}
+        {/* Badge de Partidas Profissionais */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs text-amber-400 font-bold">
-          <Award className="w-4 h-4" /> Top 50 Oficiais
+          <CheckCircle2 className="w-4 h-4 text-amber-400" /> Apenas Jogos Profissionais
         </div>
       </div>
 
@@ -101,7 +102,7 @@ export default function RecordsView({
       {loading ? (
         <div className="py-24 flex flex-col items-center justify-center gap-3 text-gray-400">
           <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-          <span className="text-xs font-semibold">Consultando recordes mundiais da OpenDota...</span>
+          <span className="text-xs font-semibold">Consultando recordes mundiais oficiais...</span>
         </div>
       ) : records.length === 0 ? (
         <div className="text-center py-20 text-gray-400 text-xs">
@@ -126,13 +127,32 @@ export default function RecordsView({
                   />
                 )}
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block">
-                    Recordista Mundial Absoluto
-                  </span>
-                  <h3 className="text-xl font-black text-white">
-                    {records[0].hero_id ? getHeroName(constants, records[0].hero_id) : 'Partida Profissional'}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400">
+                      Recordista Profissional #1
+                    </span>
+                    {records[0].tournament && (
+                      <span className="text-[9px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono">
+                        {records[0].tournament}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-black text-white mt-0.5">
+                    {records[0].player_name ? records[0].player_name : getHeroName(constants, records[0].hero_id)}
                   </h3>
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-gray-400 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400 mt-1">
+                    {records[0].team_name && (
+                      <span className="font-semibold text-amber-200/80">
+                        {records[0].team_name} {records[0].vs_team ? `vs ${records[0].vs_team}` : ''}
+                      </span>
+                    )}
+                    {records[0].hero_id && (
+                      <span className="text-gray-400">
+                        · {getHeroName(constants, records[0].hero_id)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-gray-400 mt-1">
                     <span>Match ID:</span>
                     <a
                       href={`https://www.opendota.com/matches/${records[0].match_id}`}
@@ -153,7 +173,7 @@ export default function RecordsView({
                 </div>
               </div>
 
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <div className="font-mono text-3xl font-black text-amber-400">
                   {formatScore(records[0].score, selectedType)}
                 </div>
@@ -164,13 +184,15 @@ export default function RecordsView({
             </div>
           )}
 
-          {/* TABELA DO TOP 2 AO 50 */}
+          {/* TABELA DO TOP 2 AO FINAL */}
           <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0E1118]/80 backdrop-blur-xl">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
                 <tr>
                   <th className="p-3.5 pl-5 w-16 text-center">Posição</th>
-                  <th className="p-3.5">Herói / Jogador</th>
+                  <th className="p-3.5">Jogador & Equipe</th>
+                  <th className="p-3.5">Herói</th>
+                  <th className="p-3.5">Torneio</th>
                   <th className="p-3.5 text-right font-bold">Valor Recorde</th>
                   <th className="p-3.5 text-right">Data</th>
                   <th className="p-3.5 pr-5 text-right">Match ID</th>
@@ -189,7 +211,18 @@ export default function RecordsView({
                       </td>
 
                       <td className="p-3.5">
-                        <div className="flex items-center gap-3">
+                        <div className="font-bold text-white text-sm">
+                          {r.player_name || heroName}
+                        </div>
+                        {r.team_name && (
+                          <div className="text-[11px] text-gray-400">
+                            {r.team_name} {r.vs_team ? `vs ${r.vs_team}` : ''}
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="p-3.5">
+                        <div className="flex items-center gap-2.5">
                           {heroImg ? (
                             <img
                               src={heroImg}
@@ -205,12 +238,18 @@ export default function RecordsView({
                             </div>
                           )}
                           <span
-                            className="text-white font-bold cursor-pointer hover:text-amber-400 transition-colors"
+                            className="text-gray-300 font-semibold cursor-pointer hover:text-amber-400 transition-colors"
                             onClick={() => r.hero_id && onSelectHero && onSelectHero({ id: r.hero_id, name: heroName })}
                           >
                             {heroName}
                           </span>
                         </div>
+                      </td>
+
+                      <td className="p-3.5">
+                        <span className="text-gray-300 font-medium">
+                          {r.tournament || "Circuito Pro"}
+                        </span>
                       </td>
 
                       <td className="p-3.5 text-right font-mono font-black text-amber-400 text-sm">

@@ -1,3 +1,6 @@
+import { PRO_RECORDS } from "../data/proRecords";
+import { INITIAL_ARCHIVED_TOURNAMENTS } from "../data/archivedTournaments";
+
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
 
@@ -396,6 +399,58 @@ export function clusterMatchesIntoSeries(rawMatches) {
   });
 }
 
+// Gerenciamento e Acervo Permanente de Torneios
+const ARCHIVE_KEY = "dota_hub_tournaments_archive_v1";
+
+export function getArchivedTournaments() {
+  try {
+    const raw = localStorage.getItem(ARCHIVE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Aviso ao ler torneios arquivados:", e);
+  }
+  try {
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(INITIAL_ARCHIVED_TOURNAMENTS));
+  } catch (e) {}
+  return [...INITIAL_ARCHIVED_TOURNAMENTS];
+}
+
+export function saveFinishedTournament(tournament) {
+  if (!tournament || !tournament.id) return;
+  try {
+    const current = getArchivedTournaments();
+    const existingIndex = current.findIndex(
+      (t) => String(t.id) === String(tournament.id) || (t.league_id && String(t.league_id) === String(tournament.league_id))
+    );
+    const updatedTournament = {
+      ...tournament,
+      status: "finalizado"
+    };
+
+    if (existingIndex >= 0) {
+      current[existingIndex] = {
+        ...current[existingIndex],
+        ...updatedTournament,
+        seriesList: (updatedTournament.seriesList && updatedTournament.seriesList.length > 0)
+          ? updatedTournament.seriesList
+          : current[existingIndex].seriesList
+      };
+    } else {
+      current.unshift(updatedTournament);
+    }
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(current));
+    return current;
+  } catch (e) {
+    console.warn("Aviso ao salvar torneio finalizado:", e);
+  }
+  return null;
+}
+
 // 3. Buscar Partidas Profissionais Recentes (com timeout e cache de 3 min)
 export async function fetchProMatches() {
   const cached = getCached("pro_matches_v7", 3 * 60 * 1000);
@@ -413,6 +468,8 @@ export async function fetchProMatches() {
 
       // Agrupamento por Liga
       const leaguesMap = {};
+      const nowSec = Math.floor(Date.now() / 1000);
+
       rawList.forEach((m) => {
         const lId = m.leagueid || m.league_name;
         if (!lId) return;
@@ -422,21 +479,45 @@ export async function fetchProMatches() {
             league_id: m.leagueid,
             name: m.league_name || "Torneio Dota 2",
             recentDate: new Date(m.start_time * 1000).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }),
+            lastMatchTime: m.start_time || 0,
             rawMatches: []
           };
         }
         leaguesMap[lId].rawMatches.push(m);
+        if (m.start_time && m.start_time > leaguesMap[lId].lastMatchTime) {
+          leaguesMap[lId].lastMatchTime = m.start_time;
+        }
       });
 
-      const tournaments = Object.values(leaguesMap).map((l) => ({
-        ...l,
-        seriesList: clusterMatchesIntoSeries(l.rawMatches).reverse()
-      }));
+      const liveTournaments = Object.values(leaguesMap).map((l) => {
+        const isRecent = (nowSec - l.lastMatchTime) < 3 * 24 * 3600; // últimos 3 dias
+        return {
+          ...l,
+          status: isRecent ? "em_andamento" : "finalizado",
+          seriesList: clusterMatchesIntoSeries(l.rawMatches).reverse()
+        };
+      });
+
+      // Salva torneios finalizados automaticamente no acervo permanente
+      liveTournaments.forEach((t) => {
+        if (t.status === "finalizado") {
+          saveFinishedTournament(t);
+        }
+      });
+
+      // Recupera acervo completo de torneios arquivados
+      const archivedTournaments = getArchivedTournaments();
+
+      // Mescla em andamento + finalizados sem duplicatas
+      const ongoing = liveTournaments.filter((t) => t.status === "em_andamento");
+      const existingIds = new Set(ongoing.map((t) => String(t.league_id || t.id)));
+      const finalized = archivedTournaments.filter((t) => !existingIds.has(String(t.league_id || t.id)));
+      const allTournaments = [...ongoing, ...finalized];
 
       const result = {
         rawMatches: rawList,
         finishedSeries: valid.slice(0, 15),
-        tournaments: tournaments.slice(0, 15)
+        tournaments: allTournaments
       };
 
       setCache("pro_matches_v7", result);
@@ -445,7 +526,11 @@ export async function fetchProMatches() {
   } catch (err) {
     console.warn("Aviso ao buscar proMatches (usando cache anterior):", err);
   }
-  return getCachedFast("pro_matches_v7") || { rawMatches: [], finishedSeries: [], tournaments: [] };
+  const cachedFallback = getCachedFast("pro_matches_v7") || { rawMatches: [], finishedSeries: [], tournaments: [] };
+  if (!cachedFallback.tournaments || cachedFallback.tournaments.length === 0) {
+    cachedFallback.tournaments = getArchivedTournaments();
+  }
+  return cachedFallback;
 }
 
 // 4. Buscar Detalhes Completos do Replay da Partida
@@ -1616,24 +1701,96 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
   }
 }
 
-// 12. Buscar Recordes Mundiais do Dota 2
+// 12. Buscar Recordes Oficiais Profissionais do Dota 2 (Hall da Fama Competitivo)
 export async function fetchDotaRecords(recordType = "kills") {
-  const cacheKey = `records_${recordType}`;
+  const records = PRO_RECORDS[recordType];
+  if (records && records.length > 0) {
+    return records;
+  }
+  return [];
+}
+
+// 12.1. Buscar Estatísticas de Heróis do Torneio (Liquipedia-Style)
+export async function fetchTournamentHeroStats(leagueId) {
+  if (!leagueId) return null;
+  const numLeagueId = Number(leagueId);
+  const cacheKey = `tourney_hero_stats_${leagueId}`;
   const cached = getCached(cacheKey, 30 * 60 * 1000);
   if (cached) return cached;
 
-  try {
-    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/records/${recordType}`, {}, 5000);
-    if (res.ok) {
-      const data = await res.json();
-      const list = (Array.isArray(data) ? data : []).slice(0, 50);
-      setCache(cacheKey, list);
-      return list;
+  if (numLeagueId && !isNaN(numLeagueId)) {
+    try {
+      const sql = `SELECT picks_bans, radiant_win FROM matches WHERE leagueid=${numLeagueId} AND picks_bans IS NOT NULL`;
+      const res = await fetchWithTimeout(
+        `https://api.opendota.com/api/explorer?sql=${encodeURIComponent(sql)}`,
+        {},
+        8000
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const rows = data.rows || [];
+        if (rows.length > 0) {
+          const heroMap = {};
+          const totalMatches = rows.length;
+
+          rows.forEach((r) => {
+            const rWin = r.radiant_win;
+            const pbList = r.picks_bans || [];
+            pbList.forEach((pb) => {
+              const hId = pb.hero_id;
+              if (!hId) return;
+              if (!heroMap[hId]) {
+                heroMap[hId] = {
+                  hero_id: hId,
+                  picks: 0,
+                  bans: 0,
+                  wins: 0,
+                  losses: 0
+                };
+              }
+              if (pb.is_pick) {
+                heroMap[hId].picks++;
+                const isRad = pb.team === 0;
+                const won = (isRad && rWin) || (!isRad && !rWin);
+                if (won) heroMap[hId].wins++;
+                else heroMap[hId].losses++;
+              } else {
+                heroMap[hId].bans++;
+              }
+            });
+          });
+
+          const heroes = Object.values(heroMap).map((h) => {
+            const contested = h.picks + h.bans;
+            const winRate = h.picks > 0 ? (h.wins / h.picks) * 100 : 0;
+            const pickRate = totalMatches > 0 ? (h.picks / totalMatches) * 100 : 0;
+            const banRate = totalMatches > 0 ? (h.bans / totalMatches) * 100 : 0;
+            const contestRate = totalMatches > 0 ? (contested / totalMatches) * 100 : 0;
+            return {
+              ...h,
+              contested,
+              winRate,
+              pickRate,
+              banRate,
+              contestRate
+            };
+          });
+
+          const result = {
+            leagueId: numLeagueId,
+            totalMatches,
+            heroes
+          };
+          setCache(cacheKey, result);
+          return result;
+        }
+      }
+    } catch (err) {
+      console.warn("Aviso ao buscar estatísticas de heróis no Explorer:", err);
     }
-  } catch (err) {
-    console.warn("Aviso ao carregar recordes do Dota 2:", err);
   }
-  return getCachedFast(cacheKey) || [];
+
+  return getCachedFast(cacheKey) || null;
 }
 
 // 13. Sinergias e Combos de Heróis Populares

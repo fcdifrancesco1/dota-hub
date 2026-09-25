@@ -460,6 +460,8 @@ export default function App() {
             loading={loadingData}
             searchQuery={searchQuery}
             onSelectSeries={(s) => setSelectedSeries(s)}
+            constants={constants}
+            onSelectHero={(h) => setSelectedHero(h)}
           />
         </div>
       )}
