@@ -358,7 +358,7 @@ export default function App() {
         />
       )}
 
-      {/* MODAL DETALHADO DA PARTIDA AO VIVO (MINIMAPA, ESTATÍSTICAS, BUYBACKS, PICKS & BANS) */}
+      {/* MODAL DETALHADO DA PARTIDA AO VIVO (DRAFT, ESTATÍSTICAS, ITENS, TORRES) */}
       {selectedLiveGame && (
         <LiveMatchDetailModal
           game={selectedLiveGame}

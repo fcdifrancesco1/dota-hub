@@ -19,7 +19,6 @@ import {
   fetchMatchDetails
 } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
-import LiveMinimap from './LiveMinimap';
 
 // Lê o primeiro valor definido entre possíveis nomes de campo da API (sem inventar números)
 function pick(obj, keys) {
@@ -563,9 +562,14 @@ export default function LiveMatchDetailModal({
             <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
               {leagueName} ({formatStr})
             </span>
-            <span className="text-[10px] text-emerald-400/80 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" /> Sincronizado a cada 20s ({lastSync})
-            </span>
+            <button
+              type="button"
+              onClick={syncMatchData}
+              title="Clique para sincronizar telemetria da Valve agora"
+              className="text-[10px] text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1 cursor-pointer transition-all"
+            >
+              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} /> Sincronizado a cada 20s ({lastSync})
+            </button>
             {matchData?.spectators > 0 && (
               <span className="text-[10px] text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
                 <Eye className="w-2.5 h-2.5" /> {matchData.spectators.toLocaleString()} espectadores GOTV
@@ -683,16 +687,6 @@ export default function LiveMatchDetailModal({
             </div>
           ) : (
             <>
-              {/* POSICIONAMENTO NO MAPA EM TEMPO REAL (MINIMAP) */}
-              <LiveMinimap
-                matchData={matchData}
-                constants={constants}
-                radiantStructures={radiantStructures}
-                direStructures={direStructures}
-                onSelectHero={onSelectHero}
-                onManualSync={syncMatchData}
-              />
-
               {/* ORDEM DO DRAFT (CAPTAIN'S MODE: PICKS & BANS) */}
               {renderCaptainsModeDraft()}
 
