@@ -401,17 +401,17 @@ export default function LiveMatchDetailModal({
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80">
-        <table className="w-full text-left text-xs border-collapse min-w-[820px]">
+        <table className="w-full text-left text-xs border-collapse min-w-[1000px]">
           <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
             <tr>
-              <th className="p-3 pl-4">Jogador / Herói</th>
-              <th className="p-3 text-center">Nível</th>
+              <th className="p-3 pl-4 whitespace-nowrap min-w-[170px]">Jogador / Herói</th>
+              <th className="p-3 text-center whitespace-nowrap min-w-[60px]">Nível</th>
               <th className="p-3 text-center min-w-[110px] whitespace-nowrap">K / D / A</th>
-              <th className="p-3 text-right">Patrimônio Líquido</th>
-              <th className="p-3 text-right">CS (LH / DN)</th>
-              <th className="p-3 text-center min-w-[140px] whitespace-nowrap">Buybacks Usados</th>
-              <th className="p-3 text-right min-w-[90px] whitespace-nowrap">GPM / XPM</th>
-              <th className="p-3 pr-4">Inventário Atual</th>
+              <th className="p-3 text-right whitespace-nowrap min-w-[130px]">Patrimônio Líquido</th>
+              <th className="p-3 text-right whitespace-nowrap min-w-[110px]">CS (LH / DN)</th>
+              <th className="p-3 text-center min-w-[130px] whitespace-nowrap">Buybacks Usados</th>
+              <th className="p-3 text-right min-w-[110px] whitespace-nowrap">GPM / XPM</th>
+              <th className="p-3 pr-4 whitespace-nowrap min-w-[190px]">Inventário Atual</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 font-medium">
@@ -423,7 +423,7 @@ export default function LiveMatchDetailModal({
               return (
                 <tr key={i} className="transition-colors hover:bg-white/[0.03]">
                   {/* Jogador e Herói */}
-                  <td className="p-3 pl-4">
+                  <td className="p-3 pl-4 whitespace-nowrap">
                     <button
                       type="button"
                       onClick={() => {
@@ -452,7 +452,7 @@ export default function LiveMatchDetailModal({
                   </td>
 
                   {/* Nível */}
-                  <td className="p-3 text-center font-mono font-bold">
+                  <td className="p-3 text-center font-mono font-bold whitespace-nowrap">
                     <span className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] text-gray-300">
                       {p.level ?? '—'}
                     </span>
@@ -470,13 +470,15 @@ export default function LiveMatchDetailModal({
                   </td>
 
                   {/* Net Worth */}
-                  <td className="p-3 text-right font-mono font-black text-amber-400">
+                  <td className="p-3 text-right font-mono font-black text-amber-400 whitespace-nowrap">
                     {p.net_worth != null ? p.net_worth.toLocaleString() : '—'}
                   </td>
 
                   {/* CS */}
-                  <td className="p-3 text-right font-mono text-gray-300">
-                    {p.last_hits ?? '—'} <span className="text-gray-500">/</span> {p.denies ?? '—'}
+                  <td className="p-3 text-right font-mono text-gray-300 whitespace-nowrap">
+                    <span className="font-semibold text-white">{p.last_hits ?? '—'}</span>
+                    <span className="text-gray-500 mx-1">/</span>
+                    <span className="text-gray-400">{p.denies ?? '—'}</span>
                   </td>
 
                   {/* Buybacks usados (dado real, sem estimar disponibilidade de ouro) */}
@@ -499,12 +501,12 @@ export default function LiveMatchDetailModal({
                   {/* GPM / XPM */}
                   <td className="p-3 text-right font-mono text-[11px] whitespace-nowrap">
                     <span className="text-amber-400 font-bold">{p.gpm ?? '—'}</span>
-                    <span className="text-gray-500"> / </span>
-                    <span className="text-cyan-400">{p.xpm ?? '—'}</span>
+                    <span className="text-gray-500 mx-1">/</span>
+                    <span className="text-cyan-400 font-bold">{p.xpm ?? '—'}</span>
                   </td>
 
                   {/* Itens */}
-                  <td className="p-3 pr-4">
+                  <td className="p-3 pr-4 whitespace-nowrap">
                     <div className="flex items-center gap-1">
                       <div className="grid grid-cols-6 gap-1 bg-black/60 p-1 rounded-lg border border-white/10 w-fit">
                         {Array.from({ length: 6 }).map((_, itIdx) => {

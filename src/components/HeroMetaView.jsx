@@ -190,7 +190,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
         <SkeletonTable rows={10} cols={6} />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80 backdrop-blur-xl">
-          <table className="w-full text-left text-xs border-collapse min-w-[760px]">
+          <table className="w-full text-left text-xs border-collapse min-w-[840px]">
             <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
               <tr>
                 <th
@@ -198,20 +198,20 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     if (sortBy === 'tier') setSortAsc(!sortAsc);
                     else { setSortBy('tier'); setSortAsc(false); }
                   }}
-                  className="p-3 pl-4 cursor-pointer hover:text-white"
+                  className="p-3 pl-4 cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center gap-1">
                     Tier {sortBy === 'tier' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
                   </div>
                 </th>
-                <th className="p-3">Herói</th>
-                <th className="p-3">Atributo / Função</th>
+                <th className="p-3 whitespace-nowrap">Herói</th>
+                <th className="p-3 whitespace-nowrap">Atributo / Função</th>
                 <th
                   onClick={() => {
                     if (sortBy === 'proWinRate') setSortAsc(!sortAsc);
                     else { setSortBy('proWinRate'); setSortAsc(false); }
                   }}
-                  className="p-3 text-center cursor-pointer hover:text-white"
+                  className="p-3 text-center cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center justify-center gap-1">
                     Winrate Pro {sortBy === 'proWinRate' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
@@ -222,7 +222,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     if (sortBy === 'proPick') setSortAsc(!sortAsc);
                     else { setSortBy('proPick'); setSortAsc(false); }
                   }}
-                  className="p-3 text-center cursor-pointer hover:text-white"
+                  className="p-3 text-center cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center justify-center gap-1">
                     Picks / Bans {sortBy === 'proPick' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
@@ -233,7 +233,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     if (sortBy === 'pub8WinRate') setSortAsc(!sortAsc);
                     else { setSortBy('pub8WinRate'); setSortAsc(false); }
                   }}
-                  className="p-3 pr-4 text-right cursor-pointer hover:text-white"
+                  className="p-3 pr-4 text-right cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center justify-end gap-1">
                     Immortal Pub WR {sortBy === 'pub8WinRate' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
@@ -259,14 +259,14 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     title={`Clique para ver detalhes completos de ${h.name}`}
                   >
                     {/* Badge do Tier */}
-                    <td className="p-3 pl-4">
+                    <td className="p-3 pl-4 whitespace-nowrap">
                       <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-black text-xs font-mono border ${tierStyles[h.tier] || tierStyles['B']}`}>
                         {h.tier}
                       </span>
                     </td>
 
                     {/* Herói */}
-                    <td className="p-3">
+                    <td className="p-3 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <img
                           src={h.img}
@@ -285,7 +285,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     </td>
 
                     {/* Atributo e Funções */}
-                    <td className="p-3">
+                    <td className="p-3 whitespace-nowrap">
                       <div className="space-y-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-2 py-0.5 rounded border border-white/5">
                           {h.primaryAttr}
@@ -297,21 +297,21 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     </td>
 
                     {/* Winrate Pro */}
-                    <td className="p-3 text-center font-mono">
+                    <td className="p-3 text-center font-mono whitespace-nowrap">
                       <span className={`font-bold text-xs ${h.proWinRate >= 52 ? 'text-emerald-400' : h.proWinRate >= 48 ? 'text-amber-400' : 'text-rose-400'}`}>
                         {h.proPick > 0 ? `${h.proWinRate}%` : '—'}
                       </span>
                     </td>
 
                     {/* Picks / Bans */}
-                    <td className="p-3 text-center font-mono text-gray-300">
+                    <td className="p-3 text-center font-mono text-gray-300 whitespace-nowrap">
                       <span className="text-white font-bold">{h.proPick}</span>
-                      <span className="text-gray-500"> / </span>
+                      <span className="text-gray-500 mx-1">/</span>
                       <span className="text-rose-400">{h.proBan}</span>
                     </td>
 
                     {/* Immortal Pub WR */}
-                    <td className="p-3 pr-4 text-right font-mono">
+                    <td className="p-3 pr-4 text-right font-mono whitespace-nowrap">
                       <span className={`font-bold ${h.pub8WinRate >= 52 ? 'text-emerald-400' : h.pub8WinRate >= 48 ? 'text-gray-300' : 'text-rose-400'}`}>
                         {h.pub8WinRate}%
                       </span>

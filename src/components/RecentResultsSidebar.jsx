@@ -56,25 +56,25 @@ export default function RecentResultsSidebar({
               >
                 {/* Cabeçalho do Card */}
                 <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2 mb-2 text-[10px]">
-                  <span className="font-bold text-amber-400/90 truncate uppercase tracking-wider max-w-[190px]">
+                  <span className="font-bold text-amber-400/90 truncate uppercase tracking-wider flex-1 min-w-0 pr-1" title={s.stage || "Torneio Profissional"}>
                     {s.stage || "Torneio Profissional"}
                   </span>
-                  <span className="font-mono text-gray-400 font-semibold bg-black/40 px-1.5 py-0.5 rounded border border-white/5 flex items-center gap-1">
-                    <span>{s.dur}</span>
-                    {s.dateStr && <span className="text-cyan-400/90 font-medium"> • {s.dateStr}</span>}
+                  <span className="font-mono text-gray-400 font-semibold bg-black/50 px-2 py-0.5 rounded border border-white/5 flex items-center gap-1.5 shrink-0 whitespace-nowrap text-[9px]">
+                    <span className="whitespace-nowrap">{s.dur}</span>
+                    {s.dateStr && <span className="text-cyan-400/90 font-medium whitespace-nowrap"> • {s.dateStr}</span>}
                   </span>
                 </div>
 
                 {/* Linha Time A */}
                 <div className="flex items-center justify-between gap-2 py-1">
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-2 truncate flex-1 min-w-0">
                     <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} className="w-5 h-5 shrink-0" />
                     <span className={`text-xs font-bold truncate ${aWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
                       {s.timeA}
                     </span>
                   </div>
                   <span
-                    className={`font-mono text-xs font-black px-2 py-0.5 rounded ${
+                    className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${
                       aWon
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : s.scoreA === s.scoreB
@@ -88,14 +88,14 @@ export default function RecentResultsSidebar({
 
                 {/* Linha Time B */}
                 <div className="flex items-center justify-between gap-2 py-1">
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-2 truncate flex-1 min-w-0">
                     <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} className="w-5 h-5 shrink-0" />
                     <span className={`text-xs font-bold truncate ${bWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
                       {s.timeB}
                     </span>
                   </div>
                   <span
-                    className={`font-mono text-xs font-black px-2 py-0.5 rounded ${
+                    className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${
                       bWon
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : s.scoreA === s.scoreB

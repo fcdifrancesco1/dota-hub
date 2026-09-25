@@ -23,35 +23,37 @@ export default function PlayerStatsModal({ team, stats, loading, onClose }) {
         {loading ? (
           <div className="text-center py-10 text-dota-dim animate-pulse">Calculando médias competitivas...</div>
         ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="bg-dota-card text-dota-dim text-xs font-mono border-b border-dota-border">
-              <tr>
-                <th className="p-3">Posição</th>
-                <th className="p-3">Jogador</th>
-                <th className="p-3 text-center">Jogos</th>
-                <th className="p-3 text-center">KDA</th>
-                <th className="p-3 text-right">GPM</th>
-                <th className="p-3 text-right">XPM</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-dota-border/40 font-medium">
-              {stats.map((p) => {
-                const k = p.games ? (p.kills / p.games).toFixed(1) : 0;
-                const d = p.games ? (p.deaths / p.games).toFixed(1) : 0;
-                const a = p.games ? (p.assists / p.games).toFixed(1) : 0;
-                return (
-                  <tr key={p.id} className="hover:bg-dota-card/30">
-                    <td className="p-3 font-mono text-dota-accent">Pos {p.position}</td>
-                    <td className="p-3 font-bold text-white">{p.name}</td>
-                    <td className="p-3 text-center font-mono text-dota-dim">{p.games}</td>
-                    <td className="p-3 text-center font-mono">{k}/{d}/{a}</td>
-                    <td className="p-3 text-right font-mono text-dota-cyan">{Math.round(p.gpm / (p.games || 1))}</td>
-                    <td className="p-3 text-right font-mono text-dota-text">{Math.round(p.xpm / (p.games || 1))}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[500px]">
+              <thead className="bg-dota-card text-dota-dim text-xs font-mono border-b border-dota-border">
+                <tr>
+                  <th className="p-3 whitespace-nowrap">Posição</th>
+                  <th className="p-3 whitespace-nowrap">Jogador</th>
+                  <th className="p-3 text-center whitespace-nowrap">Jogos</th>
+                  <th className="p-3 text-center whitespace-nowrap">KDA</th>
+                  <th className="p-3 text-right whitespace-nowrap">GPM</th>
+                  <th className="p-3 text-right whitespace-nowrap">XPM</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-dota-border/40 font-medium">
+                {stats.map((p) => {
+                  const k = p.games ? (p.kills / p.games).toFixed(1) : 0;
+                  const d = p.games ? (p.deaths / p.games).toFixed(1) : 0;
+                  const a = p.games ? (p.assists / p.games).toFixed(1) : 0;
+                  return (
+                    <tr key={p.id} className="hover:bg-dota-card/30">
+                      <td className="p-3 font-mono text-dota-accent whitespace-nowrap">Pos {p.position}</td>
+                      <td className="p-3 font-bold text-white whitespace-nowrap">{p.name}</td>
+                      <td className="p-3 text-center font-mono text-dota-dim whitespace-nowrap">{p.games}</td>
+                      <td className="p-3 text-center font-mono whitespace-nowrap">{k}/{d}/{a}</td>
+                      <td className="p-3 text-right font-mono text-dota-cyan whitespace-nowrap">{Math.round(p.gpm / (p.games || 1))}</td>
+                      <td className="p-3 text-right font-mono text-dota-text whitespace-nowrap">{Math.round(p.xpm / (p.games || 1))}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

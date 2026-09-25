@@ -56,18 +56,18 @@ export default function MatchDetailModal({
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/70">
-          <table className="w-full text-left text-xs border-collapse min-w-[840px]">
+          <table className="w-full text-left text-xs border-collapse min-w-[1040px]">
             <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
               <tr>
-                <th className="p-3 pl-4">Jogador / Herói</th>
-                <th className="p-3 text-center">Nível</th>
-                <th className="p-3 text-center">K / D / A</th>
-                <th className="p-3 text-right">Patrimônio (NW)</th>
-                <th className="p-3 text-right">CS (LH / DN)</th>
-                <th className="p-3 text-right">Dano a Heróis</th>
-                <th className="p-3 text-right">Dano Torres</th>
-                <th className="p-3 text-right">GPM / XPM</th>
-                <th className="p-3 pr-4">Inventário Final</th>
+                <th className="p-3 pl-4 whitespace-nowrap min-w-[170px]">Jogador / Herói</th>
+                <th className="p-3 text-center whitespace-nowrap min-w-[60px]">Nível</th>
+                <th className="p-3 text-center whitespace-nowrap min-w-[110px]">K / D / A</th>
+                <th className="p-3 text-right whitespace-nowrap min-w-[120px]">Patrimônio (NW)</th>
+                <th className="p-3 text-right whitespace-nowrap min-w-[110px]">CS (LH / DN)</th>
+                <th className="p-3 text-right whitespace-nowrap min-w-[115px]">Dano a Heróis</th>
+                <th className="p-3 text-right whitespace-nowrap min-w-[105px]">Dano Torres</th>
+                <th className="p-3 text-right whitespace-nowrap min-w-[110px]">GPM / XPM</th>
+                <th className="p-3 pr-4 whitespace-nowrap min-w-[210px]">Inventário Final</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 font-medium">
@@ -83,7 +83,7 @@ export default function MatchDetailModal({
                 return (
                   <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
                     {/* Jogador e Herói */}
-                    <td className="p-3 pl-4">
+                    <td className="p-3 pl-4 whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => {
@@ -108,7 +108,7 @@ export default function MatchDetailModal({
                     </td>
 
                     {/* Nível */}
-                    <td className="p-3 text-center font-mono font-bold text-gray-300">
+                    <td className="p-3 text-center font-mono font-bold text-gray-300 whitespace-nowrap">
                       <span className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[10px]">
                         {p.level || "—"}
                       </span>
@@ -126,34 +126,36 @@ export default function MatchDetailModal({
                     </td>
 
                     {/* Net Worth */}
-                    <td className="p-3 text-right font-mono font-bold text-amber-400">
+                    <td className="p-3 text-right font-mono font-bold text-amber-400 whitespace-nowrap">
                       {p.net_worth ? p.net_worth.toLocaleString() : (p.gold_per_min && loadedMatchData.duration ? Math.round((p.gold_per_min * loadedMatchData.duration) / 60).toLocaleString() : "—")}
                     </td>
 
                     {/* Last Hits / Denies */}
-                    <td className="p-3 text-right font-mono text-gray-300">
-                      {p.last_hits ?? 0} <span className="text-gray-500">/</span> {p.denies ?? 0}
+                    <td className="p-3 text-right font-mono text-gray-300 whitespace-nowrap">
+                      <span className="font-semibold text-white">{p.last_hits ?? 0}</span>
+                      <span className="text-gray-500 mx-1">/</span>
+                      <span className="text-gray-400">{p.denies ?? 0}</span>
                     </td>
 
                     {/* Dano a Heróis */}
-                    <td className="p-3 text-right font-mono font-bold text-rose-300">
+                    <td className="p-3 text-right font-mono font-bold text-rose-300 whitespace-nowrap">
                       {p.hero_damage ? p.hero_damage.toLocaleString() : "—"}
                     </td>
 
                     {/* Dano a Torres */}
-                    <td className="p-3 text-right font-mono font-bold text-amber-200">
+                    <td className="p-3 text-right font-mono font-bold text-amber-200 whitespace-nowrap">
                       {p.tower_damage ? p.tower_damage.toLocaleString() : "—"}
                     </td>
 
                     {/* GPM / XPM */}
-                    <td className="p-3 text-right font-mono text-[11px]">
-                      <span className="text-amber-400 font-bold">{p.gold_per_min}</span>
-                      <span className="text-gray-500"> / </span>
-                      <span className="text-cyan-400 font-bold">{p.xp_per_min}</span>
+                    <td className="p-3 text-right font-mono text-[11px] whitespace-nowrap">
+                      <span className="text-amber-400 font-bold">{p.gold_per_min ?? '—'}</span>
+                      <span className="text-gray-500 mx-1">/</span>
+                      <span className="text-cyan-400 font-bold">{p.xp_per_min ?? '—'}</span>
                     </td>
 
                     {/* Inventário Final */}
-                    <td className="p-3 pr-4">
+                    <td className="p-3 pr-4 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         {/* 6 Slots Principais */}
                         <div className="grid grid-cols-6 gap-1 bg-black/60 p-1 rounded-lg border border-white/10">

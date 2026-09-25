@@ -63,25 +63,25 @@ export default function TournamentsView({
                     onClick={() => onSelectSeries && onSelectSeries(s)}
                     className="group bg-[#161A24]/80 hover:bg-[#1C2230] border border-white/10 hover:border-amber-500/60 rounded-xl p-4 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-lg hover:shadow-amber-500/5 hover:-translate-y-1"
                   >
-                    <div className="flex items-center justify-between text-[10px] text-gray-400 border-b border-white/5 pb-2 mb-2.5">
-                      <span className="font-bold text-amber-400 uppercase tracking-wider">{s.stage}</span>
-                      <span className="font-mono bg-black/40 px-1.5 py-0.5 rounded border border-white/5">{s.dur}</span>
+                    <div className="flex items-center justify-between gap-2 text-[10px] text-gray-400 border-b border-white/5 pb-2 mb-2.5">
+                      <span className="font-bold text-amber-400 uppercase tracking-wider truncate flex-1 min-w-0 pr-1">{s.stage}</span>
+                      <span className="font-mono bg-black/40 px-2 py-0.5 rounded border border-white/5 shrink-0 whitespace-nowrap text-[9px]">{s.dur}</span>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 py-1">
-                      <span className={`text-xs font-bold truncate ${aWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-bold truncate flex-1 min-w-0 ${aWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
                         {s.timeA}
                       </span>
-                      <span className={`font-mono text-xs font-black px-2 py-0.5 rounded ${aWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
+                      <span className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${aWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
                         {s.scoreA}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 py-1">
-                      <span className={`text-xs font-bold truncate ${bWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-bold truncate flex-1 min-w-0 ${bWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
                         {s.timeB}
                       </span>
-                      <span className={`font-mono text-xs font-black px-2 py-0.5 rounded ${bWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
+                      <span className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${bWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
                         {s.scoreB}
                       </span>
                     </div>
