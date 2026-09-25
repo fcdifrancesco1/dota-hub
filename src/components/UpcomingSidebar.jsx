@@ -97,7 +97,7 @@ export default function UpcomingSidebar({
                       {timeStr} <span className="text-[9px] text-gray-500">BRT</span>
                     </div>
                     {dateStr && (
-                      <span className="text-[9px] text-gray-500 font-mono">{dateStr}</span>
+                      <span className="text-[10px] text-white font-bold font-mono">{dateStr}</span>
                     )}
                     {isExpanded ? (
                       <ChevronUp className="w-3.5 h-3.5 text-gray-400 mt-0.5" />
