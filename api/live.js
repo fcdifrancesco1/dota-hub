@@ -3,6 +3,8 @@ import path from 'path';
 
 // Dicionário de Ligas Conhecidas (para exibir o nome real do torneio pelo league_id)
 const KNOWN_LEAGUES = {
+  20279: "PGL Wallachia Season 9",
+  20176: "BetBoom Streamers Battle 15",
   19944: "EPL Masters 2026",
   17144: "EPL World Series",
   16440: "The International 2026",

@@ -159,7 +159,19 @@ export const KNOWN_TEAM_ALIASES = {
   'nemesis': ['team nemesis', 'nemesis team'],
   'team nemesis': ['nemesis', 'nemesis team'],
   'lynx': ['team lynx', 'lynx team'],
-  'team lynx': ['lynx', 'lynx team']
+  'team lynx': ['lynx', 'lynx team'],
+  'gl': ['gamerlegion', 'gamer legion', 'team gamerlegion'],
+  'gamerlegion': ['gl', 'gamer legion', 'team gamerlegion'],
+  'gamer legion': ['gl', 'gamerlegion', 'team gamerlegion'],
+  'avice': ['team avice', 'avice team'],
+  'team avice': ['avice', 'avice team'],
+  'pari': ['parivision', 'pari vision', 'team parivision'],
+  'parivision': ['pari', 'pari vision', 'team parivision'],
+  'lvlup': ['level up', 'levelup'],
+  'level up': ['lvlup', 'levelup'],
+  'ykbros': ["yakult's brothers", "yakults brothers", "yakult brothers"],
+  'yandex': ['team yandex', 'yandex team'],
+  'team yandex': ['yandex', 'yandex team']
 };
 
 export function simplifyTourneyName(t) {

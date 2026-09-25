@@ -71,7 +71,7 @@ export default function LiveMatchesSection({
             const hasRealScore = rScore !== null && dScore !== null;
 
             const mins = g.gameDuration ? Math.floor(g.gameDuration / 60) : (!isLiquipedia ? Math.floor((sb.duration || g.duration || 0) / 60) : null);
-            const leagueName = g.torneio || (g.league_tier ? `Liga Tier ${g.league_tier}` : "Torneio Dota 2");
+            const leagueName = g.torneio || g.league_name || (g.league_tier ? `Liga Tier ${g.league_tier}` : "Torneio Dota 2");
             const formatStr = g.formato || "BO3";
 
             return (
