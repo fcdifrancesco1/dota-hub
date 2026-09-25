@@ -119,27 +119,16 @@ function normalizeValveLiveGame(g) {
   const radPlayers = (radSb.players || []).map((p, i) => mapPlayer(p, i, true));
   const direPlayers = (direSb.players || []).map((p, i) => mapPlayer(p, i, false));
 
-  const radKillsSum = radPlayers.reduce((s, p) => s + (p.kills || 0), 0);
   let finalRadPlayers = radPlayers;
   let finalDirePlayers = direPlayers;
-  if ((radKillsSum === 0 && radiant_score > 0) || radPlayers.length === 0) {
-    const rawAll = [
-      ...radPlayers.map(p => ({ ...p, team: 0 })),
-      ...direPlayers.map(p => ({ ...p, team: 1 }))
-    ];
-    if (rawAll.length > 0) {
-      const enriched = enrichPlayers(
-        rawAll,
-        radiant_score,
-        dire_score,
-        duration,
-        g.radiant_lead || 0,
-        g.radiant_team?.team_name || "Radiant",
-        g.dire_team?.team_name || "Dire"
-      );
-      finalRadPlayers = enriched.radPlayers;
-      finalDirePlayers = enriched.direPlayers;
-    }
+  if (radPlayers.length === 0 && Array.isArray(g.players) && g.players.length > 0) {
+    const mapped = mapCoordinatorPlayers(
+      g.players,
+      g.radiant_team?.team_name || "Radiant",
+      g.dire_team?.team_name || "Dire"
+    );
+    finalRadPlayers = mapped.radPlayers;
+    finalDirePlayers = mapped.direPlayers;
   }
 
   const rawPicksBans = [
@@ -186,196 +175,73 @@ function normalizeValveLiveGame(g) {
   };
 }
 
-// Tabela de itens canônicos por herói
-const HERO_ITEM_BUILDS = {
-  // Mirana
-  9: [63, 1466, 116, 263, 100, 1097],
-  // Dragon Knight
-  49: [63, 116, 1, 112, 598, 114],
-  // Lone Druid
-  80: [50, 939, 174, 168, 208, 112],
-  // Tidehunter
-  29: [231, 1, 119, 90, 110, 226],
-  // Invoker
-  74: [48, 108, 116, 96, 1, 110],
-  // Rubick
-  86: [180, 1, 232, 102, 108, 254],
-  // Shadow Demon
-  79: [214, 254, 102, 108, 100, 226],
-  // Puck
-  13: [48, 1, 1107, 100, 123, 235],
-  // Anti-Mage
-  1: [63, 135, 147, 208, 139, 116],
-  // Morphling
-  10: [63, 147, 154, 139, 156, 116],
-  // Terrorblade
-  109: [63, 147, 154, 139, 156, 116],
-  // Faceless Void
-  41: [63, 147, 116, 141, 154, 110],
-  // Mars
-  129: [50, 1, 116, 168, 110, 119],
-  // Centaur
-  96: [50, 1, 114, 127, 90, 226],
-  // Snapfire
-  128: [50, 1466, 116, 141, 263, 1],
-  // Lion
-  26: [214, 1, 254, 102, 108, 100],
-  // Crystal Maiden
-  5: [214, 254, 102, 116, 100, 1],
-  // Disruptor
-  87: [180, 254, 102, 108, 1, 100],
-  // Pangolier
-  120: [180, 174, 1, 100, 116, 208],
-  // Tiny
-  19: [63, 1, 939, 116, 141, 112],
-  // Windranger
-  21: [50, 1466, 116, 141, 1, 123],
-  // Doom
-  69: [50, 1, 116, 119, 110, 235],
-  // Spirit Breaker
-  71: [50, 249, 235, 116, 114, 108],
-  // Leshrac
-  52: [48, 116, 235, 119, 1107, 108],
-  // Lifestealer
-  54: [50, 112, 141, 156, 208, 114],
-  // Dark Seer
-  55: [231, 1, 119, 90, 226, 110],
-  // Gyrocopter
-  72: [63, 147, 116, 141, 154, 139],
-  // Tinker
-  34: [48, 1, 1107, 119, 96, 235],
-  // Skywrath Mage
-  101: [214, 232, 102, 108, 100, 96],
-  // Bane
-  3: [214, 1, 254, 102, 108, 100]
-};
+// Mapeia os 10 jogadores a partir do feed do Coordinator ou Valve sem inventar estatísticas fictícias
+function mapCoordinatorPlayers(rawPlayers, radTeamName, direTeamName) {
+  const radRaw = (rawPlayers || []).filter(p => p.team === 0 || (p.team_slot && p.team_slot <= 5 && p.team === undefined));
+  const direRaw = (rawPlayers || []).filter(p => p.team === 1 || (p.team_slot && p.team_slot > 5 && p.team === undefined));
 
-// Builds por Role (quando hero_id não tem build customizada acima)
-const ROLE_ITEM_BUILDS = {
-  1: [63, 147, 116, 139, 156, 154], // Carry
-  2: [48, 1, 116, 96, 235, 123],     // Mid
-  3: [50, 1, 116, 119, 90, 226],     // Offlane
-  4: [180, 1, 102, 100, 254, 108],   // Soft Support
-  5: [214, 254, 102, 100, 226, 231]   // Hard Support
-};
+  // Ordena pelo slot de equipe oficial (team_slot 1..5)
+  const sortBySlot = (a, b) => (a.team_slot || 0) - (b.team_slot || 0);
+  radRaw.sort(sortBySlot);
+  direRaw.sort(sortBySlot);
 
-// Distribui um valor total entre pesos garantindo soma exata
-function distributeTotal(total, weights) {
-  if (total <= 0) return weights.map(() => 0);
-  const sumWeights = weights.reduce((a, b) => a + b, 0);
-  let distributed = weights.map(w => Math.floor((w / sumWeights) * total));
-  let currentSum = distributed.reduce((a, b) => a + b, 0);
-  let remainder = total - currentSum;
-
-  const order = weights.map((w, i) => ({ w, i })).sort((a, b) => b.w - a.w);
-  let idx = 0;
-  while (remainder > 0) {
-    distributed[order[idx % order.length].i]++;
-    remainder--;
-    idx++;
-  }
-  return distributed;
-}
-
-// Gera inventário baseado no tempo de jogo
-function getHeroItems(heroId, pos, durationSec) {
-  const fullBuild = HERO_ITEM_BUILDS[heroId] || ROLE_ITEM_BUILDS[pos] || ROLE_ITEM_BUILDS[1];
-  const mins = durationSec / 60;
-  let count = 6;
-  if (mins < 10) count = 2;
-  else if (mins < 18) count = 3;
-  else if (mins < 26) count = 4;
-  else if (mins < 36) count = 5;
-  else count = 6;
-
-  return fullBuild.slice(0, count);
-}
-
-// Enriquece os 10 jogadores com estatísticas coerentes e itens
-function enrichPlayers(rawPlayers, radScore, direScore, durationSec, radLead, radTeamName, direTeamName) {
-  const mins = durationSec > 0 ? durationSec / 60 : 1;
-  const radRaw = (rawPlayers || []).filter(p => p.team === 0);
-  const direRaw = (rawPlayers || []).filter(p => p.team === 1);
-
-  // Kills: Radiant mata = radScore, Dire mata = direScore
-  const killWeights = [0.30, 0.35, 0.20, 0.10, 0.05]; // Pos 1..5
-  const deathWeights = [0.10, 0.14, 0.22, 0.25, 0.29]; // Pos 1..5
-
-  const radKills = distributeTotal(radScore, killWeights);
-  const radDeaths = distributeTotal(direScore, deathWeights);
-
-  const direKills = distributeTotal(direScore, killWeights);
-  const direDeaths = distributeTotal(radScore, deathWeights);
-
-  // Net worth base por equipe
-  const baseTeamNet = Math.max(10000, Math.round(mins * 2600 + 5000));
-  const lead = radLead || 0;
-  const radTotalNet = Math.max(5000, baseTeamNet + Math.round(lead / 2));
-  const direTotalNet = Math.max(5000, baseTeamNet - Math.round(lead / 2));
-
-  const netWeights = [0.30, 0.27, 0.20, 0.13, 0.10];
-  const radNets = distributeTotal(radTotalNet, netWeights);
-  const direNets = distributeTotal(direTotalNet, netWeights);
-
-  const enrichTeam = (teamRaw, isRad, killsArr, deathsArr, netsArr) => {
+  const mapTeam = (teamList, isRad) => {
     const teamName = isRad ? radTeamName : direTeamName;
-    return [0, 1, 2, 3, 4].map(idx => {
-      const p = teamRaw[idx] || {};
-      const pos = idx + 1;
+    return teamList.map((p, idx) => {
+      const slotNum = p.team_slot || (idx + 1);
       const heroId = p.hero_id || 0;
+      const playerName = p.name || p.personaname || `${teamName} Jogador ${slotNum}`;
 
       const hasRealKills = p.kills !== undefined && p.kills !== null;
-      const kills = hasRealKills ? p.kills : killsArr[idx];
-      const deaths = (p.deaths ?? p.death) !== undefined ? (p.deaths ?? p.death) : deathsArr[idx];
+      const hasRealDeaths = (p.deaths ?? p.death) !== undefined && (p.deaths ?? p.death) !== null;
+      const hasRealAssists = p.assists !== undefined && p.assists !== null;
+      const hasRealLH = p.last_hits !== undefined && p.last_hits !== null;
+      const hasRealDN = p.denies !== undefined && p.denies !== null;
+      const hasRealNet = (p.net_worth || p.gold) !== undefined && (p.net_worth || p.gold) !== null;
+      const hasRealGpm = (p.gold_per_min || p.gpm) !== undefined && (p.gold_per_min || p.gpm) !== null;
+      const hasRealXpm = (p.xp_per_min || p.xpm) !== undefined && (p.xp_per_min || p.xpm) !== null;
 
-      const assistMult = pos >= 4 ? 0.65 : pos === 3 ? 0.55 : 0.40;
-      const assists = p.assists !== undefined ? p.assists : Math.max(0, Math.round((isRad ? radScore : direScore) * assistMult) + (idx % 3));
-
-      const baseLevel = Math.min(30, Math.max(1, Math.floor(mins / 2) + 6));
-      const level = p.level || (pos <= 2 ? Math.min(30, baseLevel + 2) : pos === 3 ? baseLevel : Math.max(1, baseLevel - 2));
-
-      const csMult = pos === 1 ? 10 : pos === 2 ? 8.5 : pos === 3 ? 6.5 : pos === 4 ? 2.5 : 1.5;
-      const lastHits = p.last_hits ?? Math.round(mins * csMult);
-      const denies = p.denies ?? (pos <= 3 ? Math.round(8 + (idx * 4)) : Math.round(2 + idx));
-
-      const netWorth = p.net_worth || netsArr[idx];
-      const gpm = p.gold_per_min || p.gpm || Math.round(netWorth / mins);
-      const xpm = p.xp_per_min || p.xpm || Math.round((level * 480) / mins);
-
-      const items = (p.items && p.items.length > 0) ? p.items : getHeroItems(heroId, pos, durationSec);
+      const rawItems = [
+        p.item0, p.item1, p.item2, p.item3, p.item4, p.item5,
+        p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5,
+        ...(Array.isArray(p.items) ? p.items : [])
+      ].filter(v => v !== undefined && v !== null && v !== 0 && v !== "");
 
       return {
         slot: isRad ? idx : idx + 5,
-        player_slot: p.team_slot ? (isRad ? p.team_slot - 1 : (p.team_slot - 1) + 128) : (isRad ? idx : idx + 128),
-        name: p.name || `${teamName} Pos ${pos}`,
+        team_slot: slotNum,
+        player_slot: isRad ? (slotNum - 1) : (slotNum - 1) + 128,
+        name: playerName,
         account_id: p.account_id,
         hero_id: heroId,
-        level,
-        kills,
-        deaths,
-        assists,
-        last_hits: lastHits,
-        denies,
-        gold: netWorth,
-        net_worth: netWorth,
-        gpm,
-        xpm,
-        item_0: items[0] || 0,
-        item_1: items[1] || 0,
-        item_2: items[2] || 0,
-        item_3: items[3] || 0,
-        item_4: items[4] || 0,
-        item_5: items[5] || 0,
-        items,
-        isRadiant: isRad
+        level: p.level ?? null,
+        kills: hasRealKills ? p.kills : null,
+        deaths: hasRealDeaths ? (p.deaths ?? p.death) : null,
+        assists: hasRealAssists ? p.assists : null,
+        last_hits: hasRealLH ? p.last_hits : null,
+        denies: hasRealDN ? p.denies : null,
+        net_worth: hasRealNet ? (p.net_worth || p.gold) : null,
+        gold: hasRealNet ? (p.net_worth || p.gold) : null,
+        gpm: hasRealGpm ? (p.gold_per_min || p.gpm) : null,
+        xpm: hasRealXpm ? (p.xp_per_min || p.xpm) : null,
+        item_0: rawItems[0] || null,
+        item_1: rawItems[1] || null,
+        item_2: rawItems[2] || null,
+        item_3: rawItems[3] || null,
+        item_4: rawItems[4] || null,
+        item_5: rawItems[5] || null,
+        items: rawItems,
+        isRadiant: isRad,
+        is_pro: Boolean(p.is_pro),
+        country_code: p.country_code || null
       };
     });
   };
 
-  const radPlayers = enrichTeam(radRaw, true, radKills, radDeaths, radNets);
-  const direPlayers = enrichTeam(direRaw, false, direKills, direDeaths, direNets);
-
-  return { radPlayers, direPlayers };
+  return {
+    radPlayers: mapTeam(radRaw, true),
+    direPlayers: mapTeam(direRaw, false)
+  };
 }
 
 // Gera a sequência cronológica oficial de Captain's Mode (Patch 7.34+)
@@ -560,12 +426,8 @@ function normalizeOpenDotaLive(g) {
   const radTeamName = g.team_name_radiant || "Radiant";
   const direTeamName = g.team_name_dire || "Dire";
 
-  const { radPlayers, direPlayers } = enrichPlayers(
+  const { radPlayers, direPlayers } = mapCoordinatorPlayers(
     rawPlayers,
-    radScore,
-    direScore,
-    duration,
-    radLead,
     radTeamName,
     direTeamName
   );
@@ -669,6 +531,106 @@ function filterAndDeduplicateLiveGames(games) {
   return Array.from(seriesMap.values());
 }
 
+// Normaliza partida já finalizada ou com replay indexado pela OpenDota
+function normalizeFinishedMatch(m) {
+  if (!m || !m.match_id) return null;
+  const radPlayers = (m.players || []).filter(p => p.player_slot < 128).map((p, idx) => ({
+    slot: idx,
+    team_slot: idx + 1,
+    player_slot: p.player_slot,
+    name: p.personaname || p.name || `${m.radiant_name || "Radiant"} Pos ${idx + 1}`,
+    account_id: p.account_id,
+    hero_id: p.hero_id,
+    level: p.level ?? null,
+    kills: p.kills ?? 0,
+    deaths: p.deaths ?? 0,
+    assists: p.assists ?? 0,
+    last_hits: p.last_hits ?? 0,
+    denies: p.denies ?? 0,
+    net_worth: p.net_worth || p.total_gold || 0,
+    gold: p.gold ?? 0,
+    gpm: p.gold_per_min || 0,
+    xpm: p.xp_per_min || 0,
+    item_0: p.item_0 || null,
+    item_1: p.item_1 || null,
+    item_2: p.item_2 || null,
+    item_3: p.item_3 || null,
+    item_4: p.item_4 || null,
+    item_5: p.item_5 || null,
+    items: [p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].filter(Boolean),
+    isRadiant: true
+  }));
+
+  const direPlayers = (m.players || []).filter(p => p.player_slot >= 128).map((p, idx) => ({
+    slot: idx + 5,
+    team_slot: idx + 1,
+    player_slot: p.player_slot,
+    name: p.personaname || p.name || `${m.dire_name || "Dire"} Pos ${idx + 1}`,
+    account_id: p.account_id,
+    hero_id: p.hero_id,
+    level: p.level ?? null,
+    kills: p.kills ?? 0,
+    deaths: p.deaths ?? 0,
+    assists: p.assists ?? 0,
+    last_hits: p.last_hits ?? 0,
+    denies: p.denies ?? 0,
+    net_worth: p.net_worth || p.total_gold || 0,
+    gold: p.gold ?? 0,
+    gpm: p.gold_per_min || 0,
+    xpm: p.xp_per_min || 0,
+    item_0: p.item_0 || null,
+    item_1: p.item_1 || null,
+    item_2: p.item_2 || null,
+    item_3: p.item_3 || null,
+    item_4: p.item_4 || null,
+    item_5: p.item_5 || null,
+    items: [p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5].filter(Boolean),
+    isRadiant: false
+  }));
+
+  const picks_bans = (m.picks_bans || []).map(pb => ({
+    is_pick: Boolean(pb.is_pick),
+    hero_id: pb.hero_id,
+    team: pb.team,
+    order: pb.order
+  }));
+
+  return {
+    match_id: String(m.match_id),
+    league_id: m.leagueid,
+    radiant_name: m.radiant_name || m.radiant_team?.name || "Radiant",
+    dire_name: m.dire_name || m.dire_team?.name || "Dire",
+    radiant_score: m.radiant_score ?? 0,
+    dire_score: m.dire_score ?? 0,
+    gameScoreA: m.radiant_score ?? 0,
+    gameScoreB: m.dire_score ?? 0,
+    duration: m.duration ?? 0,
+    gameDuration: m.duration ?? 0,
+    tower_status_radiant: m.tower_status_radiant ?? 0,
+    barracks_status_radiant: m.barracks_status_radiant ?? 0,
+    tower_status_dire: m.tower_status_dire ?? 0,
+    barracks_status_dire: m.barracks_status_dire ?? 0,
+    scoreboard: {
+      duration: m.duration ?? 0,
+      radiant: {
+        score: m.radiant_score ?? 0,
+        players: radPlayers
+      },
+      dire: {
+        score: m.dire_score ?? 0,
+        players: direPlayers
+      }
+    },
+    players: [...radPlayers, ...direPlayers],
+    radiant_players: radPlayers,
+    dire_players: direPlayers,
+    picks_bans,
+    is_live_telemetry: false,
+    is_finished: true,
+    radiant_win: m.radiant_win
+  };
+}
+
 export default async function handler(req, res) {
   try {
     const key = getSteamApiKey(req);
@@ -720,8 +682,46 @@ export default async function handler(req, res) {
           if (matchId) {
             const specific = rawList.find(g => String(g.match_id) === String(matchId));
             if (specific) {
-              games = [normalizeOpenDotaLive(specific)];
-              source = "dota_coordinator_live";
+              const liveGame = normalizeOpenDotaLive(specific);
+
+              // Tenta complementar com estatísticas detalhadas se a partida já tiver sido indexada/concluída
+              try {
+                const matchDetailRes = await fetch(`https://api.opendota.com/api/matches/${matchId}`, {
+                  headers: { "Accept": "application/json" },
+                  signal: AbortSignal.timeout(2000)
+                });
+                if (matchDetailRes.ok) {
+                  const mData = await matchDetailRes.json();
+                  if (mData && Array.isArray(mData.players) && mData.players.length === 10) {
+                    const finished = normalizeFinishedMatch(mData);
+                    if (finished) {
+                      games = [finished];
+                      source = "opendota_match_details";
+                    }
+                  }
+                }
+              } catch (_) {}
+
+              if (!games.length) {
+                games = [liveGame];
+                source = "dota_coordinator_live";
+              }
+            } else {
+              // Se não estiver mais na lista de live (ex: partida encerrou), busca direto do endpoint de matches
+              try {
+                const matchDetailRes = await fetch(`https://api.opendota.com/api/matches/${matchId}`, {
+                  headers: { "Accept": "application/json" },
+                  signal: AbortSignal.timeout(2500)
+                });
+                if (matchDetailRes.ok) {
+                  const mData = await matchDetailRes.json();
+                  const finished = normalizeFinishedMatch(mData);
+                  if (finished) {
+                    games = [finished];
+                    source = "opendota_match_details";
+                  }
+                }
+              } catch (_) {}
             }
           } else {
             // Filtra primeiro os jogos de torneios / ligas / times profissionais

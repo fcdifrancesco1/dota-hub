@@ -202,6 +202,7 @@ export default function LiveMatchDetailModal({
   const radiantPlayers = rawRadiant.map((p, idx) => buildPlayer(p, idx, true));
   const direPlayers = rawDire.map((p, idx) => buildPlayer(p, idx, false));
   const hasPlayerData = radiantPlayers.length > 0 || direPlayers.length > 0;
+  const hasDetailedStats = radiantPlayers.some((p) => p.kills !== null && p.kills !== undefined) || direPlayers.some((p) => p.kills !== null && p.kills !== undefined);
 
   // Picks & Bans em formato Captain's Mode
   const picksBans = matchData?.picks_bans || [];
@@ -357,10 +358,10 @@ export default function LiveMatchDetailModal({
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1.5 text-[9px] font-mono">
+        <div className="grid grid-cols-4 gap-1 sm:gap-1.5 text-[8px] sm:text-[9px] font-mono">
           {columns.map((col) => (
             <div key={col.key} className="flex flex-col gap-1">
-              <div className="text-center text-[9px] font-extrabold uppercase tracking-wider text-gray-400 bg-white/5 py-0.5 rounded">
+              <div className="text-center text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider text-gray-400 bg-white/5 py-0.5 rounded">
                 {col.label}
               </div>
               <div className="flex flex-col gap-1">
@@ -370,7 +371,7 @@ export default function LiveMatchDetailModal({
                     <div
                       key={itIdx}
                       title={`${col.label} - ${item.name}: ${unknown ? 'Status desconhecido' : item.alive ? 'Em pé (Intacta)' : 'Derrubada (Destruída)'}`}
-                      className={`flex items-center justify-between px-1.5 py-1 rounded border transition-all ${
+                      className={`flex items-center justify-between px-1 sm:px-1.5 py-0.5 sm:py-1 rounded border transition-all ${
                         unknown
                           ? 'bg-white/[0.02] text-gray-600 border-white/5'
                           : item.alive
@@ -382,11 +383,11 @@ export default function LiveMatchDetailModal({
                     >
                       <span className="truncate">{item.name}</span>
                       {unknown ? (
-                        <span className="text-[8px] text-gray-600 shrink-0">?</span>
+                        <span className="text-[7px] sm:text-[8px] text-gray-600 shrink-0">?</span>
                       ) : item.alive ? (
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isRadiant ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                       ) : (
-                        <span className="text-[8px] text-rose-500 font-bold shrink-0">✕</span>
+                        <span className="text-[7px] sm:text-[8px] text-rose-500 font-bold shrink-0">✕</span>
                       )}
                     </div>
                   );
@@ -415,7 +416,8 @@ export default function LiveMatchDetailModal({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80">
+      {/* TABELA PARA TELAS MÉDIAS E GRANDES (DESKTOP) */}
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80">
         <table className="w-full text-left text-xs border-collapse min-w-[1000px]">
           <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
             <tr>
@@ -555,102 +557,249 @@ export default function LiveMatchDetailModal({
           </tbody>
         </table>
       </div>
+
+      {/* CARDS RESPONSIVOS PARA MOBILE (DISPOSITIVOS MÓVEIS) */}
+      <div className="block md:hidden space-y-2">
+        {players.map((p, i) => {
+          const hImg = p.hero_id ? getHeroImg(constants, p.hero_id) : "";
+          const hName = p.hero_id ? getHeroName(constants, p.hero_id) : "Herói desconhecido";
+          const neutralImg = p.neutralItem ? getItemImg(constants, p.neutralItem) : null;
+          const hasStats = p.kills !== null || p.net_worth !== null || p.last_hits !== null;
+
+          return (
+            <div
+              key={i}
+              className={`p-2.5 rounded-xl border bg-[#0E1118]/90 transition-all ${
+                isRadiant ? 'border-emerald-500/25' : 'border-rose-500/25'
+              }`}
+            >
+              {/* Topo do card: Herói, Jogador e KDA */}
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onSelectHero && constants?.heroes?.[p.hero_id]) {
+                      onSelectHero(constants.heroes[p.hero_id]);
+                    }
+                  }}
+                  className="flex items-center gap-2 min-w-0 text-left group"
+                >
+                  <div className="relative shrink-0">
+                    {hImg ? (
+                      <img
+                        src={hImg}
+                        alt={hName}
+                        className={`w-11 h-7 object-cover rounded border ${
+                          isRadiant ? 'border-emerald-400' : 'border-rose-400'
+                        } group-hover:ring-2 group-hover:ring-amber-400/50 transition-all`}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-11 h-7 rounded bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-gray-500 font-mono">
+                        ?
+                      </div>
+                    )}
+                    {p.level != null && (
+                      <span className="absolute -bottom-1 -right-1 bg-black/90 border border-white/20 text-[9px] font-mono font-bold text-amber-300 px-1 rounded leading-tight">
+                        L{p.level}
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-white font-bold text-xs truncate block">{p.name}</span>
+                    <span className="text-[10px] text-gray-400 truncate block group-hover:text-amber-400 transition-colors">{hName}</span>
+                  </div>
+                </button>
+
+                {/* K / D / A */}
+                <div className="flex flex-col items-end shrink-0">
+                  <div className="inline-flex items-center gap-1 font-mono text-xs px-2 py-0.5 rounded bg-black/60 border border-white/10">
+                    <span className="font-bold text-white min-w-[14px] text-right">{p.kills ?? '—'}</span>
+                    <span className="text-gray-500">/</span>
+                    <span className="font-bold text-rose-400 min-w-[14px] text-center">{p.deaths ?? '—'}</span>
+                    <span className="text-gray-500">/</span>
+                    <span className="font-bold text-cyan-400 min-w-[14px] text-left">{p.assists ?? '—'}</span>
+                  </div>
+                  <span className="text-[8px] font-mono text-gray-500 uppercase mt-0.5">K / D / A</span>
+                </div>
+              </div>
+
+              {/* Estatísticas secundárias: Patrimônio Líquido, CS, GPM/XPM */}
+              {hasStats && (
+                <div className="grid grid-cols-3 gap-1 pt-2 mt-2 border-t border-white/5 text-[10px] font-mono text-center">
+                  <div className="bg-white/[0.02] p-1 rounded">
+                    <div className="text-gray-500 text-[8px] uppercase">Patrimônio</div>
+                    <div className="text-amber-400 font-bold truncate">
+                      {p.net_worth != null
+                        ? p.net_worth >= 1000
+                          ? `${(p.net_worth / 1000).toFixed(1)}k`
+                          : p.net_worth.toLocaleString()
+                        : '—'}
+                    </div>
+                  </div>
+                  <div className="bg-white/[0.02] p-1 rounded">
+                    <div className="text-gray-500 text-[8px] uppercase">CS (LH/DN)</div>
+                    <div className="text-gray-300 font-semibold truncate">
+                      {p.last_hits ?? '—'} <span className="text-gray-600">/</span> {p.denies ?? '—'}
+                    </div>
+                  </div>
+                  <div className="bg-white/[0.02] p-1 rounded">
+                    <div className="text-gray-500 text-[8px] uppercase">GPM / XPM</div>
+                    <div className="text-gray-300 font-semibold truncate">
+                      <span className="text-amber-300">{p.gpm ?? '—'}</span>{' '}
+                      <span className="text-gray-600">/</span>{' '}
+                      <span className="text-cyan-300">{p.xpm ?? '—'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Itens do Inventário se disponíveis */}
+              {p.items && p.items.length > 0 && (
+                <div className="flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-white/5">
+                  <span className="text-[8px] font-mono text-gray-500 uppercase shrink-0">Itens:</span>
+                  <div className="flex items-center gap-1 overflow-x-auto">
+                    {Array.from({ length: 6 }).map((_, itIdx) => {
+                      const itId = p.items[itIdx];
+                      const itImg = itId ? getItemImg(constants, itId) : null;
+                      return (
+                        <div
+                          key={itIdx}
+                          className="w-5 h-4 rounded bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shrink-0"
+                        >
+                          {itImg ? (
+                            <img src={itImg} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="w-1 h-1 rounded-full bg-white/10" />
+                          )}
+                        </div>
+                      );
+                    })}
+                    {neutralImg && (
+                      <div
+                        title="Item Neutro"
+                        className="w-5 h-4 rounded bg-amber-500/20 border border-amber-400/60 flex items-center justify-center overflow-hidden shrink-0 ml-1"
+                      >
+                        <img src={neutralImg} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-[#0C0F16] border border-rose-500/40 rounded-2xl p-4 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-5xl bg-[#0C0F16] border border-rose-500/40 rounded-2xl p-3 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col">
         {/* BOTÃO FECHAR */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-400 hover:text-white transition-all z-20"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-400 hover:text-white transition-all z-20"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
         {/* CABEÇALHO DO AO VIVO */}
-        <div className="text-center border-b border-white/10 pb-4 mb-4 relative z-10 shrink-0">
-          <div className="flex items-center justify-center gap-2 flex-wrap">
-            <span className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest text-rose-400 bg-rose-500/20 border border-rose-500/30 px-3 py-1 rounded-full animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+        <div className="text-center border-b border-white/10 pb-3 sm:pb-4 mb-3 sm:mb-4 relative z-10 shrink-0">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-[11px]">
+            <span className="flex items-center gap-1.5 font-extrabold uppercase tracking-widest text-rose-400 bg-rose-500/20 border border-rose-500/30 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full animate-pulse">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500 animate-ping" />
               Partida Ao Vivo {timeFormatted ? `· ${timeFormatted}` : ''}
             </span>
-            <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
+            <span className="text-gray-400 font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
               {leagueName} ({formatStr})
             </span>
             <button
               type="button"
               onClick={syncMatchData}
               title="Clique para sincronizar telemetria da Valve agora"
-              className="text-[10px] text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1 cursor-pointer transition-all"
+              className="text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 px-2 sm:px-2.5 py-0.5 rounded-full flex items-center gap-1 cursor-pointer transition-all"
             >
-              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} /> Sincronizado a cada 20s ({lastSync})
+              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} /> A cada 20s ({lastSync})
             </button>
             {matchData?.spectators > 0 && (
-              <span className="text-[10px] text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Eye className="w-2.5 h-2.5" /> {matchData.spectators.toLocaleString()} espectadores GOTV
+              <span className="text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Eye className="w-2.5 h-2.5" /> {matchData.spectators.toLocaleString()} GOTV
               </span>
             )}
             {matchData?.roshan_respawn_timer !== undefined && matchData?.roshan_respawn_timer !== null && (
               matchData.roshan_respawn_timer > 0 ? (
-                <span className="text-[10px] text-amber-400 font-mono bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                  Roshan Renascendo ({Math.floor(matchData.roshan_respawn_timer / 60)}m {matchData.roshan_respawn_timer % 60}s)
+                <span className="text-amber-400 font-mono bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                  Roshan ({Math.floor(matchData.roshan_respawn_timer / 60)}m {matchData.roshan_respawn_timer % 60}s)
                 </span>
               ) : (
-                <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <span className="text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                   Roshan no Pit
                 </span>
               )
             )}
             {matchData?.is_live_telemetry && (
-              <span className="text-[10px] text-purple-400 font-mono bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
+              <span className="text-purple-400 font-mono bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
                 Valve GOTV Oficial
               </span>
             )}
           </div>
 
           {/* Placar Principal do Jogo (Abates) */}
-          <div className="flex items-center justify-center gap-4 sm:gap-8 mt-3">
+          <div className="flex items-center justify-between sm:justify-center gap-2 sm:gap-8 mt-3 px-1">
             <div
               onClick={() => onOpenTeamProfile && onOpenTeamProfile(null, teamAName)}
-              className="text-right flex-1 truncate flex items-center justify-end gap-3 cursor-pointer group"
+              className="text-right flex-1 truncate flex items-center justify-end gap-1.5 sm:gap-3 cursor-pointer group"
               title={`Ver Perfil de ${teamAName}`}
             >
-              <span className="text-base sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamAName}</span>
+              <span className="text-xs sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamAName}</span>
               <TeamLogo
                 teamName={teamAName}
                 logoUrl={logoA}
-                className="w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
               />
             </div>
 
             <div className="flex flex-col items-center shrink-0">
               {hasScore ? (
-                <div className="px-5 py-2 rounded-xl bg-black/80 border border-rose-500/40 font-mono text-xl sm:text-3xl font-black text-amber-400 shadow-lg shadow-rose-500/10">
-                  {scoreA} <span className="text-gray-500 mx-1">:</span> {scoreB}
+                <div className="px-3.5 py-1 sm:px-5 sm:py-2 rounded-xl bg-black/80 border border-rose-500/40 font-mono text-lg sm:text-3xl font-black text-amber-400 shadow-lg shadow-rose-500/10">
+                  {scoreA} <span className="text-gray-500 mx-0.5 sm:mx-1">:</span> {scoreB}
                 </div>
               ) : (
-                <div className="px-5 py-2 rounded-xl bg-black/60 border border-white/10 font-mono text-sm font-bold text-gray-400">
+                <div className="px-3 py-1 sm:px-5 sm:py-2 rounded-xl bg-black/60 border border-white/10 font-mono text-xs sm:text-sm font-bold text-gray-400">
                   Aguardando dados
                 </div>
               )}
-              <span className="text-[9px] text-gray-400 font-mono mt-1 uppercase tracking-wider">
+              <span className="text-[8px] sm:text-[9px] text-gray-400 font-mono mt-0.5 sm:mt-1 uppercase tracking-wider">
                 Placar de Abates
               </span>
+
+              {/* Vantagem de Ouro da Equipe */}
+              {matchData?.radiant_lead !== undefined && matchData?.radiant_lead !== null && matchData?.radiant_lead !== 0 && (
+                <div className={`mt-1 text-[9px] sm:text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${
+                  matchData.radiant_lead > 0
+                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                    : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+                }`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  {matchData.radiant_lead > 0
+                    ? `${teamAName} +${(Math.abs(matchData.radiant_lead) / 1000).toFixed(1)}k ouro`
+                    : `${teamBName} +${(Math.abs(matchData.radiant_lead) / 1000).toFixed(1)}k ouro`}
+                </div>
+              )}
             </div>
 
             <div
               onClick={() => onOpenTeamProfile && onOpenTeamProfile(null, teamBName)}
-              className="text-left flex-1 truncate flex items-center justify-start gap-3 cursor-pointer group"
+              className="text-left flex-1 truncate flex items-center justify-start gap-1.5 sm:gap-3 cursor-pointer group"
               title={`Ver Perfil de ${teamBName}`}
             >
               <TeamLogo
                 teamName={teamBName}
                 logoUrl={logoB}
-                className="w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
               />
-              <span className="text-base sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamBName}</span>
+              <span className="text-xs sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamBName}</span>
             </div>
           </div>
 
@@ -731,6 +880,14 @@ export default function LiveMatchDetailModal({
               {/* TABELAS DE JOGADORES (SOMENTE QUANDO A API RETORNA JOGADORES) */}
               {hasPlayerData ? (
                 <>
+                  {!hasDetailedStats && (
+                    <div className="flex items-center gap-2 p-2.5 sm:p-3 rounded-xl bg-purple-950/30 border border-purple-500/30 text-[10px] sm:text-xs text-purple-200 font-mono">
+                      <Radio className="w-3.5 h-3.5 text-purple-400 shrink-0 animate-pulse" />
+                      <span>
+                        Transmissão ao vivo oficial do Dota Coordinator. Placar, torres, vantagem de ouro e draft em tempo real. K/D/A e inventário individual consolidados no relatório pós-jogo.
+                      </span>
+                    </div>
+                  )}
                   {renderTable(radiantPlayers, teamAName, true, scoreA)}
                   {renderTable(direPlayers, teamBName, false, scoreB)}
                 </>
