@@ -400,28 +400,29 @@ export function clusterMatchesIntoSeries(rawMatches) {
 }
 
 // Gerenciamento e Acervo Permanente de Torneios
-const ARCHIVE_KEY = "dota_hub_tournaments_archive_v1";
+const ARCHIVE_KEY = "dota_hub_tournaments_archive_v2";
 
 export function getArchivedTournaments() {
   try {
+    // Remove chave antiga v1 para limpar dados pré-populados
+    if (localStorage.getItem("dota_hub_tournaments_archive_v1")) {
+      localStorage.removeItem("dota_hub_tournaments_archive_v1");
+    }
     const raw = localStorage.getItem(ARCHIVE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed;
       }
     }
   } catch (e) {
     console.warn("Aviso ao ler torneios arquivados:", e);
   }
-  try {
-    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(INITIAL_ARCHIVED_TOURNAMENTS));
-  } catch (e) {}
-  return [...INITIAL_ARCHIVED_TOURNAMENTS];
+  return [];
 }
 
 export function saveFinishedTournament(tournament) {
-  if (!tournament || !tournament.id) return;
+  if (!tournament || !tournament.id) return [];
   try {
     const current = getArchivedTournaments();
     const existingIndex = current.findIndex(
@@ -429,7 +430,8 @@ export function saveFinishedTournament(tournament) {
     );
     const updatedTournament = {
       ...tournament,
-      status: "finalizado"
+      status: "finalizado",
+      finishedAt: Date.now()
     };
 
     if (existingIndex >= 0) {
@@ -448,7 +450,7 @@ export function saveFinishedTournament(tournament) {
   } catch (e) {
     console.warn("Aviso ao salvar torneio finalizado:", e);
   }
-  return null;
+  return [];
 }
 
 // 3. Buscar Partidas Profissionais Recentes (com timeout e cache de 3 min)
@@ -468,7 +470,6 @@ export async function fetchProMatches() {
 
       // Agrupamento por Liga
       const leaguesMap = {};
-      const nowSec = Math.floor(Date.now() / 1000);
 
       rawList.forEach((m) => {
         const lId = m.leagueid || m.league_name;
@@ -489,30 +490,22 @@ export async function fetchProMatches() {
         }
       });
 
+      // Torneios atualmente ao vivo/recentes na OpenDota
       const liveTournaments = Object.values(leaguesMap).map((l) => {
-        const isRecent = (nowSec - l.lastMatchTime) < 3 * 24 * 3600; // últimos 3 dias
         return {
           ...l,
-          status: isRecent ? "em_andamento" : "finalizado",
+          status: "em_andamento",
           seriesList: clusterMatchesIntoSeries(l.rawMatches).reverse()
         };
       });
 
-      // Salva torneios finalizados automaticamente no acervo permanente
-      liveTournaments.forEach((t) => {
-        if (t.status === "finalizado") {
-          saveFinishedTournament(t);
-        }
-      });
-
-      // Recupera acervo completo de torneios arquivados
+      // Recupera acervo de torneios finalizados arquivados a partir de hoje
       const archivedTournaments = getArchivedTournaments();
 
-      // Mescla em andamento + finalizados sem duplicatas
-      const ongoing = liveTournaments.filter((t) => t.status === "em_andamento");
-      const existingIds = new Set(ongoing.map((t) => String(t.league_id || t.id)));
+      // Mescla torneios em andamento com os arquivados (sem duplicatas)
+      const existingIds = new Set(liveTournaments.map((t) => String(t.league_id || t.id)));
       const finalized = archivedTournaments.filter((t) => !existingIds.has(String(t.league_id || t.id)));
-      const allTournaments = [...ongoing, ...finalized];
+      const allTournaments = [...liveTournaments, ...finalized];
 
       const result = {
         rawMatches: rawList,

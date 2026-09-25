@@ -18,7 +18,7 @@ import {
   Crown
 } from 'lucide-react';
 import { SkeletonGrid } from './SkeletonLoader';
-import { fetchTournamentHeroStats, getHeroImg, getHeroName } from '../services/api';
+import { fetchTournamentHeroStats, getHeroImg, getHeroName, saveFinishedTournament } from '../services/api';
 
 export default function TournamentsView({
   tournaments = [],
@@ -151,6 +151,21 @@ export default function TournamentsView({
                     <span className="flex items-center gap-1 text-[10px] font-extrabold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
                       <Crown className="w-3.5 h-3.5" /> Campeão: {selectedTournament.champion}
                     </span>
+                  )}
+
+                  {selectedTournament.status === 'em_andamento' && (
+                    <button
+                      onClick={() => {
+                        const updated = { ...selectedTournament, status: 'finalizado' };
+                        saveFinishedTournament(updated);
+                        setSelectedTournament(updated);
+                        selectedTournament.status = 'finalizado';
+                      }}
+                      className="flex items-center gap-1.5 text-[10px] font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1 rounded-full transition-colors cursor-pointer"
+                      title="Gravar este torneio no acervo de finalizados a partir de hoje"
+                    >
+                      <Trophy className="w-3 h-3 text-amber-400" /> Marcar como Finalizado
+                    </button>
                   )}
                 </div>
 
@@ -606,7 +621,19 @@ export default function TournamentsView({
             <SkeletonGrid count={6} />
           ) : filteredTournaments.length === 0 ? (
             <div className="text-center py-20 text-xs text-gray-400 bg-[#161A24]/40 rounded-2xl border border-white/5 p-8">
-              Nenhum torneio {statusFilter === 'ongoing' ? 'em andamento' : 'finalizado'} encontrado {searchQuery ? `para "${searchQuery}"` : ""}.
+              {statusFilter === 'finalized' ? (
+                <div className="max-w-md mx-auto space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-400">
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">Nenhum torneio finalizado gravado ainda</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    A partir de hoje, assim que um campeonato for concluído ele ficará arquivado permanentemente aqui, mantendo todas as séries, partidas e estatísticas de heróis.
+                  </p>
+                </div>
+              ) : (
+                `Nenhum torneio em andamento encontrado ${searchQuery ? `para "${searchQuery}"` : ""}.`
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
