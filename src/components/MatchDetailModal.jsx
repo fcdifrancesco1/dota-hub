@@ -101,7 +101,7 @@ export default function MatchDetailModal({
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div className="min-w-0">
-                          <div className="text-white font-bold truncate max-w-[130px]">{playerName}</div>
+                          <div className="text-white font-bold truncate max-w-[150px] sm:max-w-[200px]">{playerName}</div>
                           <div className="text-[10px] text-gray-400 truncate group-hover:text-amber-400 transition-colors">{heroName}</div>
                         </div>
                       </button>
@@ -218,8 +218,8 @@ export default function MatchDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-[#0C0F16] border border-white/15 rounded-2xl p-4 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-[96vw] 2xl:max-w-[1520px] xl:max-w-[1440px] bg-[#0C0F16] border border-white/15 rounded-2xl p-4 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* BOTÃO FECHAR */}
         <button
           onClick={onClose}

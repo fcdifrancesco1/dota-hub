@@ -508,7 +508,7 @@ export default function LiveMatchDetailModal({
                         />
                       )}
                       <div className="min-w-0">
-                        <span className="text-white font-bold truncate max-w-[130px] block">{p.name}</span>
+                        <span className="text-white font-bold truncate max-w-[150px] sm:max-w-[200px] block">{p.name}</span>
                         <span className="text-[10px] text-gray-400 truncate group-hover:text-amber-400 transition-colors">{hName}</span>
                       </div>
                     </button>
@@ -743,7 +743,7 @@ export default function LiveMatchDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-[#0C0F16] border border-rose-500/40 rounded-2xl p-3 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-[96vw] 2xl:max-w-[1520px] xl:max-w-[1440px] bg-[#0C0F16] border border-rose-500/40 rounded-2xl p-3 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col">
         {/* BOTÃO FECHAR */}
         <button
           onClick={onClose}
