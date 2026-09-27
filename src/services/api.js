@@ -661,6 +661,110 @@ export async function findLiveMatchDetails(game) {
     return data.players.some(p => p.kills !== null && p.kills !== undefined);
   };
 
+  // Coleta TODOS os mapas (anteriores concluídos e atual ao vivo) da série entre as duas equipes
+  const collectSeriesMaps = async (currentMatchId, liveGameObj) => {
+    const seriesMatchesMap = new Map();
+    const targetSeriesId = game.series_id || liveGameObj?.series_id;
+
+    // 1. Mapas finalizados recentes (últimas 36h) no proMatches
+    try {
+      const cachedPro = getCached("pro_matches_v7", 5 * 60 * 1000);
+      let proList = cachedPro?.rawMatches;
+      if (!proList || !proList.length) {
+        const proRes = await fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 3500);
+        if (proRes.ok) {
+          proList = await proRes.json();
+        }
+      }
+      if (Array.isArray(proList)) {
+        proList.forEach(m => {
+          const rad = m.radiant_name || m.radiant_team_id;
+          const dire = m.dire_name || m.dire_team_id;
+          const matchTime = m.start_time || 0;
+          const isRecent = Math.abs(Date.now() - matchTime * 1000) < (36 * 3600 * 1000);
+          const matchSeries = Boolean(targetSeriesId && m.series_id && String(m.series_id) === String(targetSeriesId));
+          if (isRecent && (matchSeries || isSeriesMatch(nameA, nameB, rad, dire))) {
+            seriesMatchesMap.set(String(m.match_id), {
+              match_id: String(m.match_id),
+              radiant_score: m.radiant_score,
+              dire_score: m.dire_score,
+              start_time: matchTime,
+              is_finished: true
+            });
+          }
+        });
+      }
+    } catch (e) {}
+
+    // 2. Mapa ao vivo atual (se houver)
+    if (liveGameObj && liveGameObj.match_id) {
+      const idStr = String(liveGameObj.match_id);
+      if (!seriesMatchesMap.has(idStr)) {
+        seriesMatchesMap.set(idStr, {
+          match_id: idStr,
+          radiant_score: liveGameObj.radiant_score ?? liveGameObj.gameScoreA,
+          dire_score: liveGameObj.dire_score ?? liveGameObj.gameScoreB,
+          start_time: liveGameObj.activate_time || Math.floor(Date.now() / 1000),
+          is_live: true
+        });
+      }
+    }
+
+    // 3. Busca no /api/live se há outro mapa dessa série (ex: mapa anterior que acabou de finalizar)
+    try {
+      const liveRes = await fetchWithTimeout(`/api/live?_t=${Date.now()}`, {}, 3500);
+      if (liveRes.ok) {
+        const liveJson = await liveRes.json();
+        const rawGames = liveJson?.result?.games || [];
+        rawGames.forEach(lg => {
+          const rad = lg.radiant_team?.team_name || lg.radiant_team?.name || lg.radiant_name;
+          const dire = lg.dire_team?.team_name || lg.dire_team?.name || lg.dire_name;
+          const matchSeries = Boolean(targetSeriesId && lg.series_id && String(lg.series_id) === String(targetSeriesId));
+          if (matchSeries || isSeriesMatch(nameA, nameB, rad, dire)) {
+            const idStr = String(lg.match_id);
+            if (!seriesMatchesMap.has(idStr)) {
+              seriesMatchesMap.set(idStr, {
+                match_id: idStr,
+                radiant_score: lg.radiant_score ?? lg.gameScoreA,
+                dire_score: lg.dire_score ?? lg.gameScoreB,
+                start_time: lg.activate_time || Math.floor(Date.now() / 1000),
+                is_live: !lg.is_finished
+              });
+            }
+          }
+        });
+      }
+    } catch (e) {}
+
+    if (currentMatchId && !seriesMatchesMap.has(String(currentMatchId))) {
+      seriesMatchesMap.set(String(currentMatchId), {
+        match_id: String(currentMatchId),
+        radiant_score: game.radiant_score ?? game.gameScoreA,
+        dire_score: game.dire_score ?? game.gameScoreB,
+        start_time: game.start_time || Math.floor(Date.now() / 1000),
+        is_live: !game.is_finished
+      });
+    }
+
+    const sorted = Array.from(seriesMatchesMap.values()).sort((a, b) => {
+      if (a.start_time && b.start_time && a.start_time !== b.start_time) {
+        return a.start_time - b.start_time;
+      }
+      const idA = BigInt(String(a.match_id || 0).replace(/\D/g, '') || 0);
+      const idB = BigInt(String(b.match_id || 0).replace(/\D/g, '') || 0);
+      return idA > idB ? 1 : idA < idB ? -1 : 0;
+    });
+
+    return sorted.map((m, idx) => ({
+      mapNumber: idx + 1,
+      match_id: String(m.match_id),
+      radiant_score: m.radiant_score,
+      dire_score: m.dire_score,
+      is_finished: Boolean(m.is_finished),
+      is_live: Boolean(m.is_live)
+    }));
+  };
+
   // 1. Se temos match_id, consulta primeiro o endpoint oficial /api/live?match_id=... (telemetria direta da Valve)
   if (game.match_id) {
     try {
@@ -670,22 +774,30 @@ export async function findLiveMatchDetails(game) {
         const games = liveJson?.result?.games || [];
         const liveGame = games.find(g => String(g.match_id) === String(game.match_id));
         if (liveGame) {
+          const maps = await collectSeriesMaps(game.match_id, liveGame);
           // Se já possui estatísticas completas dos jogadores (via Valve Steam API Key ou OpenDota replay)
           if (hasPlayerStats(liveGame)) {
-            return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+            return { matchData: liveGame, maps };
           }
 
           // Se veio do feed do Coordinator (sem stats detalhadas), checa se a OpenDota já indexou o replay completo
           const finishedData = await fetchMatchDetails(game.match_id);
           if (finishedData && hasPlayerStats(finishedData)) {
-            return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+            return { matchData: finishedData, maps };
           }
 
           // Caso a partida esteja genuinamente ao vivo em andamento, retorna a telemetria ao vivo da Valve
-          return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+          return { matchData: liveGame, maps };
         }
       }
     } catch (e) {}
+
+    // Fallback prioritário para match_id específico: verifica se já é um replay indexado na OpenDota
+    const specificFinished = await fetchMatchDetails(game.match_id);
+    if (specificFinished && hasPlayerStats(specificFinished)) {
+      const maps = await collectSeriesMaps(game.match_id, specificFinished);
+      return { matchData: specificFinished, maps };
+    }
 
     // Fallback: busca por nome de time na lista ao vivo
     try {
@@ -699,34 +811,34 @@ export async function findLiveMatchDetails(game) {
           return isSeriesMatch(nameA, nameB, rad, dire);
         });
         if (liveGame) {
+          const maps = await collectSeriesMaps(liveGame.match_id, liveGame);
           if (hasPlayerStats(liveGame)) {
-            return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+            return { matchData: liveGame, maps };
           }
-          const finishedData = await fetchMatchDetails(game.match_id);
-          if (finishedData && hasPlayerStats(finishedData)) {
-            return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+          if (specificFinished && hasPlayerStats(specificFinished)) {
+            return { matchData: specificFinished, maps };
           }
-          return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+          return { matchData: liveGame, maps };
         }
       }
     } catch (e) {}
 
     // Se a partida já possui telemetria no próprio objeto (cache ou snapshot recebido)
     if (game.is_live_telemetry || game.scoreboard) {
+      const maps = await collectSeriesMaps(game.match_id, game);
       if (hasPlayerStats(game)) {
-        return { matchData: game, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+        return { matchData: game, maps };
       }
-      const finishedData = await fetchMatchDetails(game.match_id);
-      if (finishedData && hasPlayerStats(finishedData)) {
-        return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+      if (specificFinished && hasPlayerStats(specificFinished)) {
+        return { matchData: specificFinished, maps };
       }
-      return { matchData: game, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+      return { matchData: game, maps };
     }
 
     // Se não estiver mais ativa no GOTV ao vivo (já encerrou), busca o relatório pós-jogo completo
-    const finishedData = await fetchMatchDetails(game.match_id);
-    if (finishedData) {
-      return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+    if (specificFinished) {
+      const maps = await collectSeriesMaps(game.match_id, specificFinished);
+      return { matchData: specificFinished, maps };
     }
   }
 

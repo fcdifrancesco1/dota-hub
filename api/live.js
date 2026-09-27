@@ -489,6 +489,7 @@ function normalizeOpenDotaLive(g) {
     picks_bans,
     is_live_telemetry: true,
     isGameDataActive: true,
+    series_id: g.series_id || null,
     deactivate_time: g.deactivate_time || 0
   };
 }
@@ -627,6 +628,7 @@ function normalizeFinishedMatch(m) {
     picks_bans,
     is_live_telemetry: false,
     is_finished: true,
+    series_id: m.series_id || null,
     radiant_win: m.radiant_win
   };
 }
