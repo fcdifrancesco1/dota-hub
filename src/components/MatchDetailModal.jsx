@@ -234,6 +234,11 @@ export default function MatchDetailModal({
             <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
               {series.stage || "Torneio Profissional"}
             </span>
+            {series.formato && (
+              <span className="text-[11px] font-mono font-black text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-full">
+                {series.formato}
+              </span>
+            )}
             {(series.dateStr || (currentMap?.start_time ? new Date(currentMap.start_time * 1000).toLocaleDateString('pt-BR') : null)) && (
               <span className="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
                 {series.dateStr || new Date(currentMap.start_time * 1000).toLocaleDateString('pt-BR')}

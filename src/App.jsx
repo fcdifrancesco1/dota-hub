@@ -33,7 +33,7 @@ export default function App() {
   const [selectedTournamentFilter, setSelectedTournamentFilter] = useState('all');
 
   // Carregamento instantâneo a partir do cache local (Stale-While-Revalidate)
-  const cachedPro = getCachedFast('pro_matches_v7');
+  const cachedPro = getCachedFast('pro_matches_v8');
   const cachedUpcoming = getCachedFast('upcoming_real_matches_v3');
   const cachedConstants = getCachedFast('constants_v6');
 

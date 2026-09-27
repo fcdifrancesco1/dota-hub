@@ -63,6 +63,7 @@ export default function RecentResultsSidebar({
                     {s.stage || "Torneio Profissional"}
                   </span>
                   <span className="font-mono text-gray-400 font-semibold bg-black/50 px-2 py-0.5 rounded border border-white/5 inline-flex flex-row flex-nowrap items-center gap-1 shrink-0 whitespace-nowrap text-[9px]">
+                    {s.formato && <span className="text-purple-300 font-bold whitespace-nowrap">{s.formato} • </span>}
                     <span className="whitespace-nowrap">{s.dur}</span>
                     {s.dateStr && <span className="text-cyan-400/90 font-medium whitespace-nowrap"> • {s.dateStr}</span>}
                   </span>

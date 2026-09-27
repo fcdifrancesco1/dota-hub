@@ -318,7 +318,7 @@ export async function fetchConstants() {
   }
 }
 
-// 2. Agrupamento Sequencial de Séries (BO3 / BO5)
+// 2. Agrupamento Sequencial de Séries (BO1 / BO3 / BO5)
 export function clusterMatchesIntoSeries(rawMatches) {
   const list = [...rawMatches].sort((a, b) => a.start_time - b.start_time);
   const seriesList = [];
@@ -329,20 +329,34 @@ export function clusterMatchesIntoSeries(rawMatches) {
     const matchTime = m.start_time;
 
     let targetSeries = seriesList.find((s) => {
+      // 1. Se ambos têm series_id oficial da Valve, a correspondência é direta e absoluta!
+      if (s.seriesId && m.series_id && String(s.seriesId) === String(m.series_id)) {
+        return true;
+      }
+
+      // Se ambos têm series_id oficial e são diferentes, são séries distintas
+      if (s.seriesId && m.series_id && String(s.seriesId) !== String(m.series_id)) {
+        return false;
+      }
+
+      // 2. Fallback heurístico caso não haja series_id oficial:
       const sameTeams = isSeriesMatch(s.timeA, s.timeB, m.radiant_name, m.dire_name);
       const sameLeague = !m.leagueid || !s.leagueId || m.leagueid === s.leagueId;
-      const lastGameTime = s.games[s.games.length - 1].start_time;
-      const withinTime = (matchTime - lastGameTime) <= (3.5 * 3600) && (matchTime >= lastGameTime);
+      const lastGame = s.games[s.games.length - 1];
+      const lastGameTime = lastGame?.start_time || 0;
+      const withinTime = (matchTime - lastGameTime) <= (4.5 * 3600) && (matchTime >= lastGameTime);
 
-      const isAlreadyClosed = (s.scoreA >= 2 && s.scoreB < s.scoreA && s.games.length <= 3) || 
-                              (s.scoreB >= 2 && s.scoreA < s.scoreB && s.games.length <= 3) || 
-                              (s.scoreA >= 3 || s.scoreB >= 3);
+      const seriesType = s.seriesType ?? m.series_type ?? 1; // 0: BO1, 1: BO3, 2: BO5
+      const winsNeeded = seriesType === 2 ? 3 : (seriesType === 0 ? 1 : 2);
+      const isAlreadyClosed = s.scoreA >= winsNeeded || s.scoreB >= winsNeeded;
 
       return sameTeams && sameLeague && withinTime && !isAlreadyClosed;
     });
 
     if (!targetSeries) {
       targetSeries = {
+        seriesId: m.series_id || null,
+        seriesType: m.series_type !== undefined ? m.series_type : 1,
         leagueId: m.leagueid,
         leagueName: m.league_name || "Torneio Profissional",
         teamAKey: tA,
@@ -358,6 +372,13 @@ export function clusterMatchesIntoSeries(rawMatches) {
       seriesList.push(targetSeries);
     }
 
+    if (targetSeries.seriesType === undefined && m.series_type !== undefined) {
+      targetSeries.seriesType = m.series_type;
+    }
+    if (m.series_type === 2) {
+      targetSeries.seriesType = 2;
+    }
+
     targetSeries.games.push(m);
     const radWon = m.radiant_win;
     const isRadTeamA = isSameTeamMatch(m.radiant_name, targetSeries.timeA);
@@ -371,21 +392,37 @@ export function clusterMatchesIntoSeries(rawMatches) {
 
   return seriesList.map((s) => {
     const firstGameTime = s.games[0]?.start_time;
+    const lastGameTime = s.games[s.games.length - 1]?.start_time || firstGameTime;
     const dateStr = firstGameTime
       ? new Date(firstGameTime * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
       : null;
 
+    const seriesType = s.seriesType;
+    const formatStr = seriesType === 2
+      ? "BO5"
+      : seriesType === 0
+      ? "BO1"
+      : seriesType === 1
+      ? "BO3"
+      : (s.games.length >= 4 || s.scoreA >= 3 || s.scoreB >= 3 ? "BO5" : "BO3");
+
     return {
+      series_id: s.seriesId,
+      series_type: s.seriesType,
+      formato: formatStr,
       stage: s.leagueName,
       leagueId: s.leagueId,
       timeA: s.timeA,
       timeB: s.timeB,
+      preferredIdA: s.preferredIdA,
+      preferredIdB: s.preferredIdB,
       scoreA: s.scoreA,
       scoreB: s.scoreB,
       winner: s.scoreA > s.scoreB ? s.timeA : (s.scoreB > s.scoreA ? s.timeB : "Empate"),
       dur: `${s.games.length} mapa${s.games.length > 1 ? 's' : ''}`,
       dateStr,
       startTime: firstGameTime,
+      lastMatchTime: lastGameTime,
       games: s.games.map((g, idx) => ({
         mapNumber: idx + 1,
         match_id: String(g.match_id),
@@ -455,7 +492,7 @@ export function saveFinishedTournament(tournament) {
 
 // 3. Buscar Partidas Profissionais Recentes (com timeout e cache de 3 min)
 export async function fetchProMatches() {
-  const cached = getCached("pro_matches_v7", 3 * 60 * 1000);
+  const cached = getCached("pro_matches_v8", 3 * 60 * 1000);
   if (cached) return cached;
 
   try {
@@ -466,7 +503,7 @@ export async function fetchProMatches() {
       const clustered = clusterMatchesIntoSeries(rawList);
       const valid = clustered
         .filter(s => s.games.length >= 2 || (s.scoreA + s.scoreB === 1))
-        .reverse();
+        .sort((a, b) => (b.lastMatchTime || b.startTime || 0) - (a.lastMatchTime || a.startTime || 0));
 
       // Agrupamento por Liga
       const leaguesMap = {};
@@ -495,7 +532,7 @@ export async function fetchProMatches() {
         return {
           ...l,
           status: "em_andamento",
-          seriesList: clusterMatchesIntoSeries(l.rawMatches).reverse()
+          seriesList: clusterMatchesIntoSeries(l.rawMatches).sort((a, b) => (b.lastMatchTime || b.startTime || 0) - (a.lastMatchTime || a.startTime || 0))
         };
       });
 
@@ -513,13 +550,13 @@ export async function fetchProMatches() {
         tournaments: allTournaments
       };
 
-      setCache("pro_matches_v7", result);
+      setCache("pro_matches_v8", result);
       return result;
     }
   } catch (err) {
     console.warn("Aviso ao buscar proMatches (usando cache anterior):", err);
   }
-  const cachedFallback = getCachedFast("pro_matches_v7") || { rawMatches: [], finishedSeries: [], tournaments: [] };
+  const cachedFallback = getCachedFast("pro_matches_v8") || { rawMatches: [], finishedSeries: [], tournaments: [] };
   if (!cachedFallback.tournaments || cachedFallback.tournaments.length === 0) {
     cachedFallback.tournaments = getArchivedTournaments();
   }
@@ -668,7 +705,7 @@ export async function findLiveMatchDetails(game) {
 
     // 1. Mapas finalizados recentes (últimas 36h) no proMatches
     try {
-      const cachedPro = getCached("pro_matches_v7", 5 * 60 * 1000);
+      const cachedPro = getCached("pro_matches_v8", 5 * 60 * 1000);
       let proList = cachedPro?.rawMatches;
       if (!proList || !proList.length) {
         const proRes = await fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 3500);
