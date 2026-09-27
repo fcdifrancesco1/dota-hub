@@ -533,11 +533,13 @@ export async function fetchMatchDetails(matchId) {
   if (cached) return cached;
 
   try {
-    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/matches/${matchId}`, {}, 4000);
+    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/matches/${matchId}`, {}, 6000);
     if (res.ok) {
       const data = await res.json();
-      setCache(`match_${matchId}`, data);
-      return data;
+      if (data && Array.isArray(data.players) && data.players.length > 0) {
+        setCache(`match_${matchId}`, data);
+        return data;
+      }
     }
   } catch (err) {
     console.warn("Aviso ao carregar detalhes da partida (OpenDota pode estar instável):", err);
@@ -654,6 +656,11 @@ export async function findLiveMatchDetails(game) {
   const nameA = game.timeA || game.radiant_team?.name || game.radiant_team?.team_name || game.radiant_name || "Radiant";
   const nameB = game.timeB || game.dire_team?.name || game.dire_team?.team_name || game.dire_name || "Dire";
 
+  const hasPlayerStats = (data) => {
+    if (!data || !Array.isArray(data.players) || data.players.length === 0) return false;
+    return data.players.some(p => p.kills !== null && p.kills !== undefined);
+  };
+
   // 1. Se temos match_id, consulta primeiro o endpoint oficial /api/live?match_id=... (telemetria direta da Valve)
   if (game.match_id) {
     try {
@@ -662,7 +669,19 @@ export async function findLiveMatchDetails(game) {
         const liveJson = await liveRes.json();
         const games = liveJson?.result?.games || [];
         const liveGame = games.find(g => String(g.match_id) === String(game.match_id));
-        if (liveGame && (liveGame.scoreboard || (liveGame.players && liveGame.players.length > 0))) {
+        if (liveGame) {
+          // Se já possui estatísticas completas dos jogadores (via Valve Steam API Key ou OpenDota replay)
+          if (hasPlayerStats(liveGame)) {
+            return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+          }
+
+          // Se veio do feed do Coordinator (sem stats detalhadas), checa se a OpenDota já indexou o replay completo
+          const finishedData = await fetchMatchDetails(game.match_id);
+          if (finishedData && hasPlayerStats(finishedData)) {
+            return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+          }
+
+          // Caso a partida esteja genuinamente ao vivo em andamento, retorna a telemetria ao vivo da Valve
           return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
         }
       }
@@ -679,7 +698,14 @@ export async function findLiveMatchDetails(game) {
           const dire = g.dire_team?.team_name || g.dire_team?.name || g.dire_name;
           return isSeriesMatch(nameA, nameB, rad, dire);
         });
-        if (liveGame && (liveGame.scoreboard || (liveGame.players && liveGame.players.length > 0))) {
+        if (liveGame) {
+          if (hasPlayerStats(liveGame)) {
+            return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
+          }
+          const finishedData = await fetchMatchDetails(game.match_id);
+          if (finishedData && hasPlayerStats(finishedData)) {
+            return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+          }
           return { matchData: liveGame, maps: [{ mapNumber: 1, match_id: String(liveGame.match_id) }] };
         }
       }
@@ -687,6 +713,13 @@ export async function findLiveMatchDetails(game) {
 
     // Se a partida já possui telemetria no próprio objeto (cache ou snapshot recebido)
     if (game.is_live_telemetry || game.scoreboard) {
+      if (hasPlayerStats(game)) {
+        return { matchData: game, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+      }
+      const finishedData = await fetchMatchDetails(game.match_id);
+      if (finishedData && hasPlayerStats(finishedData)) {
+        return { matchData: finishedData, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
+      }
       return { matchData: game, maps: [{ mapNumber: 1, match_id: String(game.match_id) }] };
     }
 

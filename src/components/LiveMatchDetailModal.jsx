@@ -95,11 +95,22 @@ export default function LiveMatchDetailModal({
   const [mapsList, setMapsList] = useState([]);
   const [activeMapIndex, setActiveMapIndex] = useState(0);
   const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString('pt-BR'));
+  const [syncing, setSyncing] = useState(false);
 
   // 1. Sincronização e Busca da Telemetria Oficial
-  const syncMatchData = useCallback(() => {
+  const syncMatchData = useCallback(async (forceReplay = false) => {
     if (!game) return;
-    findLiveMatchDetails(game).then((result) => {
+    setSyncing(true);
+    try {
+      if (forceReplay && game.match_id) {
+        const fullData = await fetchMatchDetails(game.match_id);
+        if (fullData && fullData.players?.some(p => p.kills !== null && p.kills !== undefined)) {
+          setMatchData({ ...fullData, _syncTimestamp: Date.now() });
+          setLastSync(new Date().toLocaleTimeString('pt-BR'));
+          return;
+        }
+      }
+      const result = await findLiveMatchDetails(game);
       if (result?.matchData) {
         setMatchData({ ...result.matchData, _syncTimestamp: Date.now() });
       } else {
@@ -107,11 +118,15 @@ export default function LiveMatchDetailModal({
       }
       setMapsList(result?.maps || []);
       setLastSync(new Date().toLocaleTimeString('pt-BR'));
+    } catch (e) {
+      console.warn("Aviso ao sincronizar telemetria:", e);
+    } finally {
       setLoading(false);
-    });
+      setSyncing(false);
+    }
   }, [game]);
 
-  // 2. Sincronização estritamente a cada 20 segundos com dados reais da API
+  // 2. Sincronização a cada 20 segundos com dados reais da API
   useEffect(() => {
     setLoading(true);
     syncMatchData();
@@ -693,6 +708,81 @@ export default function LiveMatchDetailModal({
     </div>
   );
 
+  const renderLiveRoster = (players, teamName, isRadiant, score) => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between border-b border-white/10 pb-2.5 px-1">
+        <div className="flex items-center gap-2">
+          <TeamLogo teamName={teamName} className="w-5 h-5 rounded shrink-0" />
+          <span className={`w-3 h-3 rounded-full ${isRadiant ? 'bg-emerald-400' : 'bg-rose-500'} animate-pulse`} />
+          <h3 className={`text-sm font-black uppercase tracking-wider ${isRadiant ? 'text-emerald-400' : 'text-rose-400'}`}>
+            {teamName} ({isRadiant ? 'Radiant' : 'Dire'}) · Escalação Ao Vivo
+          </h3>
+        </div>
+        <div className="flex items-center gap-3 text-xs font-mono">
+          <span className="text-gray-400">Total de Abates da Equipe:</span>
+          <strong className="text-white text-base font-black">{score ?? '—'}</strong>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+        {players.map((p, idx) => {
+          const hImg = p.hero_id ? getHeroImg(constants, p.hero_id) : "";
+          const hName = p.hero_id ? getHeroName(constants, p.hero_id) : "Herói desconhecido";
+          const heroObj = constants?.heroes?.[p.hero_id];
+          const primaryAttr = heroObj?.primary_attr;
+          const attrLabel = primaryAttr === 'str' ? 'Força' : primaryAttr === 'agi' ? 'Agilidade' : primaryAttr === 'int' ? 'Inteligência' : 'Universal';
+
+          return (
+            <div
+              key={idx}
+              onClick={() => {
+                if (onSelectHero && heroObj) {
+                  onSelectHero(heroObj);
+                }
+              }}
+              className={`p-3 rounded-xl border bg-[#0E1118]/90 transition-all flex flex-col justify-between gap-2.5 cursor-pointer group hover:scale-[1.02] hover:border-amber-400/60 shadow-lg ${
+                isRadiant ? 'border-emerald-500/25 hover:shadow-emerald-500/10' : 'border-rose-500/25 hover:shadow-rose-500/10'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="relative w-12 h-8 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black group-hover:ring-2 group-hover:ring-amber-400/50 transition-all">
+                  {hImg ? (
+                    <img src={hImg} alt={hName} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 font-mono">?</div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-black text-white truncate block group-hover:text-amber-400 transition-colors">
+                    {p.name}
+                  </span>
+                  <span className="text-[10px] text-gray-400 truncate block font-medium">
+                    {hName}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[9px] font-mono">
+                <span className="text-gray-500">Posição {idx + 1}</span>
+                <span className={`px-1.5 py-0.5 rounded font-bold ${
+                  primaryAttr === 'str'
+                    ? 'bg-rose-500/10 text-rose-300 border border-rose-500/20'
+                    : primaryAttr === 'agi'
+                    ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
+                    : primaryAttr === 'int'
+                    ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'
+                    : 'bg-purple-500/10 text-purple-300 border border-purple-500/20'
+                }`}>
+                  {attrLabel}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
       <div className="relative w-full max-w-5xl bg-[#0C0F16] border border-rose-500/40 rounded-2xl p-3 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col">
@@ -716,11 +806,11 @@ export default function LiveMatchDetailModal({
             </span>
             <button
               type="button"
-              onClick={syncMatchData}
-              title="Clique para sincronizar telemetria da Valve agora"
+              onClick={() => syncMatchData(true)}
+              title="Clique para sincronizar telemetria e checar replay da partida agora"
               className="text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 px-2 sm:px-2.5 py-0.5 rounded-full flex items-center gap-1 cursor-pointer transition-all"
             >
-              <RefreshCw className="w-2.5 h-2.5 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} /> A cada 20s ({lastSync})
+              <RefreshCw className={`w-2.5 h-2.5 text-emerald-400 ${syncing ? 'animate-spin' : ''}`} /> {syncing ? 'Sincronizando...' : `Atualizar (${lastSync})`}
             </button>
             {matchData?.spectators > 0 && (
               <span className="text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -877,19 +967,44 @@ export default function LiveMatchDetailModal({
                 </div>
               )}
 
-              {/* TABELAS DE JOGADORES (SOMENTE QUANDO A API RETORNA JOGADORES) */}
+              {/* TABELAS OU ESCALAÇÃO DE JOGADORES */}
               {hasPlayerData ? (
                 <>
-                  {!hasDetailedStats && (
-                    <div className="flex items-center gap-2 p-2.5 sm:p-3 rounded-xl bg-purple-950/30 border border-purple-500/30 text-[10px] sm:text-xs text-purple-200 font-mono">
-                      <Radio className="w-3.5 h-3.5 text-purple-400 shrink-0 animate-pulse" />
-                      <span>
-                        Transmissão ao vivo oficial do Dota Coordinator. Placar, torres, vantagem de ouro e draft em tempo real. K/D/A e inventário individual consolidados no relatório pós-jogo.
-                      </span>
+                  {!hasDetailedStats ? (
+                    <div className="space-y-6">
+                      {/* Banner informativo com botão direto de sincronizar pós-jogo */}
+                      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#121622] border border-purple-500/30 text-purple-200 space-y-2.5 shadow-xl">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
+                            <Radio className="w-4 h-4 text-purple-400 shrink-0 animate-pulse" />
+                            <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                              Telemetria Ao Vivo da Valve (Dota Coordinator)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => syncMatchData(true)}
+                            disabled={syncing}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-200 text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
+                            {syncing ? 'Verificando...' : 'Sincronizar Estatísticas Finais'}
+                          </button>
+                        </div>
+                        <p className="text-[11px] sm:text-xs text-gray-300 leading-relaxed">
+                          Durante a partida em andamento, a transmissão oficial da Valve transmite placar de abates, torres, vantagem de ouro e escolhas de heróis em tempo real. K/D/A individual, CS, patrimônio líquido e inventários completos são compilados assim que a partida termina e o replay oficial é processado pela OpenDota.
+                        </p>
+                      </div>
+
+                      {renderLiveRoster(radiantPlayers, teamAName, true, scoreA)}
+                      {renderLiveRoster(direPlayers, teamBName, false, scoreB)}
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {renderTable(radiantPlayers, teamAName, true, scoreA)}
+                      {renderTable(direPlayers, teamBName, false, scoreB)}
                     </div>
                   )}
-                  {renderTable(radiantPlayers, teamAName, true, scoreA)}
-                  {renderTable(direPlayers, teamBName, false, scoreB)}
                 </>
               ) : (
                 <div className="text-center py-8 text-gray-500 text-xs">

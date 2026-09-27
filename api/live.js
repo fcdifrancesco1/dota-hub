@@ -688,7 +688,7 @@ export default async function handler(req, res) {
               try {
                 const matchDetailRes = await fetch(`https://api.opendota.com/api/matches/${matchId}`, {
                   headers: { "Accept": "application/json" },
-                  signal: AbortSignal.timeout(2000)
+                  signal: AbortSignal.timeout(5000)
                 });
                 if (matchDetailRes.ok) {
                   const mData = await matchDetailRes.json();
@@ -711,7 +711,7 @@ export default async function handler(req, res) {
               try {
                 const matchDetailRes = await fetch(`https://api.opendota.com/api/matches/${matchId}`, {
                   headers: { "Accept": "application/json" },
-                  signal: AbortSignal.timeout(2500)
+                  signal: AbortSignal.timeout(5000)
                 });
                 if (matchDetailRes.ok) {
                   const mData = await matchDetailRes.json();
