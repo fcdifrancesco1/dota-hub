@@ -2,7 +2,6 @@ import React from 'react';
 import LiveTickerStrip from '../components/home/LiveTickerStrip';
 import HomeHero from '../components/home/HomeHero';
 import HomeStatsCards from '../components/home/HomeStatsCards';
-import FavoritesHighlight from '../components/home/FavoritesHighlight';
 import Upcoming24h from '../components/home/Upcoming24h';
 import RecentResultsHome from '../components/home/RecentResultsHome';
 import { useApp } from '../context/AppContext';
@@ -20,7 +19,6 @@ export default function Home() {
         <HomeHero />
 
         {/* 3. Destaque dos Times Favoritos */}
-        <FavoritesHighlight />
 
         {/* 4. Grid de Próximas Partidas (24h) e Resultados Recentes */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
