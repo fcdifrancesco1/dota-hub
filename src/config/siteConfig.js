@@ -29,8 +29,6 @@ export const SITE_CONFIG = {
 
   // Links da comunidade
   community: {
-    discord: "https://discord.gg/dota2brasil",
-    whatsapp: "https://chat.whatsapp.com/dota2brasil",
     github: "https://github.com/fcdifrancesco1/dota-hub"
   },
 

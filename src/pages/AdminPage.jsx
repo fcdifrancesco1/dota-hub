@@ -660,15 +660,6 @@ export default function AdminPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Link do Discord da Comunidade</label>
-              <input
-                type="text"
-                defaultValue={SITE_CONFIG.community.discord}
-                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Pontos: Acerto Vencedor</label>

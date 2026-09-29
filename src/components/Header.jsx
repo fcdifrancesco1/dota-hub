@@ -11,7 +11,6 @@ import {
   Menu,
   X,
   RefreshCw,
-  ExternalLink,
   Sun,
   Moon
 } from 'lucide-react';
@@ -199,15 +198,6 @@ export default function Header() {
 
             {/* Drawer Footer */}
             <div className="pt-6 border-t border-line flex flex-col gap-3">
-              <a
-                href={SITE_CONFIG.community.discord}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#5865F2]/20 border border-[#5865F2]/40 text-[#3C45C8] dark:text-[#5865F2] hover:bg-[#5865F2] hover:text-on-accent text-xs font-bold transition-all"
-              >
-                <span>Entrar no Discord da Comunidade</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
               <div className="text-[11px] text-gray-500 text-center">
                 Última sincronização: {lastUpdated || '--:--'}
               </div>
