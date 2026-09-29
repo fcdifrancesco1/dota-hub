@@ -1,5 +1,6 @@
 import { PRO_RECORDS } from "../data/proRecords";
 import { INITIAL_ARCHIVED_TOURNAMENTS } from "../data/archivedTournaments";
+import { registerLightVariant } from "../utils/teamLogos";
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
@@ -671,7 +672,30 @@ export async function fetchLiveGames() {
   return [];
 }
 
-export const UPCOMING_CACHE_KEY = "upcoming_real_matches_v4";
+// Campeonatos atuais da Liquipedia (próximos, em andamento e encerrados
+// recentes) com banner, datas, local, premiação e tier — ver api/tournaments.js
+const TOURNAMENTS_CACHE_KEY = "liquipedia_tournaments_v1";
+
+export async function fetchTournaments() {
+  const cached = getCached(TOURNAMENTS_CACHE_KEY, 30 * 60 * 1000);
+  if (cached) return cached;
+  try {
+    // A primeira consulta do servidor à Liquipedia pode levar ~10s
+    const res = await fetchWithTimeout("/api/tournaments", {}, 20000);
+    if (res.ok) {
+      const list = await res.json();
+      if (Array.isArray(list) && list.length > 0) {
+        setCache(TOURNAMENTS_CACHE_KEY, list);
+        return list;
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso ao buscar campeonatos (usando cache anterior):", err);
+  }
+  return getCachedFast(TOURNAMENTS_CACHE_KEY) || [];
+}
+
+export const UPCOMING_CACHE_KEY = "upcoming_real_matches_v5";
 
 const BRT_DATE_TIME = new Intl.DateTimeFormat('pt-BR', {
   timeZone: 'America/Sao_Paulo',
@@ -688,6 +712,8 @@ const BRT_DATE_TIME = new Intl.DateTimeFormat('pt-BR', {
  */
 export function normalizeUpcomingMatch(m) {
   if (!m) return m;
+  registerLightVariant(m.logoA, m.logoALight);
+  registerLightVariant(m.logoB, m.logoBLight);
   const rawTs = Number(m.timestamp) || 0;
   const timestamp = rawTs > 1e11 ? Math.floor(rawTs / 1000) : rawTs || null;
   return {

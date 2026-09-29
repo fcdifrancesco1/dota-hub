@@ -1,52 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Calendar, MapPin, DollarSign, Filter, Search, ChevronRight, Sparkles } from 'lucide-react';
+import { Trophy, Calendar, MapPin, DollarSign, Search, ChevronRight, Users, Wifi } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { fetchLeagues } from '../services/supabase';
-import { useApp } from '../context/AppContext';
+import { fetchTournaments } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
+import { formatDateRange, formatPrize, tierLabel, statusLabel, sortTournaments, leagueFromDatabase } from '../utils/tournamentFormat';
+import { fetchLeagues, isSupabaseConfigured } from '../services/supabase';
 
 export default function TournamentsPage() {
-  const [leagues, setLeagues] = useState([]);
+  const [tournaments, setTournaments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'ongoing' | 'upcoming' | 'finished'
-  const [tierFilter, setTierFilter] = useState('all');     // 'all' | 'tier_1' | 'tier_2' | 'qualifier'
   const [search, setSearch] = useState('');
-  const { tournamentsList } = useApp();
+  const { theme } = useTheme();
 
   useEffect(() => {
-    fetchLeagues().then(data => {
-      if (data && data.length > 0) {
-        setLeagues(data);
+    // Campeonatos da Liquipedia + os cadastrados no Admin (somente se o Supabase
+    // estiver configurado; sem ele, fetchLeagues devolveria dados de exemplo)
+    Promise.all([
+      fetchTournaments(),
+      isSupabaseConfigured ? fetchLeagues() : Promise.resolve([])
+    ]).then(([liquipedia, db]) => {
+      const list = [...(liquipedia || [])];
+      for (const l of db || []) {
+        if (list.some((t) => t.name.toLowerCase() === String(l.name).toLowerCase())) continue;
+        list.push(leagueFromDatabase(l));
       }
+      setTournaments(sortTournaments(list));
+      setLoading(false);
     });
   }, []);
 
-  // Une ligas do Supabase com os torneios parseados dinamicamente
-  const combinedLeagues = [...leagues];
-  if (tournamentsList && tournamentsList.length > 0) {
-    tournamentsList.forEach((t) => {
-      if (!combinedLeagues.some(l => l.name?.toLowerCase() === t.name?.toLowerCase())) {
-        combinedLeagues.push({
-          id: t.id || Math.floor(Math.random() * 100000),
-          name: t.name,
-          tier: 'tier_1',
-          prize_pool: t.prizePool || '$1,000,000',
-          status: 'ongoing',
-          location: t.location || 'Internacional',
-          banner_url: t.banner || null
-        });
-      }
-    });
-  }
-
-  const filtered = combinedLeagues.filter((l) => {
-    const matchesStatus = statusFilter === 'all' || l.status === statusFilter;
-    const matchesTier = tierFilter === 'all' || l.tier === tierFilter;
-    const matchesSearch = l.name.toLowerCase().includes(search.toLowerCase());
-    return matchesStatus && matchesTier && matchesSearch;
+  const filtered = tournaments.filter((t) => {
+    const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
+    const term = search.toLowerCase();
+    const matchesSearch = !term || t.name.toLowerCase().includes(term) || (t.organizer || '').toLowerCase().includes(term);
+    return matchesStatus && matchesSearch;
   });
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
-      
+
       {/* HEADER DA PÁGINA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
@@ -55,13 +48,12 @@ export default function TournamentsPage() {
             <span>Campeonatos & Majors Oficiais</span>
           </h1>
           <p className="text-gray-400 text-xs sm:text-sm mt-1">
-            Acompanhe o circuito competitivo internacional de Dota 2, fases de grupos, chaveamentos de playoffs e premiações.
+            Circuito competitivo de Dota 2: campeonatos em andamento, próximos e encerrados recentemente. Dados da Liquipedia.
           </p>
         </div>
 
         {/* FILTROS & BUSCA */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Status Tab */}
           <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
             {[
               { id: 'all', label: 'Todos' },
@@ -81,101 +73,140 @@ export default function TournamentsPage() {
             ))}
           </div>
 
-          {/* Busca */}
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Buscar campeonato..."
+              placeholder="Buscar campeonato ou organizador..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-56"
+              className="bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-64"
             />
           </div>
         </div>
       </div>
 
       {/* GRID DE CAMPEONATOS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((league) => {
-          const isOngoing = league.status === 'ongoing';
-          const isUpcoming = league.status === 'upcoming';
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-[380px] rounded-2xl bg-surface border border-line animate-pulse" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-surface border border-line rounded-2xl p-12 text-center text-gray-400 text-xs">
+          {tournaments.length === 0
+            ? 'Não foi possível carregar os campeonatos agora. Tente novamente em alguns instantes.'
+            : 'Nenhum campeonato encontrado para os filtros selecionados.'}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((t) => {
+            const isOngoing = t.status === 'ongoing';
+            const isUpcoming = t.status === 'upcoming';
+            const image = t.image?.[theme] || t.icon?.[theme];
+            const dates = formatDateRange(t.startDate, t.endDate);
+            const prize = formatPrize(t);
+            const where = [t.location, t.type].filter(Boolean).join(' · ');
 
-          return (
-            <Link
-              key={league.id}
-              to={`/campeonatos/${league.id}`}
-              className="group rounded-2xl bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/50 overflow-hidden shadow-xl transition-all flex flex-col justify-between"
-            >
-              <div>
-                {/* BANNER OU HERO PLACEHOLDER */}
-                <div className="h-40 w-full bg-gradient-to-r from-red-950 via-surface-2 to-surface-2 relative overflow-hidden flex items-center justify-center p-6">
-                  {league.banner_url ? (
-                    <img
-                      src={league.banner_url}
-                      alt={league.name}
-                      className="w-full h-full object-cover absolute inset-0 opacity-40 group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : null}
-
-                  <div className="relative z-10 text-center">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 p-2 mx-auto flex items-center justify-center mb-2 shadow-lg">
-                      <Trophy className="w-6 h-6 text-amber-400" />
-                    </div>
-                  </div>
-
-                  {/* BADGE DE STATUS */}
-                  <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
+            return (
+              <Link
+                key={t.id}
+                to={`/campeonatos/${t.id}`}
+                className="group rounded-2xl bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/50 overflow-hidden shadow-xl transition-all flex flex-col justify-between"
+              >
+                <div>
+                  {/* BANNER (logo oficial do campeonato) */}
+                  <div className={`h-40 w-full relative overflow-hidden flex items-center justify-center p-6 ${
                     isOngoing
-                      ? 'bg-red-600 text-on-accent shadow-md animate-pulse'
-                      : isUpcoming
-                      ? 'bg-amber-500 text-black font-black'
-                      : 'bg-white/10 text-gray-400'
+                      ? 'bg-gradient-to-br from-red-950 via-surface-2 to-surface-2'
+                      : 'bg-gradient-to-br from-amber-950 via-surface-2 to-surface-2'
                   }`}>
-                    {isOngoing ? '● Em Andamento' : isUpcoming ? 'Em Breve' : 'Encerrado'}
-                  </span>
-                </div>
-
-                {/* CONTEÚDO */}
-                <div className="p-6">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 block mb-1">
-                    {league.tier ? league.tier.replace('_', ' ') : 'Tier 1'}
-                  </span>
-
-                  <h3 className="text-lg font-black text-white group-hover:text-amber-400 transition-colors leading-snug mb-3">
-                    {league.name}
-                  </h3>
-
-                  <div className="space-y-2 text-xs text-gray-400">
-                    {league.location && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
-                        <span>{league.location}</span>
+                    {image ? (
+                      <img
+                        src={image}
+                        alt={t.name}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        className="max-h-24 max-w-[75%] object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+                        <Trophy className="w-6 h-6 text-amber-400" />
                       </div>
                     )}
 
-                    {league.prize_pool && (
+                    <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                      isOngoing
+                        ? 'bg-red-600 text-on-accent shadow-md'
+                        : isUpcoming
+                        ? 'bg-amber-500 text-black'
+                        : 'bg-white/10 text-gray-400'
+                    }`}>
+                      {statusLabel(t)}
+                    </span>
+                  </div>
+
+                  {/* CONTEÚDO */}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">
+                        {tierLabel(t)}
+                      </span>
+                      {t.organizer && (
+                        <span className="text-[10px] text-gray-500 truncate max-w-[50%]">{t.organizer}</span>
+                      )}
+                    </div>
+
+                    <h3 className="text-lg font-black text-white group-hover:text-amber-400 transition-colors leading-snug mb-3">
+                      {t.name}
+                    </h3>
+
+                    <div className="space-y-2 text-xs text-gray-400">
+                      {dates && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                          <span className="font-semibold text-gray-300">{dates}</span>
+                        </div>
+                      )}
+                      {where && (
+                        <div className="flex items-center gap-2">
+                          {t.type === 'Online' ? (
+                            <Wifi className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                          ) : (
+                            <MapPin className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                          )}
+                          <span className="truncate">{where}</span>
+                        </div>
+                      )}
+                      {t.teamCount && (
+                        <div className="flex items-center gap-2">
+                          <Users className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                          <span>{t.teamCount} times</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-emerald-400 font-bold font-mono">
                         <DollarSign className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>Premiação: {league.prize_pool}</span>
+                        <span>{prize ? `Premiação: ${prize}` : 'Premiação não divulgada'}</span>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* RODAPÉ DO CARD */}
-              <div className="px-6 py-3.5 border-t border-white/5 bg-canvas flex items-center justify-between text-xs">
-                <span className="text-gray-400 text-[11px]">Ver Chaveamento & Estatísticas</span>
-                <span className="font-bold text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                  <span>Acessar</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+                {/* RODAPÉ DO CARD */}
+                <div className="px-6 py-3.5 border-t border-white/5 bg-canvas flex items-center justify-between text-xs">
+                  <span className="text-gray-400 text-[11px]">Partidas, heróis e chaveamento</span>
+                  <span className="font-bold text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                    <span>Acessar</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

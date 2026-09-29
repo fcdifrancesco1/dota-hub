@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { Shield } from 'lucide-react';
 
 // Mapeamento de logos locais de alta resolução e Steam CDN oficiais verificados
@@ -243,6 +244,16 @@ function cleanStr(s) {
 // atualização automática (era isso que fazia o espaço do logo "piscar").
 const FAILED_LOGO_URLS = new Set();
 
+// Versões para fundo claro dos logos da Liquipedia (url darkmode -> url lightmode).
+// Registradas quando a agenda é carregada; o TeamLogo troca a versão no tema claro.
+const LIGHT_VARIANTS = new Map();
+
+export function registerLightVariant(darkUrl, lightUrl) {
+  if (isUsableLogoUrl(darkUrl) && isUsableLogoUrl(lightUrl) && darkUrl !== lightUrl) {
+    LIGHT_VARIANTS.set(darkUrl, lightUrl);
+  }
+}
+
 function isUsableLogoUrl(url) {
   return typeof url === 'string' &&
     (url.startsWith('http') || url.startsWith('/')) &&
@@ -327,7 +338,10 @@ export default function TeamLogo({
   showBadgeFallback = true
 }) {
   const [, forceRender] = useReducer((n) => n + 1, 0);
-  const resolvedUrl = getTeamLogo(teamName, teamId, logoUrl);
+  const { theme } = useTheme();
+  const baseUrl = getTeamLogo(teamName, teamId, logoUrl);
+  const lightUrl = theme === 'light' && baseUrl ? LIGHT_VARIANTS.get(baseUrl) : null;
+  const resolvedUrl = lightUrl && !FAILED_LOGO_URLS.has(lightUrl) ? lightUrl : baseUrl;
 
   if (!resolvedUrl) {
     if (!showBadgeFallback) return null;

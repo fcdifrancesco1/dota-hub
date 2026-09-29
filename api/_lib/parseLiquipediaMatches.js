@@ -51,7 +51,7 @@ export function parseLiquipediaMatches(html, options = {}) {
       // "darkmode" (para fundo escuro). O site é escuro, então preferimos darkmode;
       // times com logo único usam "allmode". O logo genérico do Dota 2 é ignorado
       // para que o componente mostre as iniciais do time.
-      const getLogo = (chunk) => {
+      const getLogo = (chunk, mode) => {
         const pickImg = (html) => {
           const img = html.match(/<img[^>]*>/);
           if (!img) return "";
@@ -59,8 +59,8 @@ export function parseLiquipediaMatches(html, options = {}) {
           const src = img[0].match(/src="([^"]+)"/);
           return srcset2x ? srcset2x[1] : (src ? src[1] : "");
         };
-        const darkSpan = chunk.match(/team-template-darkmode"[\s\S]*?<\/span>/);
-        let src = darkSpan ? pickImg(darkSpan[0]) : "";
+        const modeSpan = chunk.match(new RegExp(`team-template-${mode}"[\\s\\S]*?<\\/span>`));
+        let src = modeSpan ? pickImg(modeSpan[0]) : "";
         if (!src) src = pickImg(chunk);
         if (!src || /Dota_2_default/i.test(src)) return "";
         return absoluteUrl(src);
@@ -70,8 +70,11 @@ export function parseLiquipediaMatches(html, options = {}) {
       const teamB = getTeam(rightPart);
       const timeA = teamA.name;
       const timeB = teamB.name;
-      const logoA = getLogo(leftPart);
-      const logoB = getLogo(rightPart);
+      // logoA/logoB: versão para fundo escuro; *Light: versão para fundo claro
+      const logoA = getLogo(leftPart, 'darkmode');
+      const logoB = getLogo(rightPart, 'darkmode');
+      const logoALight = getLogo(leftPart, 'lightmode');
+      const logoBLight = getLogo(rightPart, 'lightmode');
 
       // 3. Formato
       const formatMatch = block.match(/\((Bo\d+)\)/i);
@@ -128,6 +131,8 @@ export function parseLiquipediaMatches(html, options = {}) {
           shortB: teamB.short,
           logoA,
           logoB,
+          logoALight,
+          logoBLight,
           formato,
           scoreA,
           scoreB,

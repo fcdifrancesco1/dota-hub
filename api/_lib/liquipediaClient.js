@@ -108,6 +108,63 @@ export async function fetchLiquipediaApi(page, { ttlMs = 10 * 60 * 1000 } = {}) 
 }
 
 /**
+ * Consulta genérica `action=query` da API da Liquipedia (ex.: wikitext de
+ * várias páginas ou URLs de imagens em lote). Usa a mesma fila sequencial e o
+ * mesmo cache do fetchLiquipediaApi. Consultas `query` são bem mais leves que
+ * `parse` para a Liquipedia, por isso preferimos buscar wikitext em lote.
+ * @param {Record<string, string>} params - parâmetros além de action/format
+ * @returns {Promise<object|null>} JSON da resposta ou null
+ */
+export async function fetchLiquipediaQuery(params, { ttlMs = 30 * 60 * 1000 } = {}) {
+  const search = new URLSearchParams({ action: 'query', format: 'json', ...params });
+  const cacheKey = `query:${search.toString()}`;
+
+  const cachedEntry = memoryCache.get(cacheKey);
+  if (cachedEntry && Date.now() < cachedEntry.expiresAt) return cachedEntry.raw;
+
+  const executeRequest = async () => {
+    const again = memoryCache.get(cacheKey);
+    if (again && Date.now() < again.expiresAt) return again.raw;
+
+    const timeSinceLast = Date.now() - lastRequestTime;
+    if (timeSinceLast < MIN_REQUEST_INTERVAL_MS) {
+      await new Promise((resolve) => setTimeout(resolve, MIN_REQUEST_INTERVAL_MS - timeSinceLast));
+    }
+
+    try {
+      const response = await fetch(`https://liquipedia.net/dota2/api.php?${search.toString()}`, {
+        headers: {
+          'User-Agent': USER_AGENT,
+          'Accept': 'application/json',
+          'Accept-Encoding': 'gzip, deflate, br'
+        },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!response.ok) {
+        console.warn(`[Liquipedia Client] HTTP ${response.status} na consulta ${cacheKey}`);
+        return cachedEntry ? cachedEntry.raw : null;
+      }
+      const json = await response.json();
+      if (json.error) {
+        console.warn('[Liquipedia Client] Erro na consulta:', json.error.info || json.error.code);
+        return cachedEntry ? cachedEntry.raw : null;
+      }
+      memoryCache.set(cacheKey, { raw: json, html: '', expiresAt: Date.now() + ttlMs });
+      return json;
+    } catch (err) {
+      console.warn('[Liquipedia Client] Falha de rede na consulta:', err.message);
+      return cachedEntry ? cachedEntry.raw : null;
+    } finally {
+      lastRequestTime = Date.now();
+    }
+  };
+
+  const currentPromise = lastRequestPromise.then(executeRequest, executeRequest);
+  lastRequestPromise = currentPromise.catch(() => {});
+  return currentPromise;
+}
+
+/**
  * Limpa o cache em memória (útil para testes ou refresh manual).
  */
 export function clearLiquipediaCache() {
