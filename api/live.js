@@ -203,7 +203,8 @@ function normalizeValveLiveGame(g) {
   const radSb = sb.radiant || {};
   const direSb = sb.dire || {};
 
-  const duration = sb.duration ?? g.duration ?? 0;
+  // A Steam envia a duração com casas decimais (ex.: 678.8000488)
+  const duration = Math.floor(Number(sb.duration ?? g.duration ?? 0)) || 0;
   const radiant_score = radSb.score ?? g.radiant_score ?? 0;
   const dire_score = direSb.score ?? g.dire_score ?? 0;
 
@@ -511,7 +512,7 @@ function decodeBuildingState(b, duration = 0) {
 function normalizeOpenDotaLive(g) {
   if (!g) return null;
 
-  const duration = g.game_time || 0;
+  const duration = Math.floor(Number(g.game_time || 0)) || 0;
   const radScore = g.radiant_score ?? 0;
   const direScore = g.dire_score ?? 0;
   const radLead = g.radiant_lead ?? 0;

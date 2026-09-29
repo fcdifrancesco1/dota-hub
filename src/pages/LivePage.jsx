@@ -267,8 +267,8 @@ export default function LivePage() {
               const direName = game.dire_name || game.team2 || 'Dire';
               const radScore = game.radiant_score ?? game.score1 ?? 0;
               const direScore = game.dire_score ?? game.score2 ?? 0;
-              const durationMin = Math.floor((game.duration || 0) / 60);
-              const durationSec = String((game.duration || 0) % 60).padStart(2, '0');
+              const durationMin = Math.floor(Math.floor(game.duration || 0) / 60);
+              const durationSec = String(Math.floor(game.duration || 0) % 60).padStart(2, '0');
               const goldLead = game.radiant_lead || game.gold_lead || 0;
 
               // Picks de heróis (se disponíveis na telemetria GOTV)

@@ -13,6 +13,29 @@ import { SITE_CONFIG } from '../config/siteConfig';
 
 const AppContext = createContext(null);
 
+// Nome "limpo" para comparar times entre fontes (Liquipedia x Steam/OpenDota)
+const cleanTeam = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const looseSameTeam = (a, b) => {
+  const x = cleanTeam(a);
+  const y = cleanTeam(b);
+  if (!x || !y) return false;
+  if (x === y) return true;
+  // "yakultbrothers" x "yakultbros", "aurora" x "auroragaming"
+  const [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  return short.length >= 4 && long.startsWith(short);
+};
+
+/** A partida da agenda já está sendo jogada (algum mapa ao vivo)? */
+function isUpcomingLive(m, liveGames) {
+  return (liveGames || []).some((g) => {
+    const a = g.radiant_name || g.timeA || g.team1;
+    const b = g.dire_name || g.timeB || g.team2;
+    return isSeriesMatch(m.timeA, m.timeB, a, b) ||
+      (looseSameTeam(m.timeA, a) && looseSameTeam(m.timeB, b)) ||
+      (looseSameTeam(m.timeA, b) && looseSameTeam(m.timeB, a));
+  });
+}
+
 export function AppProvider({ children }) {
   // Stale-While-Revalidate initial state
   const cachedPro = getCachedFast('pro_matches_v8');
@@ -92,7 +115,13 @@ export function AppProvider({ children }) {
         return !isFinished;
       });
 
-      setUpcomingMatches(activeUpcoming);
+      // Assim que a partida começa, sai da agenda: tem mapa ao vivo agora ou a
+      // série já tem placar (intervalo entre mapas)
+      const notStarted = activeUpcoming.filter((m) =>
+        !isUpcomingLive(m, currentLive) && !((m.scoreA || 0) + (m.scoreB || 0) > 0)
+      );
+
+      setUpcomingMatches(notStarted);
       setLiveGames(currentLive);
       setLastUpdated(
         new Date().toLocaleTimeString('pt-BR', {
