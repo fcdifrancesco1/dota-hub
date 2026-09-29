@@ -1,0 +1,22 @@
+{
+  "short_name": "DotaHub",
+  "name": "DotaHub Brasil - Hub Competitivo de Dota 2",
+  "description": "Acompanhamento profissional de Dota 2 em tempo real: telemetria ao vivo, agenda, campeonatos, rankings, meta de heróis e palpites.",
+  "icons": [
+    {
+      "src": "/aegis.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/aegis.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0C0E14",
+  "theme_color": "#0C0E14",
+  "display": "standalone",
+  "orientation": "portrait"
+}
