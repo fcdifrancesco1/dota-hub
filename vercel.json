@@ -12,11 +12,7 @@
   "crons": [
     {
       "path": "/api/sync-opendota",
-      "schedule": "*/10 * * * *"
-    },
-    {
-      "path": "/api/sync-steam",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
