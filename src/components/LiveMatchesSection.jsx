@@ -182,7 +182,7 @@ export default function LiveMatchesSection({
                   )}
 
                   <span className="text-gray-400 group-hover:text-amber-400 transition-colors flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
-                    Ver Telemetria <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                    Ver partida <Eye className="w-3.5 h-3.5 text-cyan-400" />
                   </span>
                 </div>
               </div>

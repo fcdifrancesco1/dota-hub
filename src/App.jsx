@@ -14,15 +14,9 @@ import TournamentsPage from './pages/TournamentsPage';
 import TournamentDetailPage from './pages/TournamentDetailPage';
 import MatchesPage from './pages/MatchesPage';
 import MatchDetailPage from './pages/MatchDetailPage';
-import TeamsPage from './pages/TeamsPage';
-import TeamDetailPage from './pages/TeamDetailPage';
-import PlayersPage from './pages/PlayersPage';
-import PlayerDetailPage from './pages/PlayerDetailPage';
 import HeroesPage from './pages/HeroesPage';
 import HeroDetailPage from './pages/HeroDetailPage';
 import PredictionsPage from './pages/PredictionsPage';
-import AnalysesPage from './pages/AnalysesPage';
-import AnalysisDetailPage from './pages/AnalysisDetailPage';
 import AdminPage from './pages/AdminPage';
 
 // Modais Globais
@@ -51,15 +45,9 @@ function AppContent() {
             <Route path="/campeonatos/:id" element={<TournamentDetailPage />} />
             <Route path="/partidas" element={<MatchesPage />} />
             <Route path="/partidas/:id" element={<MatchDetailPage />} />
-            <Route path="/times" element={<TeamsPage />} />
-            <Route path="/times/:id" element={<TeamDetailPage />} />
-            <Route path="/jogadores" element={<PlayersPage />} />
-            <Route path="/jogadores/:id" element={<PlayerDetailPage />} />
             <Route path="/herois" element={<HeroesPage />} />
             <Route path="/herois/:id" element={<HeroDetailPage />} />
             <Route path="/palpites" element={<PredictionsPage />} />
-            <Route path="/analises" element={<AnalysesPage />} />
-            <Route path="/analises/:slug" element={<AnalysisDetailPage />} />
             <Route path="/admin" element={<AdminPage />} />
             {/* Fallback route */}
             <Route path="*" element={<Home />} />

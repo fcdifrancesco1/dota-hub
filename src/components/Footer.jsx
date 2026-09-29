@@ -38,7 +38,6 @@ export default function Footer() {
               <li><a href="/campeonatos" className="hover:text-amber-400 transition-colors">Torneios & Majors</a></li>
               <li><a href="/partidas" className="hover:text-amber-400 transition-colors">Resultados & Replays</a></li>
               <li><a href="/herois" className="hover:text-amber-400 transition-colors">Meta do Patch</a></li>
-              <li><a href="/jogadores" className="hover:text-amber-400 transition-colors">Comparador de Jogadores</a></li>
               <li><a href="/palpites" className="hover:text-amber-400 transition-colors">Bolão de Palpites</a></li>
             </ul>
           </div>

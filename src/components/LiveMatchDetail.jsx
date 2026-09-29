@@ -829,7 +829,7 @@ export default function LiveMatchDetail({
           <button
             type="button"
             onClick={() => syncMatchData(true)}
-            title="Sincronizar telemetria agora"
+            title="Atualizar dados agora"
             className="text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center gap-1 transition-all"
           >
             <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} /> {syncing ? 'Sincronizando...' : `Atualizado às ${lastSync}`}
@@ -927,7 +927,7 @@ export default function LiveMatchDetail({
       ) : !matchData ? (
         <div className="py-16 flex flex-col items-center justify-center gap-3 text-center text-gray-400 rounded-2xl border border-line bg-surface">
           <Radio className="w-10 h-10 text-amber-500/40" />
-          <span className="text-sm font-bold text-white">Ainda não há telemetria oficial publicada para esta partida</span>
+          <span className="text-sm font-bold text-white">Ainda não há estatísticas oficiais publicadas para esta partida</span>
           <span className="text-xs text-gray-500 max-w-md">
             Assim que a OpenDota ou a Valve publicarem placar, torres e jogadores, eles aparecem aqui automaticamente (nova checagem a cada 20s).
           </span>

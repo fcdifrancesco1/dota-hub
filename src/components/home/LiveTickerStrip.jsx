@@ -113,7 +113,7 @@ export default function LiveTickerStrip() {
                         : 'Ouro equilibrado'}
                     </span>
                   </span>
-                  <span className="text-amber-400 font-bold hover:underline">Ver telemetria →</span>
+                  <span className="text-amber-400 font-bold hover:underline">Ver partida →</span>
                 </div>
               </div>
             );

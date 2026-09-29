@@ -1,6 +1,5 @@
 import React from 'react';
-import { Star, ChevronRight, Trophy, Calendar, CheckCircle2, XCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Star, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
@@ -18,13 +17,6 @@ export default function FavoritesHighlight() {
           <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
           <span>Times Favoritos em Destaque</span>
         </h2>
-        <Link
-          to="/times"
-          className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider"
-        >
-          <span>Todos os Times</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -77,12 +69,13 @@ export default function FavoritesHighlight() {
                   </div>
                 </div>
 
-                <Link
-                  to={`/times/${fav.id}`}
+                <button
+                  type="button"
+                  onClick={() => setSelectedTeam({ id: fav.id, name: fav.name })}
                   className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:text-white transition-colors"
                 >
                   Ver Perfil
-                </Link>
+                </button>
               </div>
 
               {/* Informações: Último Resultado e Próximo Jogo */}

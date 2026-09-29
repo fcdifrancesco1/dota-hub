@@ -5,11 +5,8 @@ import {
   Radio,
   Trophy,
   Swords,
-  Users,
-  UserCheck,
   Sparkles,
   Award,
-  BookOpen,
   Lock,
   Menu,
   X,
@@ -33,11 +30,8 @@ export default function Header() {
     { to: '/ao-vivo', label: 'Ao Vivo', icon: Radio, badge: liveCount },
     { to: '/campeonatos', label: 'Campeonatos', icon: Trophy },
     { to: '/partidas', label: 'Partidas', icon: Swords },
-    { to: '/times', label: 'Times', icon: Users },
-    { to: '/jogadores', label: 'Jogadores', icon: UserCheck },
     { to: '/herois', label: 'Heróis', icon: Sparkles },
     { to: '/palpites', label: 'Palpites', icon: Award },
-    { to: '/analises', label: 'Análises', icon: BookOpen },
     { to: '/admin', label: 'Admin', icon: Lock }
   ];
 
