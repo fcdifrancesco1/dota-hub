@@ -89,11 +89,12 @@ export default function PredictionsPage() {
       ? leaderboardMonthly
       : leaderboardOverall;
 
-  // Conquistas e Badges
+  // Conquistas: só "Iniciado" pode ser verificada hoje (há palpite salvo). As
+  // demais dependem da apuração dos resultados, que ainda não existe.
   const badges = [
-    { title: 'Iniciado em Roshan', desc: 'Fez o primeiro palpite em uma partida oficial', icon: Shield, unlocked: true },
-    { title: 'Em Chamas', desc: 'Acertou o vencedor de 3 partidas seguidas', icon: Flame, unlocked: true },
-    { title: 'Visão do Oráculo', desc: 'Acertou o placar exato de uma série MD3 ou MD5', icon: Sparkles, unlocked: Object.keys(predictions).length > 0 },
+    { title: 'Iniciado em Roshan', desc: 'Fez o primeiro palpite em uma partida oficial', icon: Shield, unlocked: Object.keys(predictions).length > 0 },
+    { title: 'Em Chamas', desc: 'Acertou o vencedor de 3 partidas seguidas', icon: Flame, unlocked: false },
+    { title: 'Visão do Oráculo', desc: 'Acertou o placar exato de uma série MD3 ou MD5', icon: Sparkles, unlocked: false },
     { title: 'Caçador de Zebras', desc: 'Acertou a vitória de um azarão com menos de 30% dos votos', icon: Star, unlocked: false },
     { title: 'Mestre do Major', desc: 'Palpitou em todos os confrontos dos playoffs', icon: Trophy, unlocked: false }
   ];
