@@ -20,6 +20,7 @@ import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
 import { useApp } from '../context/AppContext';
 import { seriesKey } from '../utils/matchRoute';
+import { useOpenTeam } from '../utils/teamRoute';
 
 const fmtNumber = (n) => (n || n === 0 ? Number(n).toLocaleString('pt-BR') : '—');
 const fmtDuration = (secs) => {
@@ -69,7 +70,7 @@ export default function MatchDetailPage() {
   const { id } = useParams();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { finishedSeries, tournamentsList, constants, setSelectedTeam, setSelectedHero } = useApp();
+  const { finishedSeries, tournamentsList, constants, setSelectedHero } = useApp();
 
   // Série: a que veio no clique, a da lista em memória ou, no link direto,
   // montada a partir do próprio replay.
@@ -139,7 +140,7 @@ export default function MatchDetailPage() {
     setSearchParams(next, { replace: true, state: location.state });
   };
 
-  const openTeam = (teamId, name) => setSelectedTeam({ id: teamId || null, name });
+  const openTeam = useOpenTeam();
   const match = activeMatchId ? matchData[activeMatchId] : undefined;
 
   return (

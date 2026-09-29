@@ -37,7 +37,6 @@ export function AppProvider({ children }) {
   const [lastUpdated, setLastUpdated] = useState('');
 
   // Modais globais
-  const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedHero, setSelectedHero] = useState(null);
 
   // Busca constantes Valve
@@ -137,8 +136,6 @@ export function AppProvider({ children }) {
         liveCount,
         refreshData: () => loadData(true),
         // Modais
-        selectedTeam,
-        setSelectedTeam,
         selectedHero,
         setSelectedHero
       }}

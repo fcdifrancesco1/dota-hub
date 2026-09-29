@@ -2163,3 +2163,6 @@ export const POPULAR_HERO_COMBOS = [
     tier: "S"
   }
 ];
+
+// Utilitários compartilhados com os serviços de páginas (ex.: teamPage.js)
+export { OPENDOTA_BASE, getCached, setCache, fetchWithTimeout };

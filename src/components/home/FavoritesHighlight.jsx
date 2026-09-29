@@ -3,10 +3,12 @@ import { Star, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
+import { useOpenTeam } from '../../utils/teamRoute';
 import { isSeriesMatch } from '../../services/api';
 
 export default function FavoritesHighlight() {
-  const { finishedSeries, upcomingMatches, setSelectedTeam } = useApp();
+  const { finishedSeries, upcomingMatches } = useApp();
+  const openTeam = useOpenTeam();
 
   const favTeams = SITE_CONFIG.favoriteTeams;
 
@@ -71,7 +73,7 @@ export default function FavoritesHighlight() {
 
                 <button
                   type="button"
-                  onClick={() => setSelectedTeam({ id: fav.id, name: fav.name })}
+                  onClick={() => openTeam(fav.id, fav.name)}
                   className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:text-white transition-colors"
                 >
                   Ver Perfil

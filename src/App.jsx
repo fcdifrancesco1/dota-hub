@@ -18,16 +18,14 @@ import HeroesPage from './pages/HeroesPage';
 import HeroDetailPage from './pages/HeroDetailPage';
 import PredictionsPage from './pages/PredictionsPage';
 import AdminPage from './pages/AdminPage';
+import TeamPage from './pages/TeamPage';
 
 // Modais Globais
-import TeamProfileModal from './components/TeamProfileModal';
 import HeroDetailModal from './components/HeroDetailModal';
 
 function AppContent() {
   const {
     constants,
-    selectedTeam,
-    setSelectedTeam,
     selectedHero,
     setSelectedHero
   } = useApp();
@@ -45,6 +43,7 @@ function AppContent() {
             <Route path="/campeonatos/:id" element={<TournamentDetailPage />} />
             <Route path="/partidas" element={<MatchesPage />} />
             <Route path="/partidas/:id" element={<MatchDetailPage />} />
+            <Route path="/times/:id" element={<TeamPage />} />
             <Route path="/herois" element={<HeroesPage />} />
             <Route path="/herois/:id" element={<HeroDetailPage />} />
             <Route path="/palpites" element={<PredictionsPage />} />
@@ -58,21 +57,11 @@ function AppContent() {
       <Footer />
 
       {/* MODAIS GLOBAIS DE DETALHES */}
-      {selectedTeam && (
-        <TeamProfileModal
-          team={selectedTeam}
-          constants={constants}
-          onClose={() => setSelectedTeam(null)}
-          onSelectHero={setSelectedHero}
-        />
-      )}
-
       {selectedHero && (
         <HeroDetailModal
           hero={selectedHero}
           constants={constants}
           onClose={() => setSelectedHero(null)}
-          onSelectTeam={setSelectedTeam}
         />
       )}
     </div>

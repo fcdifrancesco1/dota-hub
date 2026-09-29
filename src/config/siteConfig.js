@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   // Falcons: 8255888, Liquid: 2163
   favoriteTeamIds: [8255888, 2163],
   favoriteTeams: [
-    { id: 8255888, name: "Team Falcons", tag: "Falcons" },
+    { id: 9247354, name: "Team Falcons", tag: "Falcons" },
     { id: 2163, name: "Team Liquid", tag: "Liquid" }
   ],
 

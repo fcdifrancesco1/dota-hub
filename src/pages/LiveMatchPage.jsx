@@ -4,11 +4,13 @@ import { ArrowLeft, Loader2, Radio } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import LiveMatchDetail from '../components/LiveMatchDetail';
 import { liveMatchKey } from '../utils/liveMatchRoute';
+import { useOpenTeam } from '../utils/teamRoute';
 
 export default function LiveMatchPage() {
   const { matchKey } = useParams();
   const location = useLocation();
-  const { liveGames, loading, constants, setSelectedTeam, setSelectedHero } = useApp();
+  const { liveGames, loading, constants, setSelectedHero } = useApp();
+  const openTeam = useOpenTeam();
 
   // Prefere o jogo da lista atualizada (a cada 30s); na primeira abertura usa o
   // que veio no clique; com o link direto, um match_id numérico basta para a
@@ -62,7 +64,7 @@ export default function LiveMatchPage() {
           key={matchKey}
           game={game}
           constants={constants}
-          onOpenTeamProfile={(name) => setSelectedTeam({ id: null, name })}
+          onOpenTeamProfile={(name) => openTeam(null, name)}
           onSelectHero={setSelectedHero}
         />
       ) : loading ? (
