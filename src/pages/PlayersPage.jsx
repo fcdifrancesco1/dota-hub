@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import { getTeamLogo } from '../utils/teamLogos';
+import PlayerAvatar from '../components/PlayerAvatar';
 
 // Lista de jogadores profissionais de referência
 const PRO_PLAYERS_SAMPLE = [
@@ -21,7 +21,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 1,
     roleName: 'Posição 1 (Hard Carry)',
     country: 'Eslováquia',
-    avatar: 'https://avatars.steamstatic.com/d6a36f6d52f6c99c864437a3f5a2f5f9dd7b43a9_full.jpg',
+    accountId: 100058342,
     stats: { kda: 6.8, gpm: 780, xpm: 810, lastHits: 410, killPart: 74 }
   },
   {
@@ -31,7 +31,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 1,
     roleName: 'Posição 1 (Hard Carry)',
     country: 'Suécia',
-    avatar: 'https://avatars.steamstatic.com/c1da4dfce56dcfeecae209a8031d2ba5cf5bf237_full.jpg',
+    accountId: 152962063,
     stats: { kda: 5.9, gpm: 740, xpm: 770, lastHits: 390, killPart: 68 }
   },
   {
@@ -41,7 +41,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 2,
     roleName: 'Posição 2 (Midlaner)',
     country: 'Rússia',
-    avatar: 'https://avatars.steamstatic.com/ec6cb52ec5428a47ff7dbb846e1335cb99cf166e_full.jpg',
+    accountId: 898455820,
     stats: { kda: 5.4, gpm: 690, xpm: 750, lastHits: 310, killPart: 82 }
   },
   {
@@ -51,7 +51,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 2,
     roleName: 'Posição 2 (Midlaner)',
     country: 'Polônia',
-    avatar: 'https://avatars.steamstatic.com/7b134d4a8e63fb28db15984efc7df2559b97779d_full.jpg',
+    accountId: 201358612,
     stats: { kda: 6.2, gpm: 710, xpm: 780, lastHits: 330, killPart: 80 }
   },
   {
@@ -61,7 +61,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 3,
     roleName: 'Posição 3 (Offlaner)',
     country: 'Jordânia',
-    avatar: 'https://avatars.steamstatic.com/4f05256e2e50529d47910ff6fc74308ee4f55bb8_full.jpg',
+    accountId: 183719386,
     stats: { kda: 4.8, gpm: 640, xpm: 680, lastHits: 290, killPart: 75 }
   },
   {
@@ -71,7 +71,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 3,
     roleName: 'Posição 3 (Offlaner)',
     country: 'República Tcheca',
-    avatar: 'https://avatars.steamstatic.com/5cb9668fe5e27a6e11894b8fa64ef3f248e3cfbb_full.jpg',
+    accountId: 126212866,
     stats: { kda: 4.2, gpm: 580, xpm: 630, lastHits: 260, killPart: 70 }
   },
   {
@@ -81,7 +81,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 4,
     roleName: 'Posição 4 (Soft Support)',
     country: 'Dinamarca',
-    avatar: 'https://avatars.steamstatic.com/83bb2227d8db1df87c0c16b607062ea9cf5538e6_full.jpg',
+    accountId: 25907144,
     stats: { kda: 3.8, gpm: 410, xpm: 520, lastHits: 110, killPart: 86 }
   },
   {
@@ -91,7 +91,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 4,
     roleName: 'Posição 4 (Soft Support)',
     country: 'Suécia',
-    avatar: 'https://avatars.steamstatic.com/264b383ae8957ba4bcf1fe3e54b6fcfe973ca427_full.jpg',
+    accountId: 77490514,
     stats: { kda: 3.5, gpm: 390, xpm: 490, lastHits: 95, killPart: 83 }
   },
   {
@@ -101,7 +101,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 5,
     roleName: 'Posição 5 (Hard Support / Capitão)',
     country: 'EUA',
-    avatar: 'https://avatars.steamstatic.com/a42b1090013b5552a4658efeb9b8fb9dffb186b1_full.jpg',
+    accountId: 10366616,
     stats: { kda: 3.2, gpm: 340, xpm: 440, lastHits: 65, killPart: 81 }
   },
   {
@@ -111,7 +111,7 @@ const PRO_PLAYERS_SAMPLE = [
     role: 5,
     roleName: 'Posição 5 (Hard Support / Capitão)',
     country: 'Suécia',
-    avatar: 'https://avatars.steamstatic.com/492efb1a9cbe498877bc3dbbe95379e563065a78_full.jpg',
+    accountId: 54580962,
     stats: { kda: 3.1, gpm: 320, xpm: 420, lastHits: 58, killPart: 79 }
   }
 ];
@@ -252,11 +252,7 @@ export default function PlayersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Card Jogador A */}
           <div className="lg:col-span-3 bg-[#0C0E14] border border-emerald-500/30 rounded-2xl p-5 shadow-xl text-center">
-            <img
-              src={playerA.avatar}
-              alt={playerA.name}
-              className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 border-2 border-emerald-500/50 shadow-lg"
-            />
+            <PlayerAvatar accountId={playerA.accountId} name={playerA.name} className="w-20 h-20 rounded-2xl mx-auto mb-3 border-2 border-emerald-500/50 shadow-lg" />
             <h3 className="text-lg font-black text-white">{playerA.name}</h3>
             <span className="text-xs text-emerald-400 font-bold block">{playerA.team}</span>
             <span className="text-[11px] text-gray-500 block mb-4">{playerA.roleName}</span>
@@ -309,11 +305,7 @@ export default function PlayersPage() {
 
           {/* Card Jogador B */}
           <div className="lg:col-span-3 bg-[#0C0E14] border border-amber-500/30 rounded-2xl p-5 shadow-xl text-center">
-            <img
-              src={playerB.avatar}
-              alt={playerB.name}
-              className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 border-2 border-amber-500/50 shadow-lg"
-            />
+            <PlayerAvatar accountId={playerB.accountId} name={playerB.name} className="w-20 h-20 rounded-2xl mx-auto mb-3 border-2 border-amber-500/50 shadow-lg" />
             <h3 className="text-lg font-black text-white">{playerB.name}</h3>
             <span className="text-xs text-amber-400 font-bold block">{playerB.team}</span>
             <span className="text-[11px] text-gray-500 block mb-4">{playerB.roleName}</span>
@@ -348,11 +340,7 @@ export default function PlayersPage() {
             key={p.id}
             className="bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-4 shadow-xl transition-all"
           >
-            <img
-              src={p.avatar}
-              alt={p.name}
-              className="w-14 h-14 rounded-xl object-cover mb-3 border border-white/10"
-            />
+            <PlayerAvatar accountId={p.accountId} name={p.name} className="w-14 h-14 rounded-xl mb-3 border border-white/10" />
             <h4 className="text-base font-black text-white truncate">{p.name}</h4>
             <span className="text-xs text-amber-400 font-bold block truncate">{p.team}</span>
             <span className="text-[10px] text-gray-500 block mb-3">{p.roleName}</span>

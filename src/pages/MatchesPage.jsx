@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Swords, Filter, Calendar, Search, Trophy, ChevronRight, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { getTeamLogo } from '../utils/teamLogos';
+import TeamLogo from '../utils/teamLogos';
 
 export default function MatchesPage() {
   const { finishedSeries, setSelectedSeries, upcomingMatches } = useApp();
@@ -11,6 +11,13 @@ export default function MatchesPage() {
   const [search, setSearch] = useState('');
 
   const displayedList = (filterMode === 'finished' ? finishedSeries : upcomingMatches) || [];
+
+  const switchMode = (mode) => {
+    setFilterMode(mode);
+    // Os campeonatos/times de uma aba não existem necessariamente na outra
+    setSelectedTournament('all');
+    setSelectedTeam('all');
+  };
 
   // Obter lista única de torneios e times para os dropdowns de filtro
   const tournamentsList = Array.from(new Set(
@@ -62,7 +69,7 @@ export default function MatchesPage() {
         {/* ALTERNADOR DE MODO (CONCLUÍDAS VS FUTURAS) */}
         <div className="flex bg-[#11141E] p-1 rounded-xl border border-[#212838]">
           <button
-            onClick={() => setFilterMode('finished')}
+            onClick={() => switchMode('finished')}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap ${
               filterMode === 'finished' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
             }`}
@@ -70,7 +77,7 @@ export default function MatchesPage() {
             Séries Concluídas
           </button>
           <button
-            onClick={() => setFilterMode('upcoming')}
+            onClick={() => switchMode('upcoming')}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap ${
               filterMode === 'upcoming' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
             }`}
@@ -136,68 +143,102 @@ export default function MatchesPage() {
           </div>
         ) : (
           filtered.map((s, idx) => {
+            const isUpcoming = filterMode === 'upcoming';
             const tA = s.team1_name || s.timeA || 'Team 1';
             const tB = s.team2_name || s.timeB || 'Team 2';
             const scoreA = s.score_team1 ?? s.scoreA ?? 0;
             const scoreB = s.score_team2 ?? s.scoreB ?? 0;
             const tourney = s.league_name || s.tourneyName || 'Torneio Oficial';
-            const isWinnerA = scoreA > scoreB;
-            const isWinnerB = scoreB > scoreA;
+            const isWinnerA = !isUpcoming && scoreA > scoreB;
+            const isWinnerB = !isUpcoming && scoreB > scoreA;
+            const formatLabel = s.formato || s.stage || (s.series_type ? `MD${s.series_type}` : 'MD3');
+            const hasStarted = isUpcoming && Boolean(s.timestamp) && s.timestamp * 1000 <= Date.now();
 
-            return (
-              <div
-                key={s.series_id || s.id || idx}
-                onClick={() => setSelectedSeries(s)}
-                className="bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-5 transition-all cursor-pointer shadow-xl group flex flex-col justify-between"
-              >
+            const cardContent = (
+              <>
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-white/5 pb-2">
                     <span className="font-semibold truncate max-w-[200px] text-amber-400/90">{tourney}</span>
                     <span className="font-mono text-gray-400 font-bold bg-white/5 px-2 py-0.5 rounded">
-                      {s.stage || (s.series_type ? `MD${s.series_type}` : 'MD3')}
+                      {formatLabel}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-3 py-2">
                     <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                      <img
-                        src={getTeamLogo(tA, s.team1_logo || s.logoA)}
-                        alt={tA}
-                        className="w-7 h-7 object-contain"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={tA} logoUrl={s.team1_logo || s.logoA} className="w-7 h-7" />
                       <span className={`text-xs font-bold truncate ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
                         {tA}
                       </span>
                     </div>
 
                     <div className="font-mono font-black text-xs px-3 py-1 bg-black/60 rounded-xl border border-white/10 text-white">
-                      {filterMode === 'finished' ? `${scoreA} - ${scoreB}` : 'VS'}
+                      {isUpcoming ? 'VS' : `${scoreA} - ${scoreB}`}
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
                       <span className={`text-xs font-bold truncate text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
                         {tB}
                       </span>
-                      <img
-                        src={getTeamLogo(tB, s.team2_logo || s.logoB)}
-                        alt={tB}
-                        className="w-7 h-7 object-contain"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={tB} logoUrl={s.team2_logo || s.logoB} className="w-7 h-7" />
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
-                  <span className="text-gray-500">
-                    {s.start_time ? new Date(s.start_time).toLocaleDateString('pt-BR') : s.startTime || 'Recentemente'}
-                  </span>
-                  <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                    <span>Ver Replay & Draft</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
+                  {isUpcoming ? (
+                    <>
+                      <span className="flex items-center gap-1.5 text-gray-300 font-mono font-bold">
+                        <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                        {s.startTime || 'Horário a definir'}
+                      </span>
+                      {s.streamUrl ? (
+                        <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                          <span>{hasStarted ? 'Em andamento · Assistir' : 'Onde assistir'}</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                      ) : hasStarted ? (
+                        <span className="text-red-400 font-bold">Em andamento</span>
+                      ) : (
+                        <span className="text-gray-500">Agendada</span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-gray-500">
+                        {s.start_time ? new Date(s.start_time).toLocaleDateString('pt-BR') : 'Recentemente'}
+                      </span>
+                      <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                        <span>Ver Replay & Draft</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
+                    </>
+                  )}
                 </div>
+              </>
+            );
+
+            const cardClass = "bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-5 transition-all shadow-xl group flex flex-col justify-between";
+
+            // Partidas futuras não têm replay: o card leva à transmissão (se houver).
+            if (isUpcoming) {
+              const key = `${tA}-${tB}-${s.timestamp || idx}`;
+              return s.streamUrl ? (
+                <a key={key} href={s.streamUrl} target="_blank" rel="noopener noreferrer" className={`${cardClass} cursor-pointer`}>
+                  {cardContent}
+                </a>
+              ) : (
+                <div key={key} className={cardClass}>{cardContent}</div>
+              );
+            }
+
+            return (
+              <div
+                key={s.series_id || s.id || idx}
+                onClick={() => setSelectedSeries(s)}
+                className={`${cardClass} cursor-pointer`}
+              >
+                {cardContent}
               </div>
             );
           })

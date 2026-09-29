@@ -126,7 +126,8 @@ function resolveVerifiedTeamLogo(teamName, teamId, explicitUrl) {
   if (explicitUrl && typeof explicitUrl === 'string' && (explicitUrl.startsWith('http') || explicitUrl.startsWith('/'))) {
     return explicitUrl;
   }
-  return '/placeholder-team.png';
+  // Sem logo conhecido: o front-end (TeamLogo) mostra as iniciais do time
+  return '';
 }
 
 // Lê chave de ambiente ou arquivo local (.env.local / .env)

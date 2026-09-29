@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { Shield } from 'lucide-react';
 
 // Mapeamento de logos locais de alta resolução e Steam CDN oficiais verificados
@@ -238,74 +238,84 @@ function cleanStr(s) {
     .trim();
 }
 
-/**
- * Resolve o melhor logo para qualquer equipe de Dota 2 de forma polimórfica.
- * Suporta assinaturas:
- * 1. getTeamLogo(teamName, teamId, fallbackUrl)
- * 2. getTeamLogo(teamName, fallbackUrl) (quando o 2º parâmetro é uma URL)
- */
-export function getTeamLogo(teamName, teamIdOrUrl, fallbackUrl) {
-  let teamId = null;
-  let url = null;
+// URLs de logo que já falharam ao carregar nesta sessão. Guardado fora do
+// componente para que um logo quebrado não seja tentado de novo a cada
+// atualização automática (era isso que fazia o espaço do logo "piscar").
+const FAILED_LOGO_URLS = new Set();
 
-  if (typeof teamIdOrUrl === 'string' && (teamIdOrUrl.startsWith('http') || teamIdOrUrl.startsWith('/'))) {
-    url = teamIdOrUrl;
-  } else if (teamIdOrUrl && /^\d+$/.test(String(teamIdOrUrl))) {
-    teamId = String(teamIdOrUrl);
+function isUsableLogoUrl(url) {
+  return typeof url === 'string' &&
+    (url.startsWith('http') || url.startsWith('/')) &&
+    !url.includes('placeholder-team') &&
+    !/Dota_2_default/i.test(url);
+}
+
+function findLocalLogoByName(teamName) {
+  const cleaned = cleanStr(teamName);
+  if (!cleaned) return null;
+  for (const [key, logoPath] of Object.entries(LOCAL_TEAM_LOGOS)) {
+    if (cleanStr(key) === cleaned) return logoPath;
   }
-
-  if (fallbackUrl && typeof fallbackUrl === 'string' && (fallbackUrl.startsWith('http') || fallbackUrl.startsWith('/'))) {
-    url = fallbackUrl;
-  }
-
-  // 1. Identificação direta por teamId no dicionário local oficial
-  if (teamId && LOCAL_TEAM_LOGOS[String(teamId)]) {
-    return LOCAL_TEAM_LOGOS[String(teamId)];
-  }
-
-  // 2. Identificação por nome no dicionário local oficial
-  if (teamName) {
-    const cleaned = cleanStr(teamName);
-    if (cleaned) {
-      for (const [key, logoPath] of Object.entries(LOCAL_TEAM_LOGOS)) {
-        if (cleanStr(key) === cleaned) {
-          return logoPath;
-        }
-      }
-
-      const stripped = cleaned.replace(/^(team|gaming|esports)/, '').replace(/(team|gaming|esports)$/, '');
-      if (stripped && stripped.length >= 2) {
-        for (const [key, logoPath] of Object.entries(LOCAL_TEAM_LOGOS)) {
-          if (cleanStr(key) === stripped) {
-            return logoPath;
-          }
-        }
-      }
+  const stripped = cleaned.replace(/^(team|gaming|esports)/, '').replace(/(team|gaming|esports)$/, '');
+  if (stripped && stripped.length >= 2) {
+    for (const [key, logoPath] of Object.entries(LOCAL_TEAM_LOGOS)) {
+      if (cleanStr(key) === stripped) return logoPath;
     }
   }
-
-  // 3. URL explícita válida fornecida pela API
-  if (url && typeof url === 'string' && (url.startsWith('http') || url.startsWith('/'))) {
-    return url;
-  }
-
-  // 4. Registro dinâmico carregado do cache de equipes da OpenDota
-  if (teamId && DYNAMIC_TEAMS_BY_ID.has(String(teamId))) {
-    return DYNAMIC_TEAMS_BY_ID.get(String(teamId));
-  }
-  if (teamName) {
-    const cleaned = cleanStr(teamName);
-    if (DYNAMIC_TEAMS_BY_NAME.has(cleaned)) {
-      return DYNAMIC_TEAMS_BY_NAME.get(cleaned);
-    }
-  }
-
-  return '/placeholder-team.png';
+  return null;
 }
 
 /**
- * Componente React universal para exibir o logo de uma equipe de forma consistente,
- * com alta qualidade, aspect-ratio protegido e fallback em badge visual.
+ * Lista, em ordem de prioridade, todas as URLs de logo conhecidas para a equipe.
+ * Suporta as assinaturas (teamName, teamId, fallbackUrl) e (teamName, fallbackUrl).
+ */
+export function getTeamLogoCandidates(teamName, teamIdOrUrl, fallbackUrl) {
+  let teamId = null;
+  const explicitUrls = [];
+
+  if (isUsableLogoUrl(teamIdOrUrl)) {
+    explicitUrls.push(teamIdOrUrl);
+  } else if (teamIdOrUrl && /^\d+$/.test(String(teamIdOrUrl))) {
+    teamId = String(teamIdOrUrl);
+  }
+  if (isUsableLogoUrl(fallbackUrl)) explicitUrls.push(fallbackUrl);
+
+  const candidates = [
+    // 1. URL fornecida pela API — a Liquipedia já envia a versão "darkmode",
+    //    feita para fundo escuro, e cobre também times menores
+    ...explicitUrls,
+    // 2. Dicionário local (arquivos em /public/team-logos)
+    teamId && LOCAL_TEAM_LOGOS[teamId],
+    teamName && findLocalLogoByName(teamName),
+    // 3. Registro dinâmico carregado da OpenDota
+    teamId && DYNAMIC_TEAMS_BY_ID.get(teamId),
+    teamName && DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName))
+  ];
+
+  return [...new Set(candidates.filter(isUsableLogoUrl))];
+}
+
+/**
+ * Melhor logo disponível para a equipe, ou null quando nenhum é conhecido
+ * (nesse caso, exiba as iniciais do time — ver componente TeamLogo).
+ */
+export function getTeamLogo(teamName, teamIdOrUrl, fallbackUrl) {
+  return getTeamLogoCandidates(teamName, teamIdOrUrl, fallbackUrl)
+    .find((url) => !FAILED_LOGO_URLS.has(url)) || null;
+}
+
+function getTeamInitials(teamName) {
+  return String(teamName || '')
+    .replace(/^(team|gaming|esports)\s+/i, '')
+    .replace(/[^\p{L}\p{N}]/gu, '')
+    .slice(0, 3)
+    .toUpperCase();
+}
+
+/**
+ * Componente universal de logo de equipe. Tenta cada URL conhecida em ordem;
+ * se todas falharem (ou não houver nenhuma), mostra um badge estático com as
+ * iniciais do time — sem animação e sem novas tentativas.
  */
 export default function TeamLogo({
   teamName,
@@ -316,17 +326,12 @@ export default function TeamLogo({
   alt = "",
   showBadgeFallback = true
 }) {
-  const [hasError, setHasError] = useState(false);
-  const resolvedUrl = hasError ? null : getTeamLogo(teamName, teamId, logoUrl);
+  const [, forceRender] = useReducer((n) => n + 1, 0);
+  const resolvedUrl = getTeamLogo(teamName, teamId, logoUrl);
 
-  const initials = String(teamName || 'D2')
-    .replace(/^(team|gaming|esports)\s+/i, '')
-    .trim()
-    .slice(0, 3)
-    .toUpperCase();
-
-  if (!resolvedUrl || hasError || resolvedUrl === '/placeholder-team.png') {
+  if (!resolvedUrl) {
     if (!showBadgeFallback) return null;
+    const initials = getTeamInitials(teamName);
     return (
       <div
         className={`${className} flex items-center justify-center rounded-lg bg-[#141824] border border-white/10 text-[9px] font-mono font-black text-amber-400 shrink-0 select-none shadow-sm`}
@@ -340,12 +345,21 @@ export default function TeamLogo({
   return (
     <div className={`${className} flex items-center justify-center shrink-0 overflow-hidden`}>
       <img
+        key={resolvedUrl}
         src={resolvedUrl}
         alt={alt || teamName || "Logo da Equipe"}
-        className={`${imgClassName} transition-transform hover:scale-105`}
+        title={teamName || undefined}
+        className={imgClassName}
+        // Contorno claro sutil: mantém legíveis logos escuros (ex.: Liquid, Secret)
+        // sobre o fundo escuro do site sem alterar os logos claros
+        style={{ filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.45))' }}
         referrerPolicy="no-referrer"
         loading="lazy"
-        onError={() => setHasError(true)}
+        decoding="async"
+        onError={() => {
+          FAILED_LOGO_URLS.add(resolvedUrl);
+          forceRender();
+        }}
       />
     </div>
   );

@@ -16,7 +16,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { SITE_CONFIG } from '../config/siteConfig';
-import { getTeamLogo } from '../utils/teamLogos';
+import TeamLogo from '../utils/teamLogos';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 export default function PredictionsPage() {
@@ -222,12 +222,7 @@ export default function PredictionsPage() {
                           : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
                       }`}
                     >
-                      <img
-                        src={getTeamLogo(m.timeA)}
-                        alt={m.timeA}
-                        className="w-10 h-10 object-contain mb-2"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-10 h-10 mb-2" />
                       <span className="text-xs font-bold truncate max-w-[110px]">{m.timeA}</span>
                       <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
                     </button>
@@ -243,12 +238,7 @@ export default function PredictionsPage() {
                           : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
                       }`}
                     >
-                      <img
-                        src={getTeamLogo(m.timeB)}
-                        alt={m.timeB}
-                        className="w-10 h-10 object-contain mb-2"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-10 h-10 mb-2" />
                       <span className="text-xs font-bold truncate max-w-[110px]">{m.timeB}</span>
                       <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
                     </button>

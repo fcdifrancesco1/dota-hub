@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { getHeroImg, getHeroName } from '../services/api';
 import { getTeamLogo } from '../utils/teamLogos';
+import PlayerAvatar from '../components/PlayerAvatar';
 import { useApp } from '../context/AppContext';
 
 export default function PlayerDetailPage() {
@@ -26,9 +27,8 @@ export default function PlayerDetailPage() {
     team: id === '152962063' || id === '1' ? 'Team Falcons' : 'Team Liquid',
     role: id === '152962063' || id === '1' ? 'Posição 1 (Hard Carry)' : 'Posição 2 (Midlaner)',
     country: id === '152962063' || id === '1' ? 'Eslováquia' : 'Polônia',
-    avatar: id === '152962063' || id === '1'
-      ? 'https://avatars.steamstatic.com/d6a36f6d52f6c99c864437a3f5a2f5f9dd7b43a9_full.jpg'
-      : 'https://avatars.steamstatic.com/7b134d4a8e63fb28db15984efc7df2559b97779d_full.jpg',
+    // Um ID numérico longo na URL é o account_id Steam do jogador
+    accountId: /^\d{4,}$/.test(id) ? Number(id) : (id === '1' ? 100058342 : 201358612),
     stats: {
       kda: 6.8,
       gpm: 785,
@@ -59,10 +59,10 @@ export default function PlayerDetailPage() {
       {/* HERO DO JOGADOR */}
       <div className="rounded-2xl bg-gradient-to-r from-[#141A28] via-[#0E1119] to-[#181116] border border-[#212838] p-6 sm:p-8 mb-8 shadow-2xl">
         <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-          <img
-            src={player.avatar}
-            alt={player.name}
-            className="w-24 h-24 rounded-2xl object-cover border-2 border-amber-500/40 shadow-xl"
+          <PlayerAvatar
+            accountId={player.accountId}
+            name={player.name}
+            className="w-24 h-24 rounded-2xl border-2 border-amber-500/40 shadow-xl text-2xl"
           />
           <div>
             <div className="flex items-center justify-center sm:justify-start gap-2 mb-1.5">

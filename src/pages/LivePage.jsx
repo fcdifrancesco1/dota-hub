@@ -19,7 +19,6 @@ import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import { getHeroImg, getHeroName } from '../services/api';
 
 const DEFAULT_STREAMS = [
-  { id: 'btsbrasiltv', name: 'BTS Brasil TV', platform: 'twitch', lang: 'pt-BR' },
   { id: 'esl_dota2br', name: 'ESL Dota 2 Brasil', platform: 'twitch', lang: 'pt-BR' },
   { id: 'esl_dota2', name: 'ESL Dota 2 Official', platform: 'twitch', lang: 'en' },
   { id: 'pgl_dota2', name: 'PGL Dota 2', platform: 'twitch', lang: 'en' }

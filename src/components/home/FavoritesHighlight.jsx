@@ -3,7 +3,7 @@ import { Star, ChevronRight, Trophy, Calendar, CheckCircle2, XCircle } from 'luc
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { SITE_CONFIG } from '../../config/siteConfig';
-import { getTeamLogo } from '../../utils/teamLogos';
+import TeamLogo from '../../utils/teamLogos';
 import { isSeriesMatch } from '../../services/api';
 
 export default function FavoritesHighlight() {
@@ -67,12 +67,7 @@ export default function FavoritesHighlight() {
               <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 p-2 flex items-center justify-center">
-                    <img
-                      src={getTeamLogo(fav.name)}
-                      alt={fav.name}
-                      className="w-8 h-8 object-contain"
-                      onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                    />
+                    <TeamLogo teamName={fav.name} className="w-8 h-8" />
                   </div>
                   <div>
                     <h3 className="text-base font-black text-white">{fav.name}</h3>

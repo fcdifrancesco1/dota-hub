@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, Clock, ChevronRight, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { getTeamLogo } from '../../utils/teamLogos';
+import TeamLogo from '../../utils/teamLogos';
 
 export default function Upcoming24h() {
   const { upcomingMatches, loading } = useApp();
@@ -66,27 +66,27 @@ export default function Upcoming24h() {
 
               return (
                 <div
-                  key={m.id || idx}
+                  key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`}
                   className="bg-[#11141E] hover:bg-[#161B28] border border-[#1C2232] hover:border-amber-500/30 rounded-xl p-3 transition-all"
                 >
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[180px] text-amber-400/80">
                       {m.tourneyName || 'Torneio'}
                     </span>
-                    <span className="font-mono text-gray-300 bg-white/5 px-1.5 py-0.5 rounded font-bold">
-                      {formattedTime} BRT
+                    <span className="flex items-center gap-1.5">
+                      <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                        {m.formato}
+                      </span>
+                      <span className="font-mono text-gray-300 bg-white/5 px-1.5 py-0.5 rounded font-bold">
+                        {formattedTime} BRT
+                      </span>
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-2">
                     {/* Time 1 */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <img
-                        src={getTeamLogo(m.timeA)}
-                        alt={m.timeA}
-                        className="w-5 h-5 object-contain"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-5 h-5" />
                       <span className="text-xs font-bold text-white truncate">{m.timeA}</span>
                     </div>
 
@@ -95,12 +95,7 @@ export default function Upcoming24h() {
                     {/* Time 2 */}
                     <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
                       <span className="text-xs font-bold text-white truncate text-right">{m.timeB}</span>
-                      <img
-                        src={getTeamLogo(m.timeB)}
-                        alt={m.timeB}
-                        className="w-5 h-5 object-contain"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-5 h-5" />
                     </div>
                   </div>
                 </div>

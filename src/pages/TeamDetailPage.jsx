@@ -14,27 +14,30 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { fetchTeamById } from '../services/supabase';
-import { fetchTeamProfile, getHeroImg, getHeroName } from '../services/api';
-import { getTeamLogo } from '../utils/teamLogos';
+import { fetchTeamProfile, fetchTeamRoster, getHeroImg, getHeroName } from '../services/api';
+import PlayerAvatar from '../components/PlayerAvatar';
+import TeamLogo from '../utils/teamLogos';
 import { useApp } from '../context/AppContext';
 
 // Elencos profissionais conhecidos para exibição imediata
 const TEAM_ROSTERS = {
   8255888: [
-    { name: 'skiter', role: 1, roleName: 'Pos 1 (Carry)', country: 'Eslováquia', avatar: 'https://avatars.steamstatic.com/d6a36f6d52f6c99c864437a3f5a2f5f9dd7b43a9_full.jpg' },
-    { name: 'Malr1ne', role: 2, roleName: 'Pos 2 (Mid)', country: 'Rússia', avatar: 'https://avatars.steamstatic.com/ec6cb52ec5428a47ff7dbb846e1335cb99cf166e_full.jpg' },
-    { name: 'ATF', role: 3, roleName: 'Pos 3 (Offlane)', country: 'Jordânia', avatar: 'https://avatars.steamstatic.com/4f05256e2e50529d47910ff6fc74308ee4f55bb8_full.jpg' },
-    { name: 'Cr1t-', role: 4, roleName: 'Pos 4 (Soft Support)', country: 'Dinamarca', avatar: 'https://avatars.steamstatic.com/83bb2227d8db1df87c0c16b607062ea9cf5538e6_full.jpg' },
-    { name: 'Sneyking', role: 5, roleName: 'Pos 5 (Hard Support / Capitão)', country: 'EUA', avatar: 'https://avatars.steamstatic.com/a42b1090013b5552a4658efeb9b8fb9dffb186b1_full.jpg' }
+    { name: 'skiter', role: 1, roleName: 'Pos 1 (Carry)', country: 'Eslováquia', accountId: 100058342 },
+    { name: 'Malr1ne', role: 2, roleName: 'Pos 2 (Mid)', country: 'Rússia', accountId: 898455820 },
+    { name: 'ATF', role: 3, roleName: 'Pos 3 (Offlane)', country: 'Jordânia', accountId: 183719386 },
+    { name: 'Cr1t-', role: 4, roleName: 'Pos 4 (Soft Support)', country: 'Dinamarca', accountId: 25907144 },
+    { name: 'Sneyking', role: 5, roleName: 'Pos 5 (Hard Support / Capitão)', country: 'EUA', accountId: 10366616 }
   ],
   2163: [
-    { name: 'miCKe', role: 1, roleName: 'Pos 1 (Carry)', country: 'Suécia', avatar: 'https://avatars.steamstatic.com/c1da4dfce56dcfeecae209a8031d2ba5cf5bf237_full.jpg' },
-    { name: 'Nisha', role: 2, roleName: 'Pos 2 (Mid)', country: 'Polônia', avatar: 'https://avatars.steamstatic.com/7b134d4a8e63fb28db15984efc7df2559b97779d_full.jpg' },
-    { name: 'SabeRLighT-', role: 3, roleName: 'Pos 3 (Offlane)', country: 'República Tcheca', avatar: 'https://avatars.steamstatic.com/5cb9668fe5e27a6e11894b8fa64ef3f248e3cfbb_full.jpg' },
-    { name: 'Boxi', role: 4, roleName: 'Pos 4 (Soft Support)', country: 'Suécia', avatar: 'https://avatars.steamstatic.com/264b383ae8957ba4bcf1fe3e54b6fcfe973ca427_full.jpg' },
-    { name: 'Insania', role: 5, roleName: 'Pos 5 (Hard Support / Capitão)', country: 'Suécia', avatar: 'https://avatars.steamstatic.com/492efb1a9cbe498877bc3dbbe95379e563065a78_full.jpg' }
+    { name: 'miCKe', role: 1, roleName: 'Pos 1 (Carry)', country: 'Suécia', accountId: 152962063 },
+    { name: 'Nisha', role: 2, roleName: 'Pos 2 (Mid)', country: 'Polônia', accountId: 201358612 },
+    { name: 'SabeRLighT-', role: 3, roleName: 'Pos 3 (Offlane)', country: 'República Tcheca', accountId: 126212866 },
+    { name: 'Boxi', role: 4, roleName: 'Pos 4 (Soft Support)', country: 'Suécia', accountId: 77490514 },
+    { name: 'Insania', role: 5, roleName: 'Pos 5 (Hard Support / Capitão)', country: 'Suécia', accountId: 54580962 }
   ]
 };
+// 9247354 é o ID oficial da Team Falcons na OpenDota; 8255888 é o ID usado nos dados locais
+TEAM_ROSTERS[9247354] = TEAM_ROSTERS[8255888];
 
 export default function TeamDetailPage() {
   const { id } = useParams();
@@ -56,7 +59,22 @@ export default function TeamDetailPage() {
   }, [id]);
 
   const teamName = team?.name || profile?.name || `Time #${id}`;
-  const roster = TEAM_ROSTERS[id] || TEAM_ROSTERS[8255888];
+
+  // Elenco atual da OpenDota (pelo nome do time). A lista fixa só é usada se a
+  // OpenDota não tiver ao menos 3 membros atuais cadastrados para o time.
+  const [apiRoster, setApiRoster] = useState([]);
+  const hasResolvedName = Boolean(team?.name || profile?.name);
+  useEffect(() => {
+    if (!hasResolvedName) return;
+    let active = true;
+    setApiRoster([]);
+    fetchTeamRoster(teamName).then((list) => { if (active) setApiRoster(list); });
+    return () => { active = false; };
+  }, [teamName, hasResolvedName]);
+
+  const roster = apiRoster.length >= 3
+    ? apiRoster.map((p) => ({ ...p, roleName: 'Elenco atual (OpenDota)', country: '' }))
+    : (TEAM_ROSTERS[id] || []);
   const totalGames = ((team?.wins || profile?.wins || 0) + (team?.losses || profile?.losses || 0));
   const winrate = totalGames > 0 ? (((team?.wins || profile?.wins || 0) / totalGames) * 100).toFixed(1) : '68.5';
 
@@ -84,12 +102,7 @@ export default function TeamDetailPage() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/5 border border-white/10 p-3 flex items-center justify-center shadow-inner">
-              <img
-                src={getTeamLogo(teamName, team?.logo_url || profile?.logo_url)}
-                alt={teamName}
-                className="w-16 h-16 object-contain"
-                onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-              />
+              <TeamLogo teamName={teamName} logoUrl={team?.logo_url || profile?.logo_url} className="w-16 h-16" />
             </div>
 
             <div>
@@ -137,16 +150,20 @@ export default function TeamDetailPage() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {roster.length === 0 && (
+            <div className="col-span-full bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 text-center text-xs text-gray-500">
+              Elenco ainda não disponível para este time.
+            </div>
+          )}
           {roster.map((player, idx) => (
             <div
-              key={idx}
+              key={player.accountId || idx}
               className="bg-[#0C0E14] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-4 shadow-xl text-center transition-all group"
             >
-              <img
-                src={player.avatar}
-                alt={player.name}
-                className="w-16 h-16 rounded-2xl object-cover mx-auto mb-3 border border-white/10 group-hover:scale-105 transition-transform"
-                onError={(e) => { e.target.src = '/placeholder-player.png'; }}
+              <PlayerAvatar
+                accountId={player.accountId}
+                name={player.name}
+                className="w-16 h-16 rounded-2xl mx-auto mb-3 border border-white/10 group-hover:scale-105 transition-transform"
               />
               <h3 className="text-sm font-black text-white">{player.name}</h3>
               <span className="text-[11px] text-amber-400 font-bold block">{player.roleName}</span>

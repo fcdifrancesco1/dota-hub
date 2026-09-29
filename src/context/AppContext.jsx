@@ -5,7 +5,9 @@ import {
   fetchLiveGames,
   fetchUpcomingMatches,
   isSeriesMatch,
-  getCachedFast
+  getCachedFast,
+  normalizeUpcomingList,
+  UPCOMING_CACHE_KEY
 } from '../services/api';
 import { SITE_CONFIG } from '../config/siteConfig';
 
@@ -14,10 +16,10 @@ const AppContext = createContext(null);
 export function AppProvider({ children }) {
   // Stale-While-Revalidate initial state
   const cachedPro = getCachedFast('pro_matches_v8');
-  const cachedUpcoming = getCachedFast('upcoming_real_matches_v3');
+  const cachedUpcoming = normalizeUpcomingList(getCachedFast(UPCOMING_CACHE_KEY));
   const cachedConstants = getCachedFast('constants_v6');
 
-  const initialUpcoming = (cachedUpcoming || []).filter((m) => {
+  const initialUpcoming = cachedUpcoming.filter((m) => {
     if (m.isCompleted || m.winner) return false;
     const isFinished = (cachedPro?.finishedSeries || []).some((s) =>
       isSeriesMatch(m.timeA, m.timeB, s.timeA, s.timeB)
@@ -30,7 +32,7 @@ export function AppProvider({ children }) {
   const [tournamentsList, setTournamentsList] = useState(cachedPro?.tournaments || []);
   const [liveGames, setLiveGames] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState(initialUpcoming);
-  const [loading, setLoading] = useState(!cachedPro && !cachedUpcoming);
+  const [loading, setLoading] = useState(!cachedPro && cachedUpcoming.length === 0);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('');
 

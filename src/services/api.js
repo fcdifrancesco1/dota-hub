@@ -671,25 +671,59 @@ export async function fetchLiveGames() {
   return [];
 }
 
+export const UPCOMING_CACHE_KEY = "upcoming_real_matches_v4";
+
+const BRT_DATE_TIME = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: 'America/Sao_Paulo',
+  day: '2-digit',
+  month: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit'
+});
+
+/**
+ * Normaliza uma partida agendada vinda de /api/upcoming para o formato que os
+ * componentes usam: `timestamp` em SEGUNDOS (a API envia em ms), `tourneyName`
+ * e `startTime` já formatado no horário de Brasília. Idempotente.
+ */
+export function normalizeUpcomingMatch(m) {
+  if (!m) return m;
+  const rawTs = Number(m.timestamp) || 0;
+  const timestamp = rawTs > 1e11 ? Math.floor(rawTs / 1000) : rawTs || null;
+  return {
+    ...m,
+    timestamp,
+    tourneyName: m.tourneyName || m.torneio || 'Torneio',
+    formato: (m.formato || 'BO3').toUpperCase(),
+    startTime: timestamp ? `${BRT_DATE_TIME.format(new Date(timestamp * 1000)).replace(',', '')} BRT` : (m.startTime || null)
+  };
+}
+
+export function normalizeUpcomingList(list) {
+  return (Array.isArray(list) ? list : [])
+    .map(normalizeUpcomingMatch)
+    .sort((a, b) => (a.timestamp || Infinity) - (b.timestamp || Infinity));
+}
+
 // 7. Buscar Próximos Jogos Reais da Liquipedia (com timeout e cache de 3 min)
 export async function fetchUpcomingMatches() {
-  const cached = getCached("upcoming_real_matches_v3", 3 * 60 * 1000);
-  if (cached) return cached;
+  const cached = getCached(UPCOMING_CACHE_KEY, 3 * 60 * 1000);
+  if (cached) return normalizeUpcomingList(cached);
 
   try {
     const res = await fetchWithTimeout("/api/upcoming", {}, 5000);
     if (res.ok) {
       const data = await res.json();
-      const list = Array.isArray(data) ? data : [];
+      const list = normalizeUpcomingList(data);
       if (list.length > 0) {
-        setCache("upcoming_real_matches_v3", list);
+        setCache(UPCOMING_CACHE_KEY, list);
       }
       return list;
     }
   } catch (err) {
     console.warn("Aviso ao buscar upcoming (usando cache anterior):", err);
   }
-  return getCachedFast("upcoming_real_matches_v3") || [];
+  return normalizeUpcomingList(getCachedFast(UPCOMING_CACHE_KEY));
 }
 
 // 8. Buscar Telemetria em Tempo Real de Partida Ao Vivo (com matching robusto e telemetria oficial Valve)
@@ -1643,6 +1677,68 @@ export async function fetchLiquipediaTeamResults(teamName) {
 }
 
 // 10. Buscar Perfil do Time (por ID ou Nome)
+// Avatar e nome atuais de um jogador pela conta Steam (account_id) na OpenDota.
+// As URLs de avatar mudam quando o jogador troca a foto na Steam, por isso são
+// buscadas em tempo de execução em vez de ficarem fixas no código.
+const playerProfileRequests = new Map();
+
+export function fetchPlayerProfile(accountId) {
+  if (!accountId) return Promise.resolve(null);
+  const key = `player_profile_${accountId}`;
+  const cached = getCached(key, 24 * 3600 * 1000);
+  if (cached) return Promise.resolve(cached);
+
+  // Vários cards do mesmo jogador compartilham a mesma requisição
+  if (!playerProfileRequests.has(key)) {
+    const request = fetchWithTimeout(`${OPENDOTA_BASE}/players/${accountId}`, {}, 6000)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const p = data?.profile;
+        if (!p) return null;
+        const profile = {
+          accountId: p.account_id,
+          name: p.name || p.personaname || null,
+          avatar: p.avatarfull || p.avatarmedium || p.avatar || null
+        };
+        setCache(key, profile);
+        return profile;
+      })
+      .catch(() => null)
+      .finally(() => playerProfileRequests.delete(key));
+    playerProfileRequests.set(key, request);
+  }
+  return playerProfileRequests.get(key);
+}
+
+// Elenco atual de um time na OpenDota, localizado pelo NOME do time (os IDs
+// usados nos dados locais do site nem sempre batem com os IDs da OpenDota).
+export async function fetchTeamRoster(teamName) {
+  if (!teamName) return [];
+  const key = `team_roster_v1_${normalizeTeamKey(teamName) || teamName}`;
+  const cached = getCached(key, 12 * 3600 * 1000);
+  if (cached) return cached;
+
+  try {
+    const teamsRes = await fetchWithTimeout(`${OPENDOTA_BASE}/teams`, {}, 6000);
+    if (!teamsRes.ok) return [];
+    const team = resolveTeamFromList(teamName, await teamsRes.json());
+    if (!team?.team_id) return [];
+
+    const playersRes = await fetchWithTimeout(`${OPENDOTA_BASE}/teams/${team.team_id}/players`, {}, 6000);
+    if (!playersRes.ok) return [];
+    const roster = (await playersRes.json())
+      .filter((p) => p.is_current_team_member && p.account_id)
+      .sort((a, b) => (b.games_played || 0) - (a.games_played || 0))
+      .slice(0, 5)
+      .map((p) => ({ accountId: p.account_id, name: p.name || `Jogador ${p.account_id}` }));
+
+    setCache(key, roster);
+    return roster;
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchTeamProfile(teamId, teamName = "") {
   const cacheKey = `team_profile_v16_${teamId || 'name'}_${teamName || 'id'}`;
   const cached = getCached(cacheKey, 15 * 60 * 1000);

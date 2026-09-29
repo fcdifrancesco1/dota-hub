@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { fetchLeagueById } from '../services/supabase';
 import { useApp } from '../context/AppContext';
-import { getTeamLogo } from '../utils/teamLogos';
+import TeamLogo from '../utils/teamLogos';
 
 export default function TournamentDetailPage() {
   const { id } = useParams();
@@ -156,7 +156,7 @@ export default function TournamentDetailPage() {
                       {s.stage || 'Playoffs'}
                     </span>
                     <div className="flex items-center gap-2">
-                      <img src={getTeamLogo(tA)} alt={tA} className="w-6 h-6 object-contain" />
+                      <TeamLogo teamName={tA} className="w-6 h-6" />
                       <span className={`text-xs font-bold truncate ${isWinnerA ? 'text-amber-400 font-black' : 'text-white'}`}>
                         {tA}
                       </span>
@@ -172,7 +172,7 @@ export default function TournamentDetailPage() {
                       <span className={`text-xs font-bold truncate text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-white'}`}>
                         {tB}
                       </span>
-                      <img src={getTeamLogo(tB)} alt={tB} className="w-6 h-6 object-contain" />
+                      <TeamLogo teamName={tB} className="w-6 h-6" />
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 transition-colors hidden sm:block" />
                   </div>
@@ -203,7 +203,7 @@ export default function TournamentDetailPage() {
                 <tr className="hover:bg-white/5">
                   <td className="p-3 font-bold text-amber-400">1º</td>
                   <td className="p-3 font-bold text-white flex items-center gap-2">
-                    <img src={getTeamLogo('Team Falcons')} alt="Falcons" className="w-5 h-5 object-contain" />
+                    <TeamLogo teamName={'Team Falcons'} className="w-5 h-5" />
                     Team Falcons
                   </td>
                   <td className="p-3 text-center text-emerald-400 font-bold font-mono">5</td>
@@ -214,7 +214,7 @@ export default function TournamentDetailPage() {
                 <tr className="hover:bg-white/5">
                   <td className="p-3 font-bold text-amber-400">2º</td>
                   <td className="p-3 font-bold text-white flex items-center gap-2">
-                    <img src={getTeamLogo('Team Liquid')} alt="Liquid" className="w-5 h-5 object-contain" />
+                    <TeamLogo teamName={'Team Liquid'} className="w-5 h-5" />
                     Team Liquid
                   </td>
                   <td className="p-3 text-center text-emerald-400 font-bold font-mono">4</td>
@@ -225,7 +225,7 @@ export default function TournamentDetailPage() {
                 <tr className="hover:bg-white/5">
                   <td className="p-3 font-bold text-gray-400">3º</td>
                   <td className="p-3 font-bold text-white flex items-center gap-2">
-                    <img src={getTeamLogo('Gaimin Gladiators')} alt="GG" className="w-5 h-5 object-contain" />
+                    <TeamLogo teamName={'Gaimin Gladiators'} className="w-5 h-5" />
                     Gaimin Gladiators
                   </td>
                   <td className="p-3 text-center text-emerald-400 font-bold font-mono">3</td>
@@ -236,7 +236,7 @@ export default function TournamentDetailPage() {
                 <tr className="hover:bg-white/5">
                   <td className="p-3 font-bold text-gray-400">4º</td>
                   <td className="p-3 font-bold text-white flex items-center gap-2">
-                    <img src={getTeamLogo('Team Spirit')} alt="Spirit" className="w-5 h-5 object-contain" />
+                    <TeamLogo teamName={'Team Spirit'} className="w-5 h-5" />
                     Team Spirit
                   </td>
                   <td className="p-3 text-center text-emerald-400 font-bold font-mono">2</td>
@@ -267,14 +267,14 @@ export default function TournamentDetailPage() {
               <div className="bg-[#11141E] border border-white/10 rounded-xl p-3 shadow">
                 <div className="flex justify-between items-center text-xs font-bold text-white mb-1.5">
                   <div className="flex items-center gap-2">
-                    <img src={getTeamLogo('Team Falcons')} alt="Falcons" className="w-4 h-4 object-contain" />
+                    <TeamLogo teamName={'Team Falcons'} className="w-4 h-4" />
                     <span>Team Falcons</span>
                   </div>
                   <span className="text-emerald-400 font-mono font-black">2</span>
                 </div>
                 <div className="flex justify-between items-center text-xs font-bold text-gray-400">
                   <div className="flex items-center gap-2">
-                    <img src={getTeamLogo('Gaimin Gladiators')} alt="GG" className="w-4 h-4 object-contain" />
+                    <TeamLogo teamName={'Gaimin Gladiators'} className="w-4 h-4" />
                     <span>Gaimin Gladiators</span>
                   </div>
                   <span className="font-mono">0</span>
@@ -290,14 +290,14 @@ export default function TournamentDetailPage() {
               <div className="bg-[#11141E] border border-white/10 rounded-xl p-3 shadow">
                 <div className="flex justify-between items-center text-xs font-bold text-white mb-1.5">
                   <div className="flex items-center gap-2">
-                    <img src={getTeamLogo('Team Falcons')} alt="Falcons" className="w-4 h-4 object-contain" />
+                    <TeamLogo teamName={'Team Falcons'} className="w-4 h-4" />
                     <span>Team Falcons</span>
                   </div>
                   <span className="text-emerald-400 font-mono font-black">2</span>
                 </div>
                 <div className="flex justify-between items-center text-xs font-bold text-gray-400">
                   <div className="flex items-center gap-2">
-                    <img src={getTeamLogo('Team Liquid')} alt="Liquid" className="w-4 h-4 object-contain" />
+                    <TeamLogo teamName={'Team Liquid'} className="w-4 h-4" />
                     <span>Team Liquid</span>
                   </div>
                   <span className="font-mono">1</span>
@@ -313,14 +313,14 @@ export default function TournamentDetailPage() {
               <div className="bg-[#11141E] border border-amber-500/50 rounded-xl p-4 shadow-xl">
                 <div className="flex justify-between items-center text-xs font-black text-amber-400 mb-2">
                   <div className="flex items-center gap-2">
-                    <img src={getTeamLogo('Team Falcons')} alt="Falcons" className="w-5 h-5 object-contain" />
+                    <TeamLogo teamName={'Team Falcons'} className="w-5 h-5" />
                     <span>Team Falcons 🏆</span>
                   </div>
                   <span className="font-mono text-base">3</span>
                 </div>
                 <div className="flex justify-between items-center text-xs font-bold text-gray-300">
                   <div className="flex items-center gap-2">
-                    <img src={getTeamLogo('Team Liquid')} alt="Liquid" className="w-5 h-5 object-contain" />
+                    <TeamLogo teamName={'Team Liquid'} className="w-5 h-5" />
                     <span>Team Liquid</span>
                   </div>
                   <span className="font-mono text-base">2</span>

@@ -3,7 +3,7 @@ import { Trophy, Radio, ArrowRight, Clock, Flame, Calendar, Award } from 'lucide
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { SITE_CONFIG } from '../../config/siteConfig';
-import { getTeamLogo } from '../../utils/teamLogos';
+import TeamLogo from '../../utils/teamLogos';
 
 export default function HomeHero() {
   const { tournamentsList, upcomingMatches, liveGames, setSelectedLiveGame } = useApp();
@@ -19,16 +19,18 @@ export default function HomeHero() {
         logo_url: 'https://eslgaming.com/wp-content/uploads/2021/04/esl-logo-small.png'
       };
 
-  // Encontra a próxima partida mais próxima
-  const nextMatch = upcomingMatches && upcomingMatches.length > 0 ? upcomingMatches[0] : null;
+  // Próxima partida que ainda não começou (a lista já vem ordenada por horário)
+  const nowMs = Date.now();
+  const nextMatch = (upcomingMatches || []).find((m) => m.timestamp && m.timestamp * 1000 > nowMs)
+    || (upcomingMatches || [])[0]
+    || null;
 
   // Contagem regressiva dinâmica para a próxima partida
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
     if (!nextMatch || !nextMatch.timestamp) {
-      // Default placeholder timer de 2 horas se não houver timestamp
-      setTimeLeft({ hours: 2, minutes: 45, seconds: 12 });
+      setTimeLeft(null);
       return;
     }
 
@@ -115,9 +117,21 @@ export default function HomeHero() {
               <Clock className="w-3.5 h-3.5 text-amber-400" />
               <span>Próxima Grande Partida</span>
             </span>
-            <span className="text-amber-400 font-mono font-bold text-[11px] bg-amber-500/10 px-2 py-0.5 rounded">
-              MD3
-            </span>
+            {nextMatch && (
+              <span className="text-amber-400 font-mono font-bold text-[11px] bg-amber-500/10 px-2 py-0.5 rounded">
+                {nextMatch.formato || 'BO3'}
+              </span>
+            )}
+          </div>
+
+          {!nextMatch ? (
+            <div className="py-10 text-center text-xs text-gray-400">
+              Nenhuma partida profissional agendada no momento.
+            </div>
+          ) : (
+          <>
+          <div className="pt-3 text-center text-[11px] font-semibold text-amber-400/80 truncate">
+            {nextMatch.tourneyName}
           </div>
 
           {/* Confronto */}
@@ -125,15 +139,10 @@ export default function HomeHero() {
             {/* Time 1 */}
             <div className="flex flex-col items-center flex-1 text-center">
               <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
-                <img
-                  src={getTeamLogo(nextMatch?.timeA || 'Team Falcons')}
-                  alt={nextMatch?.timeA || 'Team 1'}
-                  className="w-10 h-10 object-contain"
-                  onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                />
+                <TeamLogo teamName={nextMatch.timeA} logoUrl={nextMatch.logoA} className="w-10 h-10" />
               </div>
               <span className="text-sm font-black text-white truncate max-w-[120px]">
-                {nextMatch?.timeA || 'Team Falcons'}
+                {nextMatch.timeA}
               </span>
             </div>
 
@@ -147,23 +156,24 @@ export default function HomeHero() {
             {/* Time 2 */}
             <div className="flex flex-col items-center flex-1 text-center">
               <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
-                <img
-                  src={getTeamLogo(nextMatch?.timeB || 'Team Liquid')}
-                  alt={nextMatch?.timeB || 'Team 2'}
-                  className="w-10 h-10 object-contain"
-                  onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                />
+                <TeamLogo teamName={nextMatch.timeB} logoUrl={nextMatch.logoB} className="w-10 h-10" />
               </div>
               <span className="text-sm font-black text-white truncate max-w-[120px]">
-                {nextMatch?.timeB || 'Team Liquid'}
+                {nextMatch.timeB}
               </span>
             </div>
           </div>
 
           {/* Relógio / Contagem Regressiva */}
           <div className="pt-3 border-t border-white/10">
+            {!timeLeft ? (
+              <div className="text-[11px] text-gray-400 text-center font-semibold py-2">Horário a definir</div>
+            ) : (timeLeft.hours + timeLeft.minutes + timeLeft.seconds) === 0 ? (
+              <div className="text-[11px] text-red-400 text-center font-black uppercase tracking-wider py-2">Em andamento / começando</div>
+            ) : (
+            <>
             <div className="text-[10px] text-gray-400 uppercase tracking-wider text-center mb-2 font-semibold">
-              Inicia em aproximadamente:
+              Inicia em ({nextMatch.startTime}):
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-[#121622] border border-[#212838] rounded-xl py-2">
@@ -185,7 +195,11 @@ export default function HomeHero() {
                 <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Segundos</span>
               </div>
             </div>
+            </>
+            )}
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>

@@ -162,15 +162,14 @@ ON CONFLICT (match_id, order_num) DO UPDATE SET hero_id = EXCLUDED.hero_id;
 -- 7. AGENDA MANUAL / PRÓXIMAS PARTIDAS (PRÓXIMAS 24H)
 INSERT INTO schedule (league_id, league_name, team1_id, team2_id, team1_name, team2_name, scheduled_time, series_type, stage, stream_url, stream_channel, status) VALUES
 (16890, 'ESL One Bangkok 2026', 8255888, 8599101, 'Team Falcons', 'Gaimin Gladiators', NOW() + INTERVAL '2 hours', 3, 'Playoffs - Semifinal', 'https://twitch.tv/esl_dota2', 'ESL Dota 2 Oficial', 'scheduled'),
-(16890, 'ESL One Bangkok 2026', 2163, 7119388, 'Team Liquid', 'Team Spirit', NOW() + INTERVAL '5 hours 30 minutes', 3, 'Playoffs - Lower Bracket', 'https://twitch.tv/esl_dota2br', 'BTSBrasilTV', 'scheduled'),
+(16890, 'ESL One Bangkok 2026', 2163, 7119388, 'Team Liquid', 'Team Spirit', NOW() + INTERVAL '5 hours 30 minutes', 3, 'Playoffs - Lower Bracket', 'https://twitch.tv/esl_dota2br', 'ESL Dota 2 Brasil', 'scheduled'),
 (16890, 'ESL One Bangkok 2026', 8254400, 9262100, 'BetBoom Team', 'PARIVISION', NOW() + INTERVAL '9 hours', 3, 'Playoffs - Lower Bracket', 'https://twitch.tv/esl_dota2', 'ESL Dota 2 Oficial', 'scheduled'),
-(16890, 'ESL One Bangkok 2026', 8291895, 8574561, 'Tundra Esports', 'Xtreme Gaming', NOW() + INTERVAL '14 hours', 3, 'Fase de Eliminação', 'https://twitch.tv/esl_dota2br', 'BTSBrasilTV', 'scheduled')
+(16890, 'ESL One Bangkok 2026', 8291895, 8574561, 'Tundra Esports', 'Xtreme Gaming', NOW() + INTERVAL '14 hours', 3, 'Fase de Eliminação', 'https://twitch.tv/esl_dota2br', 'ESL Dota 2 Brasil', 'scheduled')
 ON CONFLICT DO NOTHING;
 
 -- 8. STREAMS CADASTRADAS
 INSERT INTO streams (name, platform, channel_url, language, is_live, viewer_count) VALUES
 ('ESL Dota 2 Brasil', 'twitch', 'https://twitch.tv/esl_dota2br', 'pt-BR', true, 1420),
-('BTS Brasil TV', 'twitch', 'https://twitch.tv/btsbrasiltv', 'pt-BR', true, 890),
 ('ESL Dota 2 Official', 'twitch', 'https://twitch.tv/esl_dota2', 'en', true, 48500),
 ('Dota 2 Esports Canal Oficial', 'youtube', 'https://youtube.com/@dota2esports', 'en', false, 0)
 ON CONFLICT DO NOTHING;

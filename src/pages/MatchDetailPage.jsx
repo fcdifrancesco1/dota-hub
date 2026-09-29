@@ -13,7 +13,7 @@ import {
   Ban
 } from 'lucide-react';
 import { fetchMatchDetails, getHeroImg, getHeroName, getItemImg } from '../services/api';
-import { getTeamLogo } from '../utils/teamLogos';
+import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
 import { useApp } from '../context/AppContext';
 
@@ -70,12 +70,7 @@ export default function MatchDetailPage() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* RADIANT */}
           <div className="flex items-center gap-4 flex-1">
-            <img
-              src={getTeamLogo(match?.radiant_name || 'Radiant', match?.radiant_logo)}
-              alt="Radiant"
-              className="w-16 h-16 object-contain"
-              onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-            />
+            <TeamLogo teamName={match?.radiant_name || 'Radiant'} logoUrl={match?.radiant_logo} className="w-16 h-16" />
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">Radiante</span>
@@ -119,12 +114,7 @@ export default function MatchDetailPage() {
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-white">{match?.dire_name || 'Dire'}</h2>
             </div>
-            <img
-              src={getTeamLogo(match?.dire_name || 'Dire', match?.dire_logo)}
-              alt="Dire"
-              className="w-16 h-16 object-contain"
-              onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-            />
+            <TeamLogo teamName={match?.dire_name || 'Dire'} logoUrl={match?.dire_logo} className="w-16 h-16" />
           </div>
         </div>
       </div>

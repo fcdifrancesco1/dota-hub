@@ -2,7 +2,7 @@ import React from 'react';
 import { Trophy, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { getTeamLogo } from '../../utils/teamLogos';
+import TeamLogo from '../../utils/teamLogos';
 
 export default function RecentResultsHome() {
   const { finishedSeries, setSelectedSeries, loading } = useApp();
@@ -74,12 +74,7 @@ export default function RecentResultsHome() {
                   <div className="flex items-center justify-between gap-3">
                     {/* Time A */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <img
-                        src={getTeamLogo(teamAName, series.team1_logo || series.logoA)}
-                        alt={teamAName}
-                        className="w-5 h-5 object-contain"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={teamAName} logoUrl={series.team1_logo || series.logoA} className="w-5 h-5" />
                       <span className={`text-xs font-bold truncate ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-300'}`}>
                         {teamAName}
                       </span>
@@ -97,12 +92,7 @@ export default function RecentResultsHome() {
                       <span className={`text-xs font-bold truncate text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-300'}`}>
                         {teamBName}
                       </span>
-                      <img
-                        src={getTeamLogo(teamBName, series.team2_logo || series.logoB)}
-                        alt={teamBName}
-                        className="w-5 h-5 object-contain"
-                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                      />
+                      <TeamLogo teamName={teamBName} logoUrl={series.team2_logo || series.logoB} className="w-5 h-5" />
                     </div>
                   </div>
                 </div>

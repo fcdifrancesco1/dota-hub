@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Search, TrendingUp, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { fetchTeams } from '../services/supabase';
-import { getTeamLogo } from '../utils/teamLogos';
+import TeamLogo from '../utils/teamLogos';
 import { useApp } from '../context/AppContext';
 
 export default function TeamsPage() {
@@ -68,12 +68,7 @@ export default function TeamsPage() {
 
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 p-2 flex items-center justify-center">
-                  <img
-                    src={getTeamLogo(t.name, t.logo_url)}
-                    alt={t.name}
-                    className="w-10 h-10 object-contain"
-                    onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                  />
+                  <TeamLogo teamName={t.name} logoUrl={t.logo_url} className="w-10 h-10" />
                 </div>
                 <div>
                   <h3 className="text-base font-black text-white group-hover:text-amber-400 transition-colors">

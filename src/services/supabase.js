@@ -140,8 +140,8 @@ const LOCAL_SCHEDULE = [
     scheduled_time: new Date(Date.now() + 5.5 * 3600000).toISOString(),
     series_type: 3,
     stage: 'Lower Bracket Round 3',
-    stream_url: 'https://twitch.tv/btsbrasiltv',
-    stream_channel: 'BTS Brasil TV',
+    stream_url: 'https://twitch.tv/esl_dota2br',
+    stream_channel: 'ESL Dota 2 Brasil',
     status: 'scheduled'
   },
   {

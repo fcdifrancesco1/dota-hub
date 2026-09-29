@@ -28,27 +28,48 @@ export function parseLiquipediaMatches(html, options = {}) {
       const rightAndRest = scoreHolderSplit[1] || "";
       const rightPart = rightAndRest.split(/<div class="match-info-tournament"/)[0] || "";
 
+      const cleanTeamText = (s) => String(s || '')
+        .replace(/\(page does not exist\)/gi, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&#39;/g, "'")
+        .trim();
+
+      // Nome completo vem do title do link em <span class="name"> ("Team Spirit"),
+      // e o texto do link é a abreviação exibida pela Liquipedia ("TSpirit").
       const getTeam = (chunk) => {
-        const titleMatch = chunk.match(/class="team-template-image-icon[^"]*"[^>]*><a[^>]*title="([^"]+)"/);
-        const nameMatch = chunk.match(/<span class="name"[^>]*><a[^>]*>([^<]+)<\/a>/);
-        let parsedTitle = titleMatch ? titleMatch[1] : null;
-        if (parsedTitle && (parsedTitle.includes('/') || parsedTitle.includes('#'))) {
-          parsedTitle = null;
-        }
-        let t = (nameMatch ? nameMatch[1] : (parsedTitle ? parsedTitle : "TBD")).trim();
-        return t.replace(/\(page does not exist\)/gi, '').trim();
+        const nameMatch = chunk.match(/<span class="name"[^>]*><a[^>]*?title="([^"]+)"[^>]*>([^<]+)<\/a>/);
+        const plainNameMatch = chunk.match(/<span class="name"[^>]*>([^<]+)<\/span>/);
+        let full = nameMatch ? cleanTeamText(nameMatch[1]) : "";
+        const short = nameMatch ? cleanTeamText(nameMatch[2]) : cleanTeamText(plainNameMatch?.[1]);
+        if (!full || full.includes('/') || full.includes('#')) full = short;
+        return { name: full || "TBD", short: short || full || "TBD" };
       };
 
+      const absoluteUrl = (src) => (src.startsWith('http') ? src : `https://liquipedia.net${src}`);
+
+      // A Liquipedia envia duas versões do logo: "lightmode" (para fundo claro) e
+      // "darkmode" (para fundo escuro). O site é escuro, então preferimos darkmode;
+      // times com logo único usam "allmode". O logo genérico do Dota 2 é ignorado
+      // para que o componente mostre as iniciais do time.
       const getLogo = (chunk) => {
-        const imgMatch = chunk.match(/<img[^>]*src="([^"]+)"/);
-        if (imgMatch) {
-          return imgMatch[1].startsWith('http') ? imgMatch[1] : `https://liquipedia.net${imgMatch[1]}`;
-        }
-        return "";
+        const pickImg = (html) => {
+          const img = html.match(/<img[^>]*>/);
+          if (!img) return "";
+          const srcset2x = img[0].match(/srcset="[^"]*?,\s*([^\s"]+)\s+2x"/);
+          const src = img[0].match(/src="([^"]+)"/);
+          return srcset2x ? srcset2x[1] : (src ? src[1] : "");
+        };
+        const darkSpan = chunk.match(/team-template-darkmode"[\s\S]*?<\/span>/);
+        let src = darkSpan ? pickImg(darkSpan[0]) : "";
+        if (!src) src = pickImg(chunk);
+        if (!src || /Dota_2_default/i.test(src)) return "";
+        return absoluteUrl(src);
       };
 
-      const timeA = getTeam(leftPart);
-      const timeB = getTeam(rightPart);
+      const teamA = getTeam(leftPart);
+      const teamB = getTeam(rightPart);
+      const timeA = teamA.name;
+      const timeB = teamB.name;
       const logoA = getLogo(leftPart);
       const logoB = getLogo(rightPart);
 
@@ -103,6 +124,8 @@ export function parseLiquipediaMatches(html, options = {}) {
         matches.push({
           timeA,
           timeB,
+          shortA: teamA.short,
+          shortB: teamB.short,
           logoA,
           logoB,
           formato,

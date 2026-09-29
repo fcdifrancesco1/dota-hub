@@ -2,7 +2,7 @@ import React from 'react';
 import { Radio, ChevronRight, Zap, Shield, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { getTeamLogo } from '../../utils/teamLogos';
+import TeamLogo from '../../utils/teamLogos';
 
 export default function LiveTickerStrip() {
   const { liveGames, setSelectedLiveGame } = useApp();
@@ -81,12 +81,7 @@ export default function LiveTickerStrip() {
                 <div className="flex items-center justify-between gap-3">
                   {/* Radiant */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <img
-                      src={getTeamLogo(radName, game.radiant_logo)}
-                      alt={radName}
-                      className="w-6 h-6 object-contain rounded"
-                      onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                    />
+                    <TeamLogo teamName={radName} logoUrl={game.radiant_logo} className="w-6 h-6 rounded" />
                     <span className="text-xs font-bold text-emerald-400 truncate">{radName}</span>
                   </div>
 
@@ -100,12 +95,7 @@ export default function LiveTickerStrip() {
                   {/* Dire */}
                   <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
                     <span className="text-xs font-bold text-red-400 truncate text-right">{direName}</span>
-                    <img
-                      src={getTeamLogo(direName, game.dire_logo)}
-                      alt={direName}
-                      className="w-6 h-6 object-contain rounded"
-                      onError={(e) => { e.target.src = '/placeholder-team.png'; }}
-                    />
+                    <TeamLogo teamName={direName} logoUrl={game.dire_logo} className="w-6 h-6 rounded" />
                   </div>
                 </div>
 

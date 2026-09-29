@@ -53,7 +53,6 @@ export default function AdminPage() {
   // Streams (CRUD)
   const [streamsList, setStreamsList] = useState([
     { id: 1, name: 'ESL Dota 2 Brasil', channel: 'esl_dota2br', platform: 'Twitch', lang: 'pt-BR', active: true },
-    { id: 2, name: 'BTS Brasil TV', channel: 'btsbrasiltv', platform: 'Twitch', lang: 'pt-BR', active: true },
     { id: 3, name: 'ESL Dota 2 Official', channel: 'esl_dota2', platform: 'Twitch', lang: 'en', active: true }
   ]);
   const [newStreamName, setNewStreamName] = useState('');
