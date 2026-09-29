@@ -76,26 +76,11 @@ export default function PredictionsPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Rankings Mockados por Categoria
-  const leaderboardOverall = [
-    { rank: 1, name: 'DendiFanBR', points: 145, hits: 28, exactScores: 12, badge: 'Mestre do Major' },
-    { rank: 2, name: 'RoshanHunter', points: 132, hits: 25, exactScores: 10, badge: 'Oráculo' },
-    { rank: 3, name: 'MidOrFeed', points: 121, hits: 22, exactScores: 9, badge: 'Em Chamas' },
-    { rank: 4, name: 'CarryGod', points: 108, hits: 20, exactScores: 8, badge: 'Caçador de Zebras' },
-    { rank: 5, name: 'SupportLife', points: 95, hits: 18, exactScores: 6, badge: 'Iniciado' }
-  ];
-
-  const leaderboardTournament = [
-    { rank: 1, name: 'BangkokOracle', points: 65, hits: 14, exactScores: 7, badge: 'Mestre do Major' },
-    { rank: 2, name: 'DendiFanBR', points: 58, hits: 12, exactScores: 6, badge: 'Em Chamas' },
-    { rank: 3, name: 'AegisSeeker', points: 50, hits: 10, exactScores: 5, badge: 'Oráculo' }
-  ];
-
-  const leaderboardMonthly = [
-    { rank: 1, name: 'SeptemberKing', points: 92, hits: 19, exactScores: 8, badge: 'Em Chamas' },
-    { rank: 2, name: 'RoshanHunter', points: 85, hits: 17, exactScores: 7, badge: 'Oráculo' },
-    { rank: 3, name: 'DendiFanBR', points: 79, hits: 16, exactScores: 6, badge: 'Mestre do Major' }
-  ];
+  // Classificação zerada: ainda não há apuração de palpites (os nomes fictícios
+  // que existiam aqui foram removidos). Preencher com dados reais quando houver.
+  const leaderboardOverall = [];
+  const leaderboardTournament = [];
+  const leaderboardMonthly = [];
 
   const currentLeaderboard =
     rankingFilter === 'tournament'
@@ -327,6 +312,16 @@ export default function PredictionsPage() {
               </button>
             </div>
           </div>
+
+          {currentLeaderboard.length === 0 && (
+            <div className="py-12 text-center">
+              <Trophy className="w-10 h-10 text-gray-500 mx-auto mb-3" />
+              <p className="text-sm font-bold text-white">Nenhum participante pontuado ainda</p>
+              <p className="text-xs text-gray-400 mt-1">
+                A classificação aparece aqui conforme os palpites forem sendo apurados.
+              </p>
+            </div>
+          )}
 
           <div className="divide-y divide-white/5">
             {currentLeaderboard.map((item) => (
