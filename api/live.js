@@ -130,6 +130,43 @@ function resolveVerifiedTeamLogo(teamName, teamId, explicitUrl) {
   return '';
 }
 
+// Ligas profissionais segundo a OpenDota (tier "premium" ou "professional").
+// Usado para nunca exibir partidas amadoras ou públicas no site. A lista
+// completa tem ~1 MB, então guardamos só os IDs em memória por 6 horas.
+const PRO_LEAGUE_TIERS = new Set(['premium', 'professional']);
+let proLeagueCache = { ids: null, expiresAt: 0 };
+// Nome oficial de cada liga profissional (leagueid -> nome), da mesma lista
+const LEAGUE_NAMES = new Map();
+
+async function getProLeagueIds() {
+  if (proLeagueCache.ids && Date.now() < proLeagueCache.expiresAt) return proLeagueCache.ids;
+  try {
+    const res = await fetch("https://api.opendota.com/api/leagues", {
+      headers: { "Accept": "application/json" },
+      signal: AbortSignal.timeout(6000)
+    });
+    if (res.ok) {
+      const leagues = await res.json();
+      const pro = (Array.isArray(leagues) ? leagues : []).filter(l => PRO_LEAGUE_TIERS.has(l.tier));
+      const ids = new Set(pro.map(l => Number(l.leagueid)));
+      for (const l of pro) if (l.name) LEAGUE_NAMES.set(Number(l.leagueid), l.name);
+      if (ids.size > 0) proLeagueCache = { ids, expiresAt: Date.now() + 6 * 3600 * 1000 };
+    }
+  } catch (err) {
+    console.warn("[Ligas] Falha ao carregar tiers da OpenDota:", err.message);
+  }
+  return proLeagueCache.ids; // pode ser a lista anterior (expirada) ou null
+}
+
+// Partida profissional: liga premium/professional. Se a lista de ligas estiver
+// indisponível, exige ao menos liga e os dois times cadastrados.
+function isProGame(leagueId, radiantName, direName, proLeagueIds) {
+  const id = Number(leagueId);
+  if (!id) return false;
+  if (proLeagueIds) return proLeagueIds.has(id);
+  return Boolean(radiantName && direName);
+}
+
 // Lê chave de ambiente ou arquivo local (.env.local / .env)
 function getSteamApiKey(req) {
   if (req?.query?.key) return String(req.query.key).trim();
@@ -199,9 +236,12 @@ function normalizeValveLiveGame(g) {
     ];
     const items = rawItems.filter(v => v !== undefined && v !== null && v !== 0 && v !== "");
 
+    // No scoreboard da Valve o player_slot vai de 1 a 5 em CADA time; normalizamos
+    // para o padrão da OpenDota (0-4 Radiant, 128-132 Dire), usado para separar os times
     return {
-      slot: p.player_slot ?? (isRad ? idx : idx + 5),
-      player_slot: p.player_slot ?? (isRad ? idx : idx + 128),
+      slot: isRad ? idx : idx + 5,
+      team_slot: idx + 1,
+      player_slot: isRad ? idx : idx + 128,
       name: playerName,
       account_id: p.account_id,
       hero_id: p.hero_id,
@@ -258,7 +298,7 @@ function normalizeValveLiveGame(g) {
   // Draft somente quando a Valve envia os picks/bans (sem ordem inventada)
   const picks_bans = rawPicksBans;
 
-  const leagueName = g.league_id ? (KNOWN_LEAGUES[g.league_id] || g.stage_name || g.league_name || `Torneio (Liga ${g.league_id})`) : "Torneio Dota 2";
+  const leagueName = g.league_id ? (KNOWN_LEAGUES[g.league_id] || LEAGUE_NAMES.get(Number(g.league_id)) || g.stage_name || g.league_name || `Torneio (Liga ${g.league_id})`) : "Torneio Dota 2";
   const formatStr = g.series_type === 1 ? "BO3" : g.series_type === 2 ? "BO5" : (g.formato || "BO3");
 
   const radTeamName = g.radiant_team?.team_name || g.timeA || "Radiant";
@@ -500,7 +540,7 @@ function normalizeOpenDotaLive(g) {
   // O feed do Coordinator não informa bans nem a ordem do draft
   const picks_bans = [];
 
-  const leagueName = g.league_id ? (KNOWN_LEAGUES[g.league_id] || `Torneio (Liga ${g.league_id})`) : "Torneio Dota 2";
+  const leagueName = g.league_id ? (KNOWN_LEAGUES[g.league_id] || LEAGUE_NAMES.get(Number(g.league_id)) || `Torneio (Liga ${g.league_id})`) : "Torneio Dota 2";
   const formatStr = g.series_type === 2 ? "BO5" : "BO3";
 
   const radLogo = resolveVerifiedTeamLogo(radTeamName, g.team_id_radiant, g.team_logo_radiant);
@@ -751,6 +791,7 @@ export default async function handler(req, res) {
 
     let games = [];
     let source = "none";
+    const proLeagueIds = await getProLeagueIds();
 
     // 1. Consulta prioritária: Valve Steam Web API Oficial (GetLiveLeagueGames) se houver chave
     if (key) {
@@ -768,7 +809,9 @@ export default async function handler(req, res) {
           const steamData = await steamRes.json();
           const rawGames = steamData?.result?.games || [];
           if (rawGames.length > 0) {
-            const normalized = rawGames.map(normalizeValveLiveGame).filter(Boolean);
+            // Só ligas profissionais (a Steam também lista ligas amadoras)
+            const proGames = rawGames.filter(g => isProGame(g.league_id, g.radiant_team?.team_name, g.dire_team?.team_name, proLeagueIds));
+            const normalized = proGames.map(normalizeValveLiveGame).filter(Boolean);
             games = filterAndDeduplicateLiveGames(normalized);
             source = "steam_valve_official";
           }
@@ -792,7 +835,10 @@ export default async function handler(req, res) {
 
           // Se solicitou match_id específico
           if (matchId) {
-            const specific = rawList.find(g => String(g.match_id) === String(matchId));
+            const specific = rawList.find(g =>
+              String(g.match_id) === String(matchId) &&
+              isProGame(g.league_id, g.team_name_radiant, g.team_name_dire, proLeagueIds)
+            );
             if (specific) {
               const liveGame = normalizeOpenDotaLive(specific);
 
@@ -836,30 +882,15 @@ export default async function handler(req, res) {
               } catch (_) {}
             }
           } else {
-            // Filtra primeiro os jogos de torneios / ligas / times profissionais
+            // Somente partidas de ligas profissionais (nunca partidas públicas ou amadoras)
             const tournamentMatches = rawList.filter(g =>
-              (g.league_id > 0) ||
-              (g.team_name_radiant && g.team_name_dire) ||
-              (g.lobby_type === 1)
+              isProGame(g.league_id, g.team_name_radiant, g.team_name_dire, proLeagueIds)
             );
 
             if (tournamentMatches.length > 0) {
               const normalized = tournamentMatches.map(normalizeOpenDotaLive).filter(Boolean);
               games = filterAndDeduplicateLiveGames(normalized);
               source = "dota_coordinator_tournaments";
-            }
-
-            if (!games.length) {
-              // Se nenhum torneio estiver em andamento neste instante exato, exibe os jogos ao vivo mais assistidos
-              const nowSec = Math.floor(Date.now() / 1000);
-              const topWatched = [...rawList]
-                .filter(g => (!g.deactivate_time || g.deactivate_time >= nowSec) && (g.spectators > 20 || g.average_mmr > 7000) && g.game_time > 0)
-                .sort((a, b) => (b.spectators || 0) - (a.spectators || 0))
-                .slice(0, 4);
-
-              const normalized = topWatched.map(normalizeOpenDotaLive).filter(Boolean);
-              games = filterAndDeduplicateLiveGames(normalized);
-              source = "dota_coordinator_top_live";
             }
           }
         }

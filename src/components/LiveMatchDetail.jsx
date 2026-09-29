@@ -276,10 +276,18 @@ export default function LiveMatchDetail({
     const phase2 = sortedDraft.filter((d) => d.phase === 2 || (d.order && d.order > 11 && d.order <= 19));
     const phase3 = sortedDraft.filter((d) => d.phase === 3 || (d.order && d.order > 19));
 
-    const phases = [
+    // A Steam Web API envia picks e bans por time, sem a ordem do draft; nesse
+    // caso agrupamos por tipo em vez de inventar a sequência das fases.
+    const hasOrder = picksBans.some((d) => d.order || d.phase);
+    const byTeam = (a, b) => (a.team || 0) - (b.team || 0);
+
+    const phases = hasOrder ? [
       { num: 1, title: 'Fase 1: Abertura', subtitle: '7 Bans · 4 Picks', items: phase1 },
       { num: 2, title: 'Fase 2: Mid Draft', subtitle: '4 Bans · 4 Picks', items: phase2 },
       { num: 3, title: 'Fase 3: Decisão & Last Pick', subtitle: '3 Bans · 2 Picks', items: phase3 }
+    ] : [
+      { num: 1, title: 'Picks', subtitle: 'ordem do draft não informada pela Valve', items: picksBans.filter((d) => d.is_pick).sort(byTeam) },
+      { num: 2, title: 'Bans', subtitle: '', items: picksBans.filter((d) => !d.is_pick).sort(byTeam) }
     ];
 
     const renderDraftItem = (item, idx) => {
@@ -305,10 +313,10 @@ export default function LiveMatchDetail({
                 : 'bg-rose-950/30 border-rose-500/40 hover:border-rose-400 hover:scale-105 shadow-sm shadow-rose-500/10'
               : 'bg-surface border-white/10 hover:border-rose-500/40 hover:scale-105 opacity-80 hover:opacity-100'
           }`}
-          title={`${orderNum}. ${isPick ? 'PICK' : 'BAN'}: ${hName} (${teamName})`}
+          title={`${hasOrder ? `${orderNum}. ` : ''}${isPick ? 'PICK' : 'BAN'}: ${hName} (${teamName})`}
         >
           <div className="flex items-center justify-between w-full gap-1 mb-1 px-0.5">
-            <span className="text-[8px] font-mono font-black text-gray-400">#{orderNum}</span>
+            <span className="text-[8px] font-mono font-black text-gray-400">{hasOrder ? `#${orderNum}` : ''}</span>
             <span
               className={`text-[8px] font-mono font-black px-1 rounded uppercase ${
                 isPick
