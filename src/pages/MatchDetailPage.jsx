@@ -243,37 +243,64 @@ export default function MatchDetailPage() {
   );
 }
 
+/**
+ * A série terminou? Pelo formato (MD1/MD3/MD5) quando conhecido. Uma série
+ * incompleta só é considerada em andamento se o último mapa foi há menos de
+ * 6h (séries antigas com dados incompletos continuam como finalizadas).
+ */
+function seriesStatus(series) {
+  const a = series.scoreA || 0;
+  const b = series.scoreB || 0;
+  const fmt = String(series.formato || '').toUpperCase();
+  const needed = { BO1: 1, BO3: 2, BO5: 3 }[fmt];
+  let complete;
+  if (fmt === 'BO2') complete = a + b >= 2;
+  else if (needed) complete = Math.max(a, b) >= needed;
+  else complete = true;
+  const last = series.lastMatchTime || series.startTime || 0;
+  const recent = last && (Date.now() / 1000 - last) < 6 * 3600;
+  return complete || !recent ? 'finished' : 'ongoing';
+}
+
 function SeriesHeader({ series, currentMap, onOpenTeam }) {
-  const aWon = series.scoreA > series.scoreB;
-  const bWon = series.scoreB > series.scoreA;
+  const finished = seriesStatus(series) === 'finished';
+  const aWon = finished && series.scoreA > series.scoreB;
+  const bWon = finished && series.scoreB > series.scoreA;
+  const aAhead = series.scoreA > series.scoreB;
+  const bAhead = series.scoreB > series.scoreA;
   const when = series.startTime || currentMap?.start_time;
   const dateLabel = when
     ? new Date(when * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' })
     : series.dateStr;
 
-  const team = (name, teamId, won, align) => (
+  // Celular: logo em cima e nome embaixo (até 2 linhas). Telas maiores: lado a lado.
+  const team = (name, teamId, won, ahead, align) => (
     <button
       type="button"
       onClick={() => onOpenTeam(teamId, name)}
-      className={`flex-1 min-w-0 flex items-center gap-3 sm:gap-4 group ${align === 'right' ? 'flex-row-reverse text-right' : 'text-left'}`}
+      className={`flex-1 basis-0 min-w-0 flex flex-col items-center text-center gap-2 sm:gap-4 group ${
+        align === 'right' ? 'sm:flex-row-reverse sm:text-right' : 'sm:flex-row sm:text-left'
+      }`}
       title={`Ver perfil de ${name}`}
     >
       <TeamLogo teamName={name} teamId={teamId} className="w-12 h-12 sm:w-16 sm:h-16 shrink-0" />
-      <div className="min-w-0">
+      <div className="min-w-0 w-full sm:w-auto">
+        <h1 className={`text-sm sm:text-2xl font-black leading-tight break-words line-clamp-2 group-hover:text-amber-400 transition-colors ${
+          won || (!finished && ahead) ? 'text-white' : 'text-gray-400'
+        }`}>
+          {name}
+        </h1>
         {won && (
-          <span className="inline-block mb-1 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-[10px] font-black uppercase border border-emerald-500/30">
+          <span className="inline-block mt-1 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-[10px] font-black uppercase border border-emerald-500/30">
             Vencedor
           </span>
         )}
-        <h1 className={`text-lg sm:text-2xl font-black truncate group-hover:text-amber-400 transition-colors ${won ? 'text-white' : 'text-gray-400'}`}>
-          {name}
-        </h1>
       </div>
     </button>
   );
 
   return (
-    <section className="rounded-2xl bg-surface border border-line p-5 sm:p-7 shadow-xl">
+    <section className="rounded-2xl bg-surface border border-line p-4 sm:p-7 shadow-xl">
       <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
         <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
           {series.stage || 'Torneio Profissional'}
@@ -288,19 +315,25 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
             {dateLabel}
           </span>
         )}
-        <span className="text-[11px] font-black uppercase text-gray-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full">
-          Finalizado
-        </span>
+        {finished ? (
+          <span className="text-[11px] font-black uppercase text-gray-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full">
+            Finalizado
+          </span>
+        ) : (
+          <span className="text-[11px] font-black uppercase text-red-400 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-full">
+            Em andamento
+          </span>
+        )}
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-8">
-        {team(series.timeA, series.preferredIdA, aWon, 'left')}
-        <div className="shrink-0 px-4 sm:px-6 py-2 rounded-2xl bg-surface-2 border border-line font-mono text-2xl sm:text-4xl font-black">
-          <span className={aWon ? 'text-amber-400' : 'text-gray-400'}>{series.scoreA}</span>
-          <span className="text-gray-500 mx-2">:</span>
-          <span className={bWon ? 'text-amber-400' : 'text-gray-400'}>{series.scoreB}</span>
+      <div className="flex items-center gap-2 sm:gap-8">
+        {team(series.timeA, series.preferredIdA, aWon, aAhead, 'left')}
+        <div className="shrink-0 px-3 sm:px-6 py-2 rounded-2xl bg-surface-2 border border-line font-mono text-2xl sm:text-4xl font-black whitespace-nowrap">
+          <span className={aAhead ? 'text-amber-400' : 'text-gray-400'}>{series.scoreA}</span>
+          <span className="text-gray-500 mx-1.5 sm:mx-2">:</span>
+          <span className={bAhead ? 'text-amber-400' : 'text-gray-400'}>{series.scoreB}</span>
         </div>
-        {team(series.timeB, series.preferredIdB, bWon, 'right')}
+        {team(series.timeB, series.preferredIdB, bWon, bAhead, 'right')}
       </div>
     </section>
   );
