@@ -1,27 +1,83 @@
-import React, { useState } from 'react';
-import { Award, Trophy, Flame, CheckCircle, Shield, Sparkles, Lock, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Award,
+  Trophy,
+  Flame,
+  CheckCircle2,
+  Shield,
+  Sparkles,
+  Lock,
+  Star,
+  Clock,
+  ChevronRight,
+  TrendingUp,
+  AlertCircle
+} from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { SITE_CONFIG } from '../config/siteConfig';
 import { getTeamLogo } from '../utils/teamLogos';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 export default function PredictionsPage() {
   const { upcomingMatches } = useApp();
-  const { user, isConfigured } = useAuth();
+  const { user } = useAuth();
 
-  // Armazena palpites locais
-  const [predictions, setPredictions] = useState({});
+  // Armazena palpites (persistência local e Supabase)
+  const [predictions, setPredictions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dotahub_user_predictions');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
   const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'leaderboard' | 'badges'
+  const [rankingFilter, setRankingFilter] = useState('overall'); // 'overall' | 'tournament' | 'monthly'
+  const [toastMessage, setToastMessage] = useState(null);
 
-  const handlePredict = (matchId, teamChosen, score = '2-1') => {
-    setPredictions(prev => ({
+  useEffect(() => {
+    try {
+      localStorage.setItem('dotahub_user_predictions', JSON.stringify(predictions));
+    } catch (e) {}
+  }, [predictions]);
+
+  const handlePredict = async (matchId, teamChosen, score = '2-1') => {
+    const newPred = {
+      teamChosen,
+      score,
+      timestamp: Date.now(),
+      status: 'pending'
+    };
+
+    setPredictions((prev) => ({
       ...prev,
-      [matchId]: { teamChosen, score, savedAt: new Date().toISOString() }
+      [matchId]: newPred
     }));
+
+    // Se o Supabase estiver configurado e o usuário logado, salva na nuvem
+    if (isSupabaseConfigured && user) {
+      try {
+        await supabase.from('predictions').upsert({
+          user_id: user.id,
+          schedule_id: Number(matchId) || null,
+          predicted_winner_team_id: null,
+          predicted_team1_score: parseInt(score.split('-')[0], 10),
+          predicted_team2_score: parseInt(score.split('-')[1], 10),
+          status: 'pending'
+        });
+      } catch (err) {
+        console.warn('Erro ao salvar palpite no Supabase:', err);
+      }
+    }
+
+    setToastMessage(`Palpite registrado: ${teamChosen} (${score})!`);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Mock Ranking Leaderboard
-  const leaderboard = [
+  // Rankings Mockados por Categoria
+  const leaderboardOverall = [
     { rank: 1, name: 'DendiFanBR', points: 145, hits: 28, exactScores: 12, badge: 'Mestre do Major' },
     { rank: 2, name: 'RoshanHunter', points: 132, hits: 25, exactScores: 10, badge: 'Oráculo' },
     { rank: 3, name: 'MidOrFeed', points: 121, hits: 22, exactScores: 9, badge: 'Em Chamas' },
@@ -29,18 +85,46 @@ export default function PredictionsPage() {
     { rank: 5, name: 'SupportLife', points: 95, hits: 18, exactScores: 6, badge: 'Iniciado' }
   ];
 
-  // Conquistas / Badges
+  const leaderboardTournament = [
+    { rank: 1, name: 'BangkokOracle', points: 65, hits: 14, exactScores: 7, badge: 'Mestre do Major' },
+    { rank: 2, name: 'DendiFanBR', points: 58, hits: 12, exactScores: 6, badge: 'Em Chamas' },
+    { rank: 3, name: 'AegisSeeker', points: 50, hits: 10, exactScores: 5, badge: 'Oráculo' }
+  ];
+
+  const leaderboardMonthly = [
+    { rank: 1, name: 'SeptemberKing', points: 92, hits: 19, exactScores: 8, badge: 'Em Chamas' },
+    { rank: 2, name: 'RoshanHunter', points: 85, hits: 17, exactScores: 7, badge: 'Oráculo' },
+    { rank: 3, name: 'DendiFanBR', points: 79, hits: 16, exactScores: 6, badge: 'Mestre do Major' }
+  ];
+
+  const currentLeaderboard =
+    rankingFilter === 'tournament'
+      ? leaderboardTournament
+      : rankingFilter === 'monthly'
+      ? leaderboardMonthly
+      : leaderboardOverall;
+
+  // Conquistas e Badges
   const badges = [
     { title: 'Iniciado em Roshan', desc: 'Fez o primeiro palpite em uma partida oficial', icon: Shield, unlocked: true },
     { title: 'Em Chamas', desc: 'Acertou o vencedor de 3 partidas seguidas', icon: Flame, unlocked: true },
-    { title: 'Visão do Oráculo', desc: 'Acertou o placar exato de uma série MD3 ou MD5', icon: Sparkles, unlocked: false },
+    { title: 'Visão do Oráculo', desc: 'Acertou o placar exato de uma série MD3 ou MD5', icon: Sparkles, unlocked: Object.keys(predictions).length > 0 },
     { title: 'Caçador de Zebras', desc: 'Acertou a vitória de um azarão com menos de 30% dos votos', icon: Star, unlocked: false },
     { title: 'Mestre do Major', desc: 'Palpitou em todos os confrontos dos playoffs', icon: Trophy, unlocked: false }
   ];
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
-      {/* Header */}
+      
+      {/* TOAST DE FEEDBACK */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-950 border border-emerald-500 text-emerald-200 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce text-xs font-bold">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* HEADER DA PÁGINA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#212838]">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
@@ -48,17 +132,17 @@ export default function PredictionsPage() {
             <span>Bolão de Palpites & Conquistas</span>
           </h1>
           <p className="text-gray-400 text-xs sm:text-sm mt-1">
-            Palpite nos vencedores das séries antes do início. Vencedor = {SITE_CONFIG.predictionPoints.correctWinner} pts • Placar Exato = {SITE_CONFIG.predictionPoints.exactScore} pts.
+            Palpite nos vencedores e placares exatos antes do início dos jogos para subir no ranking e desbloquear medalhas.
           </p>
         </div>
 
-        {/* Abas */}
+        {/* ABAS */}
         <div className="flex bg-[#11141E] p-1 rounded-xl border border-[#212838]">
           {[
             { id: 'matches', label: 'Próximos Jogos', icon: Trophy },
-            { id: 'leaderboard', label: 'Ranking do Bolão', icon: Award },
-            { id: 'badges', label: 'Conquistas & Badges', icon: Sparkles }
-          ].map(tab => (
+            { id: 'leaderboard', label: 'Tabela de Classificação', icon: Award },
+            { id: 'badges', label: 'Medalhas & Badges', icon: Sparkles }
+          ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -72,82 +156,190 @@ export default function PredictionsPage() {
         </div>
       </div>
 
-      {/* Conteúdo Aba: Próximos Jogos para Palpite */}
+      {/* REGRAS DE PONTUAÇÃO (CENTRALIZADAS NO ARQUIVO DE CONFIGURAÇÃO) */}
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm">
+            +{SITE_CONFIG.predictionPoints.correctWinner} pts
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-white uppercase">Acerto de Vencedor</h4>
+            <span className="text-[11px] text-gray-400">Palpitar o time vencedor da série</span>
+          </div>
+        </div>
+
+        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 font-black text-sm">
+            +{SITE_CONFIG.predictionPoints.exactScore} pts
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-white uppercase">Placar Exato</h4>
+            <span className="text-[11px] text-gray-400">Acertar os mapas (ex: 2x0 ou 2x1)</span>
+          </div>
+        </div>
+
+        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400 font-black text-sm">
+            +{SITE_CONFIG.predictionPoints.upsetBonus} pts
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-white uppercase">Bônus de Zebra</h4>
+            <span className="text-[11px] text-gray-400">Apostar no azarão com menos de 30%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ABA 1: PRÓXIMOS JOGOS PARA PALPITAR */}
       {activeTab === 'matches' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {(upcomingMatches || []).slice(0, 9).map((m, idx) => {
-            const pred = predictions[m.id || idx];
+            const matchKey = m.id || `match_${idx}`;
+            const pred = predictions[matchKey];
+
             return (
               <div
-                key={m.id || idx}
-                className="bg-[#0C0E14] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-5 shadow-xl transition-all"
+                key={matchKey}
+                className="bg-[#0C0E14] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-5 shadow-xl transition-all flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between text-[11px] text-gray-400 pb-3 border-b border-white/5 mb-4">
-                  <span className="font-bold text-amber-400 truncate max-w-[200px]">{m.tourneyName || 'Torneio'}</span>
-                  <span className="font-mono text-gray-400 font-bold bg-white/5 px-2 py-0.5 rounded">
-                    {m.startTime || 'Em breve'}
+                <div>
+                  <div className="flex items-center justify-between text-[11px] text-gray-400 pb-3 border-b border-white/5 mb-4">
+                    <span className="font-bold text-amber-400 truncate max-w-[200px]">
+                      {m.tourneyName || 'Torneio Oficial'}
+                    </span>
+                    <span className="font-mono text-gray-400 font-bold bg-white/5 px-2 py-0.5 rounded">
+                      {m.startTime || 'Em breve'}
+                    </span>
+                  </div>
+
+                  {/* ESCOLHA DO VENCEDOR */}
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    {/* TIME A */}
+                    <button
+                      onClick={() => handlePredict(matchKey, m.timeA, '2-1')}
+                      className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
+                        pred?.teamChosen === m.timeA
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
+                          : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
+                      }`}
+                    >
+                      <img
+                        src={getTeamLogo(m.timeA)}
+                        alt={m.timeA}
+                        className="w-10 h-10 object-contain mb-2"
+                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
+                      />
+                      <span className="text-xs font-bold truncate max-w-[110px]">{m.timeA}</span>
+                      <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
+                    </button>
+
+                    <span className="text-xs font-black text-gray-500 uppercase">VS</span>
+
+                    {/* TIME B */}
+                    <button
+                      onClick={() => handlePredict(matchKey, m.timeB, '1-2')}
+                      className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
+                        pred?.teamChosen === m.timeB
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
+                          : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
+                      }`}
+                    >
+                      <img
+                        src={getTeamLogo(m.timeB)}
+                        alt={m.timeB}
+                        className="w-10 h-10 object-contain mb-2"
+                        onError={(e) => { e.target.src = '/placeholder-team.png'; }}
+                      />
+                      <span className="text-xs font-bold truncate max-w-[110px]">{m.timeB}</span>
+                      <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
+                    </button>
+                  </div>
+
+                  {/* SELETOR DE PLACAR EXATO (MD3) */}
+                  {pred && (
+                    <div className="mb-3 pt-2 border-t border-white/5">
+                      <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1.5 text-center">
+                        Escolha o Placar Exato da Série (MD3):
+                      </span>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {['2-0', '2-1', '1-2', '0-2'].map((sc) => (
+                          <button
+                            key={sc}
+                            onClick={() => handlePredict(matchKey, pred.teamChosen, sc)}
+                            className={`py-1 rounded-lg text-xs font-mono font-bold transition-all ${
+                              pred.score === sc
+                                ? 'bg-amber-500 text-black font-black'
+                                : 'bg-[#11141E] border border-white/10 text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            {sc}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* STATUS DO PALPITE */}
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+                  {pred ? (
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Palpite: {pred.teamChosen} ({pred.score})</span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500 text-[11px]">Selecione um dos times para votar</span>
+                  )}
+                  <span className="text-gray-500 font-mono text-[10px] flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    <span>Trava no Início</span>
                   </span>
                 </div>
-
-                <div className="flex items-center justify-between gap-4 mb-5">
-                  <button
-                    onClick={() => handlePredict(m.id || idx, m.timeA, '2-1')}
-                    className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
-                      pred?.teamChosen === m.timeA
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
-                        : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
-                    }`}
-                  >
-                    <img src={getTeamLogo(m.timeA)} alt={m.timeA} className="w-10 h-10 object-contain mb-2" />
-                    <span className="text-xs font-bold truncate max-w-[100px]">{m.timeA}</span>
-                    <span className="text-[10px] text-gray-500 mt-1">Palpitar Vitória</span>
-                  </button>
-
-                  <span className="text-xs font-black text-gray-500 uppercase">VS</span>
-
-                  <button
-                    onClick={() => handlePredict(m.id || idx, m.timeB, '1-2')}
-                    className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
-                      pred?.teamChosen === m.timeB
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
-                        : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
-                    }`}
-                  >
-                    <img src={getTeamLogo(m.timeB)} alt={m.timeB} className="w-10 h-10 object-contain mb-2" />
-                    <span className="text-xs font-bold truncate max-w-[100px]">{m.timeB}</span>
-                    <span className="text-[10px] text-gray-500 mt-1">Palpitar Vitória</span>
-                  </button>
-                </div>
-
-                {pred ? (
-                  <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs text-emerald-400 font-bold">
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Palpite registrado: {pred.teamChosen}</span>
-                    </span>
-                    <span className="text-gray-400 font-mono text-[10px]">Bloqueia no início</span>
-                  </div>
-                ) : (
-                  <div className="pt-3 border-t border-white/5 text-[11px] text-gray-500 text-center">
-                    Clique em um dos times para palpitar
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Conteúdo Aba: Ranking */}
+      {/* ABA 2: RANKING E CLASSIFICAÇÃO */}
       {activeTab === 'leaderboard' && (
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl max-w-4xl mx-auto">
-          <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <span>Classificação Geral do Bolão</span>
-          </h3>
+        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+            <h3 className="text-base font-black uppercase text-white flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-400" />
+              <span>Quadro de Líderes do Bolão</span>
+            </h3>
+
+            {/* SELETOR DE RANKING (GERAL / CAMPEONATO / MENSAL) */}
+            <div className="flex bg-[#11141E] p-1 rounded-xl border border-white/10">
+              <button
+                onClick={() => setRankingFilter('overall')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  rankingFilter === 'overall' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Geral
+              </button>
+              <button
+                onClick={() => setRankingFilter('tournament')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  rankingFilter === 'tournament' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Por Campeonato
+              </button>
+              <button
+                onClick={() => setRankingFilter('monthly')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  rankingFilter === 'monthly' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Mensal
+              </button>
+            </div>
+          </div>
 
           <div className="divide-y divide-white/5">
-            {leaderboard.map((item) => (
+            {currentLeaderboard.map((item) => (
               <div key={item.rank} className="py-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <span className={`w-8 h-8 rounded-xl font-mono font-black text-sm flex items-center justify-center ${
@@ -181,7 +373,7 @@ export default function PredictionsPage() {
         </div>
       )}
 
-      {/* Conteúdo Aba: Badges & Conquistas */}
+      {/* ABA 3: BADGES & CONQUISTAS */}
       {activeTab === 'badges' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {badges.map((b, idx) => {
