@@ -15,6 +15,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import { getHeroImg, getHeroName } from '../services/api';
 
@@ -27,13 +28,13 @@ const DEFAULT_STREAMS = [
 export default function LivePage() {
   const {
     liveGames,
-    setSelectedLiveGame,
     loadingRefresh,
     refreshData,
     upcomingMatches,
     constants
   } = useApp();
 
+  const openLiveMatch = useOpenLiveMatch();
   const [activeStream, setActiveStream] = useState(DEFAULT_STREAMS[0]);
   const [showStream, setShowStream] = useState(true);
   const [theaterMode, setTheaterMode] = useState(false);
@@ -174,7 +175,7 @@ export default function LivePage() {
               return (
                 <div
                   key={game.match_id || idx}
-                  onClick={() => setSelectedLiveGame(game)}
+                  onClick={() => openLiveMatch(game)}
                   className="bg-[#0C0E14] hover:bg-[#111520] border border-[#212838] hover:border-amber-500/50 rounded-2xl p-6 shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
                 >
                   <div>

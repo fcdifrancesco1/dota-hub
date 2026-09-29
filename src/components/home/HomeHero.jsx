@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Radio, ArrowRight, Clock, Flame, Calendar, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
 
 export default function HomeHero() {
-  const { tournamentsList, upcomingMatches, liveGames, setSelectedLiveGame } = useApp();
+  const { tournamentsList, upcomingMatches, liveGames } = useApp();
+  const openLiveMatch = useOpenLiveMatch();
 
   // Encontra o torneio em andamento de maior relevância
   const featuredTournament = tournamentsList && tournamentsList.length > 0
@@ -84,7 +86,7 @@ export default function HomeHero() {
           <div className="pt-2 flex flex-wrap items-center gap-4">
             {hasLive ? (
               <button
-                onClick={() => setSelectedLiveGame(liveGames[0])}
+                onClick={() => openLiveMatch(liveGames[0])}
                 className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black uppercase tracking-wider text-xs shadow-lg shadow-red-900/50 hover:scale-105 transition-all"
               >
                 <Radio className="w-4 h-4 animate-pulse text-white" />

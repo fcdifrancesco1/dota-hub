@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 // Páginas
 import Home from './pages/Home';
 import LivePage from './pages/LivePage';
+import LiveMatchPage from './pages/LiveMatchPage';
 import TournamentsPage from './pages/TournamentsPage';
 import TournamentDetailPage from './pages/TournamentDetailPage';
 import MatchesPage from './pages/MatchesPage';
@@ -25,7 +26,6 @@ import AdminPage from './pages/AdminPage';
 
 // Modais Globais
 import MatchDetailModal from './components/MatchDetailModal';
-import LiveMatchDetailModal from './components/LiveMatchDetailModal';
 import TeamProfileModal from './components/TeamProfileModal';
 import HeroDetailModal from './components/HeroDetailModal';
 
@@ -34,8 +34,6 @@ function AppContent() {
     constants,
     selectedSeries,
     setSelectedSeries,
-    selectedLiveGame,
-    setSelectedLiveGame,
     selectedTeam,
     setSelectedTeam,
     selectedHero,
@@ -50,6 +48,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/ao-vivo" element={<LivePage />} />
+            <Route path="/ao-vivo/:matchKey" element={<LiveMatchPage />} />
             <Route path="/campeonatos" element={<TournamentsPage />} />
             <Route path="/campeonatos/:id" element={<TournamentDetailPage />} />
             <Route path="/partidas" element={<MatchesPage />} />
@@ -78,16 +77,6 @@ function AppContent() {
           series={selectedSeries}
           constants={constants}
           onClose={() => setSelectedSeries(null)}
-          onSelectTeam={setSelectedTeam}
-          onSelectHero={setSelectedHero}
-        />
-      )}
-
-      {selectedLiveGame && (
-        <LiveMatchDetailModal
-          game={selectedLiveGame}
-          constants={constants}
-          onClose={() => setSelectedLiveGame(null)}
           onSelectTeam={setSelectedTeam}
           onSelectHero={setSelectedHero}
         />

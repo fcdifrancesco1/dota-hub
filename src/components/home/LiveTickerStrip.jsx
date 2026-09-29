@@ -2,10 +2,12 @@ import React from 'react';
 import { Radio, ChevronRight, Zap, Shield, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import TeamLogo from '../../utils/teamLogos';
 
 export default function LiveTickerStrip() {
-  const { liveGames, setSelectedLiveGame } = useApp();
+  const { liveGames } = useApp();
+  const openLiveMatch = useOpenLiveMatch();
 
   if (!liveGames || liveGames.length === 0) {
     return (
@@ -64,7 +66,7 @@ export default function LiveTickerStrip() {
             return (
               <div
                 key={game.match_id || idx}
-                onClick={() => setSelectedLiveGame(game)}
+                onClick={() => openLiveMatch(game)}
                 className="flex-shrink-0 cursor-pointer bg-[#0D1017] hover:bg-[#131824] border border-[#262F44] hover:border-amber-500/40 rounded-xl p-3 min-w-[280px] sm:min-w-[320px] transition-all shadow-lg"
               >
                 {/* Cabeçalho do Card */}

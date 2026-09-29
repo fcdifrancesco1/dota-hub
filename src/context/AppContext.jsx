@@ -38,7 +38,6 @@ export function AppProvider({ children }) {
 
   // Modais globais
   const [selectedSeries, setSelectedSeries] = useState(null);
-  const [selectedLiveGame, setSelectedLiveGame] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedHero, setSelectedHero] = useState(null);
 
@@ -141,8 +140,6 @@ export function AppProvider({ children }) {
         // Modais
         selectedSeries,
         setSelectedSeries,
-        selectedLiveGame,
-        setSelectedLiveGame,
         selectedTeam,
         setSelectedTeam,
         selectedHero,

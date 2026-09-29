@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  X,
   Tv,
   CheckCircle2,
   XCircle,
@@ -83,10 +82,11 @@ function parseStructures(towerMask, barracksMask, gameDuration = null) {
   };
 }
 
-export default function LiveMatchDetailModal({
+// Conteúdo completo de uma partida ao vivo, exibido em página própria
+// (rota /ao-vivo/:matchKey — ver pages/LiveMatchPage.jsx).
+export default function LiveMatchDetail({
   game,
   constants,
-  onClose,
   onOpenTeamProfile,
   onSelectHero
 }) {
@@ -235,61 +235,25 @@ export default function LiveMatchDetailModal({
     const gpmVal = pick(p, ['gold_per_min', 'gpm']);
     const xpmVal = pick(p, ['xp_per_min', 'xpm']);
 
-    // Proporções competitivas por posição caso a telemetria ao vivo da Valve ainda não tenha sido indexada
+    // Só dados publicados pela API; campos ausentes aparecem como "—" na tabela
     const slotNum = p.team_slot || (idx + 1);
-    const posIdx = Math.min(4, Math.max(0, slotNum - 1));
-    const durMin = Math.max(1, (durationSec || 600) / 60);
-
-    const teamScore = isRadiant ? (scoreA ?? 0) : (scoreB ?? 0);
-    const oppScore = isRadiant ? (scoreB ?? 0) : (scoreA ?? 0);
-
-    const killWeights = [0.32, 0.36, 0.18, 0.09, 0.05];
-    const deathWeights = [0.12, 0.16, 0.24, 0.24, 0.24];
-    const assistWeights = [0.15, 0.20, 0.25, 0.22, 0.18];
-    const csWeights = [8.5, 7.8, 5.8, 2.8, 1.6];
-    const nwBaseWeights = [0.28, 0.26, 0.20, 0.14, 0.12];
-
-    const fallbackKills = Math.max(0, Math.round(teamScore * killWeights[posIdx]));
-    const fallbackDeaths = Math.max(0, Math.round(oppScore * deathWeights[posIdx]));
-    const fallbackAssists = Math.max(0, Math.round((teamScore * 1.7) * assistWeights[posIdx]));
-    const fallbackLh = Math.max(1, Math.round(durMin * csWeights[posIdx]));
-    const fallbackDn = Math.max(0, Math.round(fallbackLh * (posIdx < 2 ? 0.06 : 0.03)));
-
-    const baseTeamNet = Math.round(durMin * 2200 + 4000);
-    const radLead = matchData?.radiant_lead ?? 0;
-    const teamNet = isRadiant
-      ? Math.max(12000, baseTeamNet + Math.round(radLead / 2))
-      : Math.max(12000, baseTeamNet - Math.round(radLead / 2));
-    const fallbackNet = Math.round(teamNet * nwBaseWeights[posIdx]);
-    const fallbackLvl = Math.min(30, Math.max(1, Math.floor(durMin * 0.55 + (posIdx < 2 ? 4 : 2))));
-    const fallbackGpm = Math.round(fallbackNet / durMin);
-    const fallbackXpm = Math.round((fallbackLvl * 460) / durMin);
-
-    const CORE_ITEMS = {
-      1: [63, 147, 116, 139, 156, 149],
-      2: [63, 204, 116, 108, 96, 250],
-      3: [50, 1, 116, 112, 110, 242],
-      4: [180, 254, 102, 653, 226, 100],
-      5: [214, 254, 102, 229, 226, 100]
-    };
-    const finalItems = items.length > 0 ? items : (CORE_ITEMS[slotNum] || CORE_ITEMS[1]).slice(0, fallbackNet > 18000 ? 5 : fallbackNet > 10000 ? 4 : 3);
 
     return {
       slot: isRadiant ? idx : idx + 5,
       team_slot: slotNum,
       name: pick(p, ['name', 'personaname']) || `${teamName} Pos ${slotNum}`,
       hero_id: heroId,
-      level: levelVal ?? fallbackLvl,
-      kills: killsVal ?? fallbackKills,
-      deaths: deathsVal ?? fallbackDeaths,
-      assists: assistsVal ?? fallbackAssists,
-      last_hits: lhVal ?? fallbackLh,
-      denies: dnVal ?? fallbackDn,
-      gpm: gpmVal ?? fallbackGpm,
-      xpm: xpmVal ?? fallbackXpm,
-      net_worth: netWorthVal ?? fallbackNet,
+      level: levelVal,
+      kills: killsVal,
+      deaths: deathsVal,
+      assists: assistsVal,
+      last_hits: lhVal,
+      denies: dnVal,
+      gpm: gpmVal,
+      xpm: xpmVal,
+      net_worth: netWorthVal,
       buybackCount,
-      items: finalItems,
+      items,
       neutralItem: pick(p, ['item_neutral', 'neutral_item']),
       isRadiant
     };
@@ -298,7 +262,6 @@ export default function LiveMatchDetailModal({
   const radiantPlayers = rawRadiant.map((p, idx) => buildPlayer(p, idx, true));
   const direPlayers = rawDire.map((p, idx) => buildPlayer(p, idx, false));
   const hasPlayerData = radiantPlayers.length > 0 || direPlayers.length > 0;
-  const hasDetailedStats = true;
 
   // Picks & Bans em formato Captain's Mode
   const picksBans = matchData?.picks_bans || [];
@@ -399,7 +362,7 @@ export default function LiveMatchDetailModal({
           <div className="flex items-center gap-2">
             <Swords className="w-4 h-4 text-amber-400" />
             <h3 className="text-xs font-black uppercase tracking-wider text-white">
-              Ordem do Draft (Captain's Mode: Picks & Bans)
+              Ordem do Draft (Captain&apos;s Mode: Picks & Bans)
             </h3>
           </div>
           <div className="flex items-center gap-2 text-[10px] font-mono">
@@ -796,237 +759,214 @@ export default function LiveMatchDetailModal({
 
 
 
+  const scoreboardTeam = (side) => {
+    const isRadiant = side === 'radiant';
+    const name = isRadiant ? teamAName : teamBName;
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenTeamProfile && onOpenTeamProfile(name)}
+        className={`flex flex-col items-center text-center gap-2 lg:gap-4 flex-1 min-w-0 group ${isRadiant ? 'lg:flex-row lg:justify-end lg:text-right' : 'lg:flex-row-reverse lg:justify-end lg:text-left'}`}
+        title={`Ver perfil de ${name}`}
+      >
+        <div className="min-w-0 max-w-full order-2 lg:order-1">
+          <span className="block text-sm sm:text-xl lg:text-3xl font-black text-white leading-tight break-words line-clamp-2 group-hover:text-amber-400 transition-colors">{name}</span>
+          <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest ${isRadiant ? 'text-emerald-400' : 'text-rose-400'}`}>
+            {isRadiant ? 'Radiant' : 'Dire'}
+          </span>
+        </div>
+        <TeamLogo
+          teamName={name}
+          teamId={isRadiant
+            ? (matchData?.radiant_team?.team_id || game.team_id_radiant || game.radiant_team_id)
+            : (matchData?.dire_team?.team_id || game.team_id_dire || game.dire_team_id)}
+          logoUrl={isRadiant ? (matchData?.logoA || logoA) : (matchData?.logoB || logoB)}
+          className="order-1 lg:order-2 w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-black/40 border border-white/10 p-2 shrink-0 group-hover:scale-105 transition-transform"
+        />
+      </button>
+    );
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-[96vw] 2xl:max-w-[1520px] xl:max-w-[1440px] bg-[#0C0F16] border border-rose-500/40 rounded-2xl p-3 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col">
-        {/* BOTÃO FECHAR */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-400 hover:text-white transition-all z-20"
-        >
-          <X className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
+    <div className="space-y-6">
+      {/* CABEÇALHO: STATUS, PLACAR E MAPAS DA SÉRIE */}
+      <section className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-[#161019] via-[#0E1119] to-[#121622] p-4 sm:p-8 shadow-2xl">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[480px] h-[240px] rounded-full bg-rose-600/10 blur-3xl pointer-events-none" />
 
-        {/* CABEÇALHO DO AO VIVO */}
-        <div className="text-center border-b border-white/10 pb-3 sm:pb-4 mb-3 sm:mb-4 relative z-10 shrink-0">
-          <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-[11px]">
-            <span className="flex items-center gap-1.5 font-extrabold uppercase tracking-widest text-rose-400 bg-rose-500/20 border border-rose-500/30 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full animate-pulse">
-              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500 animate-ping" />
-              Partida Ao Vivo {timeFormatted ? `· ${timeFormatted}` : ''}
+        <div className="relative flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-[11px]">
+          <span className="flex items-center gap-1.5 font-extrabold uppercase tracking-widest text-rose-400 bg-rose-500/20 border border-rose-500/30 px-3 py-1 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+            Ao Vivo {timeFormatted ? `· ${timeFormatted}` : ''}
+          </span>
+          <span className="text-gray-300 font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
+            {leagueName} ({formatStr})
+          </span>
+          {matchData?.spectators > 0 && (
+            <span className="text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
+              <Eye className="w-3 h-3" /> {matchData.spectators.toLocaleString()} assistindo na GOTV
             </span>
-            <span className="text-gray-400 font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
-              {leagueName} ({formatStr})
-            </span>
-            <button
-              type="button"
-              onClick={() => syncMatchData(true)}
-              title="Clique para sincronizar telemetria e checar replay da partida agora"
-              className="text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 px-2 sm:px-2.5 py-0.5 rounded-full flex items-center gap-1 cursor-pointer transition-all"
-            >
-              <RefreshCw className={`w-2.5 h-2.5 text-emerald-400 ${syncing ? 'animate-spin' : ''}`} /> {syncing ? 'Sincronizando...' : `Atualizar (${lastSync})`}
-            </button>
-            {matchData?.spectators > 0 && (
-              <span className="text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Eye className="w-2.5 h-2.5" /> {matchData.spectators.toLocaleString()} GOTV
-              </span>
-            )}
-            {matchData?.roshan_respawn_timer !== undefined && matchData?.roshan_respawn_timer !== null && (
-              matchData.roshan_respawn_timer > 0 ? (
-                <span className="text-amber-400 font-mono bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                  Roshan ({Math.floor(matchData.roshan_respawn_timer / 60)}m {matchData.roshan_respawn_timer % 60}s)
-                </span>
-              ) : (
-                <span className="text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                  Roshan no Pit
-                </span>
-              )
-            )}
-            {matchData?.is_live_telemetry && (
-              <span className="text-purple-400 font-mono bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
-                Valve GOTV Oficial
-              </span>
-            )}
-          </div>
-
-          {/* Placar Principal do Jogo (Abates) */}
-          <div className="flex items-center justify-between sm:justify-center gap-2 sm:gap-8 mt-3 px-1">
-            <div
-              onClick={() => onOpenTeamProfile && onOpenTeamProfile(null, teamAName)}
-              className="text-right flex-1 truncate flex items-center justify-end gap-1.5 sm:gap-3 cursor-pointer group"
-              title={`Ver Perfil de ${teamAName}`}
-            >
-              <span className="text-xs sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamAName}</span>
-              <TeamLogo
-                teamName={teamAName}
-                teamId={matchData?.radiant_team?.team_id || game.team_id_radiant || game.radiant_team_id}
-                logoUrl={matchData?.logoA || logoA}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
-              />
-            </div>
-
-            <div className="flex flex-col items-center shrink-0">
-              {hasScore ? (
-                <div className="px-3.5 py-1 sm:px-5 sm:py-2 rounded-xl bg-black/80 border border-rose-500/40 font-mono text-lg sm:text-3xl font-black text-amber-400 shadow-lg shadow-rose-500/10">
-                  {scoreA} <span className="text-gray-500 mx-0.5 sm:mx-1">:</span> {scoreB}
-                </div>
-              ) : (
-                <div className="px-3 py-1 sm:px-5 sm:py-2 rounded-xl bg-black/60 border border-white/10 font-mono text-xs sm:text-sm font-bold text-gray-400">
-                  Aguardando dados
-                </div>
-              )}
-              <span className="text-[8px] sm:text-[9px] text-gray-400 font-mono mt-0.5 sm:mt-1 uppercase tracking-wider">
-                Placar de Abates
-              </span>
-
-              {/* Vantagem de Ouro da Equipe */}
-              {matchData?.radiant_lead !== undefined && matchData?.radiant_lead !== null && matchData?.radiant_lead !== 0 && (
-                <div className={`mt-1 text-[9px] sm:text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${
-                  matchData.radiant_lead > 0
-                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                    : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
-                }`}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  {matchData.radiant_lead > 0
-                    ? `${teamAName} +${(Math.abs(matchData.radiant_lead) / 1000).toFixed(1)}k ouro`
-                    : `${teamBName} +${(Math.abs(matchData.radiant_lead) / 1000).toFixed(1)}k ouro`}
-                </div>
-              )}
-            </div>
-
-            <div
-              onClick={() => onOpenTeamProfile && onOpenTeamProfile(null, teamBName)}
-              className="text-left flex-1 truncate flex items-center justify-start gap-1.5 sm:gap-3 cursor-pointer group"
-              title={`Ver Perfil de ${teamBName}`}
-            >
-              <TeamLogo
-                teamName={teamBName}
-                teamId={matchData?.dire_team?.team_id || game.team_id_dire || game.dire_team_id}
-                logoUrl={matchData?.logoB || logoB}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/40 border border-white/10 p-0.5 shrink-0 group-hover:scale-105 transition-transform"
-              />
-              <span className="text-xs sm:text-xl font-black text-white truncate block group-hover:text-amber-400 transition-colors">{teamBName}</span>
-            </div>
-          </div>
-
-          {game.streamUrl && (
-            <div className="mt-3 flex justify-center">
-              <a
-                href={game.streamUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-extrabold text-xs transition-all shadow-md"
-              >
-                <Tv className="w-4 h-4" /> Assistir Transmissão Ao Vivo (Stream)
-              </a>
-            </div>
           )}
-
-          {/* ABAS DOS MAPAS DA SÉRIE QUANDO EXISTEM MÚLTIPLOS JOGOS */}
-          {mapsList.length > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-white/5 flex-wrap">
-              {mapsList.map((m, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSelectMap(m.match_id, idx)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono uppercase transition-all cursor-pointer ${
-                    activeMapIndex === idx
-                      ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/25 font-black scale-105'
-                      : 'bg-white/5 text-gray-300 hover:text-white border border-white/10 hover:bg-white/10'
-                  }`}
-                >
-                  <Swords className="w-3.5 h-3.5" />
-                  <span className="font-extrabold">Jogo {m.mapNumber}</span>
-                  {m.radiant_score !== undefined && m.dire_score !== undefined && (
-                    <span className="font-black">({m.radiant_score} : {m.dire_score})</span>
-                  )}
-                  {m.is_live ? (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500/30 text-rose-300 text-[9px] font-black border border-rose-500/50">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" /> AO VIVO
-                    </span>
-                  ) : m.is_finished ? (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                      FINALIZADO
-                    </span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
+          {matchData?.roshan_respawn_timer !== undefined && matchData?.roshan_respawn_timer !== null && (
+            matchData.roshan_respawn_timer > 0 ? (
+              <span className="text-amber-400 font-mono bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
+                Roshan volta em {Math.floor(matchData.roshan_respawn_timer / 60)}m {matchData.roshan_respawn_timer % 60}s
+              </span>
+            ) : (
+              <span className="text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                Roshan no Pit
+              </span>
+            )
           )}
+          <button
+            type="button"
+            onClick={() => syncMatchData(true)}
+            title="Sincronizar telemetria agora"
+            className="text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center gap-1 transition-all"
+          >
+            <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} /> {syncing ? 'Sincronizando...' : `Atualizado às ${lastSync}`}
+          </button>
         </div>
 
-        {/* CONTEÚDO COM OBJETIVOS E TABELAS (SOMENTE DADOS REAIS DA API) */}
-        <div className="overflow-y-auto flex-1 pr-1 custom-scrollbar space-y-6">
-          {loading ? (
-            <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
-              <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-              <span className="text-xs font-semibold">Sincronizando dados oficiais da partida...</span>
-            </div>
-          ) : !matchData ? (
-            <div className="py-16 flex flex-col items-center justify-center gap-3 text-center text-gray-400">
-              <Radio className="w-10 h-10 text-amber-500/40 animate-pulse" />
-              <span className="text-sm font-bold text-white">Ainda não há telemetria oficial publicada para esta partida</span>
-              <span className="text-xs text-gray-500 max-w-md">
-                Assim que a OpenDota ou a Liquipedia publicarem dados de placar, torres e jogadores, eles aparecem aqui automaticamente (nova checagem a cada 20s). Enquanto isso, acompanhe pela transmissão oficial.
-              </span>
-            </div>
-          ) : (
-            <>
-              {/* ORDEM DO DRAFT (CAPTAIN'S MODE: PICKS & BANS) */}
-              {renderCaptainsModeDraft()}
+        {/* Placar principal */}
+        <div className="relative flex items-center justify-between gap-3 sm:gap-10 mt-6 sm:mt-8">
+          {scoreboardTeam('radiant')}
 
-              {/* STATUS DAS TORRES E BARRACAS (SOMENTE QUANDO A API FORNECE OS DADOS) */}
-              {(radiantStructures.hasData || direStructures.hasData) && (
-                <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                      <Castle className="w-3.5 h-3.5 text-amber-400" /> Torres & Barracas (Top / Mid / Bot / Base)
+          <div className="flex flex-col items-center shrink-0">
+            {hasScore ? (
+              <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-7 py-2 sm:py-3 rounded-2xl bg-black/70 border border-rose-500/40 font-mono text-3xl sm:text-6xl font-black shadow-lg shadow-rose-500/10">
+                <span className="text-emerald-400">{scoreA}</span>
+                <span className="text-gray-600 text-2xl sm:text-4xl">:</span>
+                <span className="text-rose-400">{scoreB}</span>
+              </div>
+            ) : (
+              <div className="px-4 py-2 rounded-xl bg-black/60 border border-white/10 font-mono text-sm font-bold text-gray-400">
+                Aguardando dados
+              </div>
+            )}
+            <span className="text-[9px] sm:text-[10px] text-gray-400 font-mono mt-1.5 uppercase tracking-wider">Placar de abates</span>
+
+            {matchData?.radiant_lead !== undefined && matchData?.radiant_lead !== null && matchData?.radiant_lead !== 0 && (
+              <div className={`mt-2 text-[10px] sm:text-xs font-mono font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border ${
+                matchData.radiant_lead > 0
+                  ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                  : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+              }`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                {matchData.radiant_lead > 0 ? teamAName : teamBName} +{(Math.abs(matchData.radiant_lead) / 1000).toFixed(1)}k de ouro
+              </div>
+            )}
+          </div>
+
+          {scoreboardTeam('dire')}
+        </div>
+
+        {game.streamUrl && (
+          <div className="relative mt-6 flex justify-center">
+            <a
+              href={game.streamUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-extrabold text-xs transition-all shadow-md"
+            >
+              <Tv className="w-4 h-4" /> Assistir transmissão ao vivo
+            </a>
+          </div>
+        )}
+
+        {/* Mapas da série */}
+        {mapsList.length > 1 && (
+          <div className="relative flex items-center justify-center gap-2 mt-6 pt-4 border-t border-white/5 flex-wrap">
+            {mapsList.map((m, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSelectMap(m.match_id, idx)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono uppercase transition-all ${
+                  activeMapIndex === idx
+                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/25 font-black'
+                    : 'bg-white/5 text-gray-300 hover:text-white border border-white/10 hover:bg-white/10'
+                }`}
+              >
+                <Swords className="w-3.5 h-3.5" />
+                <span className="font-extrabold">Jogo {m.mapNumber}</span>
+                {m.radiant_score !== undefined && m.dire_score !== undefined && (
+                  <span className="font-black">({m.radiant_score} : {m.dire_score})</span>
+                )}
+                {m.is_live ? (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500/30 text-rose-300 text-[9px] font-black border border-rose-500/50">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" /> AO VIVO
+                  </span>
+                ) : m.is_finished ? (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                    FINALIZADO
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {loading ? (
+        <div className="py-24 flex flex-col items-center justify-center gap-3 text-gray-400 rounded-2xl border border-[#212838] bg-[#0C0E14]">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+          <span className="text-xs font-semibold">Sincronizando dados oficiais da partida...</span>
+        </div>
+      ) : !matchData ? (
+        <div className="py-16 flex flex-col items-center justify-center gap-3 text-center text-gray-400 rounded-2xl border border-[#212838] bg-[#0C0E14]">
+          <Radio className="w-10 h-10 text-amber-500/40" />
+          <span className="text-sm font-bold text-white">Ainda não há telemetria oficial publicada para esta partida</span>
+          <span className="text-xs text-gray-500 max-w-md">
+            Assim que a OpenDota ou a Valve publicarem placar, torres e jogadores, eles aparecem aqui automaticamente (nova checagem a cada 20s).
+          </span>
+        </div>
+      ) : (
+        <>
+          {/* DRAFT EM LARGURA TOTAL */}
+          {renderCaptainsModeDraft()}
+
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+            {/* JOGADORES */}
+            <div className="xl:col-span-8 space-y-6 min-w-0">
+              {hasPlayerData ? (
+                <>
+                  {renderTable(radiantPlayers, teamAName, true, scoreA)}
+                  {renderTable(direPlayers, teamBName, false, scoreB)}
+                </>
+              ) : (
+                <div className="text-center py-10 text-gray-500 text-xs rounded-2xl border border-[#212838] bg-[#0C0E14]">
+                  Estatísticas individuais dos jogadores ainda não foram publicadas pela API para esta partida.
+                </div>
+              )}
+            </div>
+
+            {/* COLUNA LATERAL: OBJETIVOS */}
+            <aside className="xl:col-span-4 space-y-4 xl:sticky xl:top-24">
+              {(radiantStructures.hasData || direStructures.hasData) ? (
+                <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-amber-400">
+                      <Castle className="w-4 h-4 text-amber-400" /> Torres & Barracas
                     </div>
-                    <div className="flex items-center gap-3 text-[10px] font-mono">
-                      <span className="text-emerald-400 font-bold">{teamAName}: {radiantAliveCount}/18</span>
+                    <div className="flex items-center gap-2 text-[10px] font-mono">
+                      <span className="text-emerald-400 font-bold">{radiantAliveCount}/18</span>
                       <span className="text-gray-500">·</span>
-                      <span className="text-rose-400 font-bold">{teamBName}: {direAliveCount}/18</span>
+                      <span className="text-rose-400 font-bold">{direAliveCount}/18</span>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2 text-[10px]">
                     {renderStructureColumns(radiantStructures, teamAName, true, radiantAliveCount)}
                     {renderStructureColumns(direStructures, teamBName, false, direAliveCount)}
                   </div>
                 </div>
-              )}
-
-              {/* TABELAS DE JOGADORES (SEMPRE EM FORMATO TABELA COMPLETA) */}
-              {hasPlayerData ? (
-                <div className="space-y-6">
-                  {!hasDetailedStats && (
-                    <div className="p-3 sm:p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-[11px] sm:text-xs text-purple-200 font-mono flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        <Radio className="w-3.5 h-3.5 text-purple-400 shrink-0 animate-pulse" />
-                        <span>Partida em andamento na GOTV. Placar, torres, ouro e draft em tempo real.</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => syncMatchData(true)}
-                        disabled={syncing}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-200 text-[11px] font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
-                      >
-                        <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
-                        {syncing ? 'Sincronizando...' : 'Sincronizar Replay'}
-                      </button>
-                    </div>
-                  )}
-                  {renderTable(radiantPlayers, teamAName, true, scoreA)}
-                  {renderTable(direPlayers, teamBName, false, scoreB)}
-                </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 text-xs">
-                  Estatísticas individuais dos jogadores ainda não foram publicadas pela API para esta partida.
+                <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 text-xs text-gray-500 text-center">
+                  Status de torres e barracas ainda não disponível.
                 </div>
               )}
-            </>
-          )}
-        </div>
-      </div>
+            </aside>
+          </div>
+        </>
+      )}
     </div>
   );
 }
