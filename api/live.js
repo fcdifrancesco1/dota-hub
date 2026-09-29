@@ -618,20 +618,10 @@ function normalizeOpenDotaLive(g) {
 function filterAndDeduplicateLiveGames(games) {
   if (!Array.isArray(games)) return [];
 
-  const nowSec = Math.floor(Date.now() / 1000);
-  const activeOrRecent = games.filter(g => {
-    if (!g) return false;
-    const deact = Number(g.deactivate_time || 0);
-    // Se ainda não desativou, está 100% ao vivo
-    if (!deact || deact >= nowSec) return true;
-    // Se tem liga/torneio, mantém visível durante o pós-jogo/intervalo da série (até 25 minutos)
-    const isTournament = g.league_id > 0 || (g.radiant_name && g.dire_name && g.radiant_name !== 'Radiant');
-    if (isTournament && (nowSec - deact) < 1500) {
-      g.is_finished = true;
-      return true;
-    }
-    return false;
-  });
+  // deactivate_time só é preenchido quando o jogo termina (a OpenDota o agenda
+  // ~15 min no futuro e mantém o jogo no feed por até 1h30). Jogo encerrado sai
+  // da lista ao vivo; os mapas concluídos da série são buscados pela página da partida.
+  const activeOrRecent = games.filter(g => g && !Number(g.deactivate_time || 0));
 
   // Agrupar por confronto de times (série) e manter apenas o mapa mais recente (maior match_id)
   const seriesMap = new Map();
