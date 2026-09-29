@@ -783,7 +783,42 @@ function normalizeFinishedMatch(m) {
   };
 }
 
+// Canais oficiais no YouTube (BLAST, ESL, PGL). Só estes podem ser consultados,
+// para a rota não virar um proxy aberto do YouTube.
+const YOUTUBE_CHANNELS = new Set([
+  'UCAvIC2XmBLLXFPdveirTrmw', // BLAST SLAM Dota 2
+  'UCaYLBJfw6d8XqmNlL204lNg', // ESL Dota 2
+  'UC7VWLs_Ivccq22rM2_xo0Rg'  // PGL DOTA2
+]);
+
+/**
+ * Descobre o vídeo ao vivo atual de um canal. O embed "live_stream?channel="
+ * do YouTube deixou de funcionar de forma confiável, então lemos a página
+ * /channel/<id>/live, que redireciona (canonical) para o vídeo da live.
+ */
+async function fetchYoutubeLive(channelId) {
+  const res = await fetch(`https://www.youtube.com/channel/${channelId}/live`, {
+    headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en' }
+  });
+  if (!res.ok) return { channelId, live: false, videoId: null };
+  const html = await res.text();
+  const videoId = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/)?.[1] || null;
+  // Lives agendadas também têm canonical de vídeo, mas sem "isLive":true
+  const live = Boolean(videoId) && /"isLive(?:Now)?":true/.test(html);
+  const title = videoId ? (html.match(/<meta name="title" content="([^"]*)"/)?.[1] || null) : null;
+  return { channelId, live, videoId: live ? videoId : null, title: live ? title : null };
+}
+
+async function handleYoutube(res) {
+  const results = await Promise.all([...YOUTUBE_CHANNELS].map((id) =>
+    fetchYoutubeLive(id).catch(() => ({ channelId: id, live: false, videoId: null }))
+  ));
+  res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300');
+  return res.status(200).json({ channels: results });
+}
+
 export default async function handler(req, res) {
+  if (req.query?.youtube) return handleYoutube(res);
   try {
     const key = getSteamApiKey(req);
     const leagueId = req.query?.league_id;
