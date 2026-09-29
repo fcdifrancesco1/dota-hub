@@ -363,12 +363,3 @@ export async function fetchAnalysisBySlug(slug) {
 }
 
 // Estatísticas globais do dia/semana para a Home
-export function getHomeStats() {
-  return {
-    matchesToday: 18,
-    avgDurationMin: 39,
-    mostPickedHero: { name: 'Luna', count: 24, winrate: 68.4, img: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/luna.png' },
-    mostBannedHero: { name: 'Io', count: 31, img: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/wisp.png' },
-    highestWinrateHero: { name: 'Timbersaw', winrate: 73.3, matches: 15, img: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/shredder.png' }
-  };
-}

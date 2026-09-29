@@ -84,3 +84,22 @@ export function leagueFromDatabase(l) {
     image: l.banner_url || l.logo_url ? { light: l.banner_url || l.logo_url, dark: l.banner_url || l.logo_url } : null
   };
 }
+
+/**
+ * Campeonato de maior relevância em andamento, para o destaque da Home.
+ * Só torneios principais S-Tier ou A-Tier (Tier 1 ou 2 na Liquipedia) com
+ * liga da Valve (leagueId) — qualificatórias e showmatches ficam de fora.
+ * Desempate: tier mais alto, depois maior premiação. null se nenhum.
+ */
+export function pickFeaturedTournament(list) {
+  const candidates = (list || []).filter((t) =>
+    t?.status === 'ongoing' && t.leagueId && (t.tier === 1 || t.tier === 2) && !t.tierType
+  );
+  candidates.sort((a, b) => a.tier - b.tier || (b.prizePoolUsd || 0) - (a.prizePoolUsd || 0));
+  return candidates[0] || null;
+}
+
+/** "S-Tier" / "A-Tier" a partir do tier numérico da Liquipedia. */
+export function tierLetter(tier) {
+  return { 1: 'S-Tier', 2: 'A-Tier', 3: 'B-Tier', 4: 'C-Tier' }[tier] || null;
+}

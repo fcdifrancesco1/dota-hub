@@ -2017,13 +2017,13 @@ export async function fetchDotaRecords(recordType = "kills") {
 export async function fetchTournamentHeroStats(leagueId) {
   if (!leagueId) return null;
   const numLeagueId = Number(leagueId);
-  const cacheKey = `tourney_hero_stats_${leagueId}`;
-  const cached = getCached(cacheKey, 30 * 60 * 1000);
+  const cacheKey = `tourney_hero_stats_v2_${leagueId}`;
+  const cached = getCached(cacheKey, 10 * 60 * 1000);
   if (cached) return cached;
 
   if (numLeagueId && !isNaN(numLeagueId)) {
     try {
-      const sql = `SELECT picks_bans, radiant_win FROM matches WHERE leagueid=${numLeagueId} AND picks_bans IS NOT NULL`;
+      const sql = `SELECT picks_bans, radiant_win, duration, start_time FROM matches WHERE leagueid=${numLeagueId} AND picks_bans IS NOT NULL`;
       const res = await fetchWithTimeout(
         `https://api.opendota.com/api/explorer?sql=${encodeURIComponent(sql)}`,
         {},
@@ -2079,9 +2079,16 @@ export async function fetchTournamentHeroStats(leagueId) {
             };
           });
 
+          // Mapas de hoje no fuso de Brasília
+          const brtDay = (secs) => new Date(secs * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+          const today = brtDay(Date.now() / 1000);
+          const durations = rows.map((r) => r.duration).filter((d) => d > 0);
+
           const result = {
             leagueId: numLeagueId,
             totalMatches,
+            matchesToday: rows.filter((r) => r.start_time && brtDay(r.start_time) === today).length,
+            avgDurationSec: durations.length ? Math.round(durations.reduce((a, d) => a + d, 0) / durations.length) : null,
             heroes
           };
           setCache(cacheKey, result);
