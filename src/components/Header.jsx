@@ -106,17 +106,6 @@ export default function Header() {
 
           {/* RIGHT ACTIONS: SYNC STATUS & MOBILE TRIGGER */}
           <div className="flex items-center gap-3">
-            {/* Live Count Pill (Desktop) */}
-            {liveCount > 0 && (
-              <Link
-                to="/ao-vivo"
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 whitespace-nowrap rounded-lg bg-red-950/60 border border-red-800/40 text-red-400 text-xs font-black uppercase tracking-wider hover:bg-red-900/50 transition-colors"
-              >
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                <span>{liveCount} {liveCount === 1 ? 'Partida Ao Vivo' : 'Partidas Ao Vivo'}</span>
-              </Link>
-            )}
-
             {/* Refresh Button */}
             <button
               onClick={refreshData}
