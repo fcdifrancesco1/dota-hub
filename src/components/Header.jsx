@@ -19,6 +19,22 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { SITE_CONFIG } from '../config/siteConfig';
 
+// Contador de partidas ao vivo: cores fixas (não dependem do tema) para o
+// número ficar sempre legível; só o halo por trás pulsa, o número não.
+function LiveBadge({ count, className = '' }) {
+  return (
+    <span className={`relative inline-flex items-center justify-center ${className}`} aria-label={`${count} ao vivo`}>
+      <span className="absolute inset-0 rounded-full animate-ping opacity-40" style={{ backgroundColor: '#EF4444' }} />
+      <span
+        className="relative min-w-[20px] h-5 px-1.5 rounded-full text-[11px] leading-none font-black tabular-nums flex items-center justify-center shadow-sm"
+        style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
+      >
+        {count}
+      </span>
+    </span>
+  );
+}
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { liveCount, refreshData, loadingRefresh, lastUpdated } = useApp();
@@ -72,7 +88,7 @@ export default function Header() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                     isActive
                       ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-md shadow-amber-500/20 font-black'
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -82,16 +98,7 @@ export default function Header() {
                   <span>{item.label}</span>
 
                   {/* Badge Ao Vivo */}
-                  {item.badge > 0 && (
-                    <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black uppercase flex items-center gap-1 ${
-                      isActive
-                        ? 'bg-red-950 text-red-200'
-                        : 'bg-red-600/90 text-on-accent animate-pulse'
-                    }`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
-                      {item.badge}
-                    </span>
-                  )}
+                  {item.badge > 0 && <LiveBadge count={item.badge} className="ml-1" />}
                 </NavLink>
               );
             })}
@@ -103,7 +110,7 @@ export default function Header() {
             {liveCount > 0 && (
               <Link
                 to="/ao-vivo"
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-950/60 border border-red-800/40 text-red-400 text-xs font-black uppercase tracking-wider hover:bg-red-900/50 transition-colors"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 whitespace-nowrap rounded-lg bg-red-950/60 border border-red-800/40 text-red-400 text-xs font-black uppercase tracking-wider hover:bg-red-900/50 transition-colors"
               >
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
                 <span>{liveCount} {liveCount === 1 ? 'Partida Ao Vivo' : 'Partidas Ao Vivo'}</span>
@@ -194,13 +201,7 @@ export default function Header() {
                         <Icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-amber-400'}`} />
                         <span>{item.label}</span>
                       </div>
-                      {item.badge > 0 && (
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                          isActive ? 'bg-black text-amber-400' : 'bg-red-600 text-on-accent animate-pulse'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      )}
+                      {item.badge > 0 && <LiveBadge count={item.badge} />}
                     </NavLink>
                   );
                 })}
