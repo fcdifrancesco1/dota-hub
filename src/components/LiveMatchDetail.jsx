@@ -8,7 +8,8 @@ import {
   RefreshCw,
   Castle,
   Radio,
-  Eye
+  Eye,
+  Info
 } from 'lucide-react';
 import {
   getHeroImg,
@@ -933,6 +934,16 @@ export default function LiveMatchDetail({
             <div className="xl:col-span-8 space-y-6 min-w-0">
               {hasPlayerData ? (
                 <>
+                  {matchData?.has_player_stats === false && (
+                    <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs text-gray-300">
+                      <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span>
+                        O feed público ao vivo da Valve informa apenas os jogadores e heróis desta partida.
+                        KDA, CS, patrimônio, GPM/XPM e itens aparecem aqui assim que a Valve publicar as
+                        estatísticas (ao fim do mapa, quando o replay for processado).
+                      </span>
+                    </div>
+                  )}
                   {renderTable(radiantPlayers, teamAName, true, scoreA)}
                   {renderTable(direPlayers, teamBName, false, scoreB)}
                 </>

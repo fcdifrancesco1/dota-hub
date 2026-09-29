@@ -190,9 +190,8 @@ function normalizeValveLiveGame(g) {
       : (g.dire_team?.team_name ? `${g.dire_team.team_name} Pos ${idx + 1}` : `Dire Pos ${idx + 1}`);
 
     const playerName = p.name || lobbyPlayerMap.get(p.account_id) || defaultName;
-    const durMin = duration > 0 ? duration / 60 : 1;
-    const gpm = p.gold_per_min || (p.net_worth ? Math.round(p.net_worth / durMin) : 0);
-    const xpm = p.xp_per_min || (p.level ? Math.round((p.level * 420) / durMin) : 0);
+    const gpm = p.gold_per_min ?? null;
+    const xpm = p.xp_per_min ?? null;
 
     const rawItems = [
       p.item0, p.item1, p.item2, p.item3, p.item4, p.item5,
@@ -206,7 +205,7 @@ function normalizeValveLiveGame(g) {
       name: playerName,
       account_id: p.account_id,
       hero_id: p.hero_id,
-      level: p.level ?? 1,
+      level: p.level ?? null,
       kills: p.kills ?? 0,
       deaths: p.death ?? p.deaths ?? 0,
       assists: p.assists ?? 0,
@@ -237,6 +236,7 @@ function normalizeValveLiveGame(g) {
 
   let finalRadPlayers = radPlayers;
   let finalDirePlayers = direPlayers;
+  let hasPlayerStats = radPlayers.length > 0;
   if (radPlayers.length === 0 && Array.isArray(g.players) && g.players.length > 0) {
     const mapped = mapCoordinatorPlayers(
       g.players,
@@ -245,6 +245,7 @@ function normalizeValveLiveGame(g) {
     );
     finalRadPlayers = mapped.radPlayers;
     finalDirePlayers = mapped.direPlayers;
+    hasPlayerStats = mapped.hasPlayerStats;
   }
 
   const rawPicksBans = [
@@ -254,12 +255,8 @@ function normalizeValveLiveGame(g) {
     ...(direSb.bans || []).map(b => ({ hero_id: b.hero_id, is_pick: false, team: 1 }))
   ];
 
-  const picks_bans = rawPicksBans.length >= 10
-    ? rawPicksBans
-    : generateCaptainsModeDraft(
-        finalRadPlayers.map(p => p.hero_id),
-        finalDirePlayers.map(p => p.hero_id)
-      );
+  // Draft somente quando a Valve envia os picks/bans (sem ordem inventada)
+  const picks_bans = rawPicksBans;
 
   const leagueName = g.league_id ? (KNOWN_LEAGUES[g.league_id] || g.stage_name || g.league_name || `Torneio (Liga ${g.league_id})`) : "Torneio Dota 2";
   const formatStr = g.series_type === 1 ? "BO3" : g.series_type === 2 ? "BO5" : (g.formato || "BO3");
@@ -309,66 +306,18 @@ function normalizeValveLiveGame(g) {
     radiant_players: finalRadPlayers,
     dire_players: finalDirePlayers,
     picks_bans,
+    has_player_stats: hasPlayerStats,
     is_live_telemetry: true,
     isGameDataActive: true
   };
 }
 
-const KNOWN_ROSTERS = {
-  'spirit': ['Satanic', 'Larl', 'Collapse', 'rue', 'Miposhka'],
-  'team spirit': ['Satanic', 'Larl', 'Collapse', 'rue', 'Miposhka'],
-  'nemesis': ['gotthejuice', 'Niku', 'MikSa`', 'Malady', 'Sneyking'],
-  'team nemesis': ['gotthejuice', 'Niku', 'MikSa`', 'Malady', 'Sneyking'],
-  'parivision': ['Crystallis', 'No[o]ne-', 'DM', '9Class', 'Dukalis'],
-  'pari vision': ['Crystallis', 'No[o]ne-', 'DM', '9Class', 'Dukalis'],
-  'levelup': ['Focus', 'Astral', 'Daxak', 'Danial', 'lorenof'],
-  'level up': ['Focus', 'Astral', 'Daxak', 'Danial', 'lorenof'],
-  'level up esports': ['Focus', 'Astral', 'Daxak', 'Danial', 'lorenof'],
-  'falcons': ['skiter', 'Malr1ne', 'ATF', 'Cr1t-', 'Sneyking'],
-  'team falcons': ['skiter', 'Malr1ne', 'ATF', 'Cr1t-', 'Sneyking'],
-  'liquid': ['miCKe', 'Nisha', 'SABERLIGHT', 'Boxi', 'Insania'],
-  'team liquid': ['miCKe', 'Nisha', 'SABERLIGHT', 'Boxi', 'Insania'],
-  'gladiators': ['watson', 'Quinn', 'Ace', 'tOfu', 'Seleri'],
-  'gaimin gladiators': ['watson', 'Quinn', 'Ace', 'tOfu', 'Seleri'],
-  'betboom': ['Pure~', 'kiyotaka', 'Miero', 'Save-', 'Kataomi`'],
-  'betboom team': ['Pure~', 'kiyotaka', 'Miero', 'Save-', 'Kataomi`'],
-  'tundra': ['Nightfall', 'Lorenof', '33', 'Saksa', 'Whitemon'],
-  'tundra esports': ['Nightfall', 'Lorenof', '33', 'Saksa', 'Whitemon'],
-  'xtreme': ['Ame', 'Xm', 'Xxs', 'XinQ', 'Dy'],
-  'xtreme gaming': ['Ame', 'Xm', 'Xxs', 'XinQ', 'Dy'],
-  'navi': ['Yuragi', 'sanctity-', 'bignum', 'Zayac', 'Malady'],
-  'natus vincere': ['Yuragi', 'sanctity-', 'bignum', 'Zayac', 'Malady'],
-  'gamerlegion': ['Nande', 'sanctity-', 'mastery', 'daze', 'LeBronDota'],
-  'hokori': ['Lumière', '4nalog', 'Vitaly', 'Thiolicor', 'Gardick'],
-  'conventus': ['lowskill', 'erase', 'WoE', 'TSA', 'HappyDyurara'],
-  'conventus stellarum': ['lowskill', 'erase', 'WoE', 'TSA', 'HappyDyurara'],
-  '1win': ['Munkushi~', 'CHIRA_JUNIOR', 'Cloud', 'swedenstrong', 'RESPECT'],
-  'heroic': ['K1', '4nalog', 'Davai Lama', 'Scofield', 'KJ'],
-  'beastcoast': ['payk', 'Lumpy', 'Vitaly', 'Elmisho', 'MoOz'],
-  'mouz': ['Ulnit', 'MidOne', 'Force', 'NARMAN', 'Bignum'],
-  'cloud9': ['watson', 'No[o]ne-', 'DM', 'Kataomi`', 'Fishman'],
-  'og': ['Timado', 'bzm', 'Wisper', 'Ari', 'Ceb']
-};
-
-function resolvePlayerName(teamName, slotNum, rawPlayer) {
-  if (rawPlayer?.name && !rawPlayer.name.includes("Pos ")) return rawPlayer.name;
-  if (rawPlayer?.personaname) return rawPlayer.personaname;
-  const cleanTeam = String(teamName || "").toLowerCase().replace(/[^a-z0-9]/g, '');
-  for (const [key, roster] of Object.entries(KNOWN_ROSTERS)) {
-    const cleanKey = key.replace(/[^a-z0-9]/g, '');
-    if (cleanTeam.includes(cleanKey) || cleanKey.includes(cleanTeam)) {
-      const idx = Math.min(4, Math.max(0, slotNum - 1));
-      if (roster[idx]) return roster[idx];
-    }
-  }
-  return `${teamName} Pos ${slotNum}`;
-}
-
-// Mapeia os 10 jogadores com telemetria coerente e realista baseada no placar oficial e vantagem de ouro
-function mapCoordinatorPlayers(rawPlayers, radTeamName, direTeamName, matchContext = {}) {
-  const { duration = 0, radScore = 0, direScore = 0, radLead = 0 } = matchContext;
-  const durMin = Math.max(1, duration / 60);
-
+// Mapeia os jogadores do feed do Game Coordinator (OpenDota /api/live).
+// Esse feed informa quem está jogando e com qual herói, mas NÃO traz
+// estatísticas por jogador (KDA, CS, ouro, nível, itens). Esses campos só são
+// preenchidos quando a fonte realmente os envia; do contrário ficam null e a
+// interface mostra "—". Nada é estimado.
+function mapCoordinatorPlayers(rawPlayers, radTeamName, direTeamName) {
   const radRaw = (rawPlayers || []).filter(p => p.team === 0 || (p.team_slot && p.team_slot <= 5 && p.team === undefined));
   const direRaw = (rawPlayers || []).filter(p => p.team === 1 || (p.team_slot && p.team_slot > 5 && p.team === undefined));
 
@@ -377,202 +326,56 @@ function mapCoordinatorPlayers(rawPlayers, radTeamName, direTeamName, matchConte
   radRaw.sort(sortBySlot);
   direRaw.sort(sortBySlot);
 
-  // Se já há estatísticas reais de abate no payload, preserva-as com prioridade máxima
-  const hasRealStats = (rawPlayers || []).some(p => p.kills !== undefined && p.kills !== null);
-
-  // Proporções competitivas padrão por posição no Dota 2 (Pos 1: Carry, Pos 2: Mid, Pos 3: Offlane, Pos 4: Soft Sup, Pos 5: Hard Sup)
-  const killWeights = [0.32, 0.36, 0.18, 0.09, 0.05];
-  const deathWeights = [0.12, 0.16, 0.24, 0.24, 0.24];
-  const assistWeights = [0.15, 0.20, 0.25, 0.22, 0.18];
-  const csWeights = [8.5, 7.8, 5.8, 2.8, 1.6];
-  const nwBaseWeights = [0.28, 0.26, 0.20, 0.14, 0.12];
-
-  // Builds competitivos por posição
-  const CORE_ITEMS_BY_POS = {
-    1: [63, 147, 116, 139, 156, 149],
-    2: [63, 204, 116, 108, 96, 250],
-    3: [50, 1, 116, 112, 110, 242],
-    4: [180, 254, 102, 653, 226, 100],
-    5: [214, 254, 102, 229, 226, 100]
-  };
+  const real = (v) => (v === undefined || v === null ? null : v);
 
   const mapTeam = (teamList, isRad) => {
     const teamName = isRad ? radTeamName : direTeamName;
-    const teamKills = isRad ? radScore : direScore;
-    const enemyKills = isRad ? direScore : radScore;
-
-    // Calcula patrimônio líquido da equipe consistente com tempo e vantagem oficial
-    const baseTeamNet = Math.round(durMin * 2200 + 4000);
-    const teamNetWorthTotal = isRad
-      ? Math.max(15000, baseTeamNet + Math.round(radLead / 2))
-      : Math.max(15000, baseTeamNet - Math.round(radLead / 2));
-
     return teamList.map((p, idx) => {
       const slotNum = p.team_slot || (idx + 1);
-      const posIdx = Math.min(4, Math.max(0, slotNum - 1));
-      const heroId = p.hero_id || 0;
-      const playerName = resolvePlayerName(teamName, slotNum, p);
-
-      if (hasRealStats && p.kills !== undefined && p.kills !== null) {
-        const rawItems = [
-          p.item0, p.item1, p.item2, p.item3, p.item4, p.item5,
-          p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5,
-          ...(Array.isArray(p.items) ? p.items : [])
-        ].filter(v => v !== undefined && v !== null && v !== 0 && v !== "");
-
-        return {
-          slot: isRad ? idx : idx + 5,
-          team_slot: slotNum,
-          player_slot: p.player_slot ?? (isRad ? idx : idx + 128),
-          name: playerName,
-          account_id: p.account_id,
-          hero_id: heroId,
-          level: p.level ?? Math.min(30, Math.max(1, Math.floor(durMin * 0.55 + (posIdx < 2 ? 3 : 1)))),
-          kills: p.kills ?? 0,
-          deaths: p.deaths ?? p.death ?? 0,
-          assists: p.assists ?? 0,
-          last_hits: p.last_hits ?? 0,
-          denies: p.denies ?? 0,
-          net_worth: p.net_worth || p.gold || Math.round(teamNetWorthTotal * nwBaseWeights[posIdx]),
-          gold: p.gold || p.net_worth || 0,
-          gpm: p.gold_per_min || p.gpm || Math.round((p.net_worth || 0) / durMin),
-          xpm: p.xp_per_min || p.xpm || Math.round(((p.level || 1) * 450) / durMin),
-          item_0: rawItems[0] || null,
-          item_1: rawItems[1] || null,
-          item_2: rawItems[2] || null,
-          item_3: rawItems[3] || null,
-          item_4: rawItems[4] || null,
-          item_5: rawItems[5] || null,
-          items: rawItems,
-          isRadiant: isRad,
-          is_pro: Boolean(p.is_pro),
-          country_code: p.country_code || null,
-          is_live_estimated: false
-        };
-      }
-
-      // Telemetria ao vivo calculada com alta precisão e coerência total com o placar de abates e vantagem de ouro
-      const calcKills = Math.max(0, Math.round(teamKills * killWeights[posIdx]));
-      const calcDeaths = Math.max(0, Math.round(enemyKills * deathWeights[posIdx]));
-      const calcAssists = Math.max(0, Math.round((teamKills * 1.7) * assistWeights[posIdx]));
-      const calcLH = Math.max(1, Math.round(durMin * csWeights[posIdx]));
-      const calcDN = Math.max(0, Math.round(calcLH * (posIdx < 2 ? 0.06 : 0.03)));
-      const playerNet = Math.round(teamNetWorthTotal * nwBaseWeights[posIdx]);
-      const playerLevel = Math.min(30, Math.max(1, Math.floor(durMin * 0.55 + (posIdx < 2 ? 4 : 2))));
-      const calcGpm = Math.round(playerNet / durMin);
-      const calcXpm = Math.round((playerLevel * 460) / durMin);
-
-      const targetItemsCount = playerNet > 22000 ? 6 : playerNet > 16000 ? 5 : playerNet > 10000 ? 4 : playerNet > 5000 ? 3 : 2;
-      const coreSet = CORE_ITEMS_BY_POS[slotNum] || CORE_ITEMS_BY_POS[1];
-      const items = coreSet.slice(0, targetItemsCount);
+      const items = [
+        p.item0, p.item1, p.item2, p.item3, p.item4, p.item5,
+        p.item_0, p.item_1, p.item_2, p.item_3, p.item_4, p.item_5,
+        ...(Array.isArray(p.items) ? p.items : [])
+      ].filter(v => v !== undefined && v !== null && v !== 0 && v !== "").slice(0, 6);
 
       return {
         slot: isRad ? idx : idx + 5,
         team_slot: slotNum,
-        player_slot: isRad ? idx : idx + 128,
-        name: playerName,
+        player_slot: p.player_slot ?? (isRad ? idx : idx + 128),
+        name: p.name || p.personaname || `${teamName} Pos ${slotNum}`,
         account_id: p.account_id,
-        hero_id: heroId,
-        level: playerLevel,
-        kills: calcKills,
-        deaths: calcDeaths,
-        assists: calcAssists,
-        last_hits: calcLH,
-        denies: calcDN,
-        net_worth: playerNet,
-        gold: playerNet,
-        gpm: calcGpm,
-        xpm: calcXpm,
+        hero_id: p.hero_id || 0,
+        level: real(p.level),
+        kills: real(p.kills),
+        deaths: real(p.deaths ?? p.death),
+        assists: real(p.assists),
+        last_hits: real(p.last_hits),
+        denies: real(p.denies),
+        net_worth: real(p.net_worth),
+        gold: real(p.gold),
+        gpm: real(p.gold_per_min ?? p.gpm),
+        xpm: real(p.xp_per_min ?? p.xpm),
         item_0: items[0] || null,
         item_1: items[1] || null,
         item_2: items[2] || null,
         item_3: items[3] || null,
         item_4: items[4] || null,
         item_5: items[5] || null,
-        items: items,
+        items,
         isRadiant: isRad,
         is_pro: Boolean(p.is_pro),
-        country_code: p.country_code || null,
-        is_live_estimated: true
+        country_code: p.country_code || null
       };
     });
   };
 
+  const radPlayers = mapTeam(radRaw, true);
+  const direPlayers = mapTeam(direRaw, false);
   return {
-    radPlayers: mapTeam(radRaw, true),
-    direPlayers: mapTeam(direRaw, false)
+    radPlayers,
+    direPlayers,
+    hasPlayerStats: [...radPlayers, ...direPlayers].some(p => p.kills !== null)
   };
-}
-
-// Gera a sequência cronológica oficial de Captain's Mode (Patch 7.34+)
-function generateCaptainsModeDraft(radHeroes, direHeroes) {
-  const defaultBans = [
-    69,  // Doom
-    65,  // Batrider
-    79,  // Shadow Demon
-    13,  // Puck
-    120, // Pangolier
-    66,  // Chen
-    10,  // Morphling
-    38,  // Beastmaster
-    136, // Marci
-    91,  // Io
-    23,  // Kunkka
-    74,  // Invoker
-    89,  // Naga Siren
-    93   // Slark
-  ];
-
-  const DRAFT_SEQUENCE = [
-    // Fase 1 - Bans
-    { order: 1, phase: 1, is_pick: false, team: 0, banIdx: 0 },
-    { order: 2, phase: 1, is_pick: false, team: 1, banIdx: 1 },
-    { order: 3, phase: 1, is_pick: false, team: 0, banIdx: 2 },
-    { order: 4, phase: 1, is_pick: false, team: 1, banIdx: 3 },
-    { order: 5, phase: 1, is_pick: false, team: 0, banIdx: 4 },
-    { order: 6, phase: 1, is_pick: false, team: 1, banIdx: 5 },
-    { order: 7, phase: 1, is_pick: false, team: 0, banIdx: 6 },
-    // Fase 1 - Picks
-    { order: 8, phase: 1, is_pick: true, team: 0, pickIdx: 0 },
-    { order: 9, phase: 1, is_pick: true, team: 1, pickIdx: 0 },
-    { order: 10, phase: 1, is_pick: true, team: 1, pickIdx: 1 },
-    { order: 11, phase: 1, is_pick: true, team: 0, pickIdx: 1 },
-
-    // Fase 2 - Bans
-    { order: 12, phase: 2, is_pick: false, team: 1, banIdx: 7 },
-    { order: 13, phase: 2, is_pick: false, team: 0, banIdx: 8 },
-    { order: 14, phase: 2, is_pick: false, team: 1, banIdx: 9 },
-    { order: 15, phase: 2, is_pick: false, team: 0, banIdx: 10 },
-    // Fase 2 - Picks
-    { order: 16, phase: 2, is_pick: true, team: 1, pickIdx: 2 },
-    { order: 17, phase: 2, is_pick: true, team: 0, pickIdx: 2 },
-    { order: 18, phase: 2, is_pick: true, team: 1, pickIdx: 3 },
-    { order: 19, phase: 2, is_pick: true, team: 0, pickIdx: 3 },
-
-    // Fase 3 - Bans
-    { order: 20, phase: 3, is_pick: false, team: 0, banIdx: 11 },
-    { order: 21, phase: 3, is_pick: false, team: 1, banIdx: 12 },
-    { order: 22, phase: 3, is_pick: false, team: 0, banIdx: 13 },
-    // Fase 3 - Picks
-    { order: 23, phase: 3, is_pick: true, team: 0, pickIdx: 4 },
-    { order: 24, phase: 3, is_pick: true, team: 1, pickIdx: 4 }
-  ];
-
-  return DRAFT_SEQUENCE.map(step => {
-    let heroId = 0;
-    if (step.is_pick) {
-      heroId = step.team === 0 ? (radHeroes[step.pickIdx] || 0) : (direHeroes[step.pickIdx] || 0);
-    } else {
-      heroId = defaultBans[step.banIdx] || (step.banIdx + 1);
-    }
-    return {
-      order: step.order,
-      phase: step.phase,
-      is_pick: step.is_pick,
-      team: step.team,
-      hero_id: heroId
-    };
-  });
 }
 
 // Decodifica o building_state de 32 bits do Dota 2 Coordinator (CMsgConnectedPlayers)
@@ -686,16 +489,16 @@ function normalizeOpenDotaLive(g) {
   const radTeamName = g.team_name_radiant || "Radiant";
   const direTeamName = g.team_name_dire || "Dire";
 
-  const { radPlayers, direPlayers } = mapCoordinatorPlayers(
+  const { radPlayers, direPlayers, hasPlayerStats } = mapCoordinatorPlayers(
     rawPlayers,
     radTeamName,
-    direTeamName,
-    { duration, radScore, direScore, radLead }
+    direTeamName
   );
 
   const radHeroIds = radPlayers.map(p => p.hero_id);
   const direHeroIds = direPlayers.map(p => p.hero_id);
-  const picks_bans = generateCaptainsModeDraft(radHeroIds, direHeroIds);
+  // O feed do Coordinator não informa bans nem a ordem do draft
+  const picks_bans = [];
 
   const leagueName = g.league_id ? (KNOWN_LEAGUES[g.league_id] || `Torneio (Liga ${g.league_id})`) : "Torneio Dota 2";
   const formatStr = g.series_type === 2 ? "BO5" : "BO3";
@@ -763,6 +566,7 @@ function normalizeOpenDotaLive(g) {
     team_id_radiant: g.team_id_radiant || 0,
     team_id_dire: g.team_id_dire || 0,
     picks_bans,
+    has_player_stats: hasPlayerStats,
     is_live_telemetry: true,
     isGameDataActive: true,
     series_id: g.series_id || null,
