@@ -108,8 +108,9 @@ export default function LiveMatchesSection({
                   <div className="flex items-center gap-2.5 min-w-0 justify-start">
                     <TeamLogo
                       teamName={rName}
+                      teamId={isLiquipedia ? null : (g.radiant_team?.team_id || g.team_id_radiant || g.radiant_team_id)}
                       logoUrl={rLogo}
-                      className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5"
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/40 border border-white/10 p-0.5"
                     />
                     <div className="min-w-0">
                       <span className="text-xs sm:text-sm font-black text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={rName}>
@@ -155,8 +156,9 @@ export default function LiveMatchesSection({
                     </div>
                     <TeamLogo
                       teamName={dName}
+                      teamId={isLiquipedia ? null : (g.dire_team?.team_id || g.team_id_dire || g.dire_team_id)}
                       logoUrl={dLogo}
-                      className="w-7 h-7 sm:w-8 h-8 rounded-lg bg-black/40 border border-white/10 p-0.5"
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/40 border border-white/10 p-0.5"
                     />
                   </div>
                 </div>

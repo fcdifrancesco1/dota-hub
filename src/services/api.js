@@ -275,17 +275,23 @@ export function isSeriesMatch(teamA1, teamB1, teamA2, teamB2) {
          (isSameTeamMatch(teamA1, teamB2) && isSameTeamMatch(teamB1, teamA2));
 }
 
-export function getHeroImg(constants, heroId) {
+export function getHeroImg(arg1, arg2) {
+  const constants = (typeof arg1 === 'object' && arg1 !== null) ? arg1 : arg2;
+  const heroId = (typeof arg1 === 'number' || (typeof arg1 === 'string' && /^\d+$/.test(arg1))) ? arg1 : arg2;
   const h = constants?.heroes?.[heroId];
   return h ? `${STEAM_CDN}${h.img}` : "";
 }
 
-export function getHeroName(constants, heroId) {
+export function getHeroName(arg1, arg2) {
+  const constants = (typeof arg1 === 'object' && arg1 !== null) ? arg1 : arg2;
+  const heroId = (typeof arg1 === 'number' || (typeof arg1 === 'string' && /^\d+$/.test(arg1))) ? arg1 : arg2;
   const h = constants?.heroes?.[heroId];
   return h ? h.localized_name : `Herói ${heroId}`;
 }
 
-export function getItemImg(constants, itemId) {
+export function getItemImg(arg1, arg2) {
+  const constants = (typeof arg1 === 'object' && arg1 !== null) ? arg1 : arg2;
+  const itemId = (typeof arg1 === 'number' || (typeof arg1 === 'string' && /^\d+$/.test(arg1))) ? arg1 : arg2;
   const it = constants?.itemsById?.[itemId];
   return it ? `${STEAM_CDN}${it.img}` : "";
 }

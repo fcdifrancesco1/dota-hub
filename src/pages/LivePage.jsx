@@ -15,7 +15,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { getTeamLogo } from '../utils/teamLogos';
+import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import { getHeroImg, getHeroName } from '../services/api';
 
 const DEFAULT_STREAMS = [
@@ -201,11 +201,11 @@ export default function LivePage() {
                     <div className="flex items-center justify-between gap-4 py-2">
                       {/* RADIANT */}
                       <div className="flex flex-col items-center flex-1 text-center">
-                        <img
-                          src={getTeamLogo(radName, game.radiant_logo)}
-                          alt={radName}
-                          className="w-14 h-14 object-contain rounded-xl mb-2"
-                          onError={(e) => { e.target.src = '/placeholder-team.png'; }}
+                        <TeamLogo
+                          teamName={radName}
+                          teamId={game.team_id_radiant || game.radiant_team_id || game.radiant_team?.team_id}
+                          logoUrl={game.radiant_logo || game.logoA}
+                          className="w-14 h-14 rounded-xl mb-2 bg-black/40 border border-white/10 p-1"
                         />
                         <span className="text-xs font-bold text-emerald-400 truncate max-w-[130px] block">
                           {radName}
@@ -236,11 +236,11 @@ export default function LivePage() {
 
                       {/* DIRE */}
                       <div className="flex flex-col items-center flex-1 text-center">
-                        <img
-                          src={getTeamLogo(direName, game.dire_logo)}
-                          alt={direName}
-                          className="w-14 h-14 object-contain rounded-xl mb-2"
-                          onError={(e) => { e.target.src = '/placeholder-team.png'; }}
+                        <TeamLogo
+                          teamName={direName}
+                          teamId={game.team_id_dire || game.dire_team_id || game.dire_team?.team_id}
+                          logoUrl={game.dire_logo || game.logoB}
+                          className="w-14 h-14 rounded-xl mb-2 bg-black/40 border border-white/10 p-1"
                         />
                         <span className="text-xs font-bold text-red-400 truncate max-w-[130px] block">
                           {direName}
