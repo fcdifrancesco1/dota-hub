@@ -5,13 +5,21 @@ export const SITE_CONFIG = {
   shortName: "DotaHub",
   version: "2.0.0",
 
-  // Times favoritos em destaque padrão (IDs da OpenDota / Valve)
-  // Falcons: 8255888, Liquid: 2163
-  favoriteTeamIds: [8255888, 2163],
+  // Times favoritos em destaque na página inicial (IDs da OpenDota)
+  // Team Falcons (9247354) saiu do Dota 2 e foi removida do destaque.
   favoriteTeams: [
-    { id: 9247354, name: "Team Falcons", tag: "Falcons" },
     { id: 2163, name: "Team Liquid", tag: "Liquid" }
   ],
+
+  // Ajustes manuais de elenco, para mudanças que a OpenDota ainda não reflete.
+  // A escalação vem da última partida do time; aqui trocamos quem saiu/entrou.
+  rosterOverrides: {
+    2163: {
+      // Nisha se afastou do Dota 2; MidOne assumiu a vaga
+      out: [201358612],
+      in: [{ accountId: 116585378, name: "MidOne" }]
+    }
+  },
 
   // Identidade Visual
   colors: {

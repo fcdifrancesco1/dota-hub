@@ -17,11 +17,11 @@ export default function FavoritesHighlight() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
           <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-          <span>Times Favoritos em Destaque</span>
+          <span>{favTeams.length > 1 ? 'Times Favoritos em Destaque' : 'Time Favorito em Destaque'}</span>
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={`grid grid-cols-1 gap-4 ${favTeams.length > 1 ? 'md:grid-cols-2' : ''}`}>
         {favTeams.map((fav) => {
           // Busca última série concluída deste time
           const lastSeries = (finishedSeries || []).find(

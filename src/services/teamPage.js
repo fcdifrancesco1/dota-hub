@@ -5,6 +5,7 @@ import {
   fetchWithTimeout,
   resolveTeamFromList
 } from './api';
+import { SITE_CONFIG } from '../config/siteConfig';
 
 // Dados da página do time, todos reais da OpenDota:
 //  - /teams/{id}            → nome, tag, logo, rating, vitórias/derrotas
@@ -173,7 +174,7 @@ export async function fetchPlayerStats(accountId) {
 
 /** Time, elenco atual e últimas séries. As estatísticas dos jogadores vêm à parte (fetchPlayerStats). */
 export async function fetchTeamPage(teamId) {
-  const key = `team_page_v2_${teamId}`;
+  const key = `team_page_v3_${teamId}`;
   const cached = getCached(key, TEAM_TTL);
   if (cached) return cached;
 
@@ -213,6 +214,17 @@ export async function fetchTeamPage(teamId) {
     roster = playerList
       .filter((p) => p.is_current_team_member && p.account_id)
       .map((p) => toRosterEntry(p.account_id, p.name));
+  }
+  // Trocas de elenco que a OpenDota ainda não reflete (siteConfig.rosterOverrides)
+  const override = SITE_CONFIG.rosterOverrides?.[teamId];
+  if (override) {
+    const out = new Set(override.out || []);
+    roster = roster.filter((p) => !out.has(p.accountId));
+    for (const p of override.in || []) {
+      if (!roster.some((r) => r.accountId === p.accountId)) {
+        roster.push({ ...toRosterEntry(p.accountId, p.name), name: p.name, isNewcomer: true });
+      }
+    }
   }
   roster.sort((a, b) => b.gamesWithTeam - a.gamesWithTeam);
 

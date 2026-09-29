@@ -331,9 +331,17 @@ function PlayerRow({ player, info, constants }) {
         </div>
       </td>
       <td className="p-3 text-center font-mono whitespace-nowrap">
-        <span className="text-white font-bold">{player.gamesWithTeam}</span>
-        <span className="text-gray-500"> jogos · </span>
-        <span className="text-amber-400 font-bold">{pct(player.winsWithTeam, player.gamesWithTeam)}%</span>
+        {player.gamesWithTeam > 0 ? (
+          <>
+            <span className="text-white font-bold">{player.gamesWithTeam}</span>
+            <span className="text-gray-500"> jogos · </span>
+            <span className="text-amber-400 font-bold">{pct(player.winsWithTeam, player.gamesWithTeam)}%</span>
+          </>
+        ) : (
+          <span className="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase font-sans">
+            {player.isNewcomer ? 'Recém-chegado' : 'Sem jogos'}
+          </span>
+        )}
       </td>
       <td className="p-3 text-center font-mono">{stats ? stats.matches : dash}</td>
       <td className="p-3 text-center font-mono font-bold">
