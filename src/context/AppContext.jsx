@@ -37,7 +37,6 @@ export function AppProvider({ children }) {
   const [lastUpdated, setLastUpdated] = useState('');
 
   // Modais globais
-  const [selectedSeries, setSelectedSeries] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedHero, setSelectedHero] = useState(null);
 
@@ -138,8 +137,6 @@ export function AppProvider({ children }) {
         liveCount,
         refreshData: () => loadData(true),
         // Modais
-        selectedSeries,
-        setSelectedSeries,
         selectedTeam,
         setSelectedTeam,
         selectedHero,

@@ -2,10 +2,12 @@ import React from 'react';
 import { Trophy, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { useOpenSeries } from '../../utils/matchRoute';
 import TeamLogo from '../../utils/teamLogos';
 
 export default function RecentResultsHome() {
-  const { finishedSeries, setSelectedSeries, loading } = useApp();
+  const { finishedSeries, loading } = useApp();
+  const openSeries = useOpenSeries();
 
   const recent10 = (finishedSeries || []).slice(0, 8);
 
@@ -59,7 +61,7 @@ export default function RecentResultsHome() {
               return (
                 <div
                   key={series.series_id || series.id || idx}
-                  onClick={() => setSelectedSeries(series)}
+                  onClick={() => openSeries(series)}
                   className="bg-surface-2 hover:bg-surface-2 border border-surface-3 hover:border-amber-500/30 rounded-xl p-3 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">

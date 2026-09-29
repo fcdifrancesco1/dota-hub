@@ -26,15 +26,12 @@ import AnalysisDetailPage from './pages/AnalysisDetailPage';
 import AdminPage from './pages/AdminPage';
 
 // Modais Globais
-import MatchDetailModal from './components/MatchDetailModal';
 import TeamProfileModal from './components/TeamProfileModal';
 import HeroDetailModal from './components/HeroDetailModal';
 
 function AppContent() {
   const {
     constants,
-    selectedSeries,
-    setSelectedSeries,
     selectedTeam,
     setSelectedTeam,
     selectedHero,
@@ -72,23 +69,12 @@ function AppContent() {
 
       <Footer />
 
-      {/* MODAIS GLOBAIS DE TELEMETRIA E DETALHES */}
-      {selectedSeries && (
-        <MatchDetailModal
-          series={selectedSeries}
-          constants={constants}
-          onClose={() => setSelectedSeries(null)}
-          onSelectTeam={setSelectedTeam}
-          onSelectHero={setSelectedHero}
-        />
-      )}
-
+      {/* MODAIS GLOBAIS DE DETALHES */}
       {selectedTeam && (
         <TeamProfileModal
           team={selectedTeam}
           constants={constants}
           onClose={() => setSelectedTeam(null)}
-          onSelectMatch={setSelectedSeries}
           onSelectHero={setSelectedHero}
         />
       )}

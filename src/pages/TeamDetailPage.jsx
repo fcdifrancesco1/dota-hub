@@ -44,7 +44,7 @@ export default function TeamDetailPage() {
   const [team, setTeam] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { finishedSeries, setSelectedSeries, constants } = useApp();
+  const { finishedSeries, constants } = useApp();
 
   useEffect(() => {
     setLoading(true);

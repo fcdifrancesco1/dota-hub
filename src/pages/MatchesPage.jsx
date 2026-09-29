@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Swords, Filter, Calendar, Search, Trophy, ChevronRight, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useOpenSeries } from '../utils/matchRoute';
 import TeamLogo from '../utils/teamLogos';
 
 export default function MatchesPage() {
-  const { finishedSeries, setSelectedSeries, upcomingMatches } = useApp();
+  const { finishedSeries, upcomingMatches } = useApp();
+  const openSeries = useOpenSeries();
   const [filterMode, setFilterMode] = useState('finished'); // 'finished' | 'upcoming'
   const [selectedTournament, setSelectedTournament] = useState('all');
   const [selectedTeam, setSelectedTeam] = useState('all');
@@ -235,7 +237,7 @@ export default function MatchesPage() {
             return (
               <div
                 key={s.series_id || s.id || idx}
-                onClick={() => setSelectedSeries(s)}
+                onClick={() => openSeries(s)}
                 className={`${cardClass} cursor-pointer`}
               >
                 {cardContent}

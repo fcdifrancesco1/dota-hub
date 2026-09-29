@@ -18,6 +18,7 @@ import {
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
 import { fetchTournaments, fetchTournamentHeroStats, getHeroImg, getHeroName } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { useOpenSeries } from '../utils/matchRoute';
 import { useTheme } from '../context/ThemeContext';
 import TeamLogo from '../utils/teamLogos';
 import { formatDateRange, formatPrize, tierLabel, statusLabel, leagueFromDatabase } from '../utils/tournamentFormat';
@@ -26,7 +27,8 @@ const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
 export default function TournamentDetailPage() {
   const { id } = useParams();
-  const { tournamentsList, finishedSeries, upcomingMatches, setSelectedSeries, constants } = useApp();
+  const { tournamentsList, finishedSeries, upcomingMatches, constants } = useApp();
+  const openSeries = useOpenSeries();
   const { theme } = useTheme();
   const [tournament, setTournament] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -259,7 +261,7 @@ export default function TournamentDetailPage() {
                   return (
                     <button
                       key={s.series_id || idx}
-                      onClick={() => setSelectedSeries(s)}
+                      onClick={() => openSeries(s)}
                       className="w-full bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-xl p-4 flex items-center justify-between gap-4 transition-all group text-left"
                     >
                       <span className="text-[10px] font-mono text-gray-500 w-20 shrink-0">{s.dateStr || ''}</span>
