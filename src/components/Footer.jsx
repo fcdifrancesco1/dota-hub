@@ -7,7 +7,7 @@ export default function Footer() {
   const { lastUpdated } = useApp();
 
   return (
-    <footer className="mt-20 border-t border-[#212838] bg-[#0A0C10] text-gray-400 text-xs">
+    <footer className="mt-20 border-t border-line bg-canvas text-gray-400 text-xs">
       <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
           
@@ -105,7 +105,7 @@ export default function Footer() {
                 href={SITE_CONFIG.community.discord}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#5865F2]/20 border border-[#5865F2]/40 text-[#5865F2] hover:bg-[#5865F2] hover:text-white text-xs font-bold transition-all"
+                className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#5865F2]/20 border border-[#5865F2]/40 text-[#3C45C8] dark:text-[#5865F2] hover:bg-[#5865F2] hover:text-on-accent text-xs font-bold transition-all"
               >
                 <span>Discord Oficial</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -115,7 +115,7 @@ export default function Footer() {
                   href={SITE_CONFIG.community.whatsapp}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#25D366]/20 border border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366] hover:text-white text-xs font-bold transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#25D366]/20 border border-[#25D366]/40 text-[#0B6630] dark:text-[#25D366] hover:bg-[#25D366] hover:text-on-accent text-xs font-bold transition-all"
                 >
                   <span>Grupo WhatsApp</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -126,7 +126,7 @@ export default function Footer() {
         </div>
 
         {/* Linha Final de Copyright */}
-        <div className="pt-8 border-t border-[#212838] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-gray-500">
+        <div className="pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-gray-500">
           <div>
             © {new Date().getFullYear()} {SITE_CONFIG.name}. Todos os direitos reservados. Dota 2 é marca registrada da Valve Corporation.
           </div>

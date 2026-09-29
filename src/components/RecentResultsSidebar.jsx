@@ -21,7 +21,7 @@ export default function RecentResultsSidebar({
   });
 
   return (
-    <aside className="w-full lg:w-[320px] bg-[#0E1118]/80 backdrop-blur-xl border-r border-white/10 flex flex-col h-full overflow-hidden">
+    <aside className="w-full lg:w-[320px] bg-surface/80 backdrop-blur-xl border-r border-white/10 flex flex-col h-full overflow-hidden">
       <div className="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
         <div className="flex items-center gap-2 font-extrabold uppercase text-xs tracking-wider text-amber-400">
           <History className="w-4 h-4 text-amber-400" />
@@ -55,7 +55,7 @@ export default function RecentResultsSidebar({
               <div
                 key={idx}
                 onClick={() => onSelectSeries(s)}
-                className="group relative bg-[#161A24]/70 hover:bg-[#1C2230]/90 border border-white/10 hover:border-amber-500/50 rounded-xl p-3 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-lg hover:shadow-amber-500/5 hover:-translate-y-0.5"
+                className="group relative bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-amber-500/50 rounded-xl p-3 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-lg hover:shadow-amber-500/5 hover:-translate-y-0.5"
               >
                 {/* Cabeçalho do Card */}
                 <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2 mb-2 text-[10px]">

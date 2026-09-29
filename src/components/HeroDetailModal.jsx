@@ -62,7 +62,7 @@ export default function HeroDetailModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-4xl bg-[#0C0F16] border border-amber-500/40 rounded-2xl p-4 sm:p-6 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-4xl bg-surface border border-amber-500/40 rounded-2xl p-4 sm:p-6 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
       >
         {/* BOTÃO FECHAR */}
         <button
@@ -204,7 +204,7 @@ export default function HeroDetailModal({
 
                   {/* Detalhes da Habilidade Selecionada */}
                   {selectedAbility && (
-                    <div className="bg-[#141824] border border-white/10 rounded-xl p-4 space-y-3">
+                    <div className="bg-surface-2 border border-white/10 rounded-xl p-4 space-y-3">
                       <div className="flex items-start gap-3.5">
                         <img
                           src={selectedAbility.img}
@@ -248,7 +248,7 @@ export default function HeroDetailModal({
                   {/* Upgrades de Aghanim's Scepter e Shard */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     {/* Scepter */}
-                    <div className="bg-[#141824] border border-cyan-500/30 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-cyan-500/30 rounded-xl p-3.5 space-y-2">
                       <div className="flex items-center gap-2.5">
                         <img
                           src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
@@ -268,7 +268,7 @@ export default function HeroDetailModal({
                     </div>
 
                     {/* Shard */}
-                    <div className="bg-[#141824] border border-purple-500/30 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-purple-500/30 rounded-xl p-3.5 space-y-2">
                       <div className="flex items-center gap-2.5">
                         <img
                           src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
@@ -301,7 +301,7 @@ export default function HeroDetailModal({
                     {details.talents.map((t, idx) => (
                       <div
                         key={idx}
-                        className="bg-[#141824] border border-white/10 rounded-xl p-3 flex items-center justify-between gap-2 sm:gap-4 text-xs font-mono"
+                        className="bg-surface-2 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-2 sm:gap-4 text-xs font-mono"
                       >
                         <div className="flex-1 text-right text-gray-200 font-medium truncate sm:whitespace-normal">
                           {t.left}
@@ -327,7 +327,7 @@ export default function HeroDetailModal({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
                     {/* GPM */}
-                    <div className="bg-[#141824] border border-white/10 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
                       <span className="text-[11px] font-extrabold uppercase text-amber-400">Ouro Por Minuto (GPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-black/40 p-2 rounded-lg border border-white/5">
@@ -346,7 +346,7 @@ export default function HeroDetailModal({
                     </div>
 
                     {/* XPM */}
-                    <div className="bg-[#141824] border border-white/10 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
                       <span className="text-[11px] font-extrabold uppercase text-cyan-400">XP Por Minuto (XPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-black/40 p-2 rounded-lg border border-white/5">
@@ -365,7 +365,7 @@ export default function HeroDetailModal({
                     </div>
 
                     {/* KILLS PER MIN */}
-                    <div className="bg-[#141824] border border-white/10 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
                       <span className="text-[11px] font-extrabold uppercase text-rose-400">Abates Por Minuto (KPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-black/40 p-2 rounded-lg border border-white/5">
@@ -384,7 +384,7 @@ export default function HeroDetailModal({
                     </div>
 
                     {/* LAST HITS PER MIN */}
-                    <div className="bg-[#141824] border border-white/10 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
                       <span className="text-[11px] font-extrabold uppercase text-emerald-400">Last Hits Por Minuto (CS)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-black/40 p-2 rounded-lg border border-white/5">
@@ -421,7 +421,7 @@ export default function HeroDetailModal({
                           <div
                             key={idx}
                             onClick={() => onSelectAnotherHero && onSelectAnotherHero({ id: m.hero_id, name: mName })}
-                            className="bg-[#141824] hover:bg-[#1A2030] border border-emerald-500/30 rounded-xl p-2.5 px-3 flex items-center justify-between cursor-pointer transition-colors"
+                            className="bg-surface-2 hover:bg-surface-3 border border-emerald-500/30 rounded-xl p-2.5 px-3 flex items-center justify-between cursor-pointer transition-colors"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <img src={mImg} alt="" className="w-9 h-6 rounded object-cover border border-emerald-500/40" />
@@ -450,7 +450,7 @@ export default function HeroDetailModal({
                           <div
                             key={idx}
                             onClick={() => onSelectAnotherHero && onSelectAnotherHero({ id: m.hero_id, name: mName })}
-                            className="bg-[#141824] hover:bg-[#1A2030] border border-rose-500/30 rounded-xl p-2.5 px-3 flex items-center justify-between cursor-pointer transition-colors"
+                            className="bg-surface-2 hover:bg-surface-3 border border-rose-500/30 rounded-xl p-2.5 px-3 flex items-center justify-between cursor-pointer transition-colors"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <img src={mImg} alt="" className="w-9 h-6 rounded object-cover border border-rose-500/40" />

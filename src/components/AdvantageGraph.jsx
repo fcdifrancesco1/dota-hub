@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
 import { Coins, Zap } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+
+// Cores do SVG por tema (atributos SVG não leem as classes do Tailwind)
+const CHART_COLORS = {
+  dark: { radiant: '#00E676', dire: '#FF4655', gold: '#E5A93C', xp: '#00E5FF', ink: '255, 255, 255', dotStroke: '#fff' },
+  light: { radiant: '#0A7F58', dire: '#C8102E', gold: '#023266', xp: '#1F6F99', ink: '24, 32, 43', dotStroke: '#fff' }
+};
 
 export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName = "Radiant", direName = "Dire" }) {
   const [activeType, setActiveType] = useState('gold'); // 'gold' | 'xp'
   const [hoverIndex, setHoverIndex] = useState(null);
+  const { theme } = useTheme();
+  const C = CHART_COLORS[theme];
 
   const data = activeType === 'gold' ? goldAdv : xpAdv;
 
@@ -59,7 +68,7 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
             {hoveredMinute !== null ? (
               <span>
                 Minuto <strong className="text-white">{hoveredMinute}m</strong>: {' '}
-                <strong style={{ color: hoveredValue >= 0 ? 'var(--accent-radiant, #00E676)' : 'var(--accent-dire, #FF4655)' }}>
+                <strong style={{ color: hoveredValue >= 0 ? C.radiant : C.dire }}>
                   {hoveredValue >= 0 ? `${radiantName} +${Math.abs(hoveredValue).toLocaleString()}` : `${direName} +${Math.abs(hoveredValue).toLocaleString()}`}
                 </strong>
               </span>
@@ -109,12 +118,12 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
         >
           <defs>
             <linearGradient id="gradientRadiant" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00E676" stopOpacity="0.45" />
-              <stop offset="100%" stopColor="#00E676" stopOpacity="0.02" />
+              <stop offset="0%" stopColor={C.radiant} stopOpacity="0.45" />
+              <stop offset="100%" stopColor={C.radiant} stopOpacity="0.02" />
             </linearGradient>
             <linearGradient id="gradientDire" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="#FF4655" stopOpacity="0.45" />
-              <stop offset="100%" stopColor="#FF4655" stopOpacity="0.02" />
+              <stop offset="0%" stopColor={C.dire} stopOpacity="0.45" />
+              <stop offset="100%" stopColor={C.dire} stopOpacity="0.02" />
             </linearGradient>
           </defs>
 
@@ -124,16 +133,16 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
             y1={zeroY}
             x2={width - paddingX}
             y2={zeroY}
-            stroke="rgba(255, 255, 255, 0.2)"
+            stroke={`rgba(${C.ink}, 0.2)`}
             strokeDasharray="4 4"
             strokeWidth="1"
           />
 
           {/* Rótulos Radiant / Dire */}
-          <text x={paddingX} y={paddingY + 8} fill="#00E676" fontSize="10" fontWeight="700" opacity="0.85">
+          <text x={paddingX} y={paddingY + 8} fill={C.radiant} fontSize="10" fontWeight="700" opacity="0.85">
             ▲ {radiantName} (+{(absMax).toLocaleString()})
           </text>
-          <text x={paddingX} y={height - 8} fill="#FF4655" fontSize="10" fontWeight="700" opacity="0.85">
+          <text x={paddingX} y={height - 8} fill={C.dire} fontSize="10" fontWeight="700" opacity="0.85">
             ▼ {direName} (+{(absMax).toLocaleString()})
           </text>
 
@@ -143,8 +152,8 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
             const x = getX(minIndex);
             return (
               <g key={idx}>
-                <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                <text x={x} y={height - 6} fill="rgba(255,255,255,0.4)" fontSize="9" textAnchor="middle" fontFamily="monospace">
+                <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke={`rgba(${C.ink}, 0.06)`} strokeWidth="1" />
+                <text x={x} y={height - 6} fill={`rgba(${C.ink}, 0.5)`} fontSize="9" textAnchor="middle" fontFamily="monospace">
                   {minIndex}m
                 </text>
               </g>
@@ -157,7 +166,7 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
           {/* Linha Principal da Vantagem */}
           <polyline
             fill="none"
-            stroke={activeType === 'gold' ? '#E5A93C' : '#00E5FF'}
+            stroke={activeType === 'gold' ? C.gold : C.xp}
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -172,7 +181,7 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
                 y1={paddingY}
                 x2={getX(hoveredMinute)}
                 y2={height - paddingY}
-                stroke="#fff"
+                stroke={`rgb(${C.ink})`}
                 strokeWidth="1"
                 strokeDasharray="2 2"
                 opacity="0.8"
@@ -181,8 +190,8 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
                 cx={getX(hoveredMinute)}
                 cy={getY(hoveredValue)}
                 r="5"
-                fill={hoveredValue >= 0 ? '#00E676' : '#FF4655'}
-                stroke="#fff"
+                fill={hoveredValue >= 0 ? C.radiant : C.dire}
+                stroke={C.dotStroke}
                 strokeWidth="2"
               />
             </g>

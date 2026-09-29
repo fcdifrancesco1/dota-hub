@@ -57,7 +57,7 @@ export default function PlayerDetailPage() {
       </Link>
 
       {/* HERO DO JOGADOR */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#141A28] via-[#0E1119] to-[#181116] border border-[#212838] p-6 sm:p-8 mb-8 shadow-2xl">
+      <div className="rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">
         <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
           <PlayerAvatar
             accountId={player.accountId}
@@ -88,34 +88,34 @@ export default function PlayerDetailPage() {
 
       {/* MÉDIAS ESTATÍSTICAS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-10">
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">KDA Médio</span>
           <div className="text-xl font-black text-amber-400 font-mono">{player.stats.kda}</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">GPM Médio</span>
           <div className="text-xl font-black text-white font-mono">{player.stats.gpm}</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">XPM Médio</span>
           <div className="text-xl font-black text-white font-mono">{player.stats.xpm}</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Last Hits / min</span>
           <div className="text-xl font-black text-white font-mono">{player.stats.lastHits}</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Part. em Kills</span>
           <div className="text-xl font-black text-emerald-400 font-mono">{player.stats.killParticipation}</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Taxa de Vitória</span>
           <div className="text-xl font-black text-emerald-400 font-mono">{player.stats.winrate}</div>
         </div>
       </div>
 
       {/* HERÓIS MAIS JOGADOS */}
-      <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl mb-10">
+      <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl mb-10">
         <h3 className="text-sm font-black uppercase text-white mb-4 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-400" />
           <span>Heróis Mais Jogados no Circuito Profissional</span>
@@ -123,7 +123,7 @@ export default function PlayerDetailPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {player.topHeroes.map((h) => (
-            <div key={h.id} className="bg-[#11141E] border border-white/5 rounded-xl p-3 text-center">
+            <div key={h.id} className="bg-surface-2 border border-white/5 rounded-xl p-3 text-center">
               <img
                 src={getHeroImg(h.id, constants)}
                 alt={h.name}

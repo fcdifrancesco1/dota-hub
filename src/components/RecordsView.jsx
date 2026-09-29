@@ -112,7 +112,7 @@ export default function RecordsView({
         <div className="space-y-4">
           {/* O RECORDISTA MUNDIAL #1 EM DESTAQUE */}
           {records[0] && (
-            <div className="bg-gradient-to-r from-amber-500/20 via-[#161A24] to-[#141824] border border-amber-500/50 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+            <div className="bg-gradient-to-r from-amber-500/20 via-surface-2 to-surface-2 border border-amber-500/50 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-black text-2xl shadow-lg shadow-amber-500/40 shrink-0">
                   #1
@@ -185,9 +185,9 @@ export default function RecordsView({
           )}
 
           {/* TABELA DO TOP 2 AO FINAL */}
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0E1118]/80 backdrop-blur-xl">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface/80 backdrop-blur-xl">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+              <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
                 <tr>
                   <th className="p-3.5 pl-5 w-16 text-center">Posição</th>
                   <th className="p-3.5">Jogador & Equipe</th>

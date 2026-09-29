@@ -61,7 +61,7 @@ export default function TournamentDetailPage() {
       </Link>
 
       {/* HERO BANNER DO CAMPEONATO */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#141A28] via-[#0E1119] to-[#161219] border border-[#212838] p-6 sm:p-8 mb-8 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center p-3 shadow-inner">
@@ -103,7 +103,7 @@ export default function TournamentDetailPage() {
       </div>
 
       {/* ABAS DO CAMPEONATO (SEÇÃO 6.3 DO PROMPT) */}
-      <div className="flex items-center gap-2 border-b border-[#212838] pb-3 mb-8 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-line pb-3 mb-8 overflow-x-auto">
         {[
           { id: 'matches', label: 'Partidas da Série', icon: Swords },
           { id: 'standings', label: 'Tabela de Classificação', icon: Trophy },
@@ -133,7 +133,7 @@ export default function TournamentDetailPage() {
       {activeTab === 'matches' && (
         <div className="space-y-3">
           {matches.length === 0 ? (
-            <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-8 text-center text-xs text-gray-400">
+            <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
               Nenhuma partida registrada para este campeonato ainda.
             </div>
           ) : (
@@ -149,7 +149,7 @@ export default function TournamentDetailPage() {
                 <div
                   key={s.series_id || idx}
                   onClick={() => setSelectedSeries(s)}
-                  className="bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/40 rounded-xl p-4 transition-all cursor-pointer flex items-center justify-between gap-4 shadow-lg group"
+                  className="bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-xl p-4 transition-all cursor-pointer flex items-center justify-between gap-4 shadow-lg group"
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <span className="text-[11px] font-mono text-gray-500 w-32 truncate hidden sm:inline">
@@ -185,11 +185,11 @@ export default function TournamentDetailPage() {
 
       {/* ABA 2: CLASSIFICAÇÃO */}
       {activeTab === 'standings' && (
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl">
           <h3 className="text-sm font-black uppercase text-white mb-4">Classificação da Fase de Grupos</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#11141E] text-gray-400 font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="p-3">Pos</th>
                   <th className="p-3">Time</th>
@@ -252,7 +252,7 @@ export default function TournamentDetailPage() {
 
       {/* ABA 3: CHAVEAMENTO / BRACKETS */}
       {activeTab === 'brackets' && (
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-xl">
           <h3 className="text-sm font-black uppercase text-white mb-8 text-center flex items-center justify-center gap-2">
             <Trophy className="w-4 h-4 text-amber-400" />
             <span>Chaveamento dos Playoffs</span>
@@ -264,7 +264,7 @@ export default function TournamentDetailPage() {
               <h4 className="text-xs font-bold uppercase text-amber-400 border-b border-white/10 pb-2">
                 Upper Semifinais (MD3)
               </h4>
-              <div className="bg-[#11141E] border border-white/10 rounded-xl p-3 shadow">
+              <div className="bg-surface-2 border border-white/10 rounded-xl p-3 shadow">
                 <div className="flex justify-between items-center text-xs font-bold text-white mb-1.5">
                   <div className="flex items-center gap-2">
                     <TeamLogo teamName={'Team Falcons'} className="w-4 h-4" />
@@ -287,7 +287,7 @@ export default function TournamentDetailPage() {
               <h4 className="text-xs font-bold uppercase text-amber-400 border-b border-white/10 pb-2">
                 Final Upper (MD3)
               </h4>
-              <div className="bg-[#11141E] border border-white/10 rounded-xl p-3 shadow">
+              <div className="bg-surface-2 border border-white/10 rounded-xl p-3 shadow">
                 <div className="flex justify-between items-center text-xs font-bold text-white mb-1.5">
                   <div className="flex items-center gap-2">
                     <TeamLogo teamName={'Team Falcons'} className="w-4 h-4" />
@@ -310,7 +310,7 @@ export default function TournamentDetailPage() {
               <h4 className="text-xs font-bold uppercase text-amber-400 border-b border-white/10 pb-2">
                 Grande Final (MD5)
               </h4>
-              <div className="bg-[#11141E] border border-amber-500/50 rounded-xl p-4 shadow-xl">
+              <div className="bg-surface-2 border border-amber-500/50 rounded-xl p-4 shadow-xl">
                 <div className="flex justify-between items-center text-xs font-black text-amber-400 mb-2">
                   <div className="flex items-center gap-2">
                     <TeamLogo teamName={'Team Falcons'} className="w-5 h-5" />
@@ -334,25 +334,25 @@ export default function TournamentDetailPage() {
       {/* ABA 4: ESTATÍSTICAS DO CAMPEONATO */}
       {activeTab === 'stats' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+          <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
             <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Herói Mais Escolhido</span>
             <div className="text-xl font-black text-white">Luna</div>
             <span className="text-xs text-emerald-400 font-bold font-mono">38 Jogos (68.4% Win)</span>
           </div>
 
-          <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+          <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
             <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Herói Mais Banido</span>
             <div className="text-xl font-black text-white">Io / Wisp</div>
             <span className="text-xs text-red-400 font-bold font-mono">42 Bans na Fase Principal</span>
           </div>
 
-          <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+          <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
             <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Maior KDA Médio</span>
             <div className="text-xl font-black text-white">skiter (Falcons)</div>
             <span className="text-xs text-amber-400 font-bold font-mono">KDA 8.42 em 15 partidas</span>
           </div>
 
-          <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+          <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
             <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Partida Mais Longa</span>
             <div className="text-xl font-black text-white">57m 30s</div>
             <span className="text-xs text-gray-400 font-mono">Game 4: Liquid vs Falcons</span>

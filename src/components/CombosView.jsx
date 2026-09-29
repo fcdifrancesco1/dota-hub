@@ -68,7 +68,7 @@ export default function CombosView({
       </div>
 
       {/* SELETOR INTERATIVO: ENCONTRE O MELHOR PARCEIRO PARA SEU HERÓI */}
-      <div className="bg-[#141824] border border-amber-500/30 rounded-2xl p-5 space-y-4">
+      <div className="bg-surface-2 border border-amber-500/30 rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-amber-400">
             <Sparkles className="w-4 h-4 text-amber-400" /> Calculadora de Parceria de Herói
@@ -139,7 +139,7 @@ export default function CombosView({
                   <div
                     key={i}
                     onClick={() => onSelectHero && onSelectHero({ id: rec.partnerId, name: pName })}
-                    className="bg-[#161A24] hover:bg-[#1E2434] border border-white/10 hover:border-amber-400/50 p-3 rounded-xl cursor-pointer transition-all space-y-1.5"
+                    className="bg-surface-2 hover:bg-surface-3 border border-white/10 hover:border-amber-400/50 p-3 rounded-xl cursor-pointer transition-all space-y-1.5"
                   >
                     <div className="flex items-center gap-2">
                       <img src={pImg} alt="" className="w-9 h-6 rounded object-cover border border-white/10" />
@@ -176,7 +176,7 @@ export default function CombosView({
             return (
               <div
                 key={idx}
-                className="bg-[#141824] hover:bg-[#181E2E] border border-white/10 hover:border-amber-500/50 rounded-2xl p-5 space-y-3 transition-all shadow-md group"
+                className="bg-surface-2 hover:bg-surface-2 border border-white/10 hover:border-amber-500/50 rounded-2xl p-5 space-y-3 transition-all shadow-md group"
               >
                 {/* Header da Dupla */}
                 <div className="flex items-center justify-between border-b border-white/5 pb-2.5">

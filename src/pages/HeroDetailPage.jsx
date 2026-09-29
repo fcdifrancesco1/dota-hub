@@ -44,7 +44,7 @@ export default function HeroDetailPage() {
       </Link>
 
       {/* HERO BANNER */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#141A28] via-[#0E1119] to-[#181116] border border-[#212838] p-6 sm:p-8 mb-8 shadow-2xl">
+      <div className="rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">
         <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
           <img
             src={getHeroImg(id, constants)}
@@ -79,26 +79,26 @@ export default function HeroDetailPage() {
 
       {/* BENCHMARKS NO CENÁRIO PROFISSIONAL */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">GPM Médio Pro</span>
           <div className="text-xl font-black text-white font-mono">745</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">XPM Médio Pro</span>
           <div className="text-xl font-black text-white font-mono">790</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Last Hits em 10 min</span>
           <div className="text-xl font-black text-amber-400 font-mono">78.5</div>
         </div>
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 text-center">
+        <div className="bg-surface border border-line rounded-xl p-4 text-center">
           <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Dano / Minuto</span>
           <div className="text-xl font-black text-emerald-400 font-mono">820</div>
         </div>
       </div>
 
       {/* ITENS MAIS COMPRADOS NO PROFISSIONAL */}
-      <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl mb-10">
+      <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl mb-10">
         <h3 className="text-sm font-black uppercase text-white mb-4 flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-400" />
           <span>Core Build & Itens Mais Prioritários</span>
@@ -113,7 +113,7 @@ export default function HeroDetailPage() {
             { name: 'Butterfly', winrate: 81.5, timing: '29m' },
             { name: 'Satanic', winrate: 78.9, timing: '34m' }
           ].map((item, idx) => (
-            <div key={idx} className="bg-[#11141E] border border-white/5 rounded-xl p-3 text-center">
+            <div key={idx} className="bg-surface-2 border border-white/5 rounded-xl p-3 text-center">
               <h4 className="text-xs font-bold text-white mb-1">{item.name}</h4>
               <span className="text-[10px] text-gray-400 block">Tempo Médio: {item.timing}</span>
               <span className="text-xs font-mono font-bold text-emerald-400 block mt-1">{item.winrate}% Win</span>
@@ -123,14 +123,14 @@ export default function HeroDetailPage() {
       </div>
 
       {/* ATLETAS QUE MAIS SE DESTACAM COM O HERÓI */}
-      <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+      <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl">
         <h3 className="text-sm font-black uppercase text-white mb-4 flex items-center gap-2">
           <Award className="w-4 h-4 text-amber-400" />
           <span>Especialistas no Cenário Mundial</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-[#11141E] border border-white/5 rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-surface-2 border border-white/5 rounded-xl p-4 flex items-center justify-between">
             <div>
               <h4 className="text-sm font-black text-white">skiter</h4>
               <span className="text-xs text-amber-400">Team Falcons</span>
@@ -141,7 +141,7 @@ export default function HeroDetailPage() {
             </div>
           </div>
 
-          <div className="bg-[#11141E] border border-white/5 rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-surface-2 border border-white/5 rounded-xl p-4 flex items-center justify-between">
             <div>
               <h4 className="text-sm font-black text-white">miCKe</h4>
               <span className="text-xs text-amber-400">Team Liquid</span>
@@ -152,7 +152,7 @@ export default function HeroDetailPage() {
             </div>
           </div>
 
-          <div className="bg-[#11141E] border border-white/5 rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-surface-2 border border-white/5 rounded-xl p-4 flex items-center justify-between">
             <div>
               <h4 className="text-sm font-black text-white">Yatoro / Raddan</h4>
               <span className="text-xs text-amber-400">Team Spirit</span>

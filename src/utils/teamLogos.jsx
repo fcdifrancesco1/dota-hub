@@ -334,7 +334,7 @@ export default function TeamLogo({
     const initials = getTeamInitials(teamName);
     return (
       <div
-        className={`${className} flex items-center justify-center rounded-lg bg-[#141824] border border-white/10 text-[9px] font-mono font-black text-amber-400 shrink-0 select-none shadow-sm`}
+        className={`${className} flex items-center justify-center rounded-lg bg-surface-2 border border-white/10 text-[9px] font-mono font-black text-amber-400 shrink-0 select-none shadow-sm`}
         title={teamName || "Equipe"}
       >
         {initials || <Shield className="w-3.5 h-3.5 text-gray-500" />}
@@ -349,10 +349,9 @@ export default function TeamLogo({
         src={resolvedUrl}
         alt={alt || teamName || "Logo da Equipe"}
         title={teamName || undefined}
-        className={imgClassName}
-        // Contorno claro sutil: mantém legíveis logos escuros (ex.: Liquid, Secret)
-        // sobre o fundo escuro do site sem alterar os logos claros
-        style={{ filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.45))' }}
+        // team-logo-img (index.css): contorno sutil que mantém legíveis logos
+        // escuros no tema escuro e logos brancos no tema claro
+        className={`${imgClassName} team-logo-img`}
         referrerPolicy="no-referrer"
         loading="lazy"
         decoding="async"

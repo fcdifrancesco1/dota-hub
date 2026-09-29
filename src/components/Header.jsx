@@ -14,14 +14,18 @@ import {
   Menu,
   X,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import { SITE_CONFIG } from '../config/siteConfig';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { liveCount, refreshData, loadingRefresh, lastUpdated } = useApp();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
   const navLinks = [
@@ -39,7 +43,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-[#0C0E14]/90 backdrop-blur-xl border-b border-[#212838] transition-all">
+      <header className="sticky top-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-line transition-all">
         <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* LOGO & BRAND */}
@@ -49,7 +53,7 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(false)}
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-red-600 to-amber-700 p-[1.5px] shadow-lg shadow-red-950/40 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-[#0C0E14] rounded-[10px] flex items-center justify-center">
+              <div className="w-full h-full bg-surface rounded-[10px] flex items-center justify-center">
                 <Flame className="w-5 h-5 text-amber-400 group-hover:text-amber-300 transition-colors" />
               </div>
             </div>
@@ -64,7 +68,7 @@ export default function Header() {
           </Link>
 
           {/* DESKTOP NAVIGATION */}
-          <nav className="hidden xl:flex items-center gap-1 bg-[#131722]/80 px-2 py-1.5 rounded-xl border border-[#212838]">
+          <nav className="hidden xl:flex items-center gap-1 bg-surface-2/80 px-2 py-1.5 rounded-xl border border-line">
             {navLinks.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.to || 
@@ -88,7 +92,7 @@ export default function Header() {
                     <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black uppercase flex items-center gap-1 ${
                       isActive
                         ? 'bg-red-950 text-red-200'
-                        : 'bg-red-600/90 text-white animate-pulse'
+                        : 'bg-red-600/90 text-on-accent animate-pulse'
                     }`}>
                       <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
                       {item.badge}
@@ -117,15 +121,25 @@ export default function Header() {
               onClick={refreshData}
               disabled={loadingRefresh}
               title={`Atualizado às ${lastUpdated || 'recentemente'}. Clique para atualizar.`}
-              className="p-2 rounded-lg bg-[#131722] border border-[#212838] text-gray-400 hover:text-amber-400 hover:border-amber-500/30 transition-all disabled:opacity-50"
+              className="p-2 rounded-lg bg-surface-2 border border-line text-gray-400 hover:text-amber-400 hover:border-amber-500/30 transition-all disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${loadingRefresh ? 'animate-spin text-amber-400' : ''}`} />
+            </button>
+
+            {/* Alternar tema claro / escuro */}
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'}
+              aria-label={theme === 'dark' ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'}
+              className="p-2 rounded-lg bg-surface-2 border border-line text-gray-400 hover:text-amber-400 hover:border-amber-500/30 transition-all"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded-lg bg-[#131722] border border-[#212838] text-gray-300 hover:text-white"
+              className="xl:hidden p-2 rounded-lg bg-surface-2 border border-line text-gray-300 hover:text-white"
               aria-label="Abrir menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -144,10 +158,10 @@ export default function Header() {
           />
 
           {/* Drawer Menu */}
-          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#0C0E14] border-l border-[#212838] p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-surface border-l border-line p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
             <div>
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-6 border-b border-[#212838]">
+              <div className="flex items-center justify-between pb-6 border-b border-line">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
                     <Flame className="w-4 h-4 text-amber-400" />
@@ -188,7 +202,7 @@ export default function Header() {
                       </div>
                       {item.badge > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                          isActive ? 'bg-black text-amber-400' : 'bg-red-600 text-white animate-pulse'
+                          isActive ? 'bg-black text-amber-400' : 'bg-red-600 text-on-accent animate-pulse'
                         }`}>
                           {item.badge}
                         </span>
@@ -200,12 +214,12 @@ export default function Header() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="pt-6 border-t border-[#212838] flex flex-col gap-3">
+            <div className="pt-6 border-t border-line flex flex-col gap-3">
               <a
                 href={SITE_CONFIG.community.discord}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#5865F2]/20 border border-[#5865F2]/40 text-[#5865F2] hover:bg-[#5865F2] hover:text-white text-xs font-bold transition-all"
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#5865F2]/20 border border-[#5865F2]/40 text-[#3C45C8] dark:text-[#5865F2] hover:bg-[#5865F2] hover:text-on-accent text-xs font-bold transition-all"
               >
                 <span>Entrar no Discord da Comunidade</span>
                 <ExternalLink className="w-3.5 h-3.5" />

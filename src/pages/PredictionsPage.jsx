@@ -125,7 +125,7 @@ export default function PredictionsPage() {
       )}
 
       {/* HEADER DA PÁGINA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#212838]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
             <Award className="w-7 h-7 text-amber-500" />
@@ -137,7 +137,7 @@ export default function PredictionsPage() {
         </div>
 
         {/* ABAS */}
-        <div className="flex bg-[#11141E] p-1 rounded-xl border border-[#212838]">
+        <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
           {[
             { id: 'matches', label: 'Próximos Jogos', icon: Trophy },
             { id: 'leaderboard', label: 'Tabela de Classificação', icon: Award },
@@ -158,7 +158,7 @@ export default function PredictionsPage() {
 
       {/* REGRAS DE PONTUAÇÃO (CENTRALIZADAS NO ARQUIVO DE CONFIGURAÇÃO) */}
       <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-surface border border-line rounded-xl p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm">
             +{SITE_CONFIG.predictionPoints.correctWinner} pts
           </div>
@@ -168,7 +168,7 @@ export default function PredictionsPage() {
           </div>
         </div>
 
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-surface border border-line rounded-xl p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 font-black text-sm">
             +{SITE_CONFIG.predictionPoints.exactScore} pts
           </div>
@@ -178,7 +178,7 @@ export default function PredictionsPage() {
           </div>
         </div>
 
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-surface border border-line rounded-xl p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400 font-black text-sm">
             +{SITE_CONFIG.predictionPoints.upsetBonus} pts
           </div>
@@ -199,7 +199,7 @@ export default function PredictionsPage() {
             return (
               <div
                 key={matchKey}
-                className="bg-[#0C0E14] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-5 shadow-xl transition-all flex flex-col justify-between"
+                className="bg-surface border border-line hover:border-amber-500/40 rounded-2xl p-5 shadow-xl transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between text-[11px] text-gray-400 pb-3 border-b border-white/5 mb-4">
@@ -219,7 +219,7 @@ export default function PredictionsPage() {
                       className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
                         pred?.teamChosen === m.timeA
                           ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
-                          : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
+                          : 'bg-surface-2 border-white/5 hover:border-white/20 text-gray-300'
                       }`}
                     >
                       <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-10 h-10 mb-2" />
@@ -235,7 +235,7 @@ export default function PredictionsPage() {
                       className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
                         pred?.teamChosen === m.timeB
                           ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
-                          : 'bg-[#11141E] border-white/5 hover:border-white/20 text-gray-300'
+                          : 'bg-surface-2 border-white/5 hover:border-white/20 text-gray-300'
                       }`}
                     >
                       <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-10 h-10 mb-2" />
@@ -258,7 +258,7 @@ export default function PredictionsPage() {
                             className={`py-1 rounded-lg text-xs font-mono font-bold transition-all ${
                               pred.score === sc
                                 ? 'bg-amber-500 text-black font-black'
-                                : 'bg-[#11141E] border border-white/10 text-gray-400 hover:text-white'
+                                : 'bg-surface-2 border border-white/10 text-gray-400 hover:text-white'
                             }`}
                           >
                             {sc}
@@ -292,7 +292,7 @@ export default function PredictionsPage() {
 
       {/* ABA 2: RANKING E CLASSIFICAÇÃO */}
       {activeTab === 'leaderboard' && (
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
+        <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
             <h3 className="text-base font-black uppercase text-white flex items-center gap-2">
               <Trophy className="w-5 h-5 text-amber-400" />
@@ -300,7 +300,7 @@ export default function PredictionsPage() {
             </h3>
 
             {/* SELETOR DE RANKING (GERAL / CAMPEONATO / MENSAL) */}
-            <div className="flex bg-[#11141E] p-1 rounded-xl border border-white/10">
+            <div className="flex bg-surface-2 p-1 rounded-xl border border-white/10">
               <button
                 onClick={() => setRankingFilter('overall')}
                 className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
@@ -373,8 +373,8 @@ export default function PredictionsPage() {
                 key={idx}
                 className={`rounded-2xl p-6 border transition-all ${
                   b.unlocked
-                    ? 'bg-gradient-to-br from-[#141A28] to-[#0D1017] border-amber-500/40 shadow-xl'
-                    : 'bg-[#0A0C10] border-white/5 opacity-60'
+                    ? 'bg-gradient-to-br from-surface-2 to-surface border-amber-500/40 shadow-xl'
+                    : 'bg-canvas border-white/5 opacity-60'
                 }`}
               >
                 <div className="flex items-start gap-4">

@@ -51,7 +51,7 @@ export default function LivePage() {
     <div className={`mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen ${theaterMode ? 'max-w-full' : 'max-w-[1680px]'}`}>
       
       {/* HEADER DA PÁGINA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#212838]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-line">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
             <span className="relative flex h-3.5 w-3.5">
@@ -74,7 +74,7 @@ export default function LivePage() {
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-bold uppercase transition-all ${
               showStream
                 ? 'bg-purple-950/60 border-purple-800/60 text-purple-300'
-                : 'bg-[#131722] border-[#212838] text-gray-400 hover:text-white'
+                : 'bg-surface-2 border-line text-gray-400 hover:text-white'
             }`}
           >
             <Tv className="w-3.5 h-3.5" />
@@ -84,7 +84,7 @@ export default function LivePage() {
           <button
             onClick={refreshData}
             disabled={loadingRefresh}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#131722] border border-[#212838] hover:border-amber-500/40 text-xs font-bold text-gray-300 hover:text-white transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-2 border border-line hover:border-amber-500/40 text-xs font-bold text-gray-300 hover:text-white transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loadingRefresh ? 'animate-spin text-amber-400' : ''}`} />
             <span>Atualizar</span>
@@ -94,9 +94,9 @@ export default function LivePage() {
 
       {/* REPRODUTOR DE STREAM INTEGRADO (TWITCH / EMBED) */}
       {showStream && (
-        <div className="mb-8 rounded-2xl overflow-hidden bg-[#0C0E14] border border-[#262F44] shadow-2xl transition-all">
+        <div className="mb-8 rounded-2xl overflow-hidden bg-surface border border-line-strong shadow-2xl transition-all">
           {/* BARRA DE CANAIS DA TRANSMISSÃO */}
-          <div className="p-3 bg-[#11141E] border-b border-[#212838] flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="p-3 bg-surface-2 border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
               <span className="font-bold text-white">Canal Ativo:</span>
@@ -113,7 +113,7 @@ export default function LivePage() {
                   onClick={() => setActiveStream(s)}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                     activeStream.id === s.id
-                      ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                      ? 'bg-purple-600 text-on-accent shadow-md shadow-purple-600/30'
                       : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                   }`}
                 >
@@ -176,7 +176,7 @@ export default function LivePage() {
                 <div
                   key={game.match_id || idx}
                   onClick={() => openLiveMatch(game)}
-                  className="bg-[#0C0E14] hover:bg-[#111520] border border-[#212838] hover:border-amber-500/50 rounded-2xl p-6 shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+                  className="bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/50 rounded-2xl p-6 shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
                 >
                   <div>
                     {/* TOPO: TORNEIO & SÉRIE */}
@@ -311,7 +311,7 @@ export default function LivePage() {
           </div>
         ) : (
           /* ESTADO VAZIO AMIGÁVEL */
-          <div className="rounded-2xl bg-[#0C0E14] border border-[#212838] p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-2xl">
+          <div className="rounded-2xl bg-surface border border-line p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-2xl">
             <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
               <Radio className="w-8 h-8 text-gray-500" />
             </div>
@@ -324,7 +324,7 @@ export default function LivePage() {
 
             {/* PRÓXIMAS PARTIDAS IMEDIATAS */}
             {upcomingMatches && upcomingMatches.length > 0 && (
-              <div className="bg-[#11141E] border border-white/5 rounded-xl p-4 text-left">
+              <div className="bg-surface-2 border border-white/5 rounded-xl p-4 text-left">
                 <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider block mb-2">
                   Próxima partida agendada:
                 </span>

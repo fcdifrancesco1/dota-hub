@@ -11,7 +11,7 @@ export default function LiveTickerStrip() {
 
   if (!liveGames || liveGames.length === 0) {
     return (
-      <div className="w-full bg-[#11141E]/80 border-y border-[#212838] py-2.5 px-4 mb-6">
+      <div className="w-full bg-surface-2/80 border-y border-line py-2.5 px-4 mb-6">
         <div className="max-w-[1680px] mx-auto flex items-center justify-between gap-4 text-xs text-gray-400">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500/80"></span>
@@ -31,7 +31,7 @@ export default function LiveTickerStrip() {
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-red-950/60 via-[#131722] to-red-950/60 border-y border-red-900/50 py-3 px-4 mb-6 backdrop-blur-md">
+    <div className="w-full bg-gradient-to-r from-red-950/60 via-surface-2 to-red-950/60 border-y border-red-900/50 py-3 px-4 mb-6 backdrop-blur-md">
       <div className="max-w-[1680px] mx-auto">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -67,7 +67,7 @@ export default function LiveTickerStrip() {
               <div
                 key={game.match_id || idx}
                 onClick={() => openLiveMatch(game)}
-                className="flex-shrink-0 cursor-pointer bg-[#0D1017] hover:bg-[#131824] border border-[#262F44] hover:border-amber-500/40 rounded-xl p-3 min-w-[280px] sm:min-w-[320px] transition-all shadow-lg"
+                className="flex-shrink-0 cursor-pointer bg-surface hover:bg-surface-2 border border-line-strong hover:border-amber-500/40 rounded-xl p-3 min-w-[280px] sm:min-w-[320px] transition-all shadow-lg"
               >
                 {/* Cabeçalho do Card */}
                 <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2 border-b border-white/5 pb-1.5">

@@ -24,7 +24,7 @@ export default function PlayerAvatar({ accountId, name, className = 'w-14 h-14 r
     const initials = String(name || '?').replace(/[^\p{L}\p{N}]/gu, '').slice(0, 2).toUpperCase();
     return (
       <div
-        className={`${className} flex items-center justify-center bg-[#141824] border border-white/10 font-mono font-black text-amber-400 select-none`}
+        className={`${className} flex items-center justify-center bg-surface-2 border border-white/10 font-mono font-black text-amber-400 select-none`}
         title={name}
       >
         {initials || '?'}

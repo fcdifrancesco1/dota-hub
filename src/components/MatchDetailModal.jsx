@@ -55,9 +55,9 @@ export default function MatchDetailModal({
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/70">
+        <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface/70">
           <table className="w-full text-left text-xs border-collapse min-w-[1040px]">
-            <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+            <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
               <tr>
                 <th className="p-3 pl-4 whitespace-nowrap min-w-[170px]">Jogador / Herói</th>
                 <th className="p-3 text-center whitespace-nowrap min-w-[60px]">Nível</th>
@@ -219,7 +219,7 @@ export default function MatchDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-[96vw] 2xl:max-w-[1520px] xl:max-w-[1440px] bg-[#0C0F16] border border-white/15 rounded-2xl p-4 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-[96vw] 2xl:max-w-[1520px] xl:max-w-[1440px] bg-surface border border-white/15 rounded-2xl p-4 sm:p-7 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* BOTÃO FECHAR */}
         <button
           onClick={onClose}
@@ -311,7 +311,7 @@ export default function MatchDetailModal({
           ) : loadedMatchData ? (
             <>
               {/* STATUS DO MAPA ATUAL */}
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#161A24]/60 p-3.5 rounded-xl border border-white/10 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-surface-2/60 p-3.5 rounded-xl border border-white/10 text-xs">
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-amber-400" />
                   <span className="text-gray-300">Vencedor do Jogo {activeMapIndex + 1}:</span>
@@ -343,7 +343,7 @@ export default function MatchDetailModal({
 
               {/* ORDEM COMPLETA DE DRAFT (PICKS & BANS) */}
               {loadedMatchData.picks_bans && loadedMatchData.picks_bans.length > 0 && (
-                <div className="bg-[#141824]/80 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="bg-surface-2/80 border border-white/10 rounded-xl p-4 space-y-3">
                   <div className="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center justify-between">
                     <span>Fase de Draft (Picks &amp; Bans na Ordem)</span>
                     <span className="text-[10px] text-gray-400 font-normal">Picks destacados com borda sólida</span>
@@ -447,7 +447,7 @@ export default function MatchDetailModal({
               </div>
 
               {/* CARD DE DADOS CONSOLIDADOS DO MAPA E SÉRIE */}
-              <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+              <div className="bg-surface-2/80 border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
                     Dados Consolidados da Série

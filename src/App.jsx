@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -41,7 +42,7 @@ function AppContent() {
   } = useApp();
 
   return (
-    <div className="min-h-screen bg-[#0A0C10] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,20,20,0.15),rgba(255,255,255,0))] text-gray-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-canvas app-backdrop text-gray-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black">
       <div>
         <Header />
         <main>
@@ -107,11 +108,13 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppProvider>
-          <AppContent />
-        </AppProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            <AppContent />
+          </AppProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

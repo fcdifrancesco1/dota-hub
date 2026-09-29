@@ -11,6 +11,13 @@ import {
   Legend
 } from 'recharts';
 import PlayerAvatar from '../components/PlayerAvatar';
+import { useTheme } from '../context/ThemeContext';
+
+// Cores do radar por tema (Recharts desenha em SVG, fora das classes do Tailwind)
+const RADAR_COLORS = {
+  dark: { grid: '#262F44', axis: '#94A3B8', tick: '#cbd5e1', radius: '#334155', playerA: '#10B981', playerB: '#F59E0B', legend: '#ffffff' },
+  light: { grid: '#CDD3DB', axis: '#8A929C', tick: '#3B4450', radius: '#B4BAC2', playerA: '#0A7F58', playerB: '#023266', legend: '#18202B' }
+};
 
 // Lista de jogadores profissionais de referência
 const PRO_PLAYERS_SAMPLE = [
@@ -118,6 +125,8 @@ const PRO_PLAYERS_SAMPLE = [
 
 export default function PlayersPage() {
   const [selectedRole, setSelectedRole] = useState('all');
+  const { theme } = useTheme();
+  const R = RADAR_COLORS[theme];
   const [search, setSearch] = useState('');
   
   // Comparador de 2 Jogadores
@@ -167,7 +176,7 @@ export default function PlayersPage() {
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#212838]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
             <UserCheck className="w-7 h-7 text-amber-500" />
@@ -179,7 +188,7 @@ export default function PlayersPage() {
         </div>
 
         {/* Filtro de Posição */}
-        <div className="flex items-center gap-2 overflow-x-auto bg-[#11141E] p-1 rounded-xl border border-[#212838]">
+        <div className="flex items-center gap-2 overflow-x-auto bg-surface-2 p-1 rounded-xl border border-line">
           {[
             { id: 'all', label: 'Todos' },
             { id: '1', label: 'Pos 1 (Carry)' },
@@ -202,7 +211,7 @@ export default function PlayersPage() {
       </div>
 
       {/* COMPARADOR RADAR LADO A LADO */}
-      <div className="mb-12 bg-gradient-to-br from-[#121622] via-[#0E1119] to-[#161219] border border-amber-500/30 rounded-2xl p-6 sm:p-8 shadow-2xl">
+      <div className="mb-12 bg-gradient-to-br from-surface-2 via-surface to-surface-2 border border-amber-500/30 rounded-2xl p-6 sm:p-8 shadow-2xl">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-white/10 mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400">
@@ -225,7 +234,7 @@ export default function PlayersPage() {
               <select
                 value={playerA.id}
                 onChange={(e) => setPlayerA(PRO_PLAYERS_SAMPLE.find(p => p.id === Number(e.target.value)))}
-                className="bg-[#0C0E14] border border-emerald-500/40 text-emerald-400 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
+                className="bg-surface border border-emerald-500/40 text-emerald-400 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
               >
                 {PRO_PLAYERS_SAMPLE.map(p => (
                   <option key={p.id} value={p.id}>{p.name} ({p.team})</option>
@@ -238,7 +247,7 @@ export default function PlayersPage() {
               <select
                 value={playerB.id}
                 onChange={(e) => setPlayerB(PRO_PLAYERS_SAMPLE.find(p => p.id === Number(e.target.value)))}
-                className="bg-[#0C0E14] border border-amber-500/40 text-amber-400 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
+                className="bg-surface border border-amber-500/40 text-amber-400 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
               >
                 {PRO_PLAYERS_SAMPLE.map(p => (
                   <option key={p.id} value={p.id}>{p.name} ({p.team})</option>
@@ -251,7 +260,7 @@ export default function PlayersPage() {
         {/* Gráfico Radar & Detalhes */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Card Jogador A */}
-          <div className="lg:col-span-3 bg-[#0C0E14] border border-emerald-500/30 rounded-2xl p-5 shadow-xl text-center">
+          <div className="lg:col-span-3 bg-surface border border-emerald-500/30 rounded-2xl p-5 shadow-xl text-center">
             <PlayerAvatar accountId={playerA.accountId} name={playerA.name} className="w-20 h-20 rounded-2xl mx-auto mb-3 border-2 border-emerald-500/50 shadow-lg" />
             <h3 className="text-lg font-black text-white">{playerA.name}</h3>
             <span className="text-xs text-emerald-400 font-bold block">{playerA.team}</span>
@@ -281,30 +290,30 @@ export default function PlayersPage() {
           <div className="lg:col-span-6 h-[340px] flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
-                <PolarGrid stroke="#262F44" />
-                <PolarAngleAxis dataKey="metric" stroke="#94A3B8" tick={{ fill: '#cbd5e1', fontSize: 11 }} />
-                <PolarRadiusAxis stroke="#334155" domain={[0, 100]} />
+                <PolarGrid stroke={R.grid} />
+                <PolarAngleAxis dataKey="metric" stroke={R.axis} tick={{ fill: R.tick, fontSize: 11 }} />
+                <PolarRadiusAxis stroke={R.radius} domain={[0, 100]} />
                 <Radar
                   name={playerA.name}
                   dataKey={playerA.name}
-                  stroke="#10B981"
-                  fill="#10B981"
+                  stroke={R.playerA}
+                  fill={R.playerA}
                   fillOpacity={0.4}
                 />
                 <Radar
                   name={playerB.name}
                   dataKey={playerB.name}
-                  stroke="#F59E0B"
-                  fill="#F59E0B"
+                  stroke={R.playerB}
+                  fill={R.playerB}
                   fillOpacity={0.4}
                 />
-                <Legend wrapperStyle={{ color: '#ffffff', fontSize: '12px' }} />
+                <Legend wrapperStyle={{ color: R.legend, fontSize: '12px' }} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Card Jogador B */}
-          <div className="lg:col-span-3 bg-[#0C0E14] border border-amber-500/30 rounded-2xl p-5 shadow-xl text-center">
+          <div className="lg:col-span-3 bg-surface border border-amber-500/30 rounded-2xl p-5 shadow-xl text-center">
             <PlayerAvatar accountId={playerB.accountId} name={playerB.name} className="w-20 h-20 rounded-2xl mx-auto mb-3 border-2 border-amber-500/50 shadow-lg" />
             <h3 className="text-lg font-black text-white">{playerB.name}</h3>
             <span className="text-xs text-amber-400 font-bold block">{playerB.team}</span>
@@ -338,7 +347,7 @@ export default function PlayersPage() {
         {filteredPlayers.map((p) => (
           <div
             key={p.id}
-            className="bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-4 shadow-xl transition-all"
+            className="bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-2xl p-4 shadow-xl transition-all"
           >
             <PlayerAvatar accountId={p.accountId} name={p.name} className="w-14 h-14 rounded-xl mb-3 border border-white/10" />
             <h4 className="text-base font-black text-white truncate">{p.name}</h4>

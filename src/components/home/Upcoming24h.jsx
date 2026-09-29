@@ -17,7 +17,7 @@ export default function Upcoming24h() {
 
   if (loading) {
     return (
-      <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+      <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
         <div className="h-6 w-40 bg-white/5 rounded animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -29,7 +29,7 @@ export default function Upcoming24h() {
   }
 
   return (
-    <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+    <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
           <div className="flex items-center gap-2">
@@ -67,7 +67,7 @@ export default function Upcoming24h() {
               return (
                 <div
                   key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`}
-                  className="bg-[#11141E] hover:bg-[#161B28] border border-[#1C2232] hover:border-amber-500/30 rounded-xl p-3 transition-all"
+                  className="bg-surface-2 hover:bg-surface-2 border border-surface-3 hover:border-amber-500/30 rounded-xl p-3 transition-all"
                 >
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[180px] text-amber-400/80">

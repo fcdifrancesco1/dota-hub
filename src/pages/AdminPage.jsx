@@ -196,7 +196,7 @@ export default function AdminPage() {
   if (!user || !isAdmin) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 min-h-screen flex items-center justify-center">
-        <div className="w-full bg-[#0C0E14] border border-[#212838] rounded-2xl p-8 shadow-2xl">
+        <div className="w-full bg-surface border border-line rounded-2xl p-8 shadow-2xl">
           <div className="text-center mb-6">
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-3">
               <Lock className="w-7 h-7 text-amber-400" />
@@ -225,7 +225,7 @@ export default function AdminPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@dotahub.com"
-                className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
               />
             </div>
 
@@ -237,7 +237,7 @@ export default function AdminPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
               />
             </div>
 
@@ -272,7 +272,7 @@ export default function AdminPage() {
       )}
 
       {/* HEADER DO PAINEL */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#212838]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
             <Shield className="w-6 h-6" />
@@ -297,7 +297,7 @@ export default function AdminPage() {
       </div>
 
       {/* ABAS DO PAINEL */}
-      <div className="flex items-center gap-2 border-b border-[#212838] pb-3 mb-8 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-line pb-3 mb-8 overflow-x-auto">
         {[
           { id: 'sync', label: 'Sincronização & Cron', icon: RefreshCw },
           { id: 'schedule', label: 'Cadastrar Agenda', icon: Calendar },
@@ -325,7 +325,7 @@ export default function AdminPage() {
       {/* ABA 1: SINCRONIZAÇÃO */}
       {activeTab === 'sync' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+          <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-2">Disparadores Manuais</h3>
             <p className="text-xs text-gray-400 mb-6 leading-relaxed">
               Acione as rotas serverless sob demanda para importar dados da OpenDota e da Steam Web API para o Supabase.
@@ -335,7 +335,7 @@ export default function AdminPage() {
               <button
                 onClick={() => handleSyncSource('opendota')}
                 disabled={syncLoading}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#141A28] hover:bg-[#1A2234] border border-amber-500/30 text-xs font-bold text-amber-400 uppercase tracking-wider transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 hover:bg-surface-3 border border-amber-500/30 text-xs font-bold text-amber-400 uppercase tracking-wider transition-all disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${syncLoading ? 'animate-spin' : ''}`} />
                 <span>Sincronizar OpenDota ProMatches</span>
@@ -344,7 +344,7 @@ export default function AdminPage() {
               <button
                 onClick={() => handleSyncSource('steam')}
                 disabled={syncLoading}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#141A28] hover:bg-[#1A2234] border border-blue-500/30 text-xs font-bold text-blue-400 uppercase tracking-wider transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 hover:bg-surface-3 border border-blue-500/30 text-xs font-bold text-blue-400 uppercase tracking-wider transition-all disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${syncLoading ? 'animate-spin' : ''}`} />
                 <span>Sincronizar Steam GOTV Live</span>
@@ -365,11 +365,11 @@ export default function AdminPage() {
           </div>
 
           {/* HISTÓRICO DE LOGS DE SINCRONIZAÇÃO */}
-          <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+          <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Registro Recente de Sincronizações</h3>
             <div className="space-y-3">
               {syncLogs.map((log, idx) => (
-                <div key={idx} className="p-3 bg-[#11141E] border border-white/5 rounded-xl flex items-center justify-between text-xs">
+                <div key={idx} className="p-3 bg-surface-2 border border-white/5 rounded-xl flex items-center justify-between text-xs">
                   <div>
                     <span className="font-bold text-white block">{log.source}</span>
                     <span className="text-[11px] text-gray-500">{log.time}</span>
@@ -390,7 +390,7 @@ export default function AdminPage() {
       {activeTab === 'schedule' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* FORMULÁRIO DE ADIÇÃO */}
-          <div className="lg:col-span-5 bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-5 bg-surface border border-line rounded-2xl p-6 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4 flex items-center gap-2">
               <Plus className="w-4 h-4 text-amber-400" />
               <span>Cadastrar Próxima Partida</span>
@@ -406,7 +406,7 @@ export default function AdminPage() {
                     placeholder="ex: Team Falcons"
                     value={newTeam1}
                     onChange={(e) => setNewTeam1(e.target.value)}
-                    className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
                   />
                 </div>
                 <div>
@@ -417,7 +417,7 @@ export default function AdminPage() {
                     placeholder="ex: Team Liquid"
                     value={newTeam2}
                     onChange={(e) => setNewTeam2(e.target.value)}
-                    className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
                   />
                 </div>
               </div>
@@ -430,7 +430,7 @@ export default function AdminPage() {
                   placeholder="ex: ESL One Bangkok 2026"
                   value={newLeague}
                   onChange={(e) => setNewLeague(e.target.value)}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
                 />
               </div>
 
@@ -442,7 +442,7 @@ export default function AdminPage() {
                     placeholder="ex: 15:30"
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
-                    className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
                   />
                 </div>
                 <div>
@@ -450,7 +450,7 @@ export default function AdminPage() {
                   <select
                     value={newFormat}
                     onChange={(e) => setNewFormat(e.target.value)}
-                    className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
                   >
                     <option value="3">MD3 (Melhor de 3)</option>
                     <option value="5">MD5 (Melhor de 5)</option>
@@ -469,11 +469,11 @@ export default function AdminPage() {
           </div>
 
           {/* LISTA DA AGENDA CADASTRADA */}
-          <div className="lg:col-span-7 bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-7 bg-surface border border-line rounded-2xl p-6 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Agenda Cadastrada ({scheduleList.length})</h3>
             <div className="space-y-3">
               {scheduleList.map((item) => (
-                <div key={item.id} className="p-3.5 bg-[#11141E] border border-white/5 rounded-xl flex items-center justify-between gap-4">
+                <div key={item.id} className="p-3.5 bg-surface-2 border border-white/5 rounded-xl flex items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-bold text-white text-xs">{item.team1} vs {item.team2}</span>
@@ -498,7 +498,7 @@ export default function AdminPage() {
       {/* ABA 3: STREAMS E VODS */}
       {activeTab === 'streams' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5 bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-5 bg-surface border border-line rounded-2xl p-6 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Adicionar Canal de Stream</h3>
             <form onSubmit={handleAddStream} className="space-y-4">
               <div>
@@ -509,7 +509,7 @@ export default function AdminPage() {
                   placeholder="ex: ESL Dota 2 Brasil"
                   value={newStreamName}
                   onChange={(e) => setNewStreamName(e.target.value)}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
                 />
               </div>
 
@@ -521,7 +521,7 @@ export default function AdminPage() {
                   placeholder="ex: esl_dota2br"
                   value={newStreamChannel}
                   onChange={(e) => setNewStreamChannel(e.target.value)}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
                 />
               </div>
 
@@ -530,7 +530,7 @@ export default function AdminPage() {
                 <select
                   value={newStreamLang}
                   onChange={(e) => setNewStreamLang(e.target.value)}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
                 >
                   <option value="pt-BR">Português (pt-BR)</option>
                   <option value="en">Inglês (en)</option>
@@ -540,18 +540,18 @@ export default function AdminPage() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black uppercase tracking-wider text-xs shadow-md transition-all"
+                className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-md transition-all"
               >
                 Cadastrar Canal
               </button>
             </form>
           </div>
 
-          <div className="lg:col-span-7 bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-7 bg-surface border border-line rounded-2xl p-6 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Canais de Transmissão Ativos</h3>
             <div className="space-y-3">
               {streamsList.map((st) => (
-                <div key={st.id} className="p-3 bg-[#11141E] border border-white/5 rounded-xl flex items-center justify-between text-xs">
+                <div key={st.id} className="p-3 bg-surface-2 border border-white/5 rounded-xl flex items-center justify-between text-xs">
                   <div>
                     <span className="font-bold text-white block">{st.name}</span>
                     <span className="text-[11px] text-gray-500 font-mono">twitch.tv/{st.channel} ({st.lang})</span>
@@ -568,7 +568,7 @@ export default function AdminPage() {
 
       {/* ABA 4: PUBLICADOR DE ANÁLISES (MARKDOWN) */}
       {activeTab === 'analyses' && (
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
+        <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
           <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
             <FileText className="w-5 h-5 text-amber-400" />
             <span>Publicar Novo Artigo / Análise Tática</span>
@@ -583,7 +583,7 @@ export default function AdminPage() {
                 placeholder="ex: Como o Meta da Posição 4 Mudou com o Patch 7.37"
                 value={articleTitle}
                 onChange={(e) => setArticleTitle(e.target.value)}
-                className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
               />
             </div>
 
@@ -595,7 +595,7 @@ export default function AdminPage() {
                   placeholder="ex: como-meta-pos-4-mudou"
                   value={articleSlug}
                   onChange={(e) => setArticleSlug(e.target.value)}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
                 />
               </div>
               <div>
@@ -604,7 +604,7 @@ export default function AdminPage() {
                   type="text"
                   value={articleAuthor}
                   onChange={(e) => setArticleAuthor(e.target.value)}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
                 />
               </div>
             </div>
@@ -616,7 +616,7 @@ export default function AdminPage() {
                 value={articleSummary}
                 onChange={(e) => setArticleSummary(e.target.value)}
                 placeholder="Breve resumo da análise..."
-                className="w-full bg-[#11141E] border border-[#212838] rounded-xl p-3 text-xs text-white placeholder-gray-600 focus:outline-none"
+                className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-white placeholder-gray-600 focus:outline-none"
               />
             </div>
 
@@ -628,7 +628,7 @@ export default function AdminPage() {
                 value={articleContent}
                 onChange={(e) => setArticleContent(e.target.value)}
                 placeholder="# Escreva em Markdown aqui...&#10;&#10;Use títulos, tópicos e negrito."
-                className="w-full bg-[#11141E] border border-[#212838] rounded-xl p-3.5 text-xs text-white font-mono placeholder-gray-600 focus:outline-none"
+                className="w-full bg-surface-2 border border-line rounded-xl p-3.5 text-xs text-white font-mono placeholder-gray-600 focus:outline-none"
               />
             </div>
 
@@ -644,7 +644,7 @@ export default function AdminPage() {
 
       {/* ABA 5: CONFIGURAÇÕES DO SITE */}
       {activeTab === 'settings' && (
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 sm:p-8 shadow-xl max-w-2xl mx-auto">
+        <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-xl max-w-2xl mx-auto">
           <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
             <Settings className="w-5 h-5 text-amber-400" />
             <span>Configurações Globais da Aplicação</span>
@@ -656,7 +656,7 @@ export default function AdminPage() {
               <input
                 type="text"
                 defaultValue={SITE_CONFIG.name}
-                className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3.5 py-2.5 text-xs text-white"
+                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
               />
             </div>
 
@@ -665,7 +665,7 @@ export default function AdminPage() {
               <input
                 type="text"
                 defaultValue={SITE_CONFIG.community.discord}
-                className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3.5 py-2.5 text-xs text-white"
+                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
               />
             </div>
 
@@ -675,7 +675,7 @@ export default function AdminPage() {
                 <input
                   type="number"
                   defaultValue={SITE_CONFIG.predictionPoints.correctWinner}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3.5 py-2.5 text-xs text-white"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
                 />
               </div>
               <div>
@@ -683,7 +683,7 @@ export default function AdminPage() {
                 <input
                   type="number"
                   defaultValue={SITE_CONFIG.predictionPoints.exactScore}
-                  className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3.5 py-2.5 text-xs text-white"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
                 />
               </div>
             </div>

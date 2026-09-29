@@ -51,7 +51,7 @@ export default function MmrRankingView({ searchQuery = "" }) {
         </div>
 
         {/* SELETOR DE DIVISÕES */}
-        <div className="flex items-center gap-1.5 bg-[#141824]/90 p-1.5 rounded-xl border border-white/10">
+        <div className="flex items-center gap-1.5 bg-surface-2/90 p-1.5 rounded-xl border border-white/10">
           {divisions.map((d) => (
             <button
               key={d.id}
@@ -76,9 +76,9 @@ export default function MmrRankingView({ searchQuery = "" }) {
           Nenhum jogador encontrado {searchQuery ? `para "${searchQuery}"` : "nesta divisão"}.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0E1118]/80 backdrop-blur-xl shadow-xl">
+        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface/80 backdrop-blur-xl shadow-xl">
           <table className="w-full text-left text-xs border-collapse min-w-[600px]">
-            <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+            <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
               <tr>
                 <th className="p-3.5 pl-6 w-16"># Rank</th>
                 <th className="p-3.5">Jogador</th>

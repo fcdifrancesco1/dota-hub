@@ -98,7 +98,7 @@ export default function TeamDetailPage() {
       </Link>
 
       {/* HERO DO TIME */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#141A28] via-[#0E1119] to-[#161219] border border-[#212838] p-6 sm:p-8 mb-8 shadow-2xl">
+      <div className="rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/5 border border-white/10 p-3 flex items-center justify-center shadow-inner">
@@ -130,7 +130,7 @@ export default function TeamDetailPage() {
             </div>
           </div>
 
-          <div className="bg-[#090C12] border border-[#212838] rounded-xl p-4 text-center min-w-[180px]">
+          <div className="bg-surface border border-line rounded-xl p-4 text-center min-w-[180px]">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-1">
               Desempenho Geral
             </span>
@@ -151,14 +151,14 @@ export default function TeamDetailPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {roster.length === 0 && (
-            <div className="col-span-full bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 text-center text-xs text-gray-500">
+            <div className="col-span-full bg-surface border border-line rounded-2xl p-6 text-center text-xs text-gray-500">
               Elenco ainda não disponível para este time.
             </div>
           )}
           {roster.map((player, idx) => (
             <div
               key={player.accountId || idx}
-              className="bg-[#0C0E14] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-4 shadow-xl text-center transition-all group"
+              className="bg-surface border border-line hover:border-amber-500/40 rounded-2xl p-4 shadow-xl text-center transition-all group"
             >
               <PlayerAvatar
                 accountId={player.accountId}
@@ -174,7 +174,7 @@ export default function TeamDetailPage() {
       </div>
 
       {/* SEÇÃO 2: HERÓIS MAIS JOGADOS & WINRATE */}
-      <div className="mb-10 bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+      <div className="mb-10 bg-surface border border-line rounded-2xl p-6 shadow-xl">
         <h2 className="text-sm font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-400" />
           <span>Heróis Mais Escolhidos & Winrates no Patch</span>
@@ -189,7 +189,7 @@ export default function TeamDetailPage() {
             { id: 102, name: 'Abaddon', games: 24, winrate: 70.8 },
             { id: 74, name: 'Invoker', games: 22, winrate: 63.6 }
           ].map((h) => (
-            <div key={h.id} className="bg-[#11141E] border border-white/5 rounded-xl p-3 text-center">
+            <div key={h.id} className="bg-surface-2 border border-white/5 rounded-xl p-3 text-center">
               <img
                 src={getHeroImg(h.id, constants)}
                 alt={h.name}
@@ -204,7 +204,7 @@ export default function TeamDetailPage() {
       </div>
 
       {/* SEÇÃO 3: ÚLTIMAS SÉRIES & CAMPEONATOS DISPUTADOS */}
-      <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+      <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl">
         <h2 className="text-sm font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
           <Calendar className="w-4 h-4 text-amber-400" />
           <span>Histórico Recente de Confrontos</span>
@@ -219,7 +219,7 @@ export default function TeamDetailPage() {
             return (
               <div
                 key={idx}
-                className="bg-[#11141E] hover:bg-[#161B28] border border-white/5 rounded-xl p-3 flex items-center justify-between gap-4 transition-all"
+                className="bg-surface-2 hover:bg-surface-2 border border-white/5 rounded-xl p-3 flex items-center justify-between gap-4 transition-all"
               >
                 <div className="flex items-center gap-3">
                   {won ? (

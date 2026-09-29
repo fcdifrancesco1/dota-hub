@@ -302,7 +302,7 @@ export default function LiveMatchDetail({
               ? isRadiant
                 ? 'bg-emerald-950/30 border-emerald-500/40 hover:border-emerald-400 hover:scale-105 shadow-sm shadow-emerald-500/10'
                 : 'bg-rose-950/30 border-rose-500/40 hover:border-rose-400 hover:scale-105 shadow-sm shadow-rose-500/10'
-              : 'bg-[#0E1118] border-white/10 hover:border-rose-500/40 hover:scale-105 opacity-80 hover:opacity-100'
+              : 'bg-surface border-white/10 hover:border-rose-500/40 hover:scale-105 opacity-80 hover:opacity-100'
           }`}
           title={`${orderNum}. ${isPick ? 'PICK' : 'BAN'}: ${hName} (${teamName})`}
         >
@@ -357,7 +357,7 @@ export default function LiveMatchDetail({
     };
 
     return (
-      <div className="bg-[#11141D] border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl">
+      <div className="bg-surface-2 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl">
         <div className="flex items-center justify-between border-b border-white/5 pb-2.5 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Swords className="w-4 h-4 text-amber-400" />
@@ -405,7 +405,7 @@ export default function LiveMatchDetail({
     ];
 
     return (
-      <div className={`bg-[#0E1118] border ${isRadiant ? 'border-emerald-500/20' : 'border-rose-500/20'} rounded-xl p-2.5 space-y-2`}>
+      <div className={`bg-surface border ${isRadiant ? 'border-emerald-500/20' : 'border-rose-500/20'} rounded-xl p-2.5 space-y-2`}>
         <div className="flex items-center justify-between border-b border-white/5 pb-1">
           <span className={`font-bold font-mono text-xs ${isRadiant ? 'text-emerald-400' : 'text-rose-400'} truncate`}>
             {teamName} ({isRadiant ? 'Radiant' : 'Dire'})
@@ -481,9 +481,9 @@ export default function LiveMatchDetail({
       </div>
 
       {/* TABELA PARA TELAS MÉDIAS E GRANDES (DESKTOP) */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10 bg-surface/80">
         <table className="w-full text-left text-xs border-collapse min-w-[1000px]">
-          <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+          <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
             <tr>
               <th className="p-3 pl-4 whitespace-nowrap min-w-[170px]">Jogador / Herói</th>
               <th className="p-3 text-center whitespace-nowrap min-w-[60px]">Nível</th>
@@ -633,7 +633,7 @@ export default function LiveMatchDetail({
           return (
             <div
               key={i}
-              className={`p-2.5 rounded-xl border bg-[#0E1118]/90 transition-all ${
+              className={`p-2.5 rounded-xl border bg-surface/90 transition-all ${
                 isRadiant ? 'border-emerald-500/25' : 'border-rose-500/25'
               }`}
             >
@@ -790,7 +790,7 @@ export default function LiveMatchDetail({
   return (
     <div className="space-y-6">
       {/* CABEÇALHO: STATUS, PLACAR E MAPAS DA SÉRIE */}
-      <section className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-[#161019] via-[#0E1119] to-[#121622] p-4 sm:p-8 shadow-2xl">
+      <section className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-surface-2 via-surface to-surface-2 p-4 sm:p-8 shadow-2xl">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[480px] h-[240px] rounded-full bg-rose-600/10 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-[11px]">
@@ -896,7 +896,11 @@ export default function LiveMatchDetail({
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" /> AO VIVO
                   </span>
                 ) : m.is_finished ? (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold border ${
+                    activeMapIndex === idx
+                      ? 'bg-black/20 text-black border-black/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  }`}>
                     FINALIZADO
                   </span>
                 ) : null}
@@ -907,12 +911,12 @@ export default function LiveMatchDetail({
       </section>
 
       {loading ? (
-        <div className="py-24 flex flex-col items-center justify-center gap-3 text-gray-400 rounded-2xl border border-[#212838] bg-[#0C0E14]">
+        <div className="py-24 flex flex-col items-center justify-center gap-3 text-gray-400 rounded-2xl border border-line bg-surface">
           <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
           <span className="text-xs font-semibold">Sincronizando dados oficiais da partida...</span>
         </div>
       ) : !matchData ? (
-        <div className="py-16 flex flex-col items-center justify-center gap-3 text-center text-gray-400 rounded-2xl border border-[#212838] bg-[#0C0E14]">
+        <div className="py-16 flex flex-col items-center justify-center gap-3 text-center text-gray-400 rounded-2xl border border-line bg-surface">
           <Radio className="w-10 h-10 text-amber-500/40" />
           <span className="text-sm font-bold text-white">Ainda não há telemetria oficial publicada para esta partida</span>
           <span className="text-xs text-gray-500 max-w-md">
@@ -933,7 +937,7 @@ export default function LiveMatchDetail({
                   {renderTable(direPlayers, teamBName, false, scoreB)}
                 </>
               ) : (
-                <div className="text-center py-10 text-gray-500 text-xs rounded-2xl border border-[#212838] bg-[#0C0E14]">
+                <div className="text-center py-10 text-gray-500 text-xs rounded-2xl border border-line bg-surface">
                   Estatísticas individuais dos jogadores ainda não foram publicadas pela API para esta partida.
                 </div>
               )}
@@ -942,7 +946,7 @@ export default function LiveMatchDetail({
             {/* COLUNA LATERAL: OBJETIVOS */}
             <aside className="xl:col-span-4 space-y-4 xl:sticky xl:top-24">
               {(radiantStructures.hasData || direStructures.hasData) ? (
-                <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 space-y-3">
+                <div className="bg-surface-2/80 border border-white/10 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-amber-400">
                       <Castle className="w-4 h-4 text-amber-400" /> Torres & Barracas
@@ -959,7 +963,7 @@ export default function LiveMatchDetail({
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#141824]/80 border border-white/10 rounded-2xl p-4 text-xs text-gray-500 text-center">
+                <div className="bg-surface-2/80 border border-white/10 rounded-2xl p-4 text-xs text-gray-500 text-center">
                   Status de torres e barracas ainda não disponível.
                 </div>
               )}

@@ -44,7 +44,7 @@ export default function TeamProfileModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl bg-[#0C0F16] border border-white/15 rounded-2xl p-6 shadow-2xl overflow-hidden my-auto"
+        className="relative w-full max-w-2xl bg-surface border border-white/15 rounded-2xl p-6 shadow-2xl overflow-hidden my-auto"
       >
         {/* BOTÃO FECHAR */}
         <button

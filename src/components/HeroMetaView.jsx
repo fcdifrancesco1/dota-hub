@@ -125,7 +125,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       {/* CARDS DE DESTAQUE DO META */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {topWinRate && (
-          <div className="bg-gradient-to-br from-[#161A24]/90 to-[#10131C]/90 border border-emerald-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
+          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-emerald-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
             <img src={topWinRate.img} alt={topWinRate.name} className="w-12 h-12 rounded-lg object-cover border border-emerald-400/50" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-emerald-400 block">Maior Winrate Pro</span>
@@ -136,7 +136,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
         )}
 
         {mostPicked && (
-          <div className="bg-gradient-to-br from-[#161A24]/90 to-[#10131C]/90 border border-amber-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
+          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-amber-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
             <img src={mostPicked.img} alt={mostPicked.name} className="w-12 h-12 rounded-lg object-cover border border-amber-400/50" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-amber-400 block">Mais Escolhido Pro</span>
@@ -147,7 +147,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
         )}
 
         {mostBanned && (
-          <div className="bg-gradient-to-br from-[#161A24]/90 to-[#10131C]/90 border border-rose-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
+          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-rose-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
             <img src={mostBanned.img} alt={mostBanned.name} className="w-12 h-12 rounded-lg object-cover border border-rose-400/50" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-rose-400 block">Mais Banido Pro</span>
@@ -158,7 +158,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
         )}
 
         {topImmortalPub && (
-          <div className="bg-gradient-to-br from-[#161A24]/90 to-[#10131C]/90 border border-cyan-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
+          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-cyan-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
             <img src={topImmortalPub.img} alt={topImmortalPub.name} className="w-12 h-12 rounded-lg object-cover border border-cyan-400/50" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-cyan-400 block">Destaque Immortal Pub</span>
@@ -170,7 +170,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       </div>
 
       {/* BARRA DE FILTROS E FUNÇÕES */}
-      <div className="bg-[#141824]/70 border border-white/10 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-surface-2/70 border border-white/10 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
         {/* Filtros de Posição / Função */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {rolesList.map((r) => (
@@ -218,9 +218,9 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       {loading ? (
         <SkeletonTable rows={10} cols={6} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0E1118]/80 backdrop-blur-xl">
+        <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface/80 backdrop-blur-xl">
           <table className="w-full text-left text-xs border-collapse min-w-[840px]">
-            <thead className="bg-[#161A24]/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+            <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
               <tr>
                 <th
                   onClick={() => {

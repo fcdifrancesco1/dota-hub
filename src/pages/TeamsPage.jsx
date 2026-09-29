@@ -23,7 +23,7 @@ export default function TeamsPage() {
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#212838]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
             <Users className="w-7 h-7 text-amber-500" />
@@ -41,7 +41,7 @@ export default function TeamsPage() {
             placeholder="Buscar por nome ou tag..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#11141E] border border-[#212838] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-64"
+            className="bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-64"
           />
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function TeamsPage() {
             <div
               key={t.id || idx}
               onClick={() => setSelectedTeam({ id: t.id, name: t.name })}
-              className="bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-5 shadow-xl transition-all cursor-pointer group"
+              className="bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-2xl p-5 shadow-xl transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
                 <span className="font-mono text-xs font-bold text-amber-500">

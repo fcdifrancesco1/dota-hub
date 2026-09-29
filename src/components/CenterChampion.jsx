@@ -18,7 +18,7 @@ export default function CenterChampion({ onOpenTeamProfile }) {
   };
 
   return (
-    <div className="w-full max-w-4xl bg-gradient-to-b from-[#141824]/90 via-[#0F121A]/90 to-[#0A0C12]/90 border border-amber-500/30 rounded-2xl p-6 relative overflow-hidden shadow-2xl backdrop-blur-xl">
+    <div className="w-full max-w-4xl bg-gradient-to-b from-surface-2/90 via-surface/90 to-canvas/90 border border-amber-500/30 rounded-2xl p-6 relative overflow-hidden shadow-2xl backdrop-blur-xl">
       {/* Luz ambiente dourada de fundo */}
       <div className="absolute top-0 right-1/4 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -74,7 +74,7 @@ export default function CenterChampion({ onOpenTeamProfile }) {
         {champion.roster.map((player) => (
           <div
             key={player.pos}
-            className="bg-[#161A24]/70 hover:bg-[#1C2230]/90 border border-white/10 hover:border-amber-500/40 rounded-xl p-3.5 flex flex-col items-center text-center transition-all duration-200 group hover:-translate-y-1 shadow-sm"
+            className="bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-amber-500/40 rounded-xl p-3.5 flex flex-col items-center text-center transition-all duration-200 group hover:-translate-y-1 shadow-sm"
           >
             {/* Foto com Posição Flutuante */}
             <div className="relative w-14 h-14 mb-2.5">
@@ -87,7 +87,7 @@ export default function CenterChampion({ onOpenTeamProfile }) {
                   e.target.src = "/aegis.png";
                 }}
               />
-              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#0B0D12] border border-amber-400 text-amber-400 font-mono text-[10px] font-extrabold flex items-center justify-center">
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-canvas border border-amber-400 text-amber-400 font-mono text-[10px] font-extrabold flex items-center justify-center">
                 {player.pos}
               </span>
             </div>

@@ -66,7 +66,7 @@ export default function MatchDetailPage() {
       </Link>
 
       {/* HEADER DA PARTIDA COM PLACAR E VENCEDOR */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#141A28] via-[#0E1119] to-[#181116] border border-[#212838] p-6 sm:p-8 mb-8 shadow-2xl">
+      <div className="rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* RADIANT */}
           <div className="flex items-center gap-4 flex-1">
@@ -121,7 +121,7 @@ export default function MatchDetailPage() {
 
       {/* DRAFT COMPLETO (PICKS E BANS NA ORDEM OFICIAL - SEÇÃO 6.4) */}
       {picksBans.length > 0 && (
-        <div className="mb-8 bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+        <div className="mb-8 bg-surface border border-line rounded-2xl p-6 shadow-xl">
           <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-400" />
             <span>Fase de Draft (Picks & Bans Oficiais)</span>
@@ -176,7 +176,7 @@ export default function MatchDetailPage() {
 
       {/* GRÁFICO DE VANTAGEM DE OURO E XP */}
       {match?.radiant_gold_adv && match.radiant_gold_adv.length > 0 && (
-        <div className="mb-8 bg-[#0C0E14] border border-[#212838] rounded-2xl p-6 shadow-xl">
+        <div className="mb-8 bg-surface border border-line rounded-2xl p-6 shadow-xl">
           <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
             <Zap className="w-4 h-4 text-amber-400" />
             <span>Vantagem de Ouro e Experiência ao Longo do Jogo</span>
@@ -193,7 +193,7 @@ export default function MatchDetailPage() {
       {/* TABELAS DE JOGADORES (RADIANTE E DIRE) */}
       <div className="space-y-8 mb-8">
         {/* TABELA RADIANTE */}
-        <div className="bg-[#0C0E14] border border-emerald-900/30 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-surface border border-emerald-900/30 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-4 bg-emerald-950/20 border-b border-emerald-900/30 flex items-center justify-between">
             <h3 className="text-sm font-black uppercase text-emerald-400 flex items-center gap-2">
               <span>Time Radiante</span>
@@ -204,7 +204,7 @@ export default function MatchDetailPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-medium">
-              <thead className="bg-[#11141E] text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="p-3">Herói / Jogador</th>
                   <th className="p-3 text-center">K / D / A</th>
@@ -273,7 +273,7 @@ export default function MatchDetailPage() {
         </div>
 
         {/* TABELA DIRE */}
-        <div className="bg-[#0C0E14] border border-red-900/30 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-surface border border-red-900/30 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-4 bg-red-950/20 border-b border-red-900/30 flex items-center justify-between">
             <h3 className="text-sm font-black uppercase text-red-400 flex items-center gap-2">
               <span>Time Dire</span>
@@ -284,7 +284,7 @@ export default function MatchDetailPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-medium">
-              <thead className="bg-[#11141E] text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="p-3">Herói / Jogador</th>
                   <th className="p-3 text-center">K / D / A</th>
@@ -359,7 +359,7 @@ export default function MatchDetailPage() {
           href={`https://www.opendota.com/matches/${id}`}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#131722] border border-[#212838] hover:border-amber-500/40 text-gray-300 hover:text-white font-bold transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-2 border border-line hover:border-amber-500/40 text-gray-300 hover:text-white font-bold transition-all"
         >
           <ExternalLink className="w-4 h-4 text-amber-400" />
           <span>Abrir Replay no OpenDota Oficial</span>

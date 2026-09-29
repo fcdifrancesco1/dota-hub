@@ -60,7 +60,7 @@ export default function HomeHero() {
   const hasLive = liveGames && liveGames.length > 0;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-[#121622] via-[#0E1119] to-[#181116] p-6 sm:p-10 mb-8 shadow-2xl">
+    <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-surface-2 via-surface to-surface-2 p-6 sm:p-10 mb-8 shadow-2xl">
       {/* Detalhes de iluminação de fundo */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-red-600/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/3 -mb-20 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
@@ -87,7 +87,7 @@ export default function HomeHero() {
             {hasLive ? (
               <button
                 onClick={() => openLiveMatch(liveGames[0])}
-                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black uppercase tracking-wider text-xs shadow-lg shadow-red-900/50 hover:scale-105 transition-all"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-red-900/50 hover:scale-105 transition-all"
               >
                 <Radio className="w-4 h-4 animate-pulse text-white" />
                 <span>Assistir Ao Vivo Agora</span>
@@ -104,7 +104,7 @@ export default function HomeHero() {
 
             <Link
               to="/campeonatos"
-              className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-[#1A1F2C] hover:bg-[#222838] border border-white/10 hover:border-amber-500/40 text-gray-200 hover:text-white font-bold uppercase tracking-wider text-xs transition-all"
+              className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-surface-3 hover:bg-surface-3 border border-white/10 hover:border-amber-500/40 text-gray-200 hover:text-white font-bold uppercase tracking-wider text-xs transition-all"
             >
               <span>Ver Campeonatos</span>
               <ArrowRight className="w-4 h-4" />
@@ -113,7 +113,7 @@ export default function HomeHero() {
         </div>
 
         {/* Lado Direito: Próximo Confronto com Contagem Regressiva */}
-        <div className="lg:col-span-5 bg-[#0C0E14]/90 border border-[#262F44] rounded-2xl p-6 backdrop-blur-md shadow-xl">
+        <div className="lg:col-span-5 bg-surface/90 border border-line-strong rounded-2xl p-6 backdrop-blur-md shadow-xl">
           <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
             <span className="text-gray-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
@@ -178,19 +178,19 @@ export default function HomeHero() {
               Inicia em ({nextMatch.startTime}):
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-[#121622] border border-[#212838] rounded-xl py-2">
+              <div className="bg-surface-2 border border-line rounded-xl py-2">
                 <span className="block font-mono text-xl font-black text-white">
                   {String(timeLeft.hours).padStart(2, '0')}
                 </span>
                 <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Horas</span>
               </div>
-              <div className="bg-[#121622] border border-[#212838] rounded-xl py-2">
+              <div className="bg-surface-2 border border-line rounded-xl py-2">
                 <span className="block font-mono text-xl font-black text-amber-400">
                   {String(timeLeft.minutes).padStart(2, '0')}
                 </span>
                 <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Minutos</span>
               </div>
-              <div className="bg-[#121622] border border-[#212838] rounded-xl py-2">
+              <div className="bg-surface-2 border border-line rounded-xl py-2">
                 <span className="block font-mono text-xl font-black text-red-400">
                   {String(timeLeft.seconds).padStart(2, '0')}
                 </span>

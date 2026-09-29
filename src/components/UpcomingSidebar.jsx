@@ -23,7 +23,7 @@ export default function UpcomingSidebar({
   });
 
   return (
-    <aside className="w-full lg:w-[340px] bg-[#0E1118]/80 backdrop-blur-xl border-l border-white/10 flex flex-col h-full overflow-hidden">
+    <aside className="w-full lg:w-[340px] bg-surface/80 backdrop-blur-xl border-l border-white/10 flex flex-col h-full overflow-hidden">
       <div className="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
         <div className="flex items-center gap-2 font-extrabold uppercase text-xs tracking-wider text-cyan-400">
           <Calendar className="w-4 h-4 text-cyan-400" />
@@ -62,7 +62,7 @@ export default function UpcomingSidebar({
             return (
               <div
                 key={idx}
-                className="bg-[#161A24]/70 hover:bg-[#1C2230]/90 border border-white/10 hover:border-cyan-500/50 rounded-xl overflow-hidden transition-all duration-200 shadow-sm"
+                className="bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-cyan-500/50 rounded-xl overflow-hidden transition-all duration-200 shadow-sm"
               >
                 {/* Nome do Torneio */}
                 <div className="px-3 py-1.5 bg-black/40 border-b border-white/5 flex items-center justify-between text-[10px]">

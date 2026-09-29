@@ -61,7 +61,7 @@ export default function FavoritesHighlight() {
           return (
             <div
               key={fav.id}
-              className="rounded-2xl bg-gradient-to-br from-[#121622] to-[#0D1017] border border-[#212838] p-5 shadow-xl hover:border-amber-500/40 transition-all"
+              className="rounded-2xl bg-gradient-to-br from-surface-2 to-surface border border-line p-5 shadow-xl hover:border-amber-500/40 transition-all"
             >
               {/* Cabeçalho do Card */}
               <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5">
@@ -88,7 +88,7 @@ export default function FavoritesHighlight() {
               {/* Informações: Último Resultado e Próximo Jogo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                 {/* Último Resultado */}
-                <div className="bg-[#090C12] border border-[#1C2232] rounded-xl p-3">
+                <div className="bg-surface border border-surface-3 rounded-xl p-3">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-1.5">
                     Último Resultado
                   </span>
@@ -114,7 +114,7 @@ export default function FavoritesHighlight() {
                 </div>
 
                 {/* Próximo Jogo */}
-                <div className="bg-[#090C12] border border-[#1C2232] rounded-xl p-3">
+                <div className="bg-surface border border-surface-3 rounded-xl p-3">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-1.5 flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-amber-400" />
                     <span>Próximo Confronto</span>

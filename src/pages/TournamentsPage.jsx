@@ -48,7 +48,7 @@ export default function TournamentsPage() {
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
       
       {/* HEADER DA PÁGINA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#212838]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
             <Trophy className="w-7 h-7 text-amber-500" />
@@ -62,7 +62,7 @@ export default function TournamentsPage() {
         {/* FILTROS & BUSCA */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Status Tab */}
-          <div className="flex bg-[#11141E] p-1 rounded-xl border border-[#212838]">
+          <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
             {[
               { id: 'all', label: 'Todos' },
               { id: 'ongoing', label: 'Em Andamento' },
@@ -89,7 +89,7 @@ export default function TournamentsPage() {
               placeholder="Buscar campeonato..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-[#11141E] border border-[#212838] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-56"
+              className="bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-56"
             />
           </div>
         </div>
@@ -105,11 +105,11 @@ export default function TournamentsPage() {
             <Link
               key={league.id}
               to={`/campeonatos/${league.id}`}
-              className="group rounded-2xl bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/50 overflow-hidden shadow-xl transition-all flex flex-col justify-between"
+              className="group rounded-2xl bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/50 overflow-hidden shadow-xl transition-all flex flex-col justify-between"
             >
               <div>
                 {/* BANNER OU HERO PLACEHOLDER */}
-                <div className="h-40 w-full bg-gradient-to-r from-red-950 via-[#181116] to-[#121622] relative overflow-hidden flex items-center justify-center p-6">
+                <div className="h-40 w-full bg-gradient-to-r from-red-950 via-surface-2 to-surface-2 relative overflow-hidden flex items-center justify-center p-6">
                   {league.banner_url ? (
                     <img
                       src={league.banner_url}
@@ -127,7 +127,7 @@ export default function TournamentsPage() {
                   {/* BADGE DE STATUS */}
                   <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
                     isOngoing
-                      ? 'bg-red-600 text-white shadow-md animate-pulse'
+                      ? 'bg-red-600 text-on-accent shadow-md animate-pulse'
                       : isUpcoming
                       ? 'bg-amber-500 text-black font-black'
                       : 'bg-white/10 text-gray-400'
@@ -165,7 +165,7 @@ export default function TournamentsPage() {
               </div>
 
               {/* RODAPÉ DO CARD */}
-              <div className="px-6 py-3.5 border-t border-white/5 bg-[#090B0F] flex items-center justify-between text-xs">
+              <div className="px-6 py-3.5 border-t border-white/5 bg-canvas flex items-center justify-between text-xs">
                 <span className="text-gray-400 text-[11px]">Ver Chaveamento & Estatísticas</span>
                 <span className="font-bold text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
                   <span>Acessar</span>

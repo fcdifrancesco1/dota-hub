@@ -15,7 +15,7 @@ export default function AnalysesPage() {
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
       {/* Header */}
-      <div className="mb-8 pb-6 border-b border-[#212838]">
+      <div className="mb-8 pb-6 border-b border-line">
         <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
           <BookOpen className="w-7 h-7 text-amber-500" />
           <span>Análises Táticas & Tendências do Meta</span>
@@ -28,7 +28,7 @@ export default function AnalysesPage() {
       {/* BLOCOS AUTOMÁTICOS DE TENDÊNCIAS (SEÇÃO 6.9) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {/* Bloco 1: Heróis em Alta e em Queda */}
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+        <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
           <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-400" />
             <span>Tendência de Heróis (Semana)</span>
@@ -52,7 +52,7 @@ export default function AnalysesPage() {
         </div>
 
         {/* Bloco 2: Duração Média por Patch */}
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+        <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
           <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4 text-amber-400" />
             <span>Duração Média das Partidas</span>
@@ -74,7 +74,7 @@ export default function AnalysesPage() {
         </div>
 
         {/* Bloco 3: Winrate Radiant x Dire */}
-        <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+        <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
           <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 text-amber-400" />
             <span>Vantagem de Mapa (Pro Matches)</span>
@@ -103,7 +103,7 @@ export default function AnalysesPage() {
         {articles.map((art) => (
           <article
             key={art.id}
-            className="rounded-2xl bg-[#0C0E14] border border-[#212838] hover:border-amber-500/40 overflow-hidden shadow-xl transition-all group flex flex-col justify-between"
+            className="rounded-2xl bg-surface border border-line hover:border-amber-500/40 overflow-hidden shadow-xl transition-all group flex flex-col justify-between"
           >
             <div>
               {art.cover_image && (

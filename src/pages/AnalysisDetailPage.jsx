@@ -45,7 +45,7 @@ export default function AnalysisDetailPage() {
         <span>Voltar para Análises</span>
       </Link>
 
-      <article className="bg-[#0C0E14] border border-[#212838] rounded-2xl overflow-hidden shadow-2xl p-6 sm:p-10">
+      <article className="bg-surface border border-line rounded-2xl overflow-hidden shadow-2xl p-6 sm:p-10">
         {/* Metadados */}
         <div className="flex flex-wrap gap-2 mb-4">
           {article.tags?.map((t, idx) => (

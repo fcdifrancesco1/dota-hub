@@ -71,7 +71,7 @@ export default function LiveMatchPage() {
           <span className="text-xs font-semibold">Carregando partida...</span>
         </div>
       ) : (
-        <div className="rounded-2xl bg-[#0C0E14] border border-[#212838] p-10 text-center max-w-xl mx-auto">
+        <div className="rounded-2xl bg-surface border border-line p-10 text-center max-w-xl mx-auto">
           <Radio className="w-10 h-10 text-gray-500 mx-auto mb-3" />
           <h1 className="text-lg font-black text-white uppercase mb-2">Partida não está mais ao vivo</h1>
           <p className="text-xs text-gray-400 mb-5">

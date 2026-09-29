@@ -32,7 +32,7 @@ export default function LiveMatchesSection({
           <SkeletonCard rows={2} />
         </div>
       ) : liveGames.length === 0 ? (
-        <div className="bg-[#0E1118]/70 border border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2 backdrop-blur-xl">
+        <div className="bg-surface/70 border border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2 backdrop-blur-xl">
           <Radio className="w-8 h-8 text-amber-500/40 animate-pulse" />
           <span className="text-sm font-bold text-white">
             {tournamentFilter && tournamentFilter !== 'all'
@@ -78,7 +78,7 @@ export default function LiveMatchesSection({
               <div
                 key={idx}
                 onClick={() => onSelectLiveGame && onSelectLiveGame(g)}
-                className="group bg-[#161A24]/90 hover:bg-[#1C2230] border border-rose-500/30 hover:border-rose-400 rounded-2xl p-5 sm:p-6 cursor-pointer transition-all duration-200 shadow-md hover:shadow-xl hover:shadow-rose-500/10 hover:-translate-y-1 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between gap-4"
+                className="group bg-surface-2/90 hover:bg-surface-3 border border-rose-500/30 hover:border-rose-400 rounded-2xl p-5 sm:p-6 cursor-pointer transition-all duration-200 shadow-md hover:shadow-xl hover:shadow-rose-500/10 hover:-translate-y-1 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between gap-4"
               >
                 {/* Indicador de glow sutil ao vivo */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl pointer-events-none" />

@@ -55,7 +55,7 @@ export default function MatchesPage() {
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
       {/* HEADER DA PÁGINA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#212838]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
             <Swords className="w-7 h-7 text-amber-500" />
@@ -67,7 +67,7 @@ export default function MatchesPage() {
         </div>
 
         {/* ALTERNADOR DE MODO (CONCLUÍDAS VS FUTURAS) */}
-        <div className="flex bg-[#11141E] p-1 rounded-xl border border-[#212838]">
+        <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
           <button
             onClick={() => switchMode('finished')}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap ${
@@ -95,7 +95,7 @@ export default function MatchesPage() {
           <select
             value={selectedTournament}
             onChange={(e) => setSelectedTournament(e.target.value)}
-            className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+            className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
           >
             <option value="all">Todos os Campeonatos</option>
             {tournamentsList.map((t, idx) => (
@@ -110,7 +110,7 @@ export default function MatchesPage() {
           <select
             value={selectedTeam}
             onChange={(e) => setSelectedTeam(e.target.value)}
-            className="w-full bg-[#11141E] border border-[#212838] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+            className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
           >
             <option value="all">Todos os Times</option>
             {teamsList.map((tm, idx) => (
@@ -129,7 +129,7 @@ export default function MatchesPage() {
               placeholder="Digite time ou torneio..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#11141E] border border-[#212838] rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
+              className="w-full bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
             />
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function MatchesPage() {
       {/* GRID DE SÉRIES / PARTIDAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.length === 0 ? (
-          <div className="col-span-full bg-[#0C0E14] border border-[#212838] rounded-2xl p-12 text-center text-gray-400 text-xs">
+          <div className="col-span-full bg-surface border border-line rounded-2xl p-12 text-center text-gray-400 text-xs">
             Nenhuma partida encontrada para os filtros selecionados.
           </div>
         ) : (
@@ -218,7 +218,7 @@ export default function MatchesPage() {
               </>
             );
 
-            const cardClass = "bg-[#0C0E14] hover:bg-[#11141E] border border-[#212838] hover:border-amber-500/40 rounded-2xl p-5 transition-all shadow-xl group flex flex-col justify-between";
+            const cardClass = "bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-2xl p-5 transition-all shadow-xl group flex flex-col justify-between";
 
             // Partidas futuras não têm replay: o card leva à transmissão (se houver).
             if (isUpcoming) {

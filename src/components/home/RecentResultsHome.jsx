@@ -11,7 +11,7 @@ export default function RecentResultsHome() {
 
   if (loading) {
     return (
-      <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl">
+      <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
         <div className="h-6 w-44 bg-white/5 rounded animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => (
@@ -23,7 +23,7 @@ export default function RecentResultsHome() {
   }
 
   return (
-    <div className="bg-[#0C0E14] border border-[#212838] rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+    <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
           <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ export default function RecentResultsHome() {
                 <div
                   key={series.series_id || series.id || idx}
                   onClick={() => setSelectedSeries(series)}
-                  className="bg-[#11141E] hover:bg-[#161B28] border border-[#1C2232] hover:border-amber-500/30 rounded-xl p-3 transition-all cursor-pointer group"
+                  className="bg-surface-2 hover:bg-surface-2 border border-surface-3 hover:border-amber-500/30 rounded-xl p-3 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[200px] text-amber-400/80">

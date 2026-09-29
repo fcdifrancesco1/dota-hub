@@ -71,7 +71,7 @@ export default function HomeStatsCards() {
           return (
             <div
               key={idx}
-              className={`relative overflow-hidden rounded-xl bg-gradient-to-b ${card.color} bg-[#0E1118] border ${card.borderColor} p-4 transition-all hover:scale-[1.02] shadow-lg`}
+              className={`relative overflow-hidden rounded-xl bg-gradient-to-b ${card.color} bg-surface border ${card.borderColor} p-4 transition-all hover:scale-[1.02] shadow-lg`}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 truncate">
