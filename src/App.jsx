@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -23,6 +23,13 @@ import TeamPage from './pages/TeamPage';
 // Modais Globais
 import HeroDetailModal from './components/HeroDetailModal';
 
+// Ao trocar de página, volta ao topo (o React Router mantém a rolagem anterior)
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
+
 function AppContent() {
   const {
     constants,
@@ -33,6 +40,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-canvas app-backdrop text-gray-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black">
       <div>
+        <ScrollToTop />
         <Header />
         <main>
           <Routes>

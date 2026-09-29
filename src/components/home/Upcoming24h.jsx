@@ -31,16 +31,16 @@ export default function Upcoming24h() {
   return (
     <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5 mb-4">
+          <div className="flex items-center gap-2 min-w-0">
             <Calendar className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-black uppercase tracking-wider text-white">
-              Próximas 24h (Brasília)
+            <h3 className="text-sm font-black uppercase tracking-wider text-white whitespace-nowrap">
+              Próximas 24h <span className="hidden sm:inline">(Brasília)</span>
             </h3>
           </div>
           <Link
-            to="/partidas"
-            className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider"
+            to="/partidas?aba=agenda"
+            className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider whitespace-nowrap shrink-0"
           >
             <span>Ver Agenda</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -86,16 +86,16 @@ export default function Upcoming24h() {
                   <div className="flex items-center justify-between gap-2">
                     {/* Time 1 */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-5 h-5" />
-                      <span className="text-xs font-bold text-white truncate">{m.timeA}</span>
+                      <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-5 h-5 shrink-0" />
+                      <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
                     </div>
 
                     <span className="text-[10px] font-black text-gray-500 uppercase px-1">vs</span>
 
                     {/* Time 2 */}
                     <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                      <span className="text-xs font-bold text-white truncate text-right">{m.timeB}</span>
-                      <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-5 h-5" />
+                      <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
+                      <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-5 h-5 shrink-0" />
                     </div>
                   </div>
                 </div>

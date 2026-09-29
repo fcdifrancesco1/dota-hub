@@ -27,16 +27,16 @@ export default function RecentResultsHome() {
   return (
     <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5 mb-4">
+          <div className="flex items-center gap-2 min-w-0">
             <Trophy className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-black uppercase tracking-wider text-white">
+            <h3 className="text-sm font-black uppercase tracking-wider text-white whitespace-nowrap">
               Resultados Recentes
             </h3>
           </div>
           <Link
             to="/partidas"
-            className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider"
+            className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider whitespace-nowrap shrink-0"
           >
             <span>Ver Histórico</span>
             <ChevronRight className="w-3.5 h-3.5" />

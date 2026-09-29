@@ -113,7 +113,7 @@ export default function HomeHero() {
         </div>
 
         {/* Lado Direito: Próximo Confronto com Contagem Regressiva */}
-        <div className="lg:col-span-5 bg-surface/90 border border-line-strong rounded-2xl p-6 backdrop-blur-md shadow-xl">
+        <div className="lg:col-span-5 min-w-0 bg-surface/90 border border-line-strong rounded-2xl p-4 sm:p-6 backdrop-blur-md shadow-xl">
           <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
             <span className="text-gray-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
@@ -137,30 +137,30 @@ export default function HomeHero() {
           </div>
 
           {/* Confronto */}
-          <div className="py-5 flex items-center justify-between gap-4">
+          <div className="py-5 flex items-center justify-between gap-2 sm:gap-4">
             {/* Time 1 */}
-            <div className="flex flex-col items-center flex-1 text-center">
+            <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
               <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
                 <TeamLogo teamName={nextMatch.timeA} logoUrl={nextMatch.logoA} className="w-10 h-10" />
               </div>
-              <span className="text-sm font-black text-white truncate max-w-[120px]">
+              <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
                 {nextMatch.timeA}
               </span>
             </div>
 
             {/* VS */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center shrink-0">
               <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
                 VS
               </span>
             </div>
 
             {/* Time 2 */}
-            <div className="flex flex-col items-center flex-1 text-center">
+            <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
               <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 p-2 flex items-center justify-center mb-2 shadow-inner">
                 <TeamLogo teamName={nextMatch.timeB} logoUrl={nextMatch.logoB} className="w-10 h-10" />
               </div>
-              <span className="text-sm font-black text-white truncate max-w-[120px]">
+              <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
                 {nextMatch.timeB}
               </span>
             </div>

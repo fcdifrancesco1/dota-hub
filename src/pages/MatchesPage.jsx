@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Swords, Filter, Calendar, Search, Trophy, ChevronRight, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
@@ -7,7 +8,9 @@ import TeamLogo from '../utils/teamLogos';
 export default function MatchesPage() {
   const { finishedSeries, upcomingMatches } = useApp();
   const openSeries = useOpenSeries();
-  const [filterMode, setFilterMode] = useState('finished'); // 'finished' | 'upcoming'
+  // Aba vem da URL (/partidas?aba=agenda) para links diretos, voltar e recarregar
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterMode = searchParams.get('aba') === 'agenda' ? 'upcoming' : 'finished'; // 'finished' | 'upcoming'
   const [selectedTournament, setSelectedTournament] = useState('all');
   const [selectedTeam, setSelectedTeam] = useState('all');
   const [search, setSearch] = useState('');
@@ -15,7 +18,8 @@ export default function MatchesPage() {
   const displayedList = (filterMode === 'finished' ? finishedSeries : upcomingMatches) || [];
 
   const switchMode = (mode) => {
-    setFilterMode(mode);
+    if (mode === filterMode) return;
+    setSearchParams(mode === 'upcoming' ? { aba: 'agenda' } : {}, { replace: true });
     // Os campeonatos/times de uma aba não existem necessariamente na outra
     setSelectedTournament('all');
     setSelectedTeam('all');
