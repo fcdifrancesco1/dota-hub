@@ -695,6 +695,26 @@ export async function fetchTournaments() {
   return getCachedFast(TOURNAMENTS_CACHE_KEY) || [];
 }
 
+// Tabelas de classificação (fase de grupos) de um campeonato da Liquipedia — ver api/tournaments.js
+export async function fetchTournamentStandings(page) {
+  if (!page) return [];
+  const key = `tourney_standings_v2_${page}`;
+  const cached = getCached(key, 5 * 60 * 1000);
+  if (cached) return cached;
+  try {
+    const res = await fetchWithTimeout(`/api/tournaments?standings=${encodeURIComponent(page)}`, {}, 20000);
+    if (res.ok) {
+      const data = await res.json();
+      const tables = Array.isArray(data?.tables) ? data.tables : [];
+      setCache(key, tables);
+      return tables;
+    }
+  } catch (err) {
+    console.warn("Aviso ao buscar classificação do campeonato:", err);
+  }
+  return getCachedFast(key) || [];
+}
+
 export const UPCOMING_CACHE_KEY = "upcoming_real_matches_v5";
 
 const BRT_DATE_TIME = new Intl.DateTimeFormat('pt-BR', {

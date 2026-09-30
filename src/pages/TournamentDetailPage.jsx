@@ -13,10 +13,12 @@ import {
   ExternalLink,
   Clock,
   Loader2,
-  ChevronRight
+  ChevronRight,
+  ListOrdered
 } from 'lucide-react';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
-import { fetchTournaments, fetchTournamentHeroStats, getHeroImg, getHeroName } from '../services/api';
+import { fetchTournaments, fetchTournamentHeroStats, fetchTournamentStandings, getHeroImg, getHeroName } from '../services/api';
+import TournamentStandings from '../components/TournamentStandings';
 import { useApp } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import { useTheme } from '../context/ThemeContext';
@@ -32,7 +34,8 @@ export default function TournamentDetailPage() {
   const { theme } = useTheme();
   const [tournament, setTournament] = useState(null);
   const [notFound, setNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'heroes' | 'info'
+  const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'standings' | 'heroes' | 'info'
+  const [standings, setStandings] = useState([]);
   const [heroStats, setHeroStats] = useState(null);
   const [heroLoading, setHeroLoading] = useState(false);
 
@@ -53,6 +56,18 @@ export default function TournamentDetailPage() {
     });
     return () => { active = false; };
   }, [id]);
+
+  // Classificação da fase de grupos (Liquipedia). A aba só aparece se houver tabela.
+  const standingsPage = tournament?.page;
+  useEffect(() => {
+    setStandings([]);
+    if (!standingsPage) return;
+    let active = true;
+    fetchTournamentStandings(standingsPage).then((tables) => {
+      if (active) setStandings(tables || []);
+    });
+    return () => { active = false; };
+  }, [standingsPage]);
 
   // 2. Estatísticas de heróis do torneio (OpenDota), carregadas ao abrir a aba
   useEffect(() => {
@@ -106,6 +121,7 @@ export default function TournamentDetailPage() {
 
   const tabs = [
     { id: 'matches', label: 'Partidas', icon: Swords },
+    ...(standings.length ? [{ id: 'standings', label: 'Classificação', icon: ListOrdered }] : []),
     { id: 'heroes', label: 'Heróis do Torneio', icon: Sparkles, disabled: !t.leagueId },
     { id: 'info', label: 'Informações', icon: Info }
   ];
@@ -180,7 +196,7 @@ export default function TournamentDetailPage() {
               rel="noopener noreferrer"
               className="self-start md:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-2 border border-line hover:border-amber-500/40 text-xs font-bold text-gray-300 hover:text-amber-400 transition-all whitespace-nowrap"
             >
-              Chaveamento e classificação na Liquipedia
+              Ver na Liquipedia
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           )}
@@ -210,6 +226,11 @@ export default function TournamentDetailPage() {
           );
         })}
       </div>
+
+      {/* ABA: CLASSIFICAÇÃO */}
+      {activeTab === 'standings' && standings.length > 0 && (
+        <TournamentStandings tables={standings} liquipediaUrl={t.liquipediaUrl} />
+      )}
 
       {/* ABA: PARTIDAS */}
       {activeTab === 'matches' && (
