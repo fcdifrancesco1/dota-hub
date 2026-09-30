@@ -1,6 +1,7 @@
 import { fetchLiquipediaQuery, fetchLiquipediaApi } from './_lib/liquipediaClient.js';
 import { parseTournamentList, parseInfobox, buildTournament } from './_lib/parseLiquipediaTournaments.js';
 import { parseLiquipediaStandings } from './_lib/parseLiquipediaStandings.js';
+import { parseLiquipediaBrackets } from './_lib/parseLiquipediaBrackets.js';
 
 const TTL = 30 * 60 * 1000;
 
@@ -26,19 +27,21 @@ const PAGE_RE = /^[\w ./()'&:+-]{1,120}$/;
 
 /**
  * GET /api/tournaments?standings=<página>
- * Tabelas de classificação (fase de grupos) do campeonato, já com séries e
- * mapas calculados pela Liquipedia. Cache de 5 minutos.
+ * Tabelas de classificação (fase de grupos) e chaveamentos do campeonato, já
+ * com séries, mapas e vencedores calculados pela Liquipedia. Cache de 5 minutos.
  */
 async function handleStandings(page, res) {
   if (!PAGE_RE.test(page)) return res.status(400).json({ error: 'Página inválida' });
   try {
     const parsed = await fetchLiquipediaApi(page, { ttlMs: 5 * 60 * 1000 });
-    const tables = parseLiquipediaStandings(parsed?.html || '');
+    const html = parsed?.html || '';
+    const tables = parseLiquipediaStandings(html);
+    const brackets = parseLiquipediaBrackets(html);
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
-    return res.status(200).json({ page, tables });
+    return res.status(200).json({ page, tables, brackets });
   } catch (error) {
     console.error('[Tournaments API] Erro na classificação:', error.message);
-    return res.status(200).json({ page, tables: [] });
+    return res.status(200).json({ page, tables: [], brackets: [] });
   }
 }
 

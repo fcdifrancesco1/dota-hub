@@ -14,11 +14,13 @@ import {
   Clock,
   Loader2,
   ChevronRight,
-  ListOrdered
+  ListOrdered,
+  GitBranch
 } from 'lucide-react';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
 import { fetchTournaments, fetchTournamentHeroStats, fetchTournamentStandings, getHeroImg, getHeroName } from '../services/api';
 import TournamentStandings from '../components/TournamentStandings';
+import TournamentBracket from '../components/TournamentBracket';
 import { useApp } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import { useTheme } from '../context/ThemeContext';
@@ -34,8 +36,9 @@ export default function TournamentDetailPage() {
   const { theme } = useTheme();
   const [tournament, setTournament] = useState(null);
   const [notFound, setNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'standings' | 'heroes' | 'info'
+  const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'standings' | 'bracket' | 'heroes' | 'info'
   const [standings, setStandings] = useState([]);
+  const [brackets, setBrackets] = useState([]);
   const [heroStats, setHeroStats] = useState(null);
   const [heroLoading, setHeroLoading] = useState(false);
 
@@ -57,14 +60,17 @@ export default function TournamentDetailPage() {
     return () => { active = false; };
   }, [id]);
 
-  // Classificação da fase de grupos (Liquipedia). A aba só aparece se houver tabela.
+  // Classificação da fase de grupos e chaveamentos (Liquipedia). As abas só aparecem se houver dados.
   const standingsPage = tournament?.page;
   useEffect(() => {
     setStandings([]);
+    setBrackets([]);
     if (!standingsPage) return;
     let active = true;
-    fetchTournamentStandings(standingsPage).then((tables) => {
-      if (active) setStandings(tables || []);
+    fetchTournamentStandings(standingsPage).then((data) => {
+      if (!active) return;
+      setStandings(data?.tables || []);
+      setBrackets(data?.brackets || []);
     });
     return () => { active = false; };
   }, [standingsPage]);
@@ -122,6 +128,7 @@ export default function TournamentDetailPage() {
   const tabs = [
     { id: 'matches', label: 'Partidas', icon: Swords },
     ...(standings.length ? [{ id: 'standings', label: 'Classificação', icon: ListOrdered }] : []),
+    ...(brackets.length ? [{ id: 'bracket', label: 'Chaveamento', icon: GitBranch }] : []),
     { id: 'heroes', label: 'Heróis do Torneio', icon: Sparkles, disabled: !t.leagueId },
     { id: 'info', label: 'Informações', icon: Info }
   ];
@@ -231,6 +238,9 @@ export default function TournamentDetailPage() {
       {activeTab === 'standings' && standings.length > 0 && (
         <TournamentStandings tables={standings} liquipediaUrl={t.liquipediaUrl} />
       )}
+
+      {/* ABA: CHAVEAMENTO */}
+      {activeTab === 'bracket' && brackets.length > 0 && <TournamentBracket brackets={brackets} />}
 
       {/* ABA: PARTIDAS */}
       {activeTab === 'matches' && (
