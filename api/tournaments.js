@@ -22,7 +22,7 @@ function pagesContent(json) {
  * São 3 consultas leves em lote à Liquipedia, com cache de 30 minutos.
  */
 // Nome de página da Liquipedia (ex.: "BLAST/SLAM/8"); evita usar a rota como proxy genérico
-const PAGE_RE = /^[\w .\/()'&:+-]{1,120}$/;
+const PAGE_RE = /^[\w ./()'&:+-]{1,120}$/;
 
 /**
  * GET /api/tournaments?standings=<página>
