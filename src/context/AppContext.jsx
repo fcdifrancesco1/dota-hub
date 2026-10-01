@@ -10,6 +10,7 @@ import {
   UPCOMING_CACHE_KEY
 } from '../services/api';
 import { SITE_CONFIG } from '../config/siteConfig';
+import { loadTeamLogoRegistry } from '../utils/teamLogos';
 
 const AppContext = createContext(null);
 
@@ -64,6 +65,8 @@ export function AppProvider({ children }) {
 
   // Busca constantes Valve
   useEffect(() => {
+    // Logos dos ~1000 principais times da OpenDota (cache de 24h no navegador)
+    loadTeamLogoRegistry();
     fetchConstants().then((data) => {
       if (data && Object.keys(data.heroes || {}).length > 0) {
         setConstants(data);

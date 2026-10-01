@@ -84,7 +84,7 @@ export default function LiveTickerStrip() {
                 <div className="flex items-center justify-between gap-3">
                   {/* Radiant */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <TeamLogo teamName={radName} logoUrl={game.radiant_logo} className="w-6 h-6 rounded" />
+                    <TeamLogo teamName={radName} teamId={game.radiant_team?.team_id || game.radiant_team_id} logoUrl={game.radiant_logo} className="w-6 h-6 rounded" />
                     <span className="text-xs font-bold text-emerald-400 truncate">{radName}</span>
                   </div>
 
@@ -98,7 +98,7 @@ export default function LiveTickerStrip() {
                   {/* Dire */}
                   <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
                     <span className="text-xs font-bold text-red-400 truncate text-right">{direName}</span>
-                    <TeamLogo teamName={direName} logoUrl={game.dire_logo} className="w-6 h-6 rounded" />
+                    <TeamLogo teamName={direName} teamId={game.dire_team?.team_id || game.dire_team_id} logoUrl={game.dire_logo} className="w-6 h-6 rounded" />
                   </div>
                 </div>
 

@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Shield } from 'lucide-react';
 
@@ -213,16 +213,26 @@ const LOCAL_TEAM_LOGOS = {
 const DYNAMIC_TEAMS_BY_ID = new Map();
 const DYNAMIC_TEAMS_BY_NAME = new Map();
 
+// Componentes que mostram as iniciais por falta de logo e querem ser avisados
+// quando novos logos forem registrados (lista da OpenDota ou busca por ID)
+const LOGO_LISTENERS = new Set();
+function notifyLogoListeners() {
+  for (const fn of LOGO_LISTENERS) fn();
+}
+
 export function registerTeamLogos(teams) {
   if (!Array.isArray(teams)) return;
+  let added = false;
   for (const t of teams) {
     if (!t) continue;
     const logo = t.logo_url || t.logo;
     if (!logo || typeof logo !== 'string' || !logo.startsWith('http')) continue;
-    if (t.team_id) {
+    if (t.team_id && DYNAMIC_TEAMS_BY_ID.get(String(t.team_id)) !== logo) {
       DYNAMIC_TEAMS_BY_ID.set(String(t.team_id), logo);
+      added = true;
     }
     if (t.name) {
+      if (!DYNAMIC_TEAMS_BY_NAME.has(cleanStr(t.name))) added = true;
       DYNAMIC_TEAMS_BY_NAME.set(cleanStr(t.name), logo);
       const stripped = cleanStr(t.name).replace(/^(team|gaming|esports)/, '').replace(/(team|gaming|esports)$/, '');
       if (stripped && stripped.length >= 2) {
@@ -230,6 +240,62 @@ export function registerTeamLogos(teams) {
       }
     }
   }
+  if (added) notifyLogoListeners();
+}
+
+// ---- Carga dos logos da OpenDota ----
+// Lista dos ~1000 principais times (com logo) guardada por 24h no navegador.
+const REGISTRY_KEY = 'dotahub_team_logos_v1';
+const REGISTRY_TTL = 24 * 3600 * 1000;
+let registryPromise = null;
+
+export function loadTeamLogoRegistry() {
+  if (registryPromise) return registryPromise;
+  try {
+    const saved = JSON.parse(localStorage.getItem(REGISTRY_KEY) || 'null');
+    if (saved?.teams?.length) {
+      registerTeamLogos(saved.teams);
+      if (Date.now() - saved.ts < REGISTRY_TTL) {
+        registryPromise = Promise.resolve();
+        return registryPromise;
+      }
+    }
+  } catch { /* armazenamento indisponível: segue para a rede */ }
+
+  registryPromise = fetch('https://api.opendota.com/api/teams')
+    .then((r) => (r.ok ? r.json() : []))
+    .then((list) => {
+      const teams = (Array.isArray(list) ? list : [])
+        .filter((t) => t?.logo_url && t.name)
+        .map((t) => ({ team_id: t.team_id, name: t.name, logo_url: t.logo_url }));
+      registerTeamLogos(teams);
+      try { localStorage.setItem(REGISTRY_KEY, JSON.stringify({ ts: Date.now(), teams })); } catch { /* sem espaço */ }
+    })
+    .catch(() => { registryPromise = null; });
+  return registryPromise;
+}
+
+// Times fora da lista principal: busca o logo pelo ID da OpenDota (uma vez por ID)
+const LOGO_BY_ID_REQUESTS = new Map();
+function fetchTeamLogoById(teamId) {
+  const id = String(teamId);
+  if (LOGO_BY_ID_REQUESTS.has(id)) return;
+  const key = `dotahub_team_logo_${id}`;
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || 'null');
+    if (saved && Date.now() - saved.ts < REGISTRY_TTL) {
+      LOGO_BY_ID_REQUESTS.set(id, Promise.resolve());
+      if (saved.logo_url) registerTeamLogos([{ team_id: id, name: saved.name, logo_url: saved.logo_url }]);
+      return;
+    }
+  } catch { /* segue para a rede */ }
+  LOGO_BY_ID_REQUESTS.set(id, fetch(`https://api.opendota.com/api/teams/${id}`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((t) => {
+      try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), name: t?.name || null, logo_url: t?.logo_url || null })); } catch { /* sem espaço */ }
+      if (t?.logo_url) registerTeamLogos([{ team_id: id, name: t.name, logo_url: t.logo_url }]);
+    })
+    .catch(() => {}));
 }
 
 function cleanStr(s) {
@@ -300,7 +366,8 @@ export function getTeamLogoCandidates(teamName, teamIdOrUrl, fallbackUrl) {
     teamName && findLocalLogoByName(teamName),
     // 3. Registro dinâmico carregado da OpenDota
     teamId && DYNAMIC_TEAMS_BY_ID.get(teamId),
-    teamName && DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName))
+    teamName && DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName)),
+    teamName && DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName).replace(/^(team|gaming|esports)/, '').replace(/(team|gaming|esports)$/, ''))
   ];
 
   return [...new Set(candidates.filter(isUsableLogoUrl))];
@@ -342,6 +409,15 @@ export default function TeamLogo({
   const baseUrl = getTeamLogo(teamName, teamId, logoUrl);
   const lightUrl = theme === 'light' && baseUrl ? LIGHT_VARIANTS.get(baseUrl) : null;
   const resolvedUrl = lightUrl && !FAILED_LOGO_URLS.has(lightUrl) ? lightUrl : baseUrl;
+
+  // Sem logo ainda: busca pelo ID (se houver) e redesenha quando algum logo novo chegar
+  const missing = !resolvedUrl;
+  useEffect(() => {
+    if (!missing) return undefined;
+    if (teamId && /^\d+$/.test(String(teamId))) fetchTeamLogoById(teamId);
+    LOGO_LISTENERS.add(forceRender);
+    return () => { LOGO_LISTENERS.delete(forceRender); };
+  }, [missing, teamId]);
 
   if (!resolvedUrl) {
     if (!showBadgeFallback) return null;

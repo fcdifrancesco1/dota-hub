@@ -407,6 +407,8 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
       <PlayerTable
         players={radiantPlayers}
         teamName={radiant}
+        teamId={match.radiant_team_id || match.radiant_team?.team_id}
+        teamLogo={match.radiant_team?.logo_url}
         isRadiant
         kills={match.radiant_score}
         won={match.radiant_win}
@@ -416,6 +418,8 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
       <PlayerTable
         players={direPlayers}
         teamName={dire}
+        teamId={match.dire_team_id || match.dire_team?.team_id}
+        teamLogo={match.dire_team?.logo_url}
         isRadiant={false}
         kills={match.dire_score}
         won={!match.radiant_win}
@@ -546,13 +550,13 @@ function ItemSlot({ id, constants, className }) {
   );
 }
 
-function PlayerTable({ players, teamName, isRadiant, kills, won, constants, onSelectHero }) {
+function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, won, constants, onSelectHero }) {
   const accent = isRadiant ? 'text-emerald-400' : 'text-rose-400';
   return (
     <section className="bg-surface border border-line rounded-2xl overflow-hidden shadow-xl">
       <div className="p-4 border-b border-line flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <TeamLogo teamName={teamName} className="w-6 h-6 shrink-0" />
+          <TeamLogo teamName={teamName} teamId={teamId} logoUrl={teamLogo} className="w-6 h-6 shrink-0" />
           <h3 className={`text-sm font-black uppercase tracking-wider truncate ${accent}`}>{teamName}</h3>
           <span className="text-[10px] font-bold uppercase text-gray-500">{isRadiant ? 'Radiant' : 'Dire'}</span>
           {won && (

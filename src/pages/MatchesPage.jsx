@@ -172,7 +172,7 @@ export default function MatchesPage() {
 
                   <div className="flex items-center justify-between gap-3 py-2">
                     <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                      <TeamLogo teamName={tA} logoUrl={s.team1_logo || s.logoA} className="w-7 h-7" />
+                      <TeamLogo teamName={tA} teamId={s.team1_id || s.preferredIdA} logoUrl={s.team1_logo || s.logoA} className="w-7 h-7" />
                       <span className={`text-xs font-bold truncate ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
                         {tA}
                       </span>
@@ -186,7 +186,7 @@ export default function MatchesPage() {
                       <span className={`text-xs font-bold truncate text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
                         {tB}
                       </span>
-                      <TeamLogo teamName={tB} logoUrl={s.team2_logo || s.logoB} className="w-7 h-7" />
+                      <TeamLogo teamName={tB} teamId={s.team2_id || s.preferredIdB} logoUrl={s.team2_logo || s.logoB} className="w-7 h-7" />
                     </div>
                   </div>
                 </div>
