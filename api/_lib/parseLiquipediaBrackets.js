@@ -86,8 +86,13 @@ function parseHeader(html, div) {
 
 function parseOpponent(entryHtml) {
   const left = entryHtml.match(/class="brkts-opponent-entry-left[^"]*"[\s\S]*?(?=<div class="brkts-opponent-score-outer|$)/)?.[0] || entryHtml;
-  const teamName = entryHtml.match(/data-team-name="([^"]*)"/)?.[1];
-  const shortName = entryHtml.match(/data-team-shortname="([^"]*)"/)?.[1];
+  // A Liquipedia já usou dois formatos para o nome: atributos data-team-* ou
+  // <div class="team-name">…</div>. O aria-label da linha fica como reserva.
+  const teamName = entryHtml.match(/data-team-name="([^"]*)"/)?.[1]
+    || entryHtml.match(/<div class="team-name">([\s\S]*?)<\/div>/)?.[1]
+    || (/class="block-team/.test(entryHtml) ? entryHtml.match(/aria-label="([^"]*)"/)?.[1] : null);
+  const shortName = entryHtml.match(/data-team-shortname="([^"]*)"/)?.[1]
+    || entryHtml.match(/<div class="team-shortname">([\s\S]*?)<\/div>/)?.[1];
   const literal = decode(entryHtml.match(/brkts-opponent-block-literal[^>]*>([\s\S]*?)<\/div>/)?.[1]);
   const scoreText = decode(entryHtml.match(/brkts-opponent-score-inner[^>]*>([\s\S]*?)<\/div>/)?.[1]);
   const name = decode(teamName) || null;
