@@ -5,6 +5,7 @@ import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
+import { isSeriesOngoing } from '../utils/seriesStatus';
 
 export default function MatchesPage() {
   const { finishedSeries, upcomingMatches, ongoingSeries, liveGames } = useApp();
@@ -176,9 +177,11 @@ export default function MatchesPage() {
             const tB = s.team2_name || s.timeB || 'Team 2';
             const scoreA = s.score_team1 ?? s.scoreA ?? 0;
             const scoreB = s.score_team2 ?? s.scoreB ?? 0;
-            const tourney = s.league_name || s.tourneyName || 'Torneio Oficial';
-            const isWinnerA = !isUpcoming && scoreA > scoreB;
-            const isWinnerB = !isUpcoming && scoreB > scoreA;
+            const tourney = s.league_name || s.tourneyName || s.stage || 'Torneio Oficial';
+            // Série da OpenDota ainda incompleta (ex.: 1x0 numa MD3): sem vencedor
+            const inProgress = !isUpcoming && isSeriesOngoing(s);
+            const isWinnerA = !isUpcoming && !inProgress && scoreA > scoreB;
+            const isWinnerB = !isUpcoming && !inProgress && scoreB > scoreA;
             const formatLabel = s.formato || s.stage || (s.series_type ? `MD${s.series_type}` : 'MD3');
             const hasStarted = isUpcoming && Boolean(s.timestamp) && s.timestamp * 1000 <= Date.now();
 
@@ -233,8 +236,9 @@ export default function MatchesPage() {
                     </>
                   ) : (
                     <>
-                      <span className="text-gray-500">
-                        {s.startTime ? new Date(s.startTime * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Recentemente'}
+                      <span className={inProgress ? 'text-red-400 font-bold flex items-center gap-1.5' : 'text-gray-500'}>
+                        {inProgress && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+                        {inProgress ? 'Em andamento' : s.startTime ? new Date(s.startTime * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Recentemente'}
                       </span>
                       <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                         <span>Ver Replay & Draft</span>
