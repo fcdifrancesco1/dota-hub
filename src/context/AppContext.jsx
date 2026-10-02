@@ -37,6 +37,22 @@ function isUpcomingLive(m, liveGames) {
   });
 }
 
+/**
+ * A partida agendada já foi jogada? Só conta uma série concluída com os mesmos
+ * times jogada no horário da partida ou depois — na fase de grupos os times se
+ * reencontram (ex.: abertura e partida decisiva), e a série antiga não pode
+ * apagar o confronto de hoje.
+ */
+function isUpcomingFinished(m, finishedSeries) {
+  const scheduled = Number(m.timestamp) || 0; // segundos
+  return (finishedSeries || []).some((s) => {
+    if (!isSeriesMatch(m.timeA, m.timeB, s.timeA, s.timeB)) return false;
+    if (!scheduled) return true;
+    const playedAt = Number(s.lastMatchTime || s.startTime) || 0;
+    return playedAt >= scheduled - 3600;
+  });
+}
+
 export function AppProvider({ children }) {
   // Stale-While-Revalidate initial state
   const cachedPro = getCachedFast('pro_matches_v8');
@@ -45,10 +61,7 @@ export function AppProvider({ children }) {
 
   const initialUpcoming = cachedUpcoming.filter((m) => {
     if (m.isCompleted || m.winner) return false;
-    const isFinished = (cachedPro?.finishedSeries || []).some((s) =>
-      isSeriesMatch(m.timeA, m.timeB, s.timeA, s.timeB)
-    );
-    return !isFinished;
+    return !isUpcomingFinished(m, cachedPro?.finishedSeries);
   });
 
   const [constants, setConstants] = useState(cachedConstants || { heroes: {}, itemsById: {} });
@@ -104,10 +117,7 @@ export function AppProvider({ children }) {
         const matchTime = m.timestamp ? m.timestamp * 1000 : 0;
         if (matchTime > 0 && now - matchTime > 4 * 3600000) return false;
 
-        const isFinished = (proData?.finishedSeries || []).some((s) =>
-          isSeriesMatch(m.timeA, m.timeB, s.timeA, s.timeB)
-        );
-        return !isFinished;
+        return !isUpcomingFinished(m, proData?.finishedSeries);
       });
 
       // Detecta jogos em andamento

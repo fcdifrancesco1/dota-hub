@@ -54,14 +54,18 @@ export default function Upcoming24h() {
         ) : (
           <div className="space-y-2.5">
             {next24hMatches.map((m, idx) => {
-              // Formata horário no fuso America/Sao_Paulo
+              // Formata horário no fuso America/Sao_Paulo, indicando quando é amanhã
               let formattedTime = m.startTime || '--:--';
+              let dayLabel = null;
               if (m.timestamp) {
-                formattedTime = new Date(m.timestamp * 1000).toLocaleTimeString('pt-BR', {
+                const when = new Date(m.timestamp * 1000);
+                formattedTime = when.toLocaleTimeString('pt-BR', {
                   timeZone: 'America/Sao_Paulo',
                   hour: '2-digit',
                   minute: '2-digit'
                 });
+                const brtDay = (d) => d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                if (brtDay(when) !== brtDay(new Date())) dayLabel = 'Amanhã';
               }
 
               return (
@@ -78,7 +82,7 @@ export default function Upcoming24h() {
                         {m.formato}
                       </span>
                       <span className="font-mono text-gray-300 bg-white/5 px-1.5 py-0.5 rounded font-bold">
-                        {formattedTime} BRT
+                        {dayLabel ? `${dayLabel} ` : ''}{formattedTime} BRT
                       </span>
                     </span>
                   </div>
