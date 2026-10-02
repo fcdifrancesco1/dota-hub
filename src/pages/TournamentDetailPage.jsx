@@ -329,24 +329,7 @@ export default function TournamentDetailPage() {
             Ainda não há partidas com draft registradas na OpenDota para este campeonato.
           </div>
         ) : (
-          <div>
-            <p className="text-xs text-gray-400 mb-4">
-              Baseado em <strong className="text-white">{heroStats.totalMatches}</strong> partidas com draft registrado na OpenDota.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {[...heroStats.heroes].sort((a, b) => b.contested - a.contested).slice(0, 18).map((h) => (
-                <div key={h.hero_id} className="bg-surface border border-line rounded-xl p-3 text-center">
-                  <img src={getHeroImg(constants, h.hero_id)} alt="" className="w-full h-14 object-cover rounded-lg mb-2" />
-                  <div className="text-xs font-black text-white truncate">{getHeroName(constants, h.hero_id)}</div>
-                  <div className="mt-1.5 grid grid-cols-3 gap-1 text-[10px] font-mono">
-                    <div><div className="text-gray-500">Picks</div><div className="text-white font-bold">{h.picks}</div></div>
-                    <div><div className="text-gray-500">Bans</div><div className="text-rose-400 font-bold">{h.bans}</div></div>
-                    <div><div className="text-gray-500">Vit.</div><div className="text-emerald-400 font-bold">{h.picks ? `${Math.round(h.winRate)}%` : '—'}</div></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TournamentHeroes heroStats={heroStats} constants={constants} />
         )
       )}
 
@@ -371,6 +354,75 @@ export default function TournamentDetailPage() {
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+const HERO_SORTS = [
+  { id: 'contested', label: 'Mais disputados', fn: (a, b) => b.contested - a.contested || b.picks - a.picks },
+  { id: 'picks', label: 'Mais escolhidos', fn: (a, b) => b.picks - a.picks || b.winRate - a.winRate },
+  { id: 'bans', label: 'Mais banidos', fn: (a, b) => b.bans - a.bans || b.picks - a.picks },
+  { id: 'winrate', label: 'Maior vitória', fn: (a, b) => b.winRate - a.winRate || b.picks - a.picks }
+];
+
+function HeroCard({ h, constants }) {
+  return (
+    <div className="bg-surface border border-line rounded-xl p-3 text-center">
+      <img src={getHeroImg(constants, h.hero_id)} alt="" className="w-full h-14 object-cover rounded-lg mb-2" />
+      <div className="text-xs font-black text-white truncate">{getHeroName(constants, h.hero_id)}</div>
+      <div className="mt-1.5 grid grid-cols-3 gap-1 text-[10px] font-mono">
+        <div><div className="text-gray-500">Picks</div><div className="text-white font-bold">{h.picks}</div></div>
+        <div><div className="text-gray-500">Bans</div><div className="text-rose-400 font-bold">{h.bans}</div></div>
+        <div><div className="text-gray-500">Vit.</div><div className="text-emerald-400 font-bold">{h.picks ? `${Math.round(h.winRate)}%` : '—'}</div></div>
+      </div>
+    </div>
+  );
+}
+
+/** Todos os heróis escolhidos no torneio, e à parte os que só foram banidos. */
+function TournamentHeroes({ heroStats, constants }) {
+  const [sortId, setSortId] = useState('contested');
+  const sort = HERO_SORTS.find((s) => s.id === sortId) || HERO_SORTS[0];
+  const picked = heroStats.heroes.filter((h) => h.picks > 0).sort(sort.fn);
+  const bannedOnly = heroStats.heroes.filter((h) => h.picks === 0 && h.bans > 0).sort((a, b) => b.bans - a.bans);
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-gray-400">
+          <strong className="text-white">{picked.length}</strong> heróis escolhidos em{' '}
+          <strong className="text-white">{heroStats.totalMatches}</strong> partidas com draft registrado na OpenDota.
+        </p>
+        <div className="flex flex-wrap bg-surface-2 p-1 rounded-xl border border-line">
+          {HERO_SORTS.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setSortId(s.id)}
+              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                sortId === s.id ? 'bg-amber-500 text-on-accent font-black' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {picked.map((h) => <HeroCard key={h.hero_id} h={h} constants={constants} />)}
+      </div>
+
+      {bannedOnly.length > 0 && (
+        <section>
+          <h3 className="text-xs font-black uppercase tracking-wider text-white mb-3">
+            Só banidos ({bannedOnly.length})
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {bannedOnly.map((h) => <HeroCard key={h.hero_id} h={h} constants={constants} />)}
+          </div>
+        </section>
       )}
     </div>
   );
