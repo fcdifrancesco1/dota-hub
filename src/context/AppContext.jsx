@@ -26,9 +26,9 @@ const looseSameTeam = (a, b) => {
   return short.length >= 4 && long.startsWith(short);
 };
 
-/** A partida da agenda já está sendo jogada (algum mapa ao vivo)? */
-function isUpcomingLive(m, liveGames) {
-  return (liveGames || []).some((g) => {
+/** Jogo ao vivo agora entre os times de uma partida da agenda (ou undefined). */
+export function findLiveGameFor(m, liveGames) {
+  return (liveGames || []).find((g) => {
     const a = g.radiant_name || g.timeA || g.team1;
     const b = g.dire_name || g.timeB || g.team2;
     return isSeriesMatch(m.timeA, m.timeB, a, b) ||
@@ -36,6 +36,8 @@ function isUpcomingLive(m, liveGames) {
       (looseSameTeam(m.timeA, b) && looseSameTeam(m.timeB, a));
   });
 }
+
+const isUpcomingLive = (m, liveGames) => Boolean(findLiveGameFor(m, liveGames));
 
 /**
  * A partida agendada já foi jogada? Só conta uma série concluída com os mesmos
@@ -53,22 +55,44 @@ function isUpcomingFinished(m, finishedSeries) {
   });
 }
 
+/**
+ * Separa a lista da Liquipedia em:
+ *  - upcoming: ainda não começou (agenda)
+ *  - ongoing: já começou (placar parcial ou mapa ao vivo) ou terminou há pouco e
+ *    ainda não aparece nas séries concluídas da OpenDota (que demora a processar)
+ */
+function splitWikiMatches(list, finishedSeries, liveGames, now = Date.now()) {
+  const pending = (list || []).filter((m) => !isUpcomingFinished(m, finishedSeries));
+  const isDone = (m) => Boolean(m.isCompleted || m.winner);
+  const hasStarted = (m) => (m.scoreA || 0) + (m.scoreB || 0) > 0 || isUpcomingLive(m, liveGames);
+
+  const upcoming = pending.filter((m) => {
+    if (isDone(m) || hasStarted(m)) return false;
+    const matchTime = m.timestamp ? m.timestamp * 1000 : 0;
+    return !(matchTime > 0 && now - matchTime > 4 * 3600000);
+  });
+  const ongoing = pending
+    .filter((m) => isDone(m) || hasStarted(m))
+    // Em andamento primeiro; depois as encerradas, da mais recente para a mais antiga
+    .sort((a, b) => (isDone(a) - isDone(b)) || ((b.timestamp || 0) - (a.timestamp || 0)));
+  return { upcoming, ongoing };
+}
+
 export function AppProvider({ children }) {
   // Stale-While-Revalidate initial state
   const cachedPro = getCachedFast('pro_matches_v8');
   const cachedUpcoming = normalizeUpcomingList(getCachedFast(UPCOMING_CACHE_KEY));
   const cachedConstants = getCachedFast('constants_v6');
 
-  const initialUpcoming = cachedUpcoming.filter((m) => {
-    if (m.isCompleted || m.winner) return false;
-    return !isUpcomingFinished(m, cachedPro?.finishedSeries);
-  });
+  const initialSplit = splitWikiMatches(cachedUpcoming, cachedPro?.finishedSeries, []);
 
   const [constants, setConstants] = useState(cachedConstants || { heroes: {}, itemsById: {} });
   const [finishedSeries, setFinishedSeries] = useState(cachedPro?.finishedSeries || []);
   const [tournamentsList, setTournamentsList] = useState(cachedPro?.tournaments || []);
   const [liveGames, setLiveGames] = useState([]);
-  const [upcomingMatches, setUpcomingMatches] = useState(initialUpcoming);
+  const [upcomingMatches, setUpcomingMatches] = useState(initialSplit.upcoming);
+  // Séries começadas ou recém-encerradas (placar da Liquipedia) que ainda não estão nas concluídas
+  const [ongoingSeries, setOngoingSeries] = useState(initialSplit.ongoing);
   const [loading, setLoading] = useState(!cachedPro && cachedUpcoming.length === 0);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('');
@@ -108,17 +132,7 @@ export function AppProvider({ children }) {
         livePromise
       ]);
 
-      const now = Date.now();
       const rawMatches = proData?.rawMatches || [];
-
-      // Filtra partidas futuras
-      const activeUpcoming = (allWikiMatches || []).filter((m) => {
-        if (m.isCompleted || m.winner) return false;
-        const matchTime = m.timestamp ? m.timestamp * 1000 : 0;
-        if (matchTime > 0 && now - matchTime > 4 * 3600000) return false;
-
-        return !isUpcomingFinished(m, proData?.finishedSeries);
-      });
 
       // Detecta jogos em andamento
       const currentLive = (gotvLiveData || []).filter((g) => {
@@ -128,13 +142,10 @@ export function AppProvider({ children }) {
         return !isFinished;
       });
 
-      // Assim que a partida começa, sai da agenda: tem mapa ao vivo agora ou a
-      // série já tem placar (intervalo entre mapas)
-      const notStarted = activeUpcoming.filter((m) =>
-        !isUpcomingLive(m, currentLive) && !((m.scoreA || 0) + (m.scoreB || 0) > 0)
-      );
-
-      setUpcomingMatches(notStarted);
+      // Assim que a partida começa, sai da agenda e vai para "em andamento"
+      const { upcoming, ongoing } = splitWikiMatches(allWikiMatches, proData?.finishedSeries, currentLive);
+      setUpcomingMatches(upcoming);
+      setOngoingSeries(ongoing);
       setLiveGames(currentLive);
       setLastUpdated(
         new Date().toLocaleTimeString('pt-BR', {
@@ -169,6 +180,7 @@ export function AppProvider({ children }) {
       value={{
         constants,
         finishedSeries,
+        ongoingSeries,
         tournamentsList,
         liveGames,
         upcomingMatches,

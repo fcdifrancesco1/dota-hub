@@ -26,16 +26,27 @@ export default async function handler(req, res) {
         if (fmt === "BO5" && (sA >= 3 || sB >= 3)) return false;
         if (fmt === "BO2" && (sA + sB >= 2)) return false;
 
-        // Se o horário agendado já passou há mais de 3 horas, a série já encerrou
-        if (m.timestamp && (now - m.timestamp > 3 * 3600 * 1000)) {
+        // Horário já passou há muito: série encerrada (ou abandonada). Séries com
+        // placar parcial ganham mais tempo — uma MD3/MD5 passa fácil de 3 horas.
+        const started = sA + sB > 0;
+        const maxAge = (started ? 8 : 3) * 3600 * 1000;
+        if (m.timestamp && (now - m.timestamp > maxAge)) {
           return false;
         }
 
         return true;
       });
 
+      // 3. Séries encerradas nas últimas 12h (com placar final), marcadas como
+      //    concluídas. O site as mostra até a OpenDota registrar a série — ela
+      //    costuma demorar a processar as partidas.
+      const recentCompleted = parseLiquipediaMatches(result.html).filter((m) =>
+        m.isCompleted && m.timestamp && now - m.timestamp < 12 * 3600 * 1000 &&
+        !strictlyUpcoming.some((u) => u.timeA === m.timeA && u.timeB === m.timeB && u.timestamp === m.timestamp)
+      );
+
       res.setHeader('Cache-Control', 's-maxage=180, stale-while-revalidate=360');
-      return res.status(200).json(strictlyUpcoming);
+      return res.status(200).json([...strictlyUpcoming, ...recentCompleted]);
     }
 
     return res.status(200).json([]);

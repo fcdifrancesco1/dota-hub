@@ -81,7 +81,8 @@ export function parseLiquipediaMatches(html, options = {}) {
       const formato = formatMatch ? formatMatch[1].toUpperCase() : "BO3";
 
       // 4. Placar (suporta match-info-header-score e match-info-header-scoreholder-score)
-      const scoreMatch = block.match(/class="match-info-header-(?:scoreholder-)?score">(\d+)<\/span><span class="match-info-header-scoreholder-divider">:<\/span><span class="match-info-header-(?:scoreholder-)?score">(\d+)<\/span>/);
+      // O placar do vencedor ganha a classe extra "match-info-header-winner"
+      const scoreMatch = block.match(/class="match-info-header-(?:scoreholder-)?score[^"]*">(\d+)<\/span><span class="match-info-header-scoreholder-divider">:<\/span><span class="match-info-header-(?:scoreholder-)?score[^"]*">(\d+)<\/span>/);
       const scoreA = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
       const scoreB = scoreMatch ? parseInt(scoreMatch[2], 10) : 0;
 

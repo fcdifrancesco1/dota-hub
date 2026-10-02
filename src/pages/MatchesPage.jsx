@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Swords, Filter, Calendar, Search, Trophy, ChevronRight, Clock } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { Swords, Filter, Calendar, Search, Trophy, ChevronRight, Clock, Radio } from 'lucide-react';
+import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
+import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
 
 export default function MatchesPage() {
-  const { finishedSeries, upcomingMatches } = useApp();
+  const { finishedSeries, upcomingMatches, ongoingSeries, liveGames } = useApp();
   const openSeries = useOpenSeries();
+  const openLiveMatch = useOpenLiveMatch();
   // Aba vem da URL (/partidas?aba=agenda) para links diretos, voltar e recarregar
   const [searchParams, setSearchParams] = useSearchParams();
   const filterMode = searchParams.get('aba') === 'agenda' ? 'upcoming' : 'finished'; // 'finished' | 'upcoming'
@@ -141,6 +143,26 @@ export default function MatchesPage() {
         </div>
       </div>
 
+      {/* SÉRIES EM ANDAMENTO / RECÉM-ENCERRADAS (placar da Liquipedia até a OpenDota registrar) */}
+      {filterMode === 'finished' && (ongoingSeries || []).length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
+            <Radio className="w-4 h-4 text-red-500" />
+            <span>Em andamento e recém-encerradas</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {ongoingSeries.map((m) => (
+              <OngoingCard
+                key={`${m.timeA}-${m.timeB}-${m.timestamp}`}
+                match={m}
+                liveGame={findLiveGameFor(m, liveGames)}
+                onOpenLive={openLiveMatch}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* GRID DE SÉRIES / PARTIDAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.length === 0 ? (
@@ -212,7 +234,7 @@ export default function MatchesPage() {
                   ) : (
                     <>
                       <span className="text-gray-500">
-                        {s.start_time ? new Date(s.start_time).toLocaleDateString('pt-BR') : 'Recentemente'}
+                        {s.startTime ? new Date(s.startTime * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Recentemente'}
                       </span>
                       <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                         <span>Ver Replay & Draft</span>
@@ -252,4 +274,68 @@ export default function MatchesPage() {
       </div>
     </div>
   );
+}
+
+/** Série começada ou recém-encerrada, com o placar da Liquipedia. */
+function OngoingCard({ match: m, liveGame, onOpenLive }) {
+  const done = Boolean(m.isCompleted || m.winner);
+  const scoreA = m.scoreA || 0;
+  const scoreB = m.scoreB || 0;
+  const leadA = scoreA > scoreB;
+  const leadB = scoreB > scoreA;
+  const status = liveGame ? 'Ao vivo' : done ? 'Encerrada' : 'Em andamento';
+
+  const body = (
+    <>
+      <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-white/5 pb-2">
+        <span className="font-semibold truncate max-w-[200px] text-amber-400/90">{m.tourneyName}</span>
+        <span className="font-mono text-gray-400 font-bold bg-white/5 px-2 py-0.5 rounded">{m.formato}</span>
+      </div>
+      <div className="flex items-center justify-between gap-3 py-2">
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-7 h-7" />
+          <span className={`text-xs truncate ${leadA ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeA}</span>
+        </div>
+        <div className="font-mono font-black text-xs px-3 py-1 bg-black/60 rounded-xl border border-white/10 text-white">
+          {scoreA} - {scoreB}
+        </div>
+        <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
+          <span className={`text-xs truncate text-right ${leadB ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeB}</span>
+          <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-7 h-7" />
+        </div>
+      </div>
+      <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
+        <span className={`flex items-center gap-1.5 font-bold ${done ? 'text-gray-400' : 'text-red-400'}`}>
+          {!done && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+          {status}
+        </span>
+        {liveGame ? (
+          <span className="text-amber-400 font-bold flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
+        ) : done ? (
+          <span className="text-gray-500">Estatísticas em processamento</span>
+        ) : m.streamUrl ? (
+          <span className="text-amber-400 font-bold flex items-center gap-1">Assistir <ChevronRight className="w-3.5 h-3.5" /></span>
+        ) : (
+          <span className="text-gray-500">Intervalo entre mapas</span>
+        )}
+      </div>
+    </>
+  );
+
+  const cls = 'bg-surface border border-red-500/30 rounded-2xl p-5 shadow-xl flex flex-col justify-between';
+  if (liveGame) {
+    return (
+      <button type="button" onClick={() => onOpenLive(liveGame)} className={`${cls} text-left hover:border-amber-500/50 transition-colors`}>
+        {body}
+      </button>
+    );
+  }
+  if (!done && m.streamUrl) {
+    return (
+      <a href={m.streamUrl} target="_blank" rel="noopener noreferrer" className={`${cls} hover:border-amber-500/50 transition-colors`}>
+        {body}
+      </a>
+    );
+  }
+  return <div className={cls}>{body}</div>;
 }
