@@ -191,7 +191,7 @@ function RoundHeader({ titles, className = '' }) {
       {titles.map((t, i) => (
         <div
           key={i}
-          className="shrink-0 text-center text-[10px] font-black uppercase tracking-wider text-gray-300 bg-surface-2 border border-line rounded-md px-2 py-1 truncate"
+          className="shrink-0 flex items-center justify-center min-h-[34px] text-center text-[10px] leading-tight font-black uppercase tracking-wider text-gray-300 bg-surface-2 border border-line rounded-md px-2 py-1"
           style={{ width: CARD_W }}
           title={t}
         >

@@ -209,7 +209,7 @@ export default function PredictionsPage() {
                       }`}
                     >
                       <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-10 h-10 mb-2" />
-                      <span className="text-xs font-bold truncate max-w-[110px]">{m.timeA}</span>
+                      <span className="text-xs font-bold leading-tight break-words line-clamp-2 max-w-full text-center">{m.timeA}</span>
                       <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
                     </button>
 
@@ -225,7 +225,7 @@ export default function PredictionsPage() {
                       }`}
                     >
                       <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-10 h-10 mb-2" />
-                      <span className="text-xs font-bold truncate max-w-[110px]">{m.timeB}</span>
+                      <span className="text-xs font-bold leading-tight break-words line-clamp-2 max-w-full text-center">{m.timeB}</span>
                       <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
                     </button>
                   </div>

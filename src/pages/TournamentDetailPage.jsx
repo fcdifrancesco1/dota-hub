@@ -260,11 +260,11 @@ export default function TournamentDetailPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-6 h-6" />
-                        <span className="text-xs font-bold text-white truncate">{m.timeA}</span>
+                        <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
                       </div>
                       <span className="text-[10px] font-black text-gray-500 px-2">VS</span>
                       <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
-                        <span className="text-xs font-bold text-white truncate text-right">{m.timeB}</span>
+                        <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
                         <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-6 h-6" />
                       </div>
                     </div>
@@ -293,19 +293,19 @@ export default function TournamentDetailPage() {
                     <button
                       key={s.series_id || idx}
                       onClick={() => openSeries(s)}
-                      className="w-full bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-xl p-4 flex items-center justify-between gap-4 transition-all group text-left"
+                      className="w-full bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-xl p-3 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-4 transition-all group text-left"
                     >
-                      <span className="text-[10px] font-mono text-gray-500 w-20 shrink-0">{s.dateStr || ''}</span>
+                      <span className="text-[10px] font-mono text-gray-500 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>
                       <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                        <span className={`text-xs font-bold truncate ${aWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeA}</span>
-                        <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} className="w-6 h-6" />
+                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${aWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeA}</span>
+                        <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} className="w-6 h-6 shrink-0" />
                       </div>
-                      <span className="font-mono font-black text-sm px-3 py-1 rounded-lg bg-black/40 border border-white/10 text-white shrink-0">
+                      <span className="font-mono font-black text-sm px-2 sm:px-3 py-1 rounded-lg bg-black/40 border border-white/10 text-white shrink-0 whitespace-nowrap">
                         {s.scoreA} : {s.scoreB}
                       </span>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} className="w-6 h-6" />
-                        <span className={`text-xs font-bold truncate ${bWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeB}</span>
+                        <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} className="w-6 h-6 shrink-0" />
+                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${bWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeB}</span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 shrink-0" />
                     </button>
@@ -370,7 +370,7 @@ function HeroCard({ h, constants }) {
   return (
     <div className="bg-surface border border-line rounded-xl p-3 text-center">
       <img src={getHeroImg(constants, h.hero_id)} alt="" className="w-full h-14 object-cover rounded-lg mb-2" />
-      <div className="text-xs font-black text-white truncate">{getHeroName(constants, h.hero_id)}</div>
+      <div className="text-xs font-black text-white leading-tight break-words line-clamp-2">{getHeroName(constants, h.hero_id)}</div>
       <div className="mt-1.5 grid grid-cols-3 gap-1 text-[10px] font-mono">
         <div><div className="text-gray-500">Picks</div><div className="text-white font-bold">{h.picks}</div></div>
         <div><div className="text-gray-500">Bans</div><div className="text-rose-400 font-bold">{h.bans}</div></div>

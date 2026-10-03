@@ -198,7 +198,7 @@ export default function MatchesPage() {
                   <div className="flex items-center justify-between gap-3 py-2">
                     <div className="flex items-center gap-2.5 flex-1 min-w-0">
                       <TeamLogo teamName={tA} teamId={s.team1_id || s.preferredIdA} logoUrl={s.team1_logo || s.logoA} className="w-7 h-7" />
-                      <span className={`text-xs font-bold truncate ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
+                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
                         {tA}
                       </span>
                     </div>
@@ -208,7 +208,7 @@ export default function MatchesPage() {
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
-                      <span className={`text-xs font-bold truncate text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
+                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
                         {tB}
                       </span>
                       <TeamLogo teamName={tB} teamId={s.team2_id || s.preferredIdB} logoUrl={s.team2_logo || s.logoB} className="w-7 h-7" />
@@ -298,13 +298,13 @@ function OngoingCard({ match: m, liveGame, onOpenLive }) {
       <div className="flex items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-7 h-7" />
-          <span className={`text-xs truncate ${leadA ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeA}</span>
+          <span className={`text-xs leading-tight break-words line-clamp-2 ${leadA ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeA}</span>
         </div>
         <div className="font-mono font-black text-xs px-3 py-1 bg-black/60 rounded-xl border border-white/10 text-white">
           {scoreA} - {scoreB}
         </div>
         <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
-          <span className={`text-xs truncate text-right ${leadB ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeB}</span>
+          <span className={`text-xs leading-tight break-words line-clamp-2 text-right ${leadB ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeB}</span>
           <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-7 h-7" />
         </div>
       </div>

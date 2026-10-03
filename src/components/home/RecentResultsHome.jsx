@@ -114,7 +114,7 @@ export default function RecentResultsHome() {
                     {/* Time A */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <TeamLogo teamName={teamAName} teamId={series.team1_id || series.preferredIdA} logoUrl={series.team1_logo || series.logoA} className="w-5 h-5" />
-                      <span className={`text-xs font-bold truncate ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-300'}`}>
+                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-300'}`}>
                         {teamAName}
                       </span>
                     </div>
@@ -128,7 +128,7 @@ export default function RecentResultsHome() {
 
                     {/* Time B */}
                     <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                      <span className={`text-xs font-bold truncate text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-300'}`}>
+                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-300'}`}>
                         {teamBName}
                       </span>
                       <TeamLogo teamName={teamBName} teamId={series.team2_id || series.preferredIdB} logoUrl={series.team2_logo || series.logoB} className="w-5 h-5" />

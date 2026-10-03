@@ -84,12 +84,12 @@ export default function LiveTickerStrip() {
                 <div className="flex items-center justify-between gap-3">
                   {/* Radiant */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <TeamLogo teamName={radName} teamId={game.radiant_team?.team_id || game.radiant_team_id} logoUrl={game.radiant_logo} className="w-6 h-6 rounded" />
-                    <span className="text-xs font-bold text-emerald-400 truncate">{radName}</span>
+                    <TeamLogo teamName={radName} teamId={game.radiant_team?.team_id || game.radiant_team_id} logoUrl={game.radiant_logo} className="w-6 h-6 rounded shrink-0" />
+                    <span className="text-xs font-bold text-emerald-400 leading-tight break-words line-clamp-2">{radName}</span>
                   </div>
 
                   {/* Kills Placar */}
-                  <div className="flex items-center gap-1.5 font-mono font-black text-sm px-2 py-0.5 rounded bg-black/40 border border-white/10">
+                  <div className="flex items-center gap-1.5 font-mono font-black text-sm px-2 py-0.5 rounded bg-black/40 border border-white/10 shrink-0">
                     <span className="text-emerald-400">{radScore}</span>
                     <span className="text-gray-500">:</span>
                     <span className="text-red-400">{direScore}</span>
@@ -97,8 +97,8 @@ export default function LiveTickerStrip() {
 
                   {/* Dire */}
                   <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                    <span className="text-xs font-bold text-red-400 truncate text-right">{direName}</span>
-                    <TeamLogo teamName={direName} teamId={game.dire_team?.team_id || game.dire_team_id} logoUrl={game.dire_logo} className="w-6 h-6 rounded" />
+                    <span className="text-xs font-bold text-red-400 leading-tight break-words line-clamp-2 text-right">{direName}</span>
+                    <TeamLogo teamName={direName} teamId={game.dire_team?.team_id || game.dire_team_id} logoUrl={game.dire_logo} className="w-6 h-6 rounded shrink-0" />
                   </div>
                 </div>
 

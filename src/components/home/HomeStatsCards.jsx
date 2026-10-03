@@ -124,10 +124,10 @@ export default function HomeStatsCards() {
           return (
             <div
               key={card.title}
-              className={`relative overflow-hidden rounded-xl bg-gradient-to-b ${card.color} bg-surface border ${card.borderColor} p-4 transition-all hover:scale-[1.02] shadow-lg`}
+              className={`relative overflow-hidden rounded-xl bg-gradient-to-b ${card.color} bg-surface border ${card.borderColor} p-3 sm:p-4 transition-all hover:scale-[1.02] shadow-lg`}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 truncate">
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-gray-400 leading-tight">
                   {card.title}
                 </span>
                 <div className={`p-1.5 rounded-lg bg-black/40 ${card.iconColor}`}>
@@ -135,20 +135,20 @@ export default function HomeStatsCards() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
                 {card.heroImg && (
                   <img
                     src={card.heroImg}
                     alt={card.value}
-                    className="w-10 h-7 object-cover rounded shadow border border-white/10"
+                    className="w-10 h-7 shrink-0 object-cover rounded shadow border border-white/10"
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 )}
                 <div className="min-w-0">
-                  <div className="text-xl font-black text-white font-mono leading-none truncate">
+                  <div className="text-base sm:text-xl font-black text-white leading-tight break-words line-clamp-2">
                     {card.value}
                   </div>
-                  <div className="text-[10px] text-gray-400 font-medium mt-1 truncate">
+                  <div className="text-[10px] text-gray-400 font-medium mt-1 leading-snug">
                     {card.subtitle}
                   </div>
                 </div>

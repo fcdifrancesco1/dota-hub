@@ -351,11 +351,11 @@ export default function LiveMatchDetail({
             )}
           </div>
 
-          <span className="text-[9px] font-bold text-gray-200 truncate max-w-[64px] mt-1 text-center group-hover:text-amber-400 transition-colors">
+          <span className="text-[9px] font-bold text-gray-200 leading-tight break-words line-clamp-2 w-[64px] mt-1 text-center group-hover:text-amber-400 transition-colors">
             {hName}
           </span>
           <span
-            className={`text-[8px] font-mono truncate max-w-[64px] text-center ${
+            className={`text-[8px] font-mono leading-tight break-words line-clamp-2 w-[64px] text-center ${
               isRadiant ? 'text-emerald-400/90' : 'text-rose-400/90'
             }`}
           >
@@ -416,7 +416,7 @@ export default function LiveMatchDetail({
     return (
       <div className={`bg-surface border ${isRadiant ? 'border-emerald-500/20' : 'border-rose-500/20'} rounded-xl p-2.5 space-y-2`}>
         <div className="flex items-center justify-between border-b border-white/5 pb-1">
-          <span className={`font-bold font-mono text-xs ${isRadiant ? 'text-emerald-400' : 'text-rose-400'} truncate`}>
+          <span className={`font-bold font-mono text-xs ${isRadiant ? 'text-emerald-400' : 'text-rose-400'} leading-tight break-words line-clamp-2 min-w-0`}>
             {teamName} ({isRadiant ? 'Radiant' : 'Dire'})
           </span>
           <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded ${
@@ -679,8 +679,8 @@ export default function LiveMatchDetail({
                     )}
                   </div>
                   <div className="min-w-0">
-                    <span className="text-white font-bold text-xs truncate block">{p.name}</span>
-                    <span className="text-[10px] text-gray-400 truncate block group-hover:text-amber-400 transition-colors">{hName}</span>
+                    <span className="text-white font-bold text-xs leading-tight break-words line-clamp-2 block">{p.name}</span>
+                    <span className="text-[10px] text-gray-400 leading-tight break-words line-clamp-2 block group-hover:text-amber-400 transition-colors">{hName}</span>
                   </div>
                 </button>
 

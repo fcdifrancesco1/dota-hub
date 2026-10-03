@@ -303,14 +303,14 @@ export default function LivePage() {
                     {/* CONFRONTO PRINCIPAL & PLACAR */}
                     <div className="flex items-center justify-between gap-4 py-2">
                       {/* RADIANT */}
-                      <div className="flex flex-col items-center flex-1 text-center">
+                      <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
                         <TeamLogo
                           teamName={radName}
                           teamId={game.team_id_radiant || game.radiant_team_id || game.radiant_team?.team_id}
                           logoUrl={game.radiant_logo || game.logoA}
                           className="w-14 h-14 rounded-xl mb-2 bg-black/40 border border-white/10 p-1"
                         />
-                        <span className="text-xs font-bold text-emerald-400 truncate max-w-[130px] block">
+                        <span className="text-xs font-bold text-emerald-400 leading-tight break-words line-clamp-2 block">
                           {radName}
                         </span>
                         <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">
@@ -338,14 +338,14 @@ export default function LivePage() {
                       </div>
 
                       {/* DIRE */}
-                      <div className="flex flex-col items-center flex-1 text-center">
+                      <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
                         <TeamLogo
                           teamName={direName}
                           teamId={game.team_id_dire || game.dire_team_id || game.dire_team?.team_id}
                           logoUrl={game.dire_logo || game.logoB}
                           className="w-14 h-14 rounded-xl mb-2 bg-black/40 border border-white/10 p-1"
                         />
-                        <span className="text-xs font-bold text-red-400 truncate max-w-[130px] block">
+                        <span className="text-xs font-bold text-red-400 leading-tight break-words line-clamp-2 block">
                           {direName}
                         </span>
                         <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">

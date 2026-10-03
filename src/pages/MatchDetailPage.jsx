@@ -539,7 +539,7 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
       <div className="p-4 border-b border-line flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <TeamLogo teamName={teamName} teamId={teamId} logoUrl={teamLogo} className="w-6 h-6 shrink-0" />
-          <h3 className={`text-sm font-black uppercase tracking-wider truncate ${accent}`}>{teamName}</h3>
+          <h3 className={`text-sm font-black uppercase tracking-wider leading-tight break-words line-clamp-2 ${accent}`}>{teamName}</h3>
           <span className="text-[10px] font-bold uppercase text-gray-500">{isRadiant ? 'Radiant' : 'Dire'}</span>
           {won && (
             <span className="text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-black uppercase">
