@@ -55,6 +55,14 @@ export function statusLabel(t) {
   return `Começa em ${d} dias`;
 }
 
+/**
+ * Link da página do campeonato. Leva também a página da Liquipedia ("?p="), para
+ * o link continuar funcionando quando o campeonato sair da lista atual.
+ */
+export function tournamentPath(t) {
+  return t?.page ? `/campeonatos/${t.id}?p=${encodeURIComponent(t.page)}` : `/campeonatos/${t?.id}`;
+}
+
 const STATUS_ORDER = { ongoing: 0, upcoming: 1, finished: 2 };
 
 /** Em andamento primeiro, depois próximos (mais cedo primeiro), depois encerrados (mais recentes primeiro). */

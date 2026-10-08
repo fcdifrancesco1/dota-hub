@@ -695,6 +695,80 @@ export async function fetchTournaments() {
   return getCachedFast(TOURNAMENTS_CACHE_KEY) || [];
 }
 
+// Histórico permanente: campeonatos Tier 1 e Tier 2 encerrados num ano (Liquipedia) — ver api/tournaments.js
+export async function fetchTournamentArchive(year) {
+  const key = `tourney_archive_v1_${year}`;
+  const pastYear = year < new Date().getFullYear();
+  const cached = getCached(key, pastYear ? 7 * 24 * 3600 * 1000 : 3 * 3600 * 1000);
+  if (cached) return cached;
+  try {
+    const res = await fetchWithTimeout(`/api/tournaments?archive=${year}`, {}, 20000);
+    if (res.ok) {
+      const list = await res.json();
+      if (Array.isArray(list)) {
+        if (list.length > 0) setCache(key, list);
+        return list;
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso ao buscar o histórico de campeonatos:", err);
+  }
+  return getCachedFast(key) || [];
+}
+
+// Um campeonato qualquer da Liquipedia pela página (ex.: um do histórico)
+export async function fetchTournamentByPage(page) {
+  if (!page) return null;
+  const key = `tourney_page_v1_${page}`;
+  const cached = getCached(key, 60 * 60 * 1000);
+  if (cached) return cached;
+  try {
+    const res = await fetchWithTimeout(`/api/tournaments?page=${encodeURIComponent(page)}`, {}, 20000);
+    if (res.ok) {
+      const t = await res.json();
+      if (t?.id) {
+        setCache(key, t);
+        return t;
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso ao buscar o campeonato:", err);
+  }
+  return getCachedFast(key);
+}
+
+// Todas as séries de uma liga (OpenDota Explorer), para campeonatos que já saíram
+// da lista de partidas profissionais recentes
+export async function fetchLeagueSeries(leagueId) {
+  const id = Number(leagueId);
+  if (!id) return [];
+  const key = `league_series_v1_${id}`;
+  const cached = getCached(key, 10 * 60 * 1000);
+  if (cached) return cached;
+  const sql = `SELECT m.match_id, m.start_time, m.duration, m.series_id, m.series_type,
+    m.radiant_team_id, m.dire_team_id, m.radiant_win, m.radiant_score, m.dire_score, m.leagueid,
+    rt.name AS radiant_name, dt.name AS dire_name
+  FROM matches m
+  LEFT JOIN teams rt ON rt.team_id = m.radiant_team_id
+  LEFT JOIN teams dt ON dt.team_id = m.dire_team_id
+  WHERE m.leagueid = ${id}
+  ORDER BY m.start_time`;
+  try {
+    const res = await fetchWithTimeout(`https://api.opendota.com/api/explorer?sql=${encodeURIComponent(sql)}`, {}, 12000);
+    if (res.ok) {
+      const data = await res.json();
+      const rows = Array.isArray(data?.rows) ? data.rows : [];
+      const series = clusterMatchesIntoSeries(rows)
+        .sort((a, b) => (b.startTime || 0) - (a.startTime || 0));
+      if (series.length > 0) setCache(key, series);
+      return series;
+    }
+  } catch (err) {
+    console.warn("Aviso ao buscar as séries da liga:", err);
+  }
+  return getCachedFast(key) || [];
+}
+
 // Registra os logos atuais dos times que aparecem na classificação e no chaveamento
 function registerStandingsLogos({ tables = [], brackets = [] } = {}) {
   for (const t of tables) for (const r of t.rows || []) registerCurrentTeamLogo(r.team, r.logo?.dark, r.logo?.light);

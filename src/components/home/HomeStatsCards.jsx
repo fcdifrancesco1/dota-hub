@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Swords, Clock, Sparkles, Ban, TrendingUp, ChevronRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { fetchTournaments, fetchTournamentHeroStats, getHeroImg, getHeroName } from '../../services/api';
-import { pickFeaturedTournament, tierLetter } from '../../utils/tournamentFormat';
+import { pickFeaturedTournament, tierLetter, tournamentPath } from '../../utils/tournamentFormat';
 
 const REFRESH_MS = 10 * 60 * 1000;
 
@@ -110,7 +110,7 @@ export default function HomeStatsCards() {
           )}
         </h2>
         <Link
-          to={`/campeonatos/${tournament.id}`}
+          to={tournamentPath(tournament)}
           className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider"
         >
           <span>Ver campeonato</span>

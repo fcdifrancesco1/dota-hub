@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Calendar, MapPin, DollarSign, Search, ChevronRight, Users, Wifi } from 'lucide-react';
+import { Trophy, Calendar, MapPin, DollarSign, Search, ChevronRight, Users, Wifi, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { fetchTournaments } from '../services/api';
+import { fetchTournaments, fetchTournamentArchive } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
-import { formatDateRange, formatPrize, tierLabel, statusLabel, sortTournaments, leagueFromDatabase } from '../utils/tournamentFormat';
+import { formatDateRange, formatPrize, tierLabel, statusLabel, sortTournaments, leagueFromDatabase, tournamentPath } from '../utils/tournamentFormat';
+
+const CURRENT_YEAR = new Date().getFullYear();
+const FIRST_YEAR = 2011; // primeiro ano com campeonatos no histórico da Liquipedia
+const YEARS = Array.from({ length: CURRENT_YEAR - FIRST_YEAR + 1 }, (_, i) => CURRENT_YEAR - i);
 import { fetchLeagues, isSupabaseConfigured } from '../services/supabase';
 
 export default function TournamentsPage() {
@@ -11,6 +15,9 @@ export default function TournamentsPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'ongoing' | 'upcoming' | 'finished'
   const [search, setSearch] = useState('');
+  // Histórico de encerrados (Tier 1 e 2) por ano
+  const [archiveYear, setArchiveYear] = useState(CURRENT_YEAR);
+  const [archive, setArchive] = useState({});
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -30,7 +37,30 @@ export default function TournamentsPage() {
     });
   }, []);
 
-  const filtered = tournaments.filter((t) => {
+  useEffect(() => {
+    if (statusFilter !== 'finished' || archive[archiveYear]) return;
+    let active = true;
+    fetchTournamentArchive(archiveYear).then((list) => {
+      if (active) setArchive((prev) => ({ ...prev, [archiveYear]: list || [] }));
+    });
+    return () => { active = false; };
+  }, [statusFilter, archiveYear, archive]);
+
+  // Encerrados: os recentes da lista atual + o histórico do ano escolhido
+  const archiveLoading = statusFilter === 'finished' && !archive[archiveYear];
+  const finishedOfYear = () => {
+    const byId = new Map();
+    for (const t of archive[archiveYear] || []) byId.set(t.id, t);
+    for (const t of tournaments) {
+      if (t.status !== 'finished' || !String(t.endDate || '').startsWith(String(archiveYear))) continue;
+      const old = byId.get(t.id);
+      byId.set(t.id, old ? { ...old, ...t, winner: old.winner, runnerUp: old.runnerUp, prizePoolUsd: old.prizePoolUsd || t.prizePoolUsd } : t);
+    }
+    return sortTournaments([...byId.values()]);
+  };
+  const source = statusFilter === 'finished' ? finishedOfYear() : tournaments;
+
+  const filtered = source.filter((t) => {
     const matchesStatus = statusFilter === 'all' || t.status === statusFilter;
     const term = search.toLowerCase();
     const matchesSearch = !term || t.name.toLowerCase().includes(term) || (t.organizer || '').toLowerCase().includes(term);
@@ -48,7 +78,7 @@ export default function TournamentsPage() {
             <span>Campeonatos & Majors Oficiais</span>
           </h1>
           <p className="text-gray-400 text-xs sm:text-sm mt-1">
-            Circuito competitivo de Dota 2: campeonatos em andamento, próximos e encerrados recentemente. Dados da Liquipedia.
+            Circuito competitivo de Dota 2: campeonatos em andamento, próximos e o histórico de encerrados. Dados da Liquipedia.
           </p>
         </div>
 
@@ -83,11 +113,22 @@ export default function TournamentsPage() {
               className="bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-64"
             />
           </div>
+
+          {statusFilter === 'finished' && (
+            <select
+              value={archiveYear}
+              onChange={(e) => setArchiveYear(Number(e.target.value))}
+              aria-label="Ano"
+              className="bg-surface-2 border border-line rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50"
+            >
+              {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          )}
         </div>
       </div>
 
       {/* GRID DE CAMPEONATOS */}
-      {loading ? (
+      {loading || archiveLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-[380px] rounded-2xl bg-surface border border-line animate-pulse" />
@@ -95,7 +136,9 @@ export default function TournamentsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-surface border border-line rounded-2xl p-12 text-center text-gray-400 text-xs">
-          {tournaments.length === 0
+          {statusFilter === 'finished'
+            ? `Nenhum campeonato Tier 1 ou Tier 2 encerrado em ${archiveYear}${search ? ' com essa busca' : ''}.`
+            : tournaments.length === 0
             ? 'Não foi possível carregar os campeonatos agora. Tente novamente em alguns instantes.'
             : 'Nenhum campeonato encontrado para os filtros selecionados.'}
         </div>
@@ -112,7 +155,7 @@ export default function TournamentsPage() {
             return (
               <Link
                 key={t.id}
-                to={`/campeonatos/${t.id}`}
+                to={tournamentPath(t)}
                 className="group rounded-2xl bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/50 overflow-hidden shadow-xl transition-all flex flex-col justify-between"
               >
                 <div>
@@ -184,6 +227,15 @@ export default function TournamentsPage() {
                         <div className="flex items-center gap-2">
                           <Users className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
                           <span>{t.teamCount} times</span>
+                        </div>
+                      )}
+                      {t.winner && (
+                        <div className="flex items-center gap-2">
+                          <Crown className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                          <span className="truncate">
+                            Campeão: <strong className="text-amber-400">{t.winner.name}</strong>
+                            {t.runnerUp && <span className="text-gray-500"> · vice {t.runnerUp.name}</span>}
+                          </span>
                         </div>
                       )}
                       <div className="flex items-center gap-2 text-emerald-400 font-bold font-mono">

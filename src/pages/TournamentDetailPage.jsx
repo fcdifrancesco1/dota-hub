@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   Trophy,
   Calendar,
@@ -16,10 +16,11 @@ import {
   ChevronRight,
   ListOrdered,
   GitBranch,
-  UserCheck
+  UserCheck,
+  Crown
 } from 'lucide-react';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
-import { fetchTournaments, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName } from '../services/api';
+import { fetchTournaments, fetchTournamentArchive, fetchTournamentByPage, fetchLeagueSeries, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName } from '../services/api';
 import TournamentPlayers from '../components/TournamentPlayers';
 import TournamentStandings from '../components/TournamentStandings';
 import TournamentBracket from '../components/TournamentBracket';
@@ -31,8 +32,31 @@ import { formatDateRange, formatPrize, tierLabel, statusLabel, leagueFromDatabas
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
+// Campeão, vice e premiação do histórico de encerrados (a premiação da tabela
+// da Liquipedia é mais confiável que a da ficha, que às vezes vem de fórmulas)
+async function withArchiveInfo(t) {
+  const year = Number(String(t?.endDate || '').slice(0, 4));
+  if (!t || t.status !== 'finished' || !year) return t;
+  const entry = (await fetchTournamentArchive(year)).find((a) => a.id === t.id);
+  return entry
+    ? { ...t, winner: entry.winner, runnerUp: entry.runnerUp, prizePoolUsd: entry.prizePoolUsd || t.prizePoolUsd, prizePoolLocal: entry.prizePoolUsd ? null : t.prizePoolLocal }
+    : t;
+}
+
+// Procura o campeonato no histórico recente quando o link não traz a página (?p=)
+async function findInRecentArchive(id) {
+  const year = new Date().getFullYear();
+  for (const y of [year, year - 1]) {
+    const found = (await fetchTournamentArchive(y)).find((a) => a.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+
 export default function TournamentDetailPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const pageParam = searchParams.get('p');
   const { tournamentsList, finishedSeries, upcomingMatches, constants } = useApp();
   const openSeries = useOpenSeries();
   const { theme } = useTheme();
@@ -44,6 +68,7 @@ export default function TournamentDetailPage() {
   const [heroStats, setHeroStats] = useState(null);
   const [heroLoading, setHeroLoading] = useState(false);
   const [playerStats, setPlayerStats] = useState(null);
+  const [leagueSeries, setLeagueSeries] = useState(null);
 
   // 1. Campeonato: Liquipedia primeiro; ligas numéricas do Admin (Supabase) como alternativa
   useEffect(() => {
@@ -53,8 +78,15 @@ export default function TournamentDetailPage() {
     // Outro campeonato: descarta as estatísticas do anterior
     setHeroStats(null);
     setPlayerStats(null);
+    setLeagueSeries(null);
     fetchTournaments().then(async (list) => {
       let found = (list || []).find((t) => t.id === id) || null;
+      // Fora da lista atual: busca direto na Liquipedia (campeonatos do histórico)
+      if (!found) {
+        const page = pageParam || (await findInRecentArchive(id))?.page;
+        if (page) found = await fetchTournamentByPage(page);
+      }
+      if (found) found = await withArchiveInfo(found);
       if (!found && isSupabaseConfigured) {
         const db = await fetchLeagueById(id);
         if (db) found = leagueFromDatabase(db);
@@ -64,7 +96,7 @@ export default function TournamentDetailPage() {
       else setNotFound(true);
     });
     return () => { active = false; };
-  }, [id]);
+  }, [id, pageParam]);
 
   // Classificação da fase de grupos e chaveamentos (Liquipedia). As abas só aparecem se houver dados.
   const standingsPage = tournament?.page;
@@ -80,6 +112,15 @@ export default function TournamentDetailPage() {
     });
     return () => { active = false; };
   }, [standingsPage]);
+
+  // Todas as séries da liga (OpenDota Explorer): as partidas recentes não cobrem campeonatos antigos
+  const leagueId = tournament?.status !== 'upcoming' ? tournament?.leagueId : null;
+  useEffect(() => {
+    if (!leagueId) return;
+    let active = true;
+    fetchLeagueSeries(leagueId).then((list) => { if (active) setLeagueSeries(list || []); });
+    return () => { active = false; };
+  }, [leagueId]);
 
   // Estatísticas dos jogadores no torneio (OpenDota), carregadas ao abrir a aba
   useEffect(() => {
@@ -108,7 +149,7 @@ export default function TournamentDetailPage() {
           <ArrowLeft className="w-4 h-4" /> Voltar para Campeonatos
         </Link>
         <div className="bg-surface border border-line rounded-2xl p-10 text-center text-sm text-gray-400">
-          Campeonato não encontrado. Ele pode ter saído da lista atual da Liquipedia.
+          Campeonato não encontrado.
         </div>
       </div>
     );
@@ -130,9 +171,11 @@ export default function TournamentDetailPage() {
 
   // Séries concluídas da liga (OpenDota, pelo leagueId oficial da Valve)
   const leagueEntry = t.leagueId ? (tournamentsList || []).find((l) => String(l.league_id) === String(t.leagueId)) : null;
-  const series = leagueEntry?.seriesList?.length
+  const recentSeries = leagueEntry?.seriesList?.length
     ? leagueEntry.seriesList
     : (finishedSeries || []).filter((s) => t.leagueId && String(s.leagueId) === String(t.leagueId));
+  // Encerrado: a lista completa da liga; em andamento: as recentes (mais atualizadas) se houver
+  const series = (t.status === 'finished' || !recentSeries.length) && leagueSeries?.length ? leagueSeries : recentSeries;
 
   // Partidas agendadas (Liquipedia), pelo nome do campeonato ("BLAST SLAM VIII - Group B")
   const names = [norm(t.name), norm(t.shortName)].filter((n) => n.length >= 4);
@@ -203,6 +246,12 @@ export default function TournamentDetailPage() {
                   <span className="flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-gray-500" />
                     <span>{t.teamCount} times</span>
+                  </span>
+                )}
+                {t.winner && (
+                  <span className="flex items-center gap-1.5">
+                    <Crown className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Campeão: <strong className="text-amber-400">{t.winner.name}</strong>{t.runnerUp && <span className="text-gray-500"> · vice {t.runnerUp.name}</span>}</span>
                   </span>
                 )}
                 <span className="flex items-center gap-1.5 text-emerald-400 font-bold font-mono">
@@ -299,7 +348,9 @@ export default function TournamentDetailPage() {
               <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
                 {t.status === 'upcoming'
                   ? 'O campeonato ainda não começou.'
-                  : 'Nenhuma série deste campeonato entre as partidas profissionais recentes da OpenDota.'}
+                  : t.leagueId && leagueSeries === null
+                  ? 'Carregando as séries do campeonato...'
+                  : 'Nenhuma série deste campeonato registrada na OpenDota.'}
               </div>
             ) : (
               <div className="space-y-2">
