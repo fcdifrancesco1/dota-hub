@@ -360,7 +360,7 @@ export default function TournamentDetailPage() {
                   return (
                     <button
                       key={s.series_id || idx}
-                      onClick={() => openSeries(s)}
+                      onClick={() => openSeries(s, t.name)}
                       className="w-full bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-xl p-3 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-4 transition-all group text-left"
                     >
                       <span className="text-[10px] font-mono text-gray-500 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>

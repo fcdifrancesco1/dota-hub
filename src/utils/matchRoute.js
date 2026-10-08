@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
  * Identificador da série finalizada usado na URL: o match_id do primeiro mapa.
@@ -17,11 +17,30 @@ export function seriesPath(series, mapIndex = 0) {
   return mapIndex > 0 ? `/partidas/${key}?jogo=${mapIndex + 1}` : `/partidas/${key}`;
 }
 
-/** Abre a página da série, levando o objeto para exibir sem esperar a API. */
+// Nome da página de origem, para o botão "Voltar" da série
+function backLabelFor(pathname) {
+  if (pathname.startsWith('/campeonatos/')) return 'Campeonato';
+  if (pathname.startsWith('/times/')) return 'Time';
+  if (pathname.startsWith('/partidas')) return 'Partidas';
+  if (pathname === '/') return 'Início';
+  return null;
+}
+
+/**
+ * Abre a página da série, levando o objeto para exibir sem esperar a API e a
+ * página de origem para o botão "Voltar" (ex.: o campeonato de onde veio).
+ * `label` opcional substitui o nome padrão da origem (ex.: nome do campeonato).
+ */
 export function useOpenSeries() {
   const navigate = useNavigate();
-  return useCallback((series) => {
+  const location = useLocation();
+  return useCallback((series, label) => {
     const path = seriesPath(series);
-    if (path) navigate(path, { state: { series } });
-  }, [navigate]);
+    if (!path) return;
+    const from = {
+      path: `${location.pathname}${location.search}`,
+      label: label || backLabelFor(location.pathname) || 'Partidas'
+    };
+    navigate(path, { state: { series, from } });
+  }, [navigate, location.pathname, location.search]);
 }
