@@ -320,6 +320,61 @@ export function registerLightVariant(darkUrl, lightUrl) {
   }
 }
 
+// Logos ATUAIS vindos da Liquipedia (agenda, classificação, chaveamento): têm
+// prioridade sobre os arquivos locais e sobre a OpenDota, cujo cadastro às vezes
+// fica desatualizado (ex.: LGD com o logo antigo da parceria PSG.LGD).
+const CURRENT_LOGOS = new Map();
+// Guardados no navegador (30 dias) para valer também para times que não estão
+// na agenda do momento (ex.: um time já eliminado)
+const CURRENT_KEY = 'dotahub_current_logos_v1';
+try {
+  const saved = JSON.parse(localStorage.getItem(CURRENT_KEY) || 'null');
+  if (saved && Date.now() - saved.ts < 30 * 24 * 3600 * 1000) {
+    for (const [k, v] of Object.entries(saved.logos || {})) CURRENT_LOGOS.set(k, v);
+    for (const [dark, light] of Object.entries(saved.light || {})) LIGHT_VARIANTS.set(dark, light);
+  }
+} catch { /* armazenamento indisponível */ }
+let saveTimer = null;
+function persistCurrentLogos() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      const current = new Set(CURRENT_LOGOS.values());
+      const light = Object.fromEntries([...LIGHT_VARIANTS].filter(([dark]) => current.has(dark)));
+      localStorage.setItem(CURRENT_KEY, JSON.stringify({ ts: Date.now(), logos: Object.fromEntries(CURRENT_LOGOS), light }));
+    } catch { /* sem espaço */ }
+  }, 1000);
+}
+const nameVariants = (name) => {
+  const cleaned = cleanStr(name);
+  if (!cleaned) return [];
+  const stripped = cleaned.replace(/^(team|gaming|esports)/, '').replace(/(team|gaming|esports)$/, '');
+  return stripped && stripped.length >= 2 && stripped !== cleaned ? [cleaned, stripped] : [cleaned];
+};
+
+export function registerCurrentTeamLogo(teamName, darkUrl, lightUrl) {
+  if (!teamName || /^tbd$/i.test(String(teamName).trim()) || !isUsableLogoUrl(darkUrl)) return;
+  let changed = false;
+  for (const key of nameVariants(teamName)) {
+    if (CURRENT_LOGOS.get(key) !== darkUrl) {
+      CURRENT_LOGOS.set(key, darkUrl);
+      changed = true;
+    }
+  }
+  registerLightVariant(darkUrl, lightUrl);
+  if (changed) {
+    persistCurrentLogos();
+    notifyLogoListeners();
+  }
+}
+
+function findCurrentLogo(teamName) {
+  for (const key of nameVariants(teamName)) {
+    if (CURRENT_LOGOS.has(key)) return CURRENT_LOGOS.get(key);
+  }
+  return null;
+}
+
 function isUsableLogoUrl(url) {
   return typeof url === 'string' &&
     (url.startsWith('http') || url.startsWith('/')) &&
@@ -357,18 +412,27 @@ export function getTeamLogoCandidates(teamName, teamIdOrUrl, fallbackUrl) {
   }
   if (isUsableLogoUrl(fallbackUrl)) explicitUrls.push(fallbackUrl);
 
-  const candidates = [
-    // 1. URL fornecida pela API — a Liquipedia já envia a versão "darkmode",
-    //    feita para fundo escuro, e cobre também times menores
+  // O endereço antigo de logos da Valve (steamcdn…/team_logos/<id>.png) não é
+  // atualizado há anos — LGD aparece como PSG.LGD, NAVI/OG/Liquid com logos
+  // antigos. Fica como último recurso.
+  const isLegacy = (url) => /akamaihd\.net\/apps\/dota2\/images\/team_logos\//.test(url);
+  const dynamicById = teamId && DYNAMIC_TEAMS_BY_ID.get(teamId);
+  const dynamicByName = teamName && (DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName))
+    || DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName).replace(/^(team|gaming|esports)/, '').replace(/(team|gaming|esports)$/, '')));
+  const all = [
+    // 1. Logo atual da Liquipedia registrado por nome (ver registerCurrentTeamLogo):
+    //    vale mais que qualquer outra fonte, inclusive a URL enviada pela OpenDota
+    teamName && findCurrentLogo(teamName),
+    // 2. URL fornecida junto com o dado (Liquipedia envia a versão "darkmode")
     ...explicitUrls,
-    // 2. Dicionário local (arquivos em /public/team-logos)
+    // 3. Dicionário local (arquivos em /public/team-logos)
     teamId && LOCAL_TEAM_LOGOS[teamId],
     teamName && findLocalLogoByName(teamName),
-    // 3. Registro dinâmico carregado da OpenDota
-    teamId && DYNAMIC_TEAMS_BY_ID.get(teamId),
-    teamName && DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName)),
-    teamName && DYNAMIC_TEAMS_BY_NAME.get(cleanStr(teamName).replace(/^(team|gaming|esports)/, '').replace(/(team|gaming|esports)$/, ''))
-  ];
+    // 4. Registro dinâmico carregado da OpenDota
+    dynamicById,
+    dynamicByName
+  ].filter(isUsableLogoUrl);
+  const candidates = [...all.filter((u) => !isLegacy(u)), ...all.filter(isLegacy)];
 
   return [...new Set(candidates.filter(isUsableLogoUrl))];
 }
@@ -410,13 +474,17 @@ export default function TeamLogo({
   const lightUrl = theme === 'light' && baseUrl ? LIGHT_VARIANTS.get(baseUrl) : null;
   const resolvedUrl = lightUrl && !FAILED_LOGO_URLS.has(lightUrl) ? lightUrl : baseUrl;
 
-  // Sem logo ainda: busca pelo ID (se houver) e redesenha quando algum logo novo chegar
-  const missing = !resolvedUrl;
+  // Redesenha quando chegam logos novos (lista da OpenDota, busca por ID ou logo
+  // atual da Liquipedia, que pode substituir um logo antigo já exibido)
   useEffect(() => {
-    if (!missing) return undefined;
-    if (teamId && /^\d+$/.test(String(teamId))) fetchTeamLogoById(teamId);
     LOGO_LISTENERS.add(forceRender);
     return () => { LOGO_LISTENERS.delete(forceRender); };
+  }, []);
+
+  // Sem logo ainda: busca pelo ID na OpenDota (se houver)
+  const missing = !resolvedUrl;
+  useEffect(() => {
+    if (missing && teamId && /^\d+$/.test(String(teamId))) fetchTeamLogoById(teamId);
   }, [missing, teamId]);
 
   if (!resolvedUrl) {

@@ -1,6 +1,6 @@
 import { PRO_RECORDS } from "../data/proRecords";
 import { INITIAL_ARCHIVED_TOURNAMENTS } from "../data/archivedTournaments";
-import { registerLightVariant } from "../utils/teamLogos";
+import { registerCurrentTeamLogo } from "../utils/teamLogos";
 
 const OPENDOTA_BASE = "https://api.opendota.com/api";
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
@@ -695,13 +695,27 @@ export async function fetchTournaments() {
   return getCachedFast(TOURNAMENTS_CACHE_KEY) || [];
 }
 
+// Registra os logos atuais dos times que aparecem na classificação e no chaveamento
+function registerStandingsLogos({ tables = [], brackets = [] } = {}) {
+  for (const t of tables) for (const r of t.rows || []) registerCurrentTeamLogo(r.team, r.logo?.dark, r.logo?.light);
+  const walk = (node) => {
+    if (!node || node.header) return;
+    for (const o of node.match?.opponents || []) if (o?.name) registerCurrentTeamLogo(o.name, o.logo?.dark, o.logo?.light);
+    (node.children || []).forEach(walk);
+  };
+  for (const b of brackets) (b.roots || []).forEach(walk);
+}
+
 // Classificação (fase de grupos) e chaveamentos de um campeonato da Liquipedia — ver api/tournaments.js
 // Retorna { tables, brackets }.
 export async function fetchTournamentStandings(page) {
   if (!page) return { tables: [], brackets: [] };
   const key = `tourney_standings_v3_${page}`;
   const cached = getCached(key, 5 * 60 * 1000);
-  if (cached) return cached;
+  if (cached) {
+    registerStandingsLogos(cached);
+    return cached;
+  }
   try {
     const res = await fetchWithTimeout(`/api/tournaments?standings=${encodeURIComponent(page)}`, {}, 20000);
     if (res.ok) {
@@ -710,13 +724,16 @@ export async function fetchTournamentStandings(page) {
         tables: Array.isArray(data?.tables) ? data.tables : [],
         brackets: Array.isArray(data?.brackets) ? data.brackets : []
       };
+      registerStandingsLogos(result);
       setCache(key, result);
       return result;
     }
   } catch (err) {
     console.warn("Aviso ao buscar classificação do campeonato:", err);
   }
-  return getCachedFast(key) || { tables: [], brackets: [] };
+  const fallback = getCachedFast(key) || { tables: [], brackets: [] };
+  registerStandingsLogos(fallback);
+  return fallback;
 }
 
 export const UPCOMING_CACHE_KEY = "upcoming_real_matches_v5";
@@ -736,8 +753,9 @@ const BRT_DATE_TIME = new Intl.DateTimeFormat('pt-BR', {
  */
 export function normalizeUpcomingMatch(m) {
   if (!m) return m;
-  registerLightVariant(m.logoA, m.logoALight);
-  registerLightVariant(m.logoB, m.logoBLight);
+  // Logos atuais da Liquipedia passam a valer em todo o site (ver teamLogos.jsx)
+  registerCurrentTeamLogo(m.timeA, m.logoA, m.logoALight);
+  registerCurrentTeamLogo(m.timeB, m.logoB, m.logoBLight);
   const rawTs = Number(m.timestamp) || 0;
   const timestamp = rawTs > 1e11 ? Math.floor(rawTs / 1000) : rawTs || null;
   return {
