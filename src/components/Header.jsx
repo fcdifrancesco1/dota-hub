@@ -61,11 +61,13 @@ export default function Header() {
             className="flex items-center gap-3 group focus:outline-none"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-red-600 to-amber-700 p-[1.5px] shadow-lg shadow-red-950/40 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-surface rounded-[10px] flex items-center justify-center">
-                <Flame className="w-5 h-5 text-amber-400 group-hover:text-amber-300 transition-colors" />
-              </div>
-            </div>
+            <img
+              src="/logo-96.png"
+              alt=""
+              width="44"
+              height="44"
+              className="w-11 h-11 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
+            />
             <div className="flex flex-col">
               <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase leading-none">
                 Competitive

@@ -1,12 +1,13 @@
 // Service Worker para DotaHub PWA
 // Estratégia: Network-first para APIs/dados dinâmicos, Cache-first para assets estáticos
 
-const CACHE_NAME = 'dotahub-static-v2';
+const CACHE_NAME = 'dotahub-static-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/aegis.png'
+  '/logo-96.png',
+  '/logo-192.png'
 ];
 
 self.addEventListener('install', (event) => {

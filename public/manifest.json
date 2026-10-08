@@ -4,12 +4,12 @@
   "description": "Acompanhamento profissional de Dota 2 em tempo real: telemetria ao vivo, agenda, campeonatos, rankings, meta de heróis e palpites.",
   "icons": [
     {
-      "src": "/aegis.png",
+      "src": "/logo-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/aegis.png",
+      "src": "/logo.png",
       "type": "image/png",
       "sizes": "512x512"
     }
