@@ -15,10 +15,12 @@ import {
   Loader2,
   ChevronRight,
   ListOrdered,
-  GitBranch
+  GitBranch,
+  UserCheck
 } from 'lucide-react';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
-import { fetchTournaments, fetchTournamentHeroStats, fetchTournamentStandings, getHeroImg, getHeroName } from '../services/api';
+import { fetchTournaments, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName } from '../services/api';
+import TournamentPlayers from '../components/TournamentPlayers';
 import TournamentStandings from '../components/TournamentStandings';
 import TournamentBracket from '../components/TournamentBracket';
 import { useApp } from '../context/AppContext';
@@ -41,12 +43,16 @@ export default function TournamentDetailPage() {
   const [brackets, setBrackets] = useState([]);
   const [heroStats, setHeroStats] = useState(null);
   const [heroLoading, setHeroLoading] = useState(false);
+  const [playerStats, setPlayerStats] = useState(null);
 
   // 1. Campeonato: Liquipedia primeiro; ligas numéricas do Admin (Supabase) como alternativa
   useEffect(() => {
     let active = true;
     setTournament(null);
     setNotFound(false);
+    // Outro campeonato: descarta as estatísticas do anterior
+    setHeroStats(null);
+    setPlayerStats(null);
     fetchTournaments().then(async (list) => {
       let found = (list || []).find((t) => t.id === id) || null;
       if (!found && isSupabaseConfigured) {
@@ -74,6 +80,16 @@ export default function TournamentDetailPage() {
     });
     return () => { active = false; };
   }, [standingsPage]);
+
+  // Estatísticas dos jogadores no torneio (OpenDota), carregadas ao abrir a aba
+  useEffect(() => {
+    if (activeTab !== 'players' || !tournament?.leagueId || playerStats) return;
+    let active = true;
+    fetchTournamentPlayerStats(tournament.leagueId).then((data) => {
+      if (active) setPlayerStats(data || { players: [] });
+    });
+    return () => { active = false; };
+  }, [activeTab, tournament, playerStats]);
 
   // 2. Estatísticas de heróis do torneio (OpenDota), carregadas ao abrir a aba
   useEffect(() => {
@@ -129,6 +145,7 @@ export default function TournamentDetailPage() {
     { id: 'matches', label: 'Partidas', icon: Swords },
     ...(standings.length ? [{ id: 'standings', label: 'Classificação', icon: ListOrdered }] : []),
     ...(brackets.length ? [{ id: 'bracket', label: 'Chaveamento', icon: GitBranch }] : []),
+    { id: 'players', label: 'Jogadores', icon: UserCheck, disabled: !t.leagueId },
     { id: 'heroes', label: 'Heróis do Torneio', icon: Sparkles, disabled: !t.leagueId },
     { id: 'info', label: 'Informações', icon: Info }
   ];
@@ -315,6 +332,22 @@ export default function TournamentDetailPage() {
             )}
           </section>
         </div>
+      )}
+
+      {/* ABA: JOGADORES */}
+      {activeTab === 'players' && (
+        !playerStats ? (
+          <div className="py-16 flex flex-col items-center gap-3 text-gray-400">
+            <Loader2 className="w-7 h-7 animate-spin text-amber-400" />
+            <span className="text-xs">Calculando estatísticas dos jogadores...</span>
+          </div>
+        ) : playerStats.players.length === 0 ? (
+          <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
+            Ainda não há partidas deste campeonato registradas na OpenDota.
+          </div>
+        ) : (
+          <TournamentPlayers data={playerStats} constants={constants} />
+        )
       )}
 
       {/* ABA: HERÓIS DO TORNEIO */}

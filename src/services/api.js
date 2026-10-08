@@ -2127,6 +2127,79 @@ export async function fetchTournamentHeroStats(leagueId) {
   return getCachedFast(cacheKey) || null;
 }
 
+// 12b. Estatísticas dos jogadores em um campeonato (OpenDota Explorer, por leagueId).
+// O time é o pelo qual o jogador atuou NESTE torneio (o mais frequente nas
+// partidas), não o time atual do cadastro.
+export async function fetchTournamentPlayerStats(leagueId) {
+  const id = Number(leagueId);
+  if (!id) return null;
+  const cacheKey = `tourney_player_stats_v1_${id}`;
+  const cached = getCached(cacheKey, 10 * 60 * 1000);
+  if (cached) return cached;
+
+  const sql = `WITH p AS (
+    SELECT pm.account_id, MAX(np.name) AS name,
+      MODE() WITHIN GROUP (ORDER BY CASE WHEN pm.player_slot < 128 THEN m.radiant_team_id ELSE m.dire_team_id END) AS team_id,
+      COUNT(*) AS games,
+      SUM(CASE WHEN (pm.player_slot < 128) = m.radiant_win THEN 1 ELSE 0 END) AS wins,
+      SUM(pm.kills) AS kills, SUM(pm.deaths) AS deaths, SUM(pm.assists) AS assists,
+      AVG(pm.gold_per_min) AS gpm, AVG(pm.xp_per_min) AS xpm, AVG(pm.last_hits) AS lh,
+      AVG(pm.hero_damage) AS hd, AVG(pm.tower_damage) AS td, AVG(pm.hero_healing) AS heal,
+      array_agg(pm.hero_id) AS heroes
+    FROM player_matches pm
+    JOIN matches m ON m.match_id = pm.match_id
+    LEFT JOIN notable_players np ON np.account_id = pm.account_id
+    WHERE m.leagueid = ${id}
+    GROUP BY pm.account_id)
+  SELECT p.*, t.name AS team_name, t.logo_url AS team_logo
+  FROM p LEFT JOIN teams t ON t.team_id = p.team_id`;
+
+  try {
+    const res = await fetchWithTimeout(`https://api.opendota.com/api/explorer?sql=${encodeURIComponent(sql)}`, {}, 12000);
+    if (res.ok) {
+      const data = await res.json();
+      const rows = Array.isArray(data?.rows) ? data.rows : [];
+      const num = (v) => Number(v) || 0;
+      const players = rows.map((r) => {
+        const games = num(r.games);
+        const counts = {};
+        for (const h of r.heroes || []) counts[h] = (counts[h] || 0) + 1;
+        return {
+          accountId: r.account_id,
+          name: r.name || `Jogador ${r.account_id}`,
+          teamId: r.team_id || null,
+          teamName: r.team_name || null,
+          teamLogo: r.team_logo || null,
+          games,
+          wins: num(r.wins),
+          winRate: games ? (num(r.wins) / games) * 100 : 0,
+          kills: num(r.kills) / (games || 1),
+          deaths: num(r.deaths) / (games || 1),
+          assists: num(r.assists) / (games || 1),
+          kda: (num(r.kills) + num(r.assists)) / Math.max(num(r.deaths), 1),
+          gpm: Math.round(num(r.gpm)),
+          xpm: Math.round(num(r.xpm)),
+          lastHits: Math.round(num(r.lh)),
+          heroDamage: Math.round(num(r.hd)),
+          towerDamage: Math.round(num(r.td)),
+          healing: Math.round(num(r.heal)),
+          topHeroes: Object.entries(counts)
+            .map(([heroId, count]) => ({ heroId: Number(heroId), count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3),
+          heroCount: Object.keys(counts).length
+        };
+      });
+      const result = { leagueId: id, players };
+      setCache(cacheKey, result);
+      return result;
+    }
+  } catch (err) {
+    console.warn("Aviso ao buscar estatísticas de jogadores do torneio:", err);
+  }
+  return getCachedFast(cacheKey) || null;
+}
+
 // 13. Sinergias e Combos de Heróis Populares
 export const POPULAR_HERO_COMBOS = [
   {
