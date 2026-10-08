@@ -5,27 +5,30 @@ import { useApp } from '../../context/AppContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
+import { fetchTournaments } from '../../services/api';
+import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize } from '../../utils/tournamentFormat';
 
 export default function HomeHero() {
-  const { tournamentsList, upcomingMatches, liveGames } = useApp();
+  const { upcomingMatches, liveGames } = useApp();
   const openLiveMatch = useOpenLiveMatch();
 
-  // Encontra o torneio em andamento de maior relevância
-  const featuredTournament = tournamentsList && tournamentsList.length > 0
-    ? tournamentsList[0]
-    : {
-        name: 'ESL One Bangkok 2026',
-        tier: 'tier_1',
-        prize_pool: '$1,000,000',
-        stage: 'Playoffs - Grande Final',
-        logo_url: 'https://eslgaming.com/wp-content/uploads/2021/04/esl-logo-small.png'
-      };
+  // Campeonatos da Liquipedia (tier, premiação) — cache de 30 min
+  const [tournaments, setTournaments] = useState([]);
+  useEffect(() => {
+    let active = true;
+    fetchTournaments().then((list) => { if (active) setTournaments(list || []); });
+    return () => { active = false; };
+  }, []);
 
-  // Próxima partida que ainda não começou (a lista já vem ordenada por horário)
-  const nowMs = Date.now();
-  const nextMatch = (upcomingMatches || []).find((m) => m.timestamp && m.timestamp * 1000 > nowMs)
-    || (upcomingMatches || [])[0]
-    || null;
+  // Próxima partida do campeonato de maior tier (S, depois A, B...); dentro do
+  // tier, a mais próxima — ver pickHeadlineMatch
+  const headline = pickHeadlineMatch(upcomingMatches, tournaments);
+  const nextMatch = headline?.match || null;
+
+  // Torneio em destaque: o S/A-Tier em andamento; senão, o da partida em destaque
+  const featuredTournament = pickFeaturedTournament(tournaments) || headline?.tournament || null;
+  const featuredPrize = featuredTournament ? formatPrize(featuredTournament) : null;
+  const featuredTier = featuredTournament ? tierLetter(featuredTournament.tier) : null;
 
   // Contagem regressiva dinâmica para a próxima partida
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
@@ -70,16 +73,24 @@ export default function HomeHero() {
         <div className="lg:col-span-7 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
             <Trophy className="w-3.5 h-3.5" />
-            <span>Torneio em Destaque • Tier 1</span>
+            <span>{featuredTournament ? `Torneio em Destaque${featuredTier ? ` • ${featuredTier}` : ''}` : 'Dota 2 Competitivo'}</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white uppercase tracking-tight font-serif leading-tight">
-            {featuredTournament.name}
+            {featuredTournament ? featuredTournament.name : 'Cenário profissional de Dota 2'}
           </h1>
 
           <p className="text-gray-300 text-sm sm:text-base max-w-xl leading-relaxed">
-            Acompanhe em tempo real as potências mundiais de Dota 2 disputando a glória, pontos do ranking internacional e a premiação de{' '}
-            <span className="text-amber-400 font-bold">{featuredTournament.prize_pool || '$1,000,000'}</span>.
+            {featuredTournament ? (
+              <>
+                Acompanhe em tempo real as potências mundiais de Dota 2 disputando o título
+                {featuredPrize ? (
+                  <> e a premiação de <span className="text-amber-400 font-bold">{featuredPrize}</span>.</>
+                ) : '.'}
+              </>
+            ) : (
+              'Partidas ao vivo, resultados, agenda e estatísticas dos principais campeonatos.'
+            )}
           </p>
 
           {/* CTAs */}
@@ -132,8 +143,13 @@ export default function HomeHero() {
             </div>
           ) : (
           <>
-          <div className="pt-3 text-center text-[11px] font-semibold text-amber-400/80 truncate">
-            {nextMatch.tourneyName}
+          <div className="pt-3 flex items-center justify-center gap-2 text-[11px] font-semibold text-amber-400/80">
+            <span className="truncate">{nextMatch.tourneyName}</span>
+            {tierLetter(headline?.tournament?.tier) && (
+              <span className="shrink-0 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[9px] font-black uppercase">
+                {tierLetter(headline.tournament.tier)}
+              </span>
+            )}
           </div>
 
           {/* Confronto */}

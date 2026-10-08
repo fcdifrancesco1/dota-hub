@@ -101,6 +101,14 @@ export function parseLiquipediaMatches(html, options = {}) {
         }
       }
 
+      // 5b. Página do campeonato na Liquipedia (ex.: "BLAST/SLAM/8"), a mesma
+      //     usada em /api/tournaments — liga a partida ao tier do campeonato
+      let tournamentPage = null;
+      const tourneyLink = block.match(/class="match-info-tournament"[\s\S]*?href="\/dota2\/([^"#]+)/);
+      if (tourneyLink) {
+        try { tournamentPage = decodeURIComponent(tourneyLink[1]); } catch { tournamentPage = tourneyLink[1]; }
+      }
+
       // 6. Stream link
       let streamUrl = "";
       const streamMatch = block.match(/href="([^"]*Special:Stream\/[^"]+)"/);
@@ -138,6 +146,7 @@ export function parseLiquipediaMatches(html, options = {}) {
           scoreA,
           scoreB,
           torneio,
+          tournamentPage,
           streamUrl,
           data: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
           timestamp,

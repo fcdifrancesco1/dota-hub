@@ -103,3 +103,50 @@ export function pickFeaturedTournament(list) {
 export function tierLetter(tier) {
   return { 1: 'S-Tier', 2: 'A-Tier', 3: 'B-Tier', 4: 'C-Tier' }[tier] || null;
 }
+
+// ---- Partida em destaque (card "Próxima Grande Partida") ----
+const pageKey = (p) => String(p || '').replace(/ /g, '_').toLowerCase();
+const nameKey = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/** Campeonato (lista da Liquipedia) de uma partida da agenda, pela página ou pelo nome. */
+export function findTournamentForMatch(match, tournaments) {
+  const list = tournaments || [];
+  if (match?.tournamentPage) {
+    const key = pageKey(match.tournamentPage);
+    const byPage = list.find((t) => pageKey(t.page) === key);
+    if (byPage) return byPage;
+  }
+  const tn = nameKey(match?.tourneyName || match?.torneio);
+  if (!tn) return null;
+  return list.find((t) => [nameKey(t.name), nameKey(t.shortName)]
+    .some((n) => n.length >= 4 && (tn.startsWith(n) || n.startsWith(tn)))) || null;
+}
+
+/**
+ * Relevância do campeonato (menor = mais importante): eventos principais S-Tier
+ * (1), A (2), B (3)... A Liquipedia dá às qualificatórias/showmatches o tier do
+ * evento principal, mas elas valem menos que qualquer evento principal, então
+ * ficam depois de todos. Campeonato desconhecido fica por último.
+ */
+export function tournamentRank(t) {
+  if (!t) return 99;
+  if (!t.tier) return 90;
+  return t.tierType ? 50 + t.tier : t.tier * 10;
+}
+
+const isTbd = (name) => !name || /^tbd$/i.test(String(name).trim());
+
+/**
+ * Próxima partida do campeonato mais relevante: maior tier primeiro; dentro dele,
+ * a mais próxima, preferindo confrontos já definidos (sem "TBD").
+ */
+export function pickHeadlineMatch(upcoming, tournaments, nowMs = Date.now()) {
+  const future = (upcoming || []).filter((m) => m.timestamp && m.timestamp * 1000 > nowMs);
+  const pool = future.length ? future : (upcoming || []);
+  const scored = pool.map((m) => {
+    const tournament = findTournamentForMatch(m, tournaments);
+    return { m, tournament, rank: tournamentRank(tournament), tbd: isTbd(m.timeA) || isTbd(m.timeB) };
+  });
+  scored.sort((a, b) => a.rank - b.rank || a.tbd - b.tbd || (a.m.timestamp || Infinity) - (b.m.timestamp || Infinity));
+  return scored[0] ? { match: scored[0].m, tournament: scored[0].tournament } : null;
+}
