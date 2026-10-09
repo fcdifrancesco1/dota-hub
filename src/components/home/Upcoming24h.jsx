@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar, Clock, ChevronRight, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import TeamLogo from '../../utils/teamLogos';
+import MatchPreviewModal from '../MatchPreviewModal';
 
 export default function Upcoming24h() {
   const { upcomingMatches, loading } = useApp();
+  const [selected, setSelected] = useState(null);
 
   // Filtra jogos para as próximas 24 horas
   const now = Date.now();
@@ -69,9 +71,12 @@ export default function Upcoming24h() {
               }
 
               return (
-                <div
+                <button
+                  type="button"
                   key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`}
-                  className="bg-surface-2 hover:bg-surface-2 border border-surface-3 hover:border-amber-500/30 rounded-xl p-3 transition-all"
+                  onClick={() => setSelected(m)}
+                  title="Ver estatísticas dos jogadores no torneio"
+                  className="block w-full text-left bg-surface-2 hover:bg-surface-2 border border-surface-3 hover:border-amber-500/30 rounded-xl p-3 transition-all"
                 >
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[180px] text-amber-400/80">
@@ -102,7 +107,7 @@ export default function Upcoming24h() {
                       <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-5 h-5 shrink-0" />
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -110,8 +115,10 @@ export default function Upcoming24h() {
       </div>
 
       <div className="mt-4 pt-3 border-t border-white/5 text-[11px] text-gray-500 text-center">
-        Horários sincronizados automaticamente com os servidores de torneios.
+        Toque em uma partida para ver as estatísticas dos jogadores no torneio.
       </div>
+
+      {selected && <MatchPreviewModal match={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 }
