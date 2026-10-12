@@ -15,7 +15,7 @@ import {
   Trophy,
   Zap
 } from 'lucide-react';
-import { fetchMatchDetails, getHeroImg, getHeroName, getItemImg } from '../services/api';
+import { fetchMatchDetails, fetchLeagueSeries, getHeroImg, getHeroName, getItemImg } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
 import { useApp } from '../context/AppContext';
@@ -99,18 +99,23 @@ export default function MatchDetailPage() {
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
-  // Link direto sem a série em memória: busca o replay e monta a série de 1 mapa
+  // Link direto sem a série em memória: busca o replay e a série completa na
+  // liga (OpenDota); sem ela, monta uma série só com este mapa
   useEffect(() => {
     if (knownSeries) return;
     let cancelled = false;
     setSeriesError(false);
-    fetchMatchDetails(id).then((data) => {
+    fetchMatchDetails(id).then(async (data) => {
       if (cancelled) return;
-      if (data) {
-        setFallbackSeries(seriesFromMatch(data));
-        setMatchData((prev) => ({ ...prev, [String(data.match_id)]: data }));
-      } else {
+      if (!data) {
         setSeriesError(true);
+        return;
+      }
+      setMatchData((prev) => ({ ...prev, [String(data.match_id)]: data }));
+      setFallbackSeries(seriesFromMatch(data));
+      if (data.leagueid) {
+        const full = findSeries(id, [await fetchLeagueSeries(data.leagueid)]);
+        if (!cancelled && full) setFallbackSeries(full);
       }
     });
     return () => { cancelled = true; };

@@ -341,19 +341,17 @@ export function clusterMatchesIntoSeries(rawMatches) {
         return true;
       }
 
-      // Se ambos têm series_id oficial e são diferentes, são séries distintas
-      if (s.seriesId && m.series_id && String(s.seriesId) !== String(m.series_id)) {
-        return false;
-      }
-
-      // 2. Fallback heurístico caso não haja series_id oficial:
+      // 2. Heurística: mesmos times, mesma liga, poucas horas depois e série ainda
+      //    não decidida. Vale também quando o series_id muda no meio da série — a
+      //    Valve às vezes gera um ID novo (ex.: 4º mapa de uma MD5 recriado no lobby).
       const sameTeams = isSeriesMatch(s.timeA, s.timeB, m.radiant_name, m.dire_name);
       const sameLeague = !m.leagueid || !s.leagueId || m.leagueid === s.leagueId;
       const lastGame = s.games[s.games.length - 1];
       const lastGameTime = lastGame?.start_time || 0;
       const withinTime = (matchTime - lastGameTime) <= (4.5 * 3600) && (matchTime >= lastGameTime);
 
-      const seriesType = s.seriesType ?? m.series_type ?? 1; // 0: BO1, 1: BO3, 2: BO5
+      // MD5 em qualquer um dos lados manda: um mapa avulso sem o tipo não fecha a série cedo
+      const seriesType = (s.seriesType === 2 || m.series_type === 2) ? 2 : (s.seriesType ?? m.series_type ?? 1); // 0: BO1, 1: BO3, 2: BO5
       const winsNeeded = seriesType === 2 ? 3 : (seriesType === 0 ? 1 : 2);
       const isAlreadyClosed = s.scoreA >= winsNeeded || s.scoreB >= winsNeeded;
 
@@ -742,7 +740,7 @@ export async function fetchTournamentByPage(page) {
 export async function fetchLeagueSeries(leagueId) {
   const id = Number(leagueId);
   if (!id) return [];
-  const key = `league_series_v1_${id}`;
+  const key = `league_series_v2_${id}`;
   const cached = getCached(key, 10 * 60 * 1000);
   if (cached) return cached;
   const sql = `SELECT m.match_id, m.start_time, m.duration, m.series_id, m.series_type,
