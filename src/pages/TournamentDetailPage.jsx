@@ -17,6 +17,7 @@ import {
   ListOrdered,
   GitBranch,
   UserCheck,
+  Shield,
   Crown
 } from 'lucide-react';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
@@ -24,6 +25,7 @@ import { fetchTournaments, fetchTournamentArchive, fetchTournamentByPage, fetchL
 import TournamentPlayers from '../components/TournamentPlayers';
 import TournamentStandings from '../components/TournamentStandings';
 import TournamentBracket from '../components/TournamentBracket';
+import TournamentTeams from '../components/TournamentTeams';
 import { useApp } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import { useTheme } from '../context/ThemeContext';
@@ -111,6 +113,7 @@ export default function TournamentDetailPage() {
   const [leagueSeries, setLeagueSeries] = useState(null);
   const [shared, setShared] = useState(false);
   const [participants, setParticipants] = useState(null);
+  const [teams, setTeams] = useState([]);
 
   // 1. Campeonato: Liquipedia primeiro; ligas numéricas do Admin (Supabase) como alternativa
   useEffect(() => {
@@ -149,6 +152,7 @@ export default function TournamentDetailPage() {
     setStandings([]);
     setBrackets([]);
     setParticipants(null);
+    setTeams([]);
     if (!standingsPage) return;
     let active = true;
     fetchTournamentStandings(standingsPage).then((data) => {
@@ -156,6 +160,7 @@ export default function TournamentDetailPage() {
       setStandings(data?.tables || []);
       setBrackets(data?.brackets || []);
       setParticipants(allParticipants(data));
+      setTeams(data?.teams || []);
     });
     return () => { active = false; };
   }, [standingsPage]);
@@ -258,6 +263,7 @@ export default function TournamentDetailPage() {
 
   const tabs = [
     { id: 'matches', label: 'Partidas', icon: Swords },
+    ...(teams.length ? [{ id: 'teams', label: 'Equipes', icon: Shield }] : []),
     ...(standings.length ? [{ id: 'standings', label: 'Classificação', icon: ListOrdered }] : []),
     ...(brackets.length ? [{ id: 'bracket', label: 'Chaveamento', icon: GitBranch }] : []),
     { id: 'players', label: 'Jogadores', icon: UserCheck, disabled: !t.leagueId },
@@ -371,6 +377,9 @@ export default function TournamentDetailPage() {
           );
         })}
       </div>
+
+      {/* ABA: EQUIPES */}
+      {activeTab === 'teams' && teams.length > 0 && <TournamentTeams teams={teams} />}
 
       {/* ABA: CLASSIFICAÇÃO */}
       {activeTab === 'standings' && standings.length > 0 && (

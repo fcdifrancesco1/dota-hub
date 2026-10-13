@@ -106,3 +106,53 @@ export function parseLiquipediaParticipants(html) {
   }
   return names;
 }
+
+/**
+ * Cards de participantes completos: time (nome, logo, rótulo como "Invited")
+ * e elenco com país e posição — 1 a 5 ou "Coach".
+ */
+export function parseLiquipediaParticipantTeams(html) {
+  const text = String(html || '').replace(/&#95;/g, '_');
+  const teams = [];
+  for (const card of text.split('general-collapsible collapsed team-participant-card').slice(1)) {
+    // Blocos internos (ex.: notas de substituição) também usam o collapsible: só cards com time
+    if (!card.includes('team-participant-card__opponent-compact')) continue;
+    const compact = card.split('team-participant-card__opponent-full')[0];
+    const title = compact.match(/<a href="\/dota2\/[^"]*" title="([^"]+)"/);
+    const span = compact.match(/<span class="name"[^>]*>(?:<a[^>]*>)?([^<]+)/);
+    const name = decode((title?.[1] || span?.[1] || '').replace(/\s*\(page does not exist\)/i, ''));
+    if (!name || name === 'TBD' || teams.some((t) => t.name === name)) continue;
+
+    const imgs = [...compact.matchAll(/<img[^>]*>/g)].map((m) => pickImg(m[0])).filter(Boolean)
+      .filter((u) => !/Dota_2_default/i.test(u));
+    const logo = {
+      light: imgs.find((u) => /lightmode/i.test(u)) || imgs[0] || null,
+      dark: imgs.find((u) => /darkmode/i.test(u)) || imgs[0] || null
+    };
+    const label = decode(card.match(/team-participant-card__label"><span>([\s\S]*?)<\/span>/)?.[1] || '') || null;
+
+    const members = [];
+    for (const m of card.split('team-participant-card__member"').slice(1)) {
+      const player = m.match(/<span class="name"[^>]*>(?:<a[^>]*>)?([^<]+)/);
+      const playerName = decode(player?.[1] || '');
+      if (!playerName) continue;
+      const flag = m.match(/<span class="flag"><img alt="([^"]*)" src="([^"]+)"/);
+      const role = decode(m.match(/team-participant-card__member-role[^"]*">([^<]*)</)?.[1] || '');
+      members.push({
+        name: playerName,
+        country: flag ? decode(flag[1]) : null,
+        flag: flag ? absoluteUrl(flag[2]) : null,
+        position: /^[1-5]$/.test(role) ? Number(role) : null,
+        role: role || null
+      });
+    }
+    teams.push({
+      name,
+      logo,
+      label,
+      players: members.filter((p) => !/coach/i.test(p.role || '')),
+      coaches: members.filter((p) => /coach/i.test(p.role || ''))
+    });
+  }
+  return teams;
+}

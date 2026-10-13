@@ -778,7 +778,8 @@ function matchFilter(matchIds) {
 }
 
 // Registra os logos atuais dos times que aparecem na classificação e no chaveamento
-function registerStandingsLogos({ tables = [], brackets = [] } = {}) {
+function registerStandingsLogos({ tables = [], brackets = [], teams = [] } = {}) {
+  for (const t of teams) registerCurrentTeamLogo(t.name, t.logo?.dark, t.logo?.light);
   for (const t of tables) for (const r of t.rows || []) registerCurrentTeamLogo(r.team, r.logo?.dark, r.logo?.light);
   const walk = (node) => {
     if (!node || node.header) return;
@@ -792,7 +793,7 @@ function registerStandingsLogos({ tables = [], brackets = [] } = {}) {
 // Retorna { tables, brackets }.
 export async function fetchTournamentStandings(page) {
   if (!page) return { tables: [], brackets: [] };
-  const key = `tourney_standings_v4_${page}`;
+  const key = `tourney_standings_v5_${page}`;
   const cached = getCached(key, 5 * 60 * 1000);
   if (cached) {
     registerStandingsLogos(cached);
@@ -805,7 +806,8 @@ export async function fetchTournamentStandings(page) {
       const result = {
         tables: Array.isArray(data?.tables) ? data.tables : [],
         brackets: Array.isArray(data?.brackets) ? data.brackets : [],
-        participants: Array.isArray(data?.participants) ? data.participants : []
+        participants: Array.isArray(data?.participants) ? data.participants : [],
+        teams: Array.isArray(data?.teams) ? data.teams : []
       };
       registerStandingsLogos(result);
       setCache(key, result);
@@ -814,7 +816,7 @@ export async function fetchTournamentStandings(page) {
   } catch (err) {
     console.warn("Aviso ao buscar classificação do campeonato:", err);
   }
-  const fallback = getCachedFast(key) || { tables: [], brackets: [], participants: [] };
+  const fallback = getCachedFast(key) || { tables: [], brackets: [], participants: [], teams: [] };
   registerStandingsLogos(fallback);
   return fallback;
 }
