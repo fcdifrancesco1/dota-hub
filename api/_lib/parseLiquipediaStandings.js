@@ -89,3 +89,20 @@ export function parseLiquipediaStandings(html) {
   }
   return tables;
 }
+
+/**
+ * Times da seção de participantes (cards "team-participant-card"). Serve para
+ * separar campeonatos que dividem o mesmo ID de liga da Valve — ex.: todas as
+ * classificatórias regionais da DreamLeague usam uma liga só.
+ */
+export function parseLiquipediaParticipants(html) {
+  const text = String(html || '').replace(/&#95;/g, '_');
+  const names = [];
+  for (const card of text.split('team-participant-card__opponent-compact').slice(1)) {
+    const title = card.match(/<a href="\/dota2\/[^"]*" title="([^"]+)"/);
+    const span = card.match(/<span class="name"[^>]*>(?:<a[^>]*>)?([^<]+)/);
+    const name = decode((title?.[1] || span?.[1] || '').replace(/\s*\(page does not exist\)/i, ''));
+    if (name && name !== 'TBD' && !names.includes(name)) names.push(name);
+  }
+  return names;
+}

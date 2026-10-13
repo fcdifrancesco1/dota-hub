@@ -767,6 +767,16 @@ export async function fetchLeagueSeries(leagueId) {
   return getCachedFast(key) || [];
 }
 
+// Filtro opcional por partidas: campeonatos que dividem o ID de liga com outros
+// (ex.: classificatórias regionais) contam só os próprios mapas
+function matchFilter(matchIds) {
+  const ids = (matchIds || []).map(Number).filter((n) => Number.isFinite(n) && n > 0);
+  return {
+    sql: ids.length ? ` AND m.match_id IN (${ids.join(',')})` : '',
+    key: ids.length ? `_m${ids.length}_${Math.min(...ids)}_${Math.max(...ids)}` : ''
+  };
+}
+
 // Registra os logos atuais dos times que aparecem na classificação e no chaveamento
 function registerStandingsLogos({ tables = [], brackets = [] } = {}) {
   for (const t of tables) for (const r of t.rows || []) registerCurrentTeamLogo(r.team, r.logo?.dark, r.logo?.light);
@@ -782,7 +792,7 @@ function registerStandingsLogos({ tables = [], brackets = [] } = {}) {
 // Retorna { tables, brackets }.
 export async function fetchTournamentStandings(page) {
   if (!page) return { tables: [], brackets: [] };
-  const key = `tourney_standings_v3_${page}`;
+  const key = `tourney_standings_v4_${page}`;
   const cached = getCached(key, 5 * 60 * 1000);
   if (cached) {
     registerStandingsLogos(cached);
@@ -794,7 +804,8 @@ export async function fetchTournamentStandings(page) {
       const data = await res.json();
       const result = {
         tables: Array.isArray(data?.tables) ? data.tables : [],
-        brackets: Array.isArray(data?.brackets) ? data.brackets : []
+        brackets: Array.isArray(data?.brackets) ? data.brackets : [],
+        participants: Array.isArray(data?.participants) ? data.participants : []
       };
       registerStandingsLogos(result);
       setCache(key, result);
@@ -803,7 +814,7 @@ export async function fetchTournamentStandings(page) {
   } catch (err) {
     console.warn("Aviso ao buscar classificação do campeonato:", err);
   }
-  const fallback = getCachedFast(key) || { tables: [], brackets: [] };
+  const fallback = getCachedFast(key) || { tables: [], brackets: [], participants: [] };
   registerStandingsLogos(fallback);
   return fallback;
 }
@@ -2128,16 +2139,17 @@ export async function fetchDotaRecords(recordType = "kills") {
 }
 
 // 12.1. Buscar Estatísticas de Heróis do Torneio (Liquipedia-Style)
-export async function fetchTournamentHeroStats(leagueId) {
+export async function fetchTournamentHeroStats(leagueId, matchIds) {
   if (!leagueId) return null;
   const numLeagueId = Number(leagueId);
-  const cacheKey = `tourney_hero_stats_v2_${leagueId}`;
+  const filter = matchFilter(matchIds);
+  const cacheKey = `tourney_hero_stats_v2_${leagueId}${filter.key}`;
   const cached = getCached(cacheKey, 10 * 60 * 1000);
   if (cached) return cached;
 
   if (numLeagueId && !isNaN(numLeagueId)) {
     try {
-      const sql = `SELECT picks_bans, radiant_win, duration, start_time FROM matches WHERE leagueid=${numLeagueId} AND picks_bans IS NOT NULL`;
+      const sql = `SELECT picks_bans, radiant_win, duration, start_time FROM matches m WHERE m.leagueid=${numLeagueId} AND m.picks_bans IS NOT NULL${filter.sql}`;
       const res = await fetchWithTimeout(
         `https://api.opendota.com/api/explorer?sql=${encodeURIComponent(sql)}`,
         {},
@@ -2220,10 +2232,11 @@ export async function fetchTournamentHeroStats(leagueId) {
 // 12b. Estatísticas dos jogadores em um campeonato (OpenDota Explorer, por leagueId).
 // O time é o pelo qual o jogador atuou NESTE torneio (o mais frequente nas
 // partidas), não o time atual do cadastro.
-export async function fetchTournamentPlayerStats(leagueId) {
+export async function fetchTournamentPlayerStats(leagueId, matchIds) {
   const id = Number(leagueId);
   if (!id) return null;
-  const cacheKey = `tourney_player_stats_v1_${id}`;
+  const filter = matchFilter(matchIds);
+  const cacheKey = `tourney_player_stats_v1_${id}${filter.key}`;
   const cached = getCached(cacheKey, 10 * 60 * 1000);
   if (cached) return cached;
 
@@ -2239,7 +2252,7 @@ export async function fetchTournamentPlayerStats(leagueId) {
     FROM player_matches pm
     JOIN matches m ON m.match_id = pm.match_id
     LEFT JOIN notable_players np ON np.account_id = pm.account_id
-    WHERE m.leagueid = ${id}
+    WHERE m.leagueid = ${id}${filter.sql}
     GROUP BY pm.account_id)
   SELECT p.*, t.name AS team_name, t.logo_url AS team_logo
   FROM p LEFT JOIN teams t ON t.team_id = p.team_id`;

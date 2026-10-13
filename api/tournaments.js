@@ -1,6 +1,6 @@
 import { fetchLiquipediaQuery, fetchLiquipediaApi } from './_lib/liquipediaClient.js';
 import { parseTournamentList, parseInfobox, buildTournament, parseTournamentsListing } from './_lib/parseLiquipediaTournaments.js';
-import { parseLiquipediaStandings } from './_lib/parseLiquipediaStandings.js';
+import { parseLiquipediaStandings, parseLiquipediaParticipants } from './_lib/parseLiquipediaStandings.js';
 import { parseLiquipediaBrackets } from './_lib/parseLiquipediaBrackets.js';
 
 const TTL = 30 * 60 * 1000;
@@ -37,11 +37,12 @@ async function handleStandings(page, res) {
     const html = parsed?.html || '';
     const tables = parseLiquipediaStandings(html);
     const brackets = parseLiquipediaBrackets(html);
+    const participants = parseLiquipediaParticipants(html);
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
-    return res.status(200).json({ page, tables, brackets });
+    return res.status(200).json({ page, tables, brackets, participants });
   } catch (error) {
     console.error('[Tournaments API] Erro na classificação:', error.message);
-    return res.status(200).json({ page, tables: [], brackets: [] });
+    return res.status(200).json({ page, tables: [], brackets: [], participants: [] });
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   Trophy,
@@ -20,7 +20,7 @@ import {
   Crown
 } from 'lucide-react';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
-import { fetchTournaments, fetchTournamentArchive, fetchTournamentByPage, fetchLeagueSeries, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName } from '../services/api';
+import { fetchTournaments, fetchTournamentArchive, fetchTournamentByPage, fetchLeagueSeries, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName, isSameTeamMatch } from '../services/api';
 import TournamentPlayers from '../components/TournamentPlayers';
 import TournamentStandings from '../components/TournamentStandings';
 import TournamentBracket from '../components/TournamentBracket';
@@ -53,6 +53,46 @@ async function findInRecentArchive(id) {
   return null;
 }
 
+/**
+ * Campeonato que divide o ID de liga da Valve com outros (ex.: todas as
+ * classificatórias regionais da DreamLeague usam a mesma liga): as séries e
+ * estatísticas da liga precisam ser filtradas pelos participantes.
+ */
+function sharesLeague(t, list) {
+  if (!t?.leagueId) return false;
+  if (/qualifier/i.test(t.tierType || '')) return true;
+  return (list || []).some((o) => o.id !== t.id && String(o.leagueId) === String(t.leagueId));
+}
+
+// Times do campeonato: cards de participantes + quem aparece na classificação e no chaveamento
+function allParticipants(data) {
+  const names = new Set(data?.participants || []);
+  for (const table of data?.tables || []) for (const r of table.rows || []) if (r.team) names.add(r.team);
+  const walk = (node) => {
+    if (!node) return;
+    for (const o of node.match?.opponents || []) if (o?.name && o.name !== 'TBD') names.add(o.name);
+    (node.children || []).forEach(walk);
+  };
+  for (const b of data?.brackets || []) (b.roots || []).forEach(walk);
+  return [...names];
+}
+
+const DAY = 86400;
+const isoToSecs = (iso) => (iso ? Date.parse(`${iso}T00:00:00Z`) / 1000 : null);
+
+/** Só as séries entre participantes do campeonato e dentro das datas dele. */
+function filterOwnSeries(list, t, participants) {
+  const from = isoToSecs(t.startDate);
+  const to = isoToSecs(t.endDate);
+  const isParticipant = (name) => participants.some((p) => isSameTeamMatch(name, p));
+  return list.filter((s) => {
+    const when = s.startTime || 0;
+    if (from && when < from - DAY) return false;
+    if (to && when > to + 2 * DAY) return false;
+    return participants.length < 2 || (isParticipant(s.timeA) && isParticipant(s.timeB));
+  });
+}
+
 export default function TournamentDetailPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -69,6 +109,8 @@ export default function TournamentDetailPage() {
   const [heroLoading, setHeroLoading] = useState(false);
   const [playerStats, setPlayerStats] = useState(null);
   const [leagueSeries, setLeagueSeries] = useState(null);
+  const [shared, setShared] = useState(false);
+  const [participants, setParticipants] = useState(null);
 
   // 1. Campeonato: Liquipedia primeiro; ligas numéricas do Admin (Supabase) como alternativa
   useEffect(() => {
@@ -92,7 +134,10 @@ export default function TournamentDetailPage() {
         if (db) found = leagueFromDatabase(db);
       }
       if (!active) return;
-      if (found) setTournament(found);
+      if (found) {
+        setShared(sharesLeague(found, list));
+        setTournament(found);
+      }
       else setNotFound(true);
     });
     return () => { active = false; };
@@ -103,12 +148,14 @@ export default function TournamentDetailPage() {
   useEffect(() => {
     setStandings([]);
     setBrackets([]);
+    setParticipants(null);
     if (!standingsPage) return;
     let active = true;
     fetchTournamentStandings(standingsPage).then((data) => {
       if (!active) return;
       setStandings(data?.tables || []);
       setBrackets(data?.brackets || []);
+      setParticipants(allParticipants(data));
     });
     return () => { active = false; };
   }, [standingsPage]);
@@ -122,25 +169,57 @@ export default function TournamentDetailPage() {
     return () => { active = false; };
   }, [leagueId]);
 
+  // Séries concluídas da liga (OpenDota, pelo leagueId oficial da Valve)
+  const series = useMemo(() => {
+    const t = tournament;
+    if (!t?.leagueId) return [];
+    const leagueEntry = (tournamentsList || []).find((l) => String(l.league_id) === String(t.leagueId));
+    const recentSeries = leagueEntry?.seriesList?.length
+      ? leagueEntry.seriesList
+      : (finishedSeries || []).filter((s) => String(s.leagueId) === String(t.leagueId));
+    // Encerrado: a lista completa da liga; em andamento: as recentes (mais atualizadas) se houver
+    const all = (t.status === 'finished' || !recentSeries.length) && leagueSeries?.length ? leagueSeries : recentSeries;
+    if (!shared) return all;
+    return participants === null ? [] : filterOwnSeries(all, t, participants);
+  }, [tournament, tournamentsList, finishedSeries, leagueSeries, shared, participants]);
+
+  // Liga dividida: as estatísticas contam só os mapas deste campeonato, depois
+  // de saber os participantes e as séries
+  const statsReady = !shared || (participants !== null && leagueSeries !== null);
+  const ownMatchIds = useMemo(
+    () => (shared ? series.flatMap((s) => (s.games || []).map((g) => g.match_id)) : null),
+    [shared, series]
+  );
+  const matchKey = ownMatchIds ? ownMatchIds.join(',') : 'all';
+  useEffect(() => {
+    setHeroStats(null);
+    setPlayerStats(null);
+  }, [matchKey]);
+
   // Estatísticas dos jogadores no torneio (OpenDota), carregadas ao abrir a aba
   useEffect(() => {
-    if (activeTab !== 'players' || !tournament?.leagueId || playerStats) return;
+    if (activeTab !== 'players' || !tournament?.leagueId || playerStats || !statsReady) return;
+    if (ownMatchIds && !ownMatchIds.length) { setPlayerStats({ players: [] }); return; }
     let active = true;
-    fetchTournamentPlayerStats(tournament.leagueId).then((data) => {
+    fetchTournamentPlayerStats(tournament.leagueId, ownMatchIds).then((data) => {
       if (active) setPlayerStats(data || { players: [] });
     });
     return () => { active = false; };
-  }, [activeTab, tournament, playerStats]);
+  }, [activeTab, tournament, playerStats, statsReady, ownMatchIds]);
 
   // 2. Estatísticas de heróis do torneio (OpenDota), carregadas ao abrir a aba
   useEffect(() => {
-    if (activeTab !== 'heroes' || !tournament?.leagueId || heroStats) return;
+    if (activeTab !== 'heroes' || !tournament?.leagueId || heroStats || !statsReady) return;
+    if (ownMatchIds && !ownMatchIds.length) { setHeroStats({ heroes: [], totalMatches: 0 }); return; }
+    let active = true;
     setHeroLoading(true);
-    fetchTournamentHeroStats(tournament.leagueId).then((data) => {
+    fetchTournamentHeroStats(tournament.leagueId, ownMatchIds).then((data) => {
+      if (!active) return;
       setHeroStats(data || { heroes: [], totalMatches: 0 });
       setHeroLoading(false);
     });
-  }, [activeTab, tournament, heroStats]);
+    return () => { active = false; };
+  }, [activeTab, tournament, heroStats, statsReady, ownMatchIds]);
 
   if (notFound) {
     return (
@@ -169,13 +248,6 @@ export default function TournamentDetailPage() {
   const dates = formatDateRange(t.startDate, t.endDate);
   const prize = formatPrize(t);
 
-  // Séries concluídas da liga (OpenDota, pelo leagueId oficial da Valve)
-  const leagueEntry = t.leagueId ? (tournamentsList || []).find((l) => String(l.league_id) === String(t.leagueId)) : null;
-  const recentSeries = leagueEntry?.seriesList?.length
-    ? leagueEntry.seriesList
-    : (finishedSeries || []).filter((s) => t.leagueId && String(s.leagueId) === String(t.leagueId));
-  // Encerrado: a lista completa da liga; em andamento: as recentes (mais atualizadas) se houver
-  const series = (t.status === 'finished' || !recentSeries.length) && leagueSeries?.length ? leagueSeries : recentSeries;
 
   // Partidas agendadas (Liquipedia), pelo nome do campeonato ("BLAST SLAM VIII - Group B")
   const names = [norm(t.name), norm(t.shortName)].filter((n) => n.length >= 4);
@@ -348,7 +420,7 @@ export default function TournamentDetailPage() {
               <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
                 {t.status === 'upcoming'
                   ? 'O campeonato ainda não começou.'
-                  : t.leagueId && leagueSeries === null
+                  : t.leagueId && (leagueSeries === null || (shared && participants === null))
                   ? 'Carregando as séries do campeonato...'
                   : 'Nenhuma série deste campeonato registrada na OpenDota.'}
               </div>
