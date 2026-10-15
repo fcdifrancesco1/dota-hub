@@ -14,5 +14,10 @@
       "path": "/api/sync-opendota",
       "schedule": "0 6 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/results.js": {
+      "maxDuration": 30
+    }
+  }
 }

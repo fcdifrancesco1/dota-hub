@@ -31,7 +31,7 @@ async function handleHeroStats(res) {
   }
 }
 
-// Posição de cada jogador nas partidas profissionais recentes: entre os 3 que mais
+// Posição de cada jogador nas partidas das ligas profissionais/premium dos últimos 30 dias: entre os 3 que mais
 // farmaram no time, quem jogou na safe lane é pos 1, na mid pos 2 e na offlane
 // pos 3; entre os 2 que menos farmaram, quem jogou na offlane é pos 4 e na safe
 // lane pos 5. Jogos sem rota definida (jungle, roam) ficam de fora.
@@ -39,10 +39,10 @@ const HERO_POSITIONS_SQL = `
 WITH p AS (
   SELECT pm.hero_id, pm.lane_role,
     RANK() OVER (PARTITION BY pm.match_id, (pm.player_slot < 128) ORDER BY pm.gold_per_min DESC) AS farm
-  FROM player_matches pm
-  JOIN matches m ON m.match_id = pm.match_id
-  WHERE m.start_time > extract(epoch from now()) - 60 * 86400
-    AND m.leagueid > 0
+  FROM matches m
+  JOIN leagues l ON l.leagueid = m.leagueid AND l.tier IN ('premium', 'professional')
+  JOIN player_matches pm ON pm.match_id = m.match_id
+  WHERE m.start_time > extract(epoch from now()) - 30 * 86400
     AND pm.lane_role IN (1, 2, 3)
 ), pos AS (
   SELECT hero_id, CASE
@@ -62,14 +62,15 @@ GROUP BY hero_id, position`;
 /**
  * GET /api/results?heroPositions=1
  * Em quais posições cada herói foi jogado nas partidas profissionais dos
- * últimos 60 dias (OpenDota Explorer). Cache de 12 h na CDN, servido por até
+ * últimos 30 dias (OpenDota Explorer). Cache de 12 h na CDN, servido por até
  * 7 dias enquanto revalida.
  */
 async function handleHeroPositions(res) {
   try {
     const r = await fetch(`https://api.opendota.com/api/explorer?sql=${encodeURIComponent(HERO_POSITIONS_SQL)}`, {
       headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(9000)
+      // A consulta leva ~5 s, mas o Explorer pode demorar mais quando está carregado
+      signal: AbortSignal.timeout(25000)
     });
     const data = r.ok ? await r.json() : null;
     const rows = Array.isArray(data?.rows) ? data.rows : [];

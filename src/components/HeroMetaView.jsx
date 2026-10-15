@@ -341,7 +341,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                           {h.primaryAttr}
                         </span>
                         {heroPositions(h).length > 0 ? (
-                          <div className="flex items-center gap-1" title="Posições nas partidas profissionais dos últimos 60 dias">
+                          <div className="flex items-center gap-1" title="Posições nas partidas profissionais dos últimos 30 dias">
                             {heroPositions(h).map((x) => (
                               <span
                                 key={x.n}

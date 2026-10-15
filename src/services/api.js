@@ -668,13 +668,13 @@ export async function fetchHeroStats() {
 }
 
 // Posições em que cada herói foi jogado nas partidas profissionais dos últimos
-// 60 dias (ver api/results.js). Retorna { [heroId]: { 1: jogos, ..., 5: jogos, total } }.
+// 30 dias (ver api/results.js). Retorna { [heroId]: { 1: jogos, ..., 5: jogos, total } }.
 export async function fetchHeroPositions() {
   const key = "hero_positions_v1";
   const cached = getCached(key, 12 * 3600 * 1000);
   if (cached) return cached;
   try {
-    const res = await fetchWithTimeout("/api/results?heroPositions=1", {}, 15000);
+    const res = await fetchWithTimeout("/api/results?heroPositions=1", {}, 30000);
     if (res.ok) {
       const rows = await res.json();
       if (Array.isArray(rows) && rows.length) {
@@ -712,6 +712,11 @@ export async function fetchLiveGames() {
 // Campeonatos atuais da Liquipedia (próximos, em andamento e encerrados
 // recentes) com banner, datas, local, premiação e tier — ver api/tournaments.js
 const TOURNAMENTS_CACHE_KEY = "liquipedia_tournaments_v1";
+
+// Lista de campeonatos já salva no navegador (sem esperar a rede)
+export function getCachedTournaments() {
+  return getCachedFast(TOURNAMENTS_CACHE_KEY) || [];
+}
 
 export async function fetchTournaments() {
   const cached = getCached(TOURNAMENTS_CACHE_KEY, 30 * 60 * 1000);

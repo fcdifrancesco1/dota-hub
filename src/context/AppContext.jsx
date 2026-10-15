@@ -6,6 +6,8 @@ import {
   fetchUpcomingMatches,
   isSeriesMatch,
   getCachedFast,
+  getCachedTournaments,
+  fetchTournaments,
   normalizeUpcomingList,
   UPCOMING_CACHE_KEY
 } from '../services/api';
@@ -38,6 +40,42 @@ export function findLiveGameFor(m, liveGames) {
 }
 
 const isUpcomingLive = (m, liveGames) => Boolean(findLiveGameFor(m, liveGames));
+
+// Nome que a API ao vivo usa quando não conhece a liga (lista da OpenDota indisponível)
+const isUnknownLeagueName = (name) => !name || /^Torneio \(Liga \d+\)$/.test(name) || name === 'Torneio Dota 2';
+
+/** Nome do campeonato para uma liga da Valve, pelos campeonatos da Liquipedia. */
+function leagueNameFromTournaments(leagueId, tournaments) {
+  const same = (tournaments || []).filter((t) => t.leagueId && String(t.leagueId) === String(leagueId));
+  if (same.length === 1) return same[0].name;
+  if (same.length < 2) return null;
+  // Várias classificatórias na mesma liga: a parte comum dos nomes ("DreamLeague Season 30")
+  let prefix = same[0].name;
+  for (const t of same) while (prefix && !t.name.startsWith(prefix)) prefix = prefix.slice(0, -1);
+  // Prefixo terminando no meio de uma palavra ("...Season 30: South"): descarta a palavra cortada
+  const cutsWord = same.some((t) => /\w/.test(t.name[prefix.length] || '')) && /\w$/.test(prefix);
+  if (cutsWord) prefix = prefix.replace(/\w+$/, '');
+  prefix = prefix.replace(/[\s:·-]+$/, '').trim();
+  if (prefix.length < 4) return null;
+  return same.every((t) => /qualifier/i.test(t.tierType || '')) ? `${prefix} · Qualificatória` : prefix;
+}
+
+/**
+ * Completa o nome do campeonato dos jogos ao vivo que vieram só com o número da
+ * liga: primeiro pela partida da agenda da Liquipedia entre os mesmos times
+ * (traz até a região da classificatória), depois pelos campeonatos da Liquipedia.
+ */
+function withLeagueNames(games, wikiMatches) {
+  const tournaments = getCachedTournaments();
+  return games.map((g) => {
+    if (!isUnknownLeagueName(g.league_name)) return g;
+    const wiki = (wikiMatches || []).find((m) => findLiveGameFor(m, [g]));
+    const name = wiki?.tourneyName && wiki.tourneyName !== 'Torneio'
+      ? wiki.tourneyName
+      : leagueNameFromTournaments(g.league_id, tournaments);
+    return name ? { ...g, league_name: name } : g;
+  });
+}
 
 /**
  * A partida agendada já foi jogada? Só conta uma série concluída com os mesmos
@@ -104,6 +142,8 @@ export function AppProvider({ children }) {
   useEffect(() => {
     // Logos dos ~1000 principais times da OpenDota (cache de 24h no navegador)
     loadTeamLogoRegistry();
+    // Campeonatos da Liquipedia em cache: dão nome às ligas desconhecidas dos jogos ao vivo
+    fetchTournaments();
     fetchConstants().then((data) => {
       if (data && Object.keys(data.heroes || {}).length > 0) {
         setConstants(data);
@@ -135,12 +175,12 @@ export function AppProvider({ children }) {
       const rawMatches = proData?.rawMatches || [];
 
       // Detecta jogos em andamento
-      const currentLive = (gotvLiveData || []).filter((g) => {
+      const currentLive = withLeagueNames((gotvLiveData || []).filter((g) => {
         const isFinished = rawMatches.some(
           (m) => String(m.match_id) === String(g.match_id) || String(m.match_id) === String(g.matchId)
         );
         return !isFinished;
-      });
+      }), allWikiMatches);
 
       // Assim que a partida começa, sai da agenda e vai para "em andamento"
       const { upcoming, ongoing } = splitWikiMatches(allWikiMatches, proData?.finishedSeries, currentLive);
