@@ -22,7 +22,7 @@ import { SITE_CONFIG } from '../config/siteConfig';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 export default function AdminPage() {
-  const { user, isAdmin, signIn, signOut, isConfigured } = useAuth();
+  const { user, isAdmin, signIn, signOut, loading: authLoading } = useAuth();
   const { refreshData } = useApp();
 
   const [email, setEmail] = useState('');
@@ -90,7 +90,7 @@ export default function AdminPage() {
     setSyncStatus(null);
     try {
       const endpoint = source === 'opendota' ? '/api/sync-opendota' : '/api/sync-steam';
-      const res = await fetch(endpoint);
+      const res = await fetch(endpoint, { credentials: 'same-origin' });
       const data = await res.json();
       const statusObj = {
         source: source === 'opendota' ? 'OpenDota API' : 'Steam Web API',
@@ -193,6 +193,10 @@ export default function AdminPage() {
   };
 
   // TELA DE LOGIN (PROTEÇÃO ADMIN)
+  if (authLoading) {
+    return <div className="py-32 text-center text-xs text-gray-400">Verificando acesso...</div>;
+  }
+
   if (!user || !isAdmin) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 min-h-screen flex items-center justify-center">
@@ -249,11 +253,6 @@ export default function AdminPage() {
             </button>
           </form>
 
-          {!isConfigured && (
-            <div className="mt-6 p-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-gray-400 text-center">
-              💡 <strong>Ambiente Local:</strong> Você pode fazer login com qualquer e-mail contendo <code className="text-amber-400">admin</code> para testar todas as funcionalidades administrativas.
-            </div>
-          )}
         </div>
       </div>
     );

@@ -1,9 +1,12 @@
 // Aba Perfil: login com a Steam (OpenID) e estatísticas da conta via OpenDota.
 import { OPENDOTA_BASE, getCached, setCache, fetchWithTimeout } from './api';
 
-const LINK_KEY = 'dotahub_profile_link_v1';
-
 // ---- Vínculo com a Steam ----
+// O vínculo é uma sessão assinada pelo servidor num cookie HttpOnly (/api/auth):
+// a página não consegue ler nem forjar o ID da conta, só pergunta ao servidor.
+
+// Vínculo antigo, guardado no navegador antes da sessão no servidor
+const OLD_LINK_KEY = 'dotahub_profile_link_v1';
 
 /** Link da página oficial de login da Steam, que volta para /perfil. */
 export function steamLoginUrl() {
@@ -24,30 +27,33 @@ export function hasSteamReturn(search) {
   return new URLSearchParams(search).get('openid.mode') === 'id_res';
 }
 
-/** Confirma o login no servidor e guarda o vínculo neste navegador. */
+/** Confirma o login no servidor, que grava a sessão do perfil no cookie. */
 export async function completeSteamLogin(search) {
   const params = new URLSearchParams(search);
-  const forward = new URLSearchParams({ openid: 'verify' });
+  const forward = new URLSearchParams({ action: 'steam' });
   for (const [key, value] of params) if (key.startsWith('openid.')) forward.set(key, value);
-  const res = await fetchWithTimeout(`/api/sync-steam?${forward}`, {}, 15000);
+  const res = await fetchWithTimeout(`/api/auth?${forward}`, { credentials: 'same-origin' }, 15000);
   const data = await res.json().catch(() => null);
   if (!res.ok || !data?.ok) throw new Error(data?.error || 'Não foi possível confirmar o login');
-  const link = { accountId: data.accountId, steamId64: data.steamId64, linkedAt: Date.now() };
-  try { localStorage.setItem(LINK_KEY, JSON.stringify(link)); } catch { /* navegador sem armazenamento */ }
-  return link;
+  return { accountId: data.accountId };
 }
 
-export function getProfileLink() {
+/** Perfil vinculado segundo o servidor (ou null). */
+export async function fetchProfileLink() {
+  try { localStorage.removeItem(OLD_LINK_KEY); } catch { /* ignore */ }
   try {
-    const link = JSON.parse(localStorage.getItem(LINK_KEY) || 'null');
-    return link?.accountId ? link : null;
+    const res = await fetchWithTimeout('/api/auth?action=me', { credentials: 'same-origin' }, 10000);
+    const data = res.ok ? await res.json() : null;
+    return data?.profile?.accountId ? { accountId: data.profile.accountId } : null;
   } catch {
     return null;
   }
 }
 
-export function unlinkProfile() {
-  try { localStorage.removeItem(LINK_KEY); } catch { /* ignore */ }
+export async function unlinkProfile() {
+  try {
+    await fetchWithTimeout('/api/auth?action=logout&scope=profile', { method: 'POST', credentials: 'same-origin' }, 10000);
+  } catch { /* ignore */ }
 }
 
 // ---- Modos de jogo ----

@@ -1,8 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
+import { isAdminRequest } from './_lib/session.js';
 
 const OPENDOTA_BASE = 'https://api.opendota.com/api';
 
 export default async function handler(req, res) {
+  // Só o Admin logado ou o agendador da Vercel (Authorization: Bearer CRON_SECRET)
+  if (!isAdminRequest(req)) return res.status(401).json({ ok: false, error: 'Acesso restrito ao Admin' });
   // Always set JSON and private no-cache headers for cron/sync tasks
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');

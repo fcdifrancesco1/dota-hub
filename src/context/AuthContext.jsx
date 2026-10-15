@@ -1,124 +1,62 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, isSupabaseConfigured } from '../services/supabase';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
+/**
+ * Acesso ao Admin. O login é conferido no servidor (/api/auth) e a sessão fica
+ * num cookie HttpOnly assinado: a página só sabe se o servidor reconheceu o admin,
+ * e nada guardado no navegador concede acesso.
+ */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
-      // Verifica se há sessão mock salva no localStorage para desenvolvimento
-      const savedMockUser = localStorage.getItem('dotahub_mock_user');
-      if (savedMockUser) {
-        try {
-          const parsed = JSON.parse(savedMockUser);
-          setUser(parsed);
-          setIsAdmin(parsed.email?.includes('admin') || parsed.role === 'admin');
-        } catch (e) {}
-      }
+  const loadSession = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth?action=me', { credentials: 'same-origin' });
+      const data = res.ok ? await res.json() : null;
+      setUser(data?.admin ? { email: data.admin.email, role: 'admin' } : null);
+    } catch {
+      setUser(null);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Escuta estado de autenticação real no Supabase
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      checkIfAdmin(currentUser);
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      checkIfAdmin(currentUser);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
-  function checkIfAdmin(usr) {
-    if (!usr) {
-      setIsAdmin(false);
-      return;
-    }
-    const role = usr.app_metadata?.role || usr.user_metadata?.role;
-    const isAdm = role === 'admin' || usr.email?.includes('admin') || usr.email === 'admin@dotahub.com';
-    setIsAdmin(isAdm);
-  }
+  useEffect(() => {
+    // Sessão simulada antiga (login aceitava qualquer e-mail com "admin"): descarta
+    try { localStorage.removeItem('dotahub_mock_user'); } catch { /* ignore */ }
+    loadSession();
+  }, [loadSession]);
 
-  // Login
   async function signIn(email, password) {
-    if (!isSupabaseConfigured || !supabase) {
-      // Mock login para testes locais
-      const mockUser = {
-        id: 'mock-user-123',
-        email,
-        role: email.includes('admin') ? 'admin' : 'user',
-        user_metadata: { name: email.split('@')[0] }
-      };
-      setUser(mockUser);
-      setIsAdmin(mockUser.role === 'admin');
-      localStorage.setItem('dotahub_mock_user', JSON.stringify(mockUser));
-      return { data: { user: mockUser }, error: null };
+    try {
+      const res = await fetch('/api/auth?action=admin-login', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) return { error: { message: data.error || 'Não foi possível entrar' } };
+      const admin = { email: data.email, role: 'admin' };
+      setUser(admin);
+      return { data: { user: admin }, error: null };
+    } catch {
+      return { error: { message: 'Sem conexão com o servidor' } };
     }
-
-    const res = await supabase.auth.signInWithPassword({ email, password });
-    if (!res.error && res.data.user) {
-      checkIfAdmin(res.data.user);
-    }
-    return res;
   }
 
-  // Registro
-  async function signUp(email, password) {
-    if (!isSupabaseConfigured || !supabase) {
-      const mockUser = {
-        id: 'mock-user-' + Date.now(),
-        email,
-        role: 'user',
-        user_metadata: { name: email.split('@')[0] }
-      };
-      setUser(mockUser);
-      setIsAdmin(false);
-      localStorage.setItem('dotahub_mock_user', JSON.stringify(mockUser));
-      return { data: { user: mockUser }, error: null };
-    }
-
-    return await supabase.auth.signUp({ email, password });
-  }
-
-  // Logout
   async function signOut() {
-    if (!isSupabaseConfigured || !supabase) {
-      setUser(null);
-      setIsAdmin(false);
-      localStorage.removeItem('dotahub_mock_user');
-      return { error: null };
-    }
-
-    const res = await supabase.auth.signOut();
+    try {
+      await fetch('/api/auth?action=logout&scope=admin', { method: 'POST', credentials: 'same-origin' });
+    } catch { /* o cookie expira sozinho em 12 h */ }
     setUser(null);
-    setIsAdmin(false);
-    return res;
+    return { error: null };
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAdmin,
-        loading,
-        signIn,
-        signUp,
-        signOut,
-        isConfigured: isSupabaseConfigured
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAdmin: user?.role === 'admin', loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,7 +4,7 @@ import { User, Loader2, RefreshCw, LogOut, ExternalLink, ShieldAlert, ChevronRig
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
 import {
-  MODES, steamLoginUrl, hasSteamReturn, completeSteamLogin, getProfileLink, unlinkProfile,
+  MODES, steamLoginUrl, hasSteamReturn, completeSteamLogin, fetchProfileLink, unlinkProfile,
   fetchProfileSummary, fetchModeMatches, refreshProfile, medalOf
 } from '../services/profile';
 
@@ -48,7 +48,9 @@ export default function ProfilePage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { constants } = useApp();
-  const [link, setLink] = useState(() => getProfileLink());
+  const [link, setLink] = useState(null);
+  // Consultando o servidor sobre a sessão do perfil
+  const [checking, setChecking] = useState(true);
   const [linking, setLinking] = useState(() => hasSteamReturn(location.search));
   const [linkError, setLinkError] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -73,6 +75,18 @@ export default function ProfilePage() {
       });
     return () => { active = false; };
   }, [location.search, navigate]);
+
+  // Sessão do perfil (cookie no servidor); no retorno da Steam quem decide é o login acima
+  useEffect(() => {
+    if (hasSteamReturn(location.search)) { setChecking(false); return; }
+    let active = true;
+    fetchProfileLink().then((l) => {
+      if (!active) return;
+      setLink(l);
+      setChecking(false);
+    });
+    return () => { active = false; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const accountId = link?.accountId;
 
@@ -105,8 +119,8 @@ export default function ProfilePage() {
     setRefreshing(false);
   }, [accountId]);
 
-  const handleUnlink = () => {
-    unlinkProfile();
+  const handleUnlink = async () => {
+    await unlinkProfile();
     setLink(null);
     setSummary(null);
     setModeData({});
@@ -115,11 +129,11 @@ export default function ProfilePage() {
   const openMatch = (matchId) => navigate(`/partidas/${matchId}`, { state: { from: { path: '/perfil', label: 'Perfil' } } });
 
   // ---- Estados sem perfil ----
-  if (linking) {
+  if (linking || checking) {
     return (
       <div className="py-32 flex flex-col items-center gap-3 text-gray-400">
         <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-        <span className="text-xs font-semibold">Confirmando seu login com a Steam...</span>
+        <span className="text-xs font-semibold">{linking ? 'Confirmando seu login com a Steam...' : 'Carregando perfil...'}</span>
       </div>
     );
   }
