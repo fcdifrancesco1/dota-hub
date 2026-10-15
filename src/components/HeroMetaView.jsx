@@ -11,13 +11,14 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
   const [sortBy, setSortBy] = useState('tier'); // 'tier' | 'proWinRate' | 'proPick' | 'proBan' | 'pub8WinRate'
   const [sortAsc, setSortAsc] = useState(false);
 
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     setLoading(true);
     fetchHeroStats().then((data) => {
-      setHeroes(data);
+      setHeroes(data || []);
       setLoading(false);
     });
-  }, []);
+  }, [attempt]);
 
   const MID_HERO_IDS = new Set([
     11, 13, 15, 17, 19, 21, 22, 23, 25, 34, 35, 36, 39, 43, 45, 46, 47, 49,
@@ -217,6 +218,18 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       {/* TABELA GERAL DO META */}
       {loading ? (
         <SkeletonTable rows={10} cols={6} />
+      ) : heroes.length === 0 ? (
+        <div className="rounded-xl border border-line bg-surface p-10 text-center">
+          <p className="text-sm font-bold text-white">Não foi possível carregar as estatísticas dos heróis agora.</p>
+          <p className="text-xs text-gray-400 mt-1.5">A OpenDota, fonte desses dados, não está respondendo. Tente de novo em alguns minutos.</p>
+          <button
+            type="button"
+            onClick={() => setAttempt((n) => n + 1)}
+            className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-black text-xs font-black uppercase tracking-wider hover:bg-amber-400"
+          >
+            Tentar novamente
+          </button>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface/80 backdrop-blur-xl">
           <table className="w-full text-left text-xs border-collapse min-w-[840px]">

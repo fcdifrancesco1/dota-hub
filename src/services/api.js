@@ -590,69 +590,81 @@ export async function fetchMatchDetails(matchId) {
 }
 
 // 5. Buscar Meta dos Heróis do Patch (Tier List)
+// Converte a lista /heroStats da OpenDota para o formato da página de heróis
+function processHeroStats(list) {
+  return (list || []).map((h) => {
+    const proPick = h.pro_pick || 0;
+    const proWin = h.pro_win || 0;
+    const proBan = h.pro_ban || 0;
+    const proWinRate = proPick > 0 ? (proWin / proPick) * 100 : 0;
+
+    const pub8Pick = h["8_pick"] || 0;
+    const pub8Win = h["8_win"] || 0;
+    const pub8WinRate = pub8Pick > 0 ? (pub8Win / pub8Pick) * 100 : 0;
+
+    const compositeScore = (proWinRate * 0.45) + (pub8WinRate * 0.35) + (Math.min(proPick / 5, 20));
+    let tier = "B";
+    if (compositeScore >= 60 && (proPick >= 5 || pub8Pick >= 500)) tier = "S+";
+    else if (compositeScore >= 54) tier = "S";
+    else if (compositeScore >= 49) tier = "A";
+    else if (compositeScore < 45) tier = "C";
+
+    const primaryAttrMap = {
+      str: "Força",
+      agi: "Agilidade",
+      int: "Inteligência",
+      all: "Universal"
+    };
+
+    return {
+      id: h.id,
+      name: h.localized_name,
+      img: `${STEAM_CDN}${h.img}`,
+      icon: `${STEAM_CDN}${h.icon}`,
+      primaryAttr: primaryAttrMap[h.primary_attr] || "Universal",
+      attrCode: h.primary_attr,
+      attackType: h.attack_type,
+      roles: h.roles || [],
+      proPick,
+      proWin,
+      proBan,
+      proWinRate: Number(proWinRate.toFixed(1)),
+      pub8Pick,
+      pub8WinRate: Number(pub8WinRate.toFixed(1)),
+      tier,
+      baseHealth: h.base_health,
+      baseMana: h.base_mana,
+      moveSpeed: h.move_speed,
+      turboPicks: h.turbo_picks || 0
+    };
+  });
+}
+
+// Estatísticas de heróis: primeiro pelo nosso servidor (com cache na CDN, que
+// segura quedas da OpenDota), depois direto na OpenDota e, por fim, a última
+// cópia salva neste navegador.
 export async function fetchHeroStats() {
   const cached = getCached("hero_stats_v6", 30 * 60 * 1000);
   if (cached) return cached;
 
-  try {
-    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/heroStats`, {}, 4000);
-    if (res.ok) {
+  const sources = [
+    ["/api/results?heroStats=1", 12000],
+    [`${OPENDOTA_BASE}/heroStats`, 8000]
+  ];
+  for (const [url, timeout] of sources) {
+    try {
+      const res = await fetchWithTimeout(url, {}, timeout);
+      if (!res.ok) continue;
       const list = await res.json();
-      
-      const processed = (list || []).map((h) => {
-        const proPick = h.pro_pick || 0;
-        const proWin = h.pro_win || 0;
-        const proBan = h.pro_ban || 0;
-        const proWinRate = proPick > 0 ? (proWin / proPick) * 100 : 0;
-
-        const pub8Pick = h["8_pick"] || 0;
-        const pub8Win = h["8_win"] || 0;
-        const pub8WinRate = pub8Pick > 0 ? (pub8Win / pub8Pick) * 100 : 0;
-
-        const compositeScore = (proWinRate * 0.45) + (pub8WinRate * 0.35) + (Math.min(proPick / 5, 20));
-        let tier = "B";
-        if (compositeScore >= 60 && (proPick >= 5 || pub8Pick >= 500)) tier = "S+";
-        else if (compositeScore >= 54) tier = "S";
-        else if (compositeScore >= 49) tier = "A";
-        else if (compositeScore < 45) tier = "C";
-
-        const primaryAttrMap = {
-          str: "Força",
-          agi: "Agilidade",
-          int: "Inteligência",
-          all: "Universal"
-        };
-
-        return {
-          id: h.id,
-          name: h.localized_name,
-          img: `${STEAM_CDN}${h.img}`,
-          icon: `${STEAM_CDN}${h.icon}`,
-          primaryAttr: primaryAttrMap[h.primary_attr] || "Universal",
-          attrCode: h.primary_attr,
-          attackType: h.attack_type,
-          roles: h.roles || [],
-          proPick,
-          proWin,
-          proBan,
-          proWinRate: Number(proWinRate.toFixed(1)),
-          pub8Pick,
-          pub8WinRate: Number(pub8WinRate.toFixed(1)),
-          tier,
-          baseHealth: h.base_health,
-          baseMana: h.base_mana,
-          moveSpeed: h.move_speed,
-          turboPicks: h.turbo_picks || 0
-        };
-      });
-
+      if (!Array.isArray(list) || list.length === 0) continue;
+      const processed = processHeroStats(list);
       setCache("hero_stats_v6", processed);
       return processed;
+    } catch (err) {
+      console.warn(`Aviso ao carregar heroStats (${url}):`, err.message || err);
     }
-  } catch (err) {
-    console.error("Erro ao carregar heroStats:", err);
   }
-  return [];
+  return getCachedFast("hero_stats_v6") || [];
 }
 
 // 6. Buscar Partidas Ao Vivo

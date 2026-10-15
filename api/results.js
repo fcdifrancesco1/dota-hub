@@ -7,7 +7,32 @@ function normalizeTeamKey(name) {
     .trim();
 }
 
+/**
+ * GET /api/results?heroStats=1
+ * Estatísticas de heróis da OpenDota com cache na CDN da Vercel: a resposta vale
+ * 30 min e continua sendo servida por até 7 dias enquanto revalida, então a
+ * página de heróis segue funcionando quando a OpenDota fica fora do ar.
+ * Falhas respondem 503 para não substituir a cópia boa em cache.
+ */
+async function handleHeroStats(res) {
+  try {
+    const r = await fetch('https://api.opendota.com/api/heroStats', {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(9000)
+    });
+    const list = r.ok ? await r.json() : null;
+    if (!Array.isArray(list) || list.length === 0) throw new Error(`HTTP ${r.status}`);
+    res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=604800');
+    return res.status(200).json(list);
+  } catch (err) {
+    console.error('[Results API] heroStats indisponível:', err.message);
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(503).json({ error: 'OpenDota indisponível' });
+  }
+}
+
 export default async function handler(req, res) {
+  if (req.query?.heroStats) return handleHeroStats(res);
   try {
     const proRes = await fetch("https://api.opendota.com/api/proMatches", {
       headers: { "Accept": "application/json" },
