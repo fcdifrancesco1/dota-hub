@@ -156,6 +156,66 @@ export async function fetchModeMatches(accountId, mode) {
   return result;
 }
 
+// ---- Recordes (como a aba Records da OpenDota) ----
+
+const fmtInt = (v) => Math.round(v).toLocaleString('pt-BR');
+const fmtMin = (secs) => `${Math.floor(secs / 60)}:${String(Math.round(secs % 60)).padStart(2, '0')}`;
+
+export const RECORD_FIELDS = [
+  { field: 'kills', label: 'Abates', format: fmtInt },
+  { field: 'deaths', label: 'Mortes', format: fmtInt },
+  { field: 'assists', label: 'Assistências', format: fmtInt },
+  { field: 'kda', label: 'KDA', format: (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) },
+  { field: 'gold_per_min', label: 'Ouro por minuto', format: fmtInt },
+  { field: 'xp_per_min', label: 'XP por minuto', format: fmtInt },
+  { field: 'last_hits', label: 'Last hits', format: fmtInt },
+  { field: 'denies', label: 'Denies', format: fmtInt },
+  { field: 'hero_damage', label: 'Dano em heróis', format: fmtInt },
+  { field: 'tower_damage', label: 'Dano em torres', format: fmtInt },
+  { field: 'hero_healing', label: 'Cura em heróis', format: fmtInt },
+  { field: 'stuns', label: 'Atordoamento (s)', format: fmtInt },
+  { field: 'level', label: 'Nível', format: fmtInt },
+  { field: 'actions_per_min', label: 'Ações por minuto', format: fmtInt },
+  { field: 'duration', label: 'Partida mais longa', format: fmtMin }
+];
+
+/**
+ * Melhor partida da conta em cada estatística, no modo escolhido: a lista de
+ * partidas da OpenDota ordenada pelo campo (mesmo método da aba Records dela).
+ * Busca em grupos de 4 para respeitar o limite de requisições da OpenDota.
+ */
+export async function fetchModeRecords(accountId, mode) {
+  const key = `profile_records_v1_${accountId}_${mode}`;
+  const cached = getCached(key, 6 * 3600 * 1000);
+  if (cached) return cached;
+
+  const one = async ({ field }) => {
+    const query = qs({ ...MODES[mode].query, sort: field, limit: 1 });
+    const project = [field, 'hero_id', 'start_time'].map((f) => `project=${f}`).join('&');
+    const [m] = await getJson(`/players/${accountId}/matches?${query}&${project}`, 12000);
+    if (!m || m[field] === null || m[field] === undefined) return null;
+    return {
+      field,
+      value: m[field],
+      matchId: m.match_id,
+      heroId: m.hero_id,
+      startTime: m.start_time,
+      won: (m.player_slot < 128) === Boolean(m.radiant_win)
+    };
+  };
+
+  const records = [];
+  let failures = 0;
+  for (let i = 0; i < RECORD_FIELDS.length; i += 4) {
+    const group = await Promise.all(RECORD_FIELDS.slice(i, i + 4).map((f) => one(f).catch(() => { failures++; return null; })));
+    records.push(...group);
+  }
+  const result = records.filter(Boolean);
+  // Só guarda se veio completo, para uma falha momentânea não ficar 6 h no cache
+  if (!failures) setCache(key, result);
+  return result;
+}
+
 /** Pede para a OpenDota buscar as partidas novas da conta e limpa o cache local. */
 export async function refreshProfile(accountId) {
   try {
@@ -163,7 +223,7 @@ export async function refreshProfile(accountId) {
   } catch { /* segue mesmo se o pedido falhar */ }
   try {
     for (const k of Object.keys(localStorage)) {
-      if (k.includes(`profile_summary_v3_${accountId}`) || k.includes(`profile_matches_v4_${accountId}_`)) localStorage.removeItem(k);
+      if (k.includes(`profile_summary_v3_${accountId}`) || k.includes(`profile_matches_v4_${accountId}_`) || k.includes(`profile_records_v1_${accountId}_`)) localStorage.removeItem(k);
     }
   } catch { /* ignore */ }
 }

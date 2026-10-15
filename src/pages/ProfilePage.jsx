@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { User, Loader2, RefreshCw, LogOut, ExternalLink, ShieldAlert, ChevronRight, Swords, Trophy, Clock } from 'lucide-react';
+import { Medal, User, Loader2, RefreshCw, LogOut, ExternalLink, ShieldAlert, ChevronRight, Swords, Trophy, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
 import {
   MODES, steamLoginUrl, hasSteamReturn, completeSteamLogin, fetchProfileLink, unlinkProfile,
-  fetchProfileSummary, fetchModeMatches, refreshProfile, medalOf
+  fetchProfileSummary, fetchModeMatches, fetchModeRecords, RECORD_FIELDS, refreshProfile, medalOf
 } from '../services/profile';
 
 const GAME_MODES = {
@@ -57,6 +57,8 @@ export default function ProfilePage() {
   const [summaryError, setSummaryError] = useState(false);
   const [mode, setMode] = useState('normal');
   const [modeData, setModeData] = useState({});
+  const [view, setView] = useState('resumo'); // 'resumo' | 'recordes'
+  const [recordsData, setRecordsData] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -110,11 +112,22 @@ export default function ProfilePage() {
     return () => { active = false; };
   }, [accountId, mode, modeData]);
 
+  // Recordes do modo, carregados só ao abrir a aba
+  useEffect(() => {
+    if (!accountId || view !== 'recordes' || recordsData[mode]) return;
+    let active = true;
+    fetchModeRecords(accountId, mode)
+      .then((r) => { if (active) setRecordsData((prev) => ({ ...prev, [mode]: r.length ? r : { error: true } })); })
+      .catch(() => { if (active) setRecordsData((prev) => ({ ...prev, [mode]: { error: true } })); });
+    return () => { active = false; };
+  }, [accountId, view, mode, recordsData]);
+
   const handleRefresh = useCallback(async () => {
     if (!accountId) return;
     setRefreshing(true);
     await refreshProfile(accountId);
     setModeData({});
+    setRecordsData({});
     setReloadKey((k) => k + 1);
     setRefreshing(false);
   }, [accountId]);
@@ -271,8 +284,65 @@ export default function ProfilePage() {
         })}
       </div>
 
-      {/* DETALHE DO MODO */}
-      {!data ? (
+      {/* ABAS: RESUMO / RECORDES */}
+      <div className="flex items-center gap-2 border-b border-line pb-3">
+        {[['resumo', 'Resumo', Swords], ['recordes', 'Recordes', Medal]].map(([id, label, Icon]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setView(id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+              view === id ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" /> {label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'recordes' ? (
+        !recordsData[mode] ? (
+          <div className="py-12 flex flex-col items-center gap-3 text-gray-400">
+            <Loader2 className="w-7 h-7 animate-spin text-amber-400" />
+            <span className="text-xs">Buscando seus recordes de {MODES[mode].label}...</span>
+          </div>
+        ) : recordsData[mode].error ? (
+          <div className="bg-surface border border-line rounded-xl p-6 text-center text-xs text-gray-400">
+            Não foi possível carregar os recordes agora.{' '}
+            <button type="button" onClick={() => setRecordsData((p) => { const n = { ...p }; delete n[mode]; return n; })} className="font-bold text-amber-400">Tentar novamente</button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-[11px] text-gray-500">Sua melhor partida em cada estatística, em todo o histórico de {MODES[mode].label} na OpenDota. Clique para abrir a partida.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+              {RECORD_FIELDS.map(({ field, label, format }) => {
+                const r = recordsData[mode].find((x) => x.field === field);
+                if (!r) return null;
+                return (
+                  <button
+                    key={field}
+                    type="button"
+                    onClick={() => openMatch(r.matchId)}
+                    className="text-left bg-surface border border-line hover:border-amber-500/40 rounded-xl p-3.5 shadow-lg transition-all group"
+                  >
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{label}</div>
+                    <div className="mt-1 text-2xl font-black font-mono text-amber-400">{format(r.value)}</div>
+                    <div className="mt-2 flex items-center gap-2 min-w-0">
+                      <img src={getHeroImg(constants, r.heroId)} alt="" className="w-10 h-6 rounded object-cover border border-line shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-bold text-white truncate group-hover:text-amber-400">{getHeroName(constants, r.heroId)}</div>
+                        <div className="text-[10px] text-gray-500">
+                          {fmtWhen(r.startTime)} · <span className={r.won ? 'text-emerald-400' : 'text-rose-400'}>{r.won ? 'Vitória' : 'Derrota'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )
+      ) : !data ? (
         <div className="py-12 flex flex-col items-center gap-3 text-gray-400">
           <Loader2 className="w-7 h-7 animate-spin text-amber-400" />
           <span className="text-xs">Carregando partidas de {MODES[mode].label}...</span>
