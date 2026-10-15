@@ -19,6 +19,18 @@ async function verifySteamLogin(req, res) {
   if (params.get('openid.mode') !== 'id_res' || !match) {
     return res.status(400).json({ ok: false, error: 'Resposta de login inválida' });
   }
+  // A Steam só valida os campos listados em openid.signed: o ID da conta e o
+  // endereço de retorno precisam estar entre eles, senão poderiam ser trocados
+  // por quem montou a resposta
+  const signed = new Set((params.get('openid.signed') || '').split(','));
+  const mustBeSigned = ['claimed_id', 'identity', 'return_to', 'response_nonce', 'op_endpoint'];
+  if (
+    !mustBeSigned.every((field) => signed.has(field)) ||
+    params.get('openid.identity') !== claimed ||
+    params.get('openid.op_endpoint') !== 'https://steamcommunity.com/openid/login'
+  ) {
+    return res.status(400).json({ ok: false, error: 'Resposta de login inválida' });
+  }
   // O retorno precisa apontar para este site (evita reaproveitar login de outro lugar)
   const host = req.headers['x-forwarded-host'] || req.headers.host || '';
   try {
