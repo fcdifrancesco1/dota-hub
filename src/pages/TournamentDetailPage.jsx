@@ -79,15 +79,73 @@ function allParticipants(data) {
   return [...names];
 }
 
+/** Partidas do chaveamento da Liquipedia com os IDs dos mapas (links de replay). */
+function bracketMatches(brackets) {
+  const out = [];
+  const walk = (node) => {
+    if (!node) return;
+    const m = node.match;
+    if (m?.matchIds?.length && m.opponents?.length === 2 && m.opponents.every((o) => o?.name)) {
+      out.push({ ids: new Set(m.matchIds.map(String)), a: m.opponents[0], b: m.opponents[1] });
+    }
+    (node.children || []).forEach(walk);
+  };
+  for (const b of brackets || []) (b.roots || []).forEach(walk);
+  return out;
+}
+
+/**
+ * Troca os nomes da OpenDota pelos da Liquipedia quando a série está no
+ * chaveamento (ex.: o time "Skyreavers" está registrado na Valve como "The Bot^$").
+ * O lado de cada time sai do nome ou, se nenhum bater, do placar.
+ * Retorna as séries renomeadas, os IDs de mapa do chaveamento e o mapa
+ * "ID do time na OpenDota → nome na Liquipedia".
+ */
+function withLiquipediaNames(list, brackets) {
+  const matches = bracketMatches(brackets);
+  const idToName = {};
+  const inBracket = new Set();
+  const aligned = list.map((s) => {
+    const ids = (s.games || []).map((g) => String(g.match_id));
+    const bm = matches.find((m) => ids.some((id) => m.ids.has(id)));
+    if (!bm) return s;
+    ids.forEach((id) => inBracket.add(id));
+    const scoreA = Number(bm.a.score);
+    const scoreB = Number(bm.b.score);
+    let straight = null;
+    if (isSameTeamMatch(s.timeA, bm.a.name) || isSameTeamMatch(s.timeB, bm.b.name)) straight = true;
+    else if (isSameTeamMatch(s.timeA, bm.b.name) || isSameTeamMatch(s.timeB, bm.a.name)) straight = false;
+    else if (scoreA !== scoreB && Number.isFinite(scoreA) && Number.isFinite(scoreB)) {
+      if (scoreA === s.scoreA && scoreB === s.scoreB) straight = true;
+      else if (scoreA === s.scoreB && scoreB === s.scoreA) straight = false;
+    }
+    if (straight === null) return s;
+    const [nameA, nameB] = straight ? [bm.a.name, bm.b.name] : [bm.b.name, bm.a.name];
+    if (s.preferredIdA) idToName[s.preferredIdA] = nameA;
+    if (s.preferredIdB) idToName[s.preferredIdB] = nameB;
+    return { ...s, timeA: nameA, timeB: nameB };
+  });
+  // Séries fora do chaveamento (ex.: fase de grupos) com um time já identificado
+  const renamed = aligned.map((s) => {
+    const nameA = idToName[s.preferredIdA];
+    const nameB = idToName[s.preferredIdB];
+    const next = nameA || nameB ? { ...s, timeA: nameA || s.timeA, timeB: nameB || s.timeB } : s;
+    return Object.keys(idToName).length ? { ...next, teamNames: idToName } : next;
+  });
+  return { list: renamed, inBracket };
+}
+
 const DAY = 86400;
 const isoToSecs = (iso) => (iso ? Date.parse(`${iso}T00:00:00Z`) / 1000 : null);
 
 /** Só as séries entre participantes do campeonato e dentro das datas dele. */
-function filterOwnSeries(list, t, participants) {
+function filterOwnSeries(list, t, participants, inBracket = new Set()) {
   const from = isoToSecs(t.startDate);
   const to = isoToSecs(t.endDate);
   const isParticipant = (name) => participants.some((p) => isSameTeamMatch(name, p));
   return list.filter((s) => {
+    // Série cujo mapa aparece no chaveamento da Liquipedia é deste campeonato
+    if ((s.games || []).some((g) => inBracket.has(String(g.match_id)))) return true;
     const when = s.startTime || 0;
     if (from && when < from - DAY) return false;
     if (to && when > to + 2 * DAY) return false;
@@ -182,11 +240,17 @@ export default function TournamentDetailPage() {
     const recentSeries = leagueEntry?.seriesList?.length
       ? leagueEntry.seriesList
       : (finishedSeries || []).filter((s) => String(s.leagueId) === String(t.leagueId));
-    // Encerrado: a lista completa da liga; em andamento: as recentes (mais atualizadas) se houver
-    const all = (t.status === 'finished' || !recentSeries.length) && leagueSeries?.length ? leagueSeries : recentSeries;
+    // Lista completa da liga + as recentes que ela ainda não tem (a OpenDota
+    // demora a indexar os mapas mais novos), sem repetir séries
+    const known = new Set((leagueSeries || []).flatMap((x) => (x.games || []).map((g) => String(g.match_id))));
+    const extra = recentSeries.filter((x) => !(x.games || []).some((g) => known.has(String(g.match_id))));
+    const raw = [...(leagueSeries || []), ...extra].sort((x, y) => (y.startTime || 0) - (x.startTime || 0));
+    const { list: named, inBracket } = withLiquipediaNames(raw, brackets);
+    // A lista da liga vem sem nome de campeonato: usa o desta página
+    const all = named.map((x) => (x.stage && x.stage !== 'Torneio Profissional' ? x : { ...x, stage: t.name }));
     if (!shared) return all;
-    return participants === null ? [] : filterOwnSeries(all, t, participants);
-  }, [tournament, tournamentsList, finishedSeries, leagueSeries, shared, participants]);
+    return participants === null ? [] : filterOwnSeries(all, t, participants, inBracket);
+  }, [tournament, tournamentsList, finishedSeries, leagueSeries, shared, participants, brackets]);
 
   // Liga dividida: as estatísticas contam só os mapas deste campeonato, depois
   // de saber os participantes e as séries

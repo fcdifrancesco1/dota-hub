@@ -31,6 +31,26 @@ const fmtDuration = (secs) => {
 const radiantNameOf = (m) => m?.radiant_team?.name || m?.radiant_name || 'Radiant';
 const direNameOf = (m) => m?.dire_team?.name || m?.dire_name || 'Dire';
 
+/**
+ * Nomes da Liquipedia no lugar dos da OpenDota quando a série os traz
+ * (series.teamNames = { idDoTime: nome }), ex.: "The Bot^$" → "Skyreavers".
+ */
+function withTeamNames(match, teamNames) {
+  if (!match || !teamNames) return match;
+  const rId = match.radiant_team_id || match.radiant_team?.team_id;
+  const dId = match.dire_team_id || match.dire_team?.team_id;
+  const r = teamNames[rId];
+  const d = teamNames[dId];
+  if (!r && !d) return match;
+  return {
+    ...match,
+    radiant_name: r || match.radiant_name,
+    dire_name: d || match.dire_name,
+    radiant_team: match.radiant_team ? { ...match.radiant_team, name: r || match.radiant_team.name } : match.radiant_team,
+    dire_team: match.dire_team ? { ...match.dire_team, name: d || match.dire_team.name } : match.dire_team
+  };
+}
+
 /** Série montada a partir de um único replay (link direto de uma série fora da lista). */
 function seriesFromMatch(match) {
   const radiant = radiantNameOf(match);
@@ -147,7 +167,7 @@ export default function MatchDetailPage() {
   };
 
   const openTeam = useOpenTeam();
-  const match = activeMatchId ? matchData[activeMatchId] : undefined;
+  const match = activeMatchId ? withTeamNames(matchData[activeMatchId], series?.teamNames) : undefined;
 
   // Volta para a página de onde a série foi aberta (campeonato, time...); link direto volta para Partidas
   const backTo = location.state?.from?.path ? location.state.from : { path: '/partidas', label: 'Partidas' };
@@ -198,7 +218,7 @@ export default function MatchDetailPage() {
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
               {games.map((g, idx) => {
                 const active = idx === activeIndex;
-                const loaded = matchData[g.match_id];
+                const loaded = withTeamNames(matchData[g.match_id], series.teamNames);
                 const winnerName = loaded
                   ? (loaded.radiant_win ? radiantNameOf(loaded) : direNameOf(loaded))
                   : null;
