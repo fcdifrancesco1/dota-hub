@@ -667,6 +667,33 @@ export async function fetchHeroStats() {
   return getCachedFast("hero_stats_v6") || [];
 }
 
+// Posições em que cada herói foi jogado nas partidas profissionais dos últimos
+// 60 dias (ver api/results.js). Retorna { [heroId]: { 1: jogos, ..., 5: jogos, total } }.
+export async function fetchHeroPositions() {
+  const key = "hero_positions_v1";
+  const cached = getCached(key, 12 * 3600 * 1000);
+  if (cached) return cached;
+  try {
+    const res = await fetchWithTimeout("/api/results?heroPositions=1", {}, 15000);
+    if (res.ok) {
+      const rows = await res.json();
+      if (Array.isArray(rows) && rows.length) {
+        const byHero = {};
+        for (const r of rows) {
+          const h = (byHero[r.hero_id] ||= { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 });
+          h[r.position] += r.games;
+          h.total += r.games;
+        }
+        setCache(key, byHero);
+        return byHero;
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso ao carregar posições dos heróis:", err.message || err);
+  }
+  return getCachedFast(key) || null;
+}
+
 // 6. Buscar Partidas Ao Vivo
 export async function fetchLiveGames() {
   try {

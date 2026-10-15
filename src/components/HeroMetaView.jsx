@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Trophy, Flame, Shield, Swords, Sparkles, Filter, Search, ArrowUpDown, ChevronDown } from 'lucide-react';
-import { fetchHeroStats } from '../services/api';
+import { fetchHeroStats, fetchHeroPositions } from '../services/api';
 import { SkeletonTable } from './SkeletonLoader';
 
 export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
@@ -12,49 +12,45 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
   const [sortAsc, setSortAsc] = useState(false);
 
   const [attempt, setAttempt] = useState(0);
+  // Posições jogadas nas partidas profissionais (null = ainda não carregou ou indisponível)
+  const [positions, setPositions] = useState(null);
   useEffect(() => {
     setLoading(true);
-    fetchHeroStats().then((data) => {
+    Promise.all([fetchHeroStats(), fetchHeroPositions()]).then(([data, pos]) => {
       setHeroes(data || []);
+      setPositions(pos);
       setLoading(false);
     });
   }, [attempt]);
 
-  const MID_HERO_IDS = new Set([
-    11, 13, 15, 17, 19, 21, 22, 23, 25, 34, 35, 36, 39, 43, 45, 46, 47, 49,
-    52, 59, 61, 65, 73, 74, 75, 76, 80, 82, 97, 98, 101, 106, 107, 113, 114,
-    120, 126, 135, 136, 137, 138, 100, 14
-  ]);
-
-  const OFFLANE_HERO_IDS = new Set([
-    2, 7, 14, 16, 23, 28, 29, 36, 38, 40, 43, 49, 51, 55, 57, 60, 61, 65,
-    69, 71, 77, 78, 84, 85, 96, 97, 98, 99, 102, 104, 107, 108, 110, 120,
-    123, 129, 135, 136, 137
-  ]);
+  // Herói conta numa posição quando foi jogado nela em pelo menos 15% dos seus
+  // jogos profissionais recentes (e no mínimo 3 vezes)
+  const MIN_SHARE = 0.15;
+  const MIN_GAMES = 3;
+  const heroPositions = (hero) => {
+    const p = positions?.[hero.id];
+    if (!p?.total) return [];
+    return [1, 2, 3, 4, 5]
+      .map((n) => ({ n, games: p[n], share: p[n] / p.total }))
+      .filter((x) => x.games >= MIN_GAMES && x.share >= MIN_SHARE)
+      .sort((x, y) => y.share - x.share);
+  };
 
   const matchesRole = (hero, role) => {
     if (!role || role === 'all') return true;
-    if (role === 'Mid') {
-      return MID_HERO_IDS.has(hero.id) || (hero.roles?.includes('Nuker') && (hero.roles?.includes('Escape') || hero.roles?.includes('Carry')));
-    }
-    if (role === 'Offlane') {
-      return OFFLANE_HERO_IDS.has(hero.id) || ((hero.roles?.includes('Initiator') || hero.roles?.includes('Durable')) && !hero.roles?.includes('Support'));
-    }
-    if (role === 'Carry') {
-      return hero.roles?.includes('Carry');
-    }
-    if (role === 'Support') {
-      return hero.roles?.includes('Support');
-    }
+    const pos = role.match(/^pos(\d)$/);
+    if (pos) return heroPositions(hero).some((x) => x.n === Number(pos[1]));
     return hero.roles?.includes(role);
   };
+  const positionFilter = /^pos\d$/.test(selectedRole);
 
   const rolesList = [
     { id: 'all', label: 'Todas as Funções' },
-    { id: 'Carry', label: 'Carry (Pos 1)' },
-    { id: 'Mid', label: 'Midlane (Pos 2)' },
-    { id: 'Offlane', label: 'Offlane (Pos 3)' },
-    { id: 'Support', label: 'Suporte (Pos 4/5)' },
+    { id: 'pos1', label: 'Carry (Pos 1)' },
+    { id: 'pos2', label: 'Midlane (Pos 2)' },
+    { id: 'pos3', label: 'Offlane (Pos 3)' },
+    { id: 'pos4', label: 'Suporte (Pos 4)' },
+    { id: 'pos5', label: 'Suporte (Pos 5)' },
     { id: 'Nuker', label: 'Nuker' },
     { id: 'Disabler', label: 'Disabler' },
     { id: 'Initiator', label: 'Iniciador' }
@@ -218,6 +214,18 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       {/* TABELA GERAL DO META */}
       {loading ? (
         <SkeletonTable rows={10} cols={6} />
+      ) : positionFilter && !positions ? (
+        <div className="rounded-xl border border-line bg-surface p-10 text-center">
+          <p className="text-sm font-bold text-white">As posições dos heróis não estão disponíveis agora.</p>
+          <p className="text-xs text-gray-400 mt-1.5">Elas são calculadas com as partidas profissionais da OpenDota, que não está respondendo. Tente de novo em alguns minutos.</p>
+          <button
+            type="button"
+            onClick={() => setAttempt((n) => n + 1)}
+            className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-black text-xs font-black uppercase tracking-wider hover:bg-amber-400"
+          >
+            Tentar novamente
+          </button>
+        </div>
       ) : heroes.length === 0 ? (
         <div className="rounded-xl border border-line bg-surface p-10 text-center">
           <p className="text-sm font-bold text-white">Não foi possível carregar as estatísticas dos heróis agora.</p>
@@ -332,9 +340,24 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-2 py-0.5 rounded border border-white/5">
                           {h.primaryAttr}
                         </span>
-                        <div className="text-[10px] text-gray-500 truncate max-w-[220px]">
-                          {h.roles.slice(0, 3).join(', ')}
-                        </div>
+                        {heroPositions(h).length > 0 ? (
+                          <div className="flex items-center gap-1" title="Posições nas partidas profissionais dos últimos 60 dias">
+                            {heroPositions(h).map((x) => (
+                              <span
+                                key={x.n}
+                                className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                                  selectedRole === `pos${x.n}` ? 'bg-amber-500/20 text-amber-400' : 'bg-white/5 text-gray-400'
+                                }`}
+                              >
+                                Pos {x.n} · {Math.round(x.share * 100)}%
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-gray-500 truncate max-w-[220px]">
+                            {h.roles.slice(0, 3).join(', ')}
+                          </div>
+                        )}
                       </div>
                     </td>
 

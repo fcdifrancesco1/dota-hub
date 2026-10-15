@@ -31,8 +31,61 @@ async function handleHeroStats(res) {
   }
 }
 
+// Posição de cada jogador nas partidas profissionais recentes: entre os 3 que mais
+// farmaram no time, quem jogou na safe lane é pos 1, na mid pos 2 e na offlane
+// pos 3; entre os 2 que menos farmaram, quem jogou na offlane é pos 4 e na safe
+// lane pos 5. Jogos sem rota definida (jungle, roam) ficam de fora.
+const HERO_POSITIONS_SQL = `
+WITH p AS (
+  SELECT pm.hero_id, pm.lane_role,
+    RANK() OVER (PARTITION BY pm.match_id, (pm.player_slot < 128) ORDER BY pm.gold_per_min DESC) AS farm
+  FROM player_matches pm
+  JOIN matches m ON m.match_id = pm.match_id
+  WHERE m.start_time > extract(epoch from now()) - 60 * 86400
+    AND m.leagueid > 0
+    AND pm.lane_role IN (1, 2, 3)
+), pos AS (
+  SELECT hero_id, CASE
+    WHEN farm <= 3 AND lane_role = 1 THEN 1
+    WHEN farm <= 3 AND lane_role = 2 THEN 2
+    WHEN farm <= 3 AND lane_role = 3 THEN 3
+    WHEN farm > 3 AND lane_role = 3 THEN 4
+    WHEN farm > 3 AND lane_role = 1 THEN 5
+  END AS position
+  FROM p
+)
+SELECT hero_id, position, COUNT(*) AS games
+FROM pos
+WHERE position IS NOT NULL
+GROUP BY hero_id, position`;
+
+/**
+ * GET /api/results?heroPositions=1
+ * Em quais posições cada herói foi jogado nas partidas profissionais dos
+ * últimos 60 dias (OpenDota Explorer). Cache de 12 h na CDN, servido por até
+ * 7 dias enquanto revalida.
+ */
+async function handleHeroPositions(res) {
+  try {
+    const r = await fetch(`https://api.opendota.com/api/explorer?sql=${encodeURIComponent(HERO_POSITIONS_SQL)}`, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(9000)
+    });
+    const data = r.ok ? await r.json() : null;
+    const rows = Array.isArray(data?.rows) ? data.rows : [];
+    if (!rows.length) throw new Error(data?.err || `HTTP ${r.status}`);
+    res.setHeader('Cache-Control', 's-maxage=43200, stale-while-revalidate=604800');
+    return res.status(200).json(rows.map((x) => ({ hero_id: Number(x.hero_id), position: Number(x.position), games: Number(x.games) })));
+  } catch (err) {
+    console.error('[Results API] heroPositions indisponível:', err.message);
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(503).json({ error: 'OpenDota indisponível' });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.query?.heroStats) return handleHeroStats(res);
+  if (req.query?.heroPositions) return handleHeroPositions(res);
   try {
     const proRes = await fetch("https://api.opendota.com/api/proMatches", {
       headers: { "Accept": "application/json" },
