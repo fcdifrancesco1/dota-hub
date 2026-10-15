@@ -88,18 +88,19 @@ async function getJson(path, timeout = 10000) {
   return res.json();
 }
 
-const qs = (obj) => new URLSearchParams(Object.entries(obj).map(([k, v]) => [k, String(v)])).toString();
+// significant=0: por padrão a OpenDota esconde modos "não padrão", e o Turbo é um deles
+const qs = (obj) => new URLSearchParams(Object.entries({ ...obj, significant: 0 }).map(([k, v]) => [k, String(v)])).toString();
 
 /** Perfil da conta e vitórias/derrotas totais por modo. */
 export async function fetchProfileSummary(accountId) {
-  const key = `profile_summary_v1_${accountId}`;
+  const key = `profile_summary_v2_${accountId}`;
   const cached = getCached(key, 10 * 60 * 1000);
   if (cached) return cached;
 
   const [player, ranked, normal, turbo] = await Promise.all([
     getJson(`/players/${accountId}`),
     getJson(`/players/${accountId}/wl?${qs(MODES.ranked.query)}`).catch(() => null),
-    getJson(`/players/${accountId}/wl?lobby_type=0`).catch(() => null),
+    getJson(`/players/${accountId}/wl?${qs({ lobby_type: 0 })}`).catch(() => null),
     getJson(`/players/${accountId}/wl?${qs(MODES.turbo.query)}`).catch(() => null)
   ]);
   // Turbo também é lobby normal: casual = normal − turbo
@@ -123,7 +124,7 @@ const MATCH_FIELDS = ['hero_id', 'kills', 'deaths', 'assists', 'duration', 'star
 /** Últimas partidas de um modo (até 100) com resumo de heróis e médias. */
 export async function fetchModeMatches(accountId, mode) {
   const cfg = MODES[mode];
-  const key = `profile_matches_v1_${accountId}_${mode}`;
+  const key = `profile_matches_v2_${accountId}_${mode}`;
   const cached = getCached(key, 10 * 60 * 1000);
   if (cached) return cached;
 
@@ -167,7 +168,7 @@ export async function refreshProfile(accountId) {
   } catch { /* segue mesmo se o pedido falhar */ }
   try {
     for (const k of Object.keys(localStorage)) {
-      if (k.includes(`profile_summary_v1_${accountId}`) || k.includes(`profile_matches_v1_${accountId}_`)) localStorage.removeItem(k);
+      if (k.includes(`profile_summary_v2_${accountId}`) || k.includes(`profile_matches_v2_${accountId}_`)) localStorage.removeItem(k);
     }
   } catch { /* ignore */ }
 }
