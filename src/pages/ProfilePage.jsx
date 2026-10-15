@@ -21,7 +21,7 @@ function SteamButton() {
   return (
     <a
       href={steamLoginUrl()}
-      className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-[#171a21] hover:bg-[#2a475e] text-white text-sm font-bold shadow-lg transition-colors"
+      className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-[#171a21] hover:bg-[#2a475e] text-on-accent text-sm font-bold shadow-lg transition-colors"
     >
       <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden="true">
         <path d="M11.98 0C5.67 0 .5 4.86 0 11.04l6.44 2.66a3.4 3.4 0 0 1 1.92-.59h.19l2.87-4.15v-.06a4.53 4.53 0 1 1 4.53 4.53h-.1l-4.08 2.92v.16a3.4 3.4 0 0 1-6.75.6L.4 15.16A12 12 0 1 0 11.98 0Zm-4.45 18.2-1.48-.61a2.55 2.55 0 1 0 1.4-3.5l1.53.63a1.88 1.88 0 1 1-1.45 3.48Zm11.4-9.3a3.02 3.02 0 1 0-6.04 0 3.02 3.02 0 0 0 6.04 0Zm-5.28 0a2.27 2.27 0 1 1 4.53 0 2.27 2.27 0 0 1-4.53 0Z" />
