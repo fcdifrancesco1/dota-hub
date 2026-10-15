@@ -17,6 +17,7 @@ import MatchDetailPage from './pages/MatchDetailPage';
 import HeroesPage from './pages/HeroesPage';
 import HeroDetailPage from './pages/HeroDetailPage';
 import PredictionsPage from './pages/PredictionsPage';
+import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import TeamPage from './pages/TeamPage';
 
@@ -55,6 +56,7 @@ function AppContent() {
             <Route path="/herois" element={<HeroesPage />} />
             <Route path="/herois/:id" element={<HeroDetailPage />} />
             <Route path="/palpites" element={<PredictionsPage />} />
+            <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPage />} />
             {/* Fallback route */}
             <Route path="*" element={<Home />} />

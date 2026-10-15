@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import {
+  User,
   Flame,
   Radio,
   Trophy,
@@ -47,6 +48,7 @@ export default function Header() {
     { to: '/partidas', label: 'Partidas', icon: Swords },
     { to: '/herois', label: 'Heróis', icon: Sparkles },
     { to: '/palpites', label: 'Palpites', icon: Award },
+    { to: '/perfil', label: 'Perfil', icon: User },
     { to: '/admin', label: 'Admin', icon: Lock }
   ];
 
