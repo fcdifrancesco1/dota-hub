@@ -57,11 +57,11 @@ export default function Header() {
       <header className="sticky top-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-line transition-all">
         <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* LOGO & BRAND */}
-          <Link
-            to="/"
+          {/* LOGO & BRAND: volta para o hub HanG0V3R (a página inicial do Dota fica em "Início") */}
+          <a
+            href="https://hangover.com.br"
+            title="Voltar para o HanG0V3R Hub"
             className="flex items-center gap-3 group focus:outline-none"
-            onClick={() => setMobileMenuOpen(false)}
           >
             <img
               src="/logo-96.png"
@@ -78,7 +78,7 @@ export default function Header() {
                 {SITE_CONFIG.name}
               </span>
             </div>
-          </Link>
+          </a>
 
           {/* DESKTOP NAVIGATION */}
           <nav className="hidden xl:flex items-center gap-1 bg-surface-2/80 px-2 py-1.5 rounded-xl border border-line">
