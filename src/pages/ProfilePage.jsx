@@ -55,7 +55,7 @@ export default function ProfilePage() {
   const [linkError, setLinkError] = useState(null);
   const [summary, setSummary] = useState(null);
   const [summaryError, setSummaryError] = useState(false);
-  const [mode, setMode] = useState('ranked');
+  const [mode, setMode] = useState('normal');
   const [modeData, setModeData] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -147,8 +147,8 @@ export default function ProfilePage() {
           </div>
           <h1 className="text-2xl font-black text-white">Seu perfil de Dota 2</h1>
           <p className="text-sm text-gray-400 mt-2 max-w-lg mx-auto">
-            Vincule sua conta Steam para ver suas estatísticas de <strong className="text-gray-200">Ranked</strong>,{' '}
-            <strong className="text-gray-200">Casual</strong> e <strong className="text-gray-200">Turbo</strong>: medalha,
+            Vincule sua conta Steam para ver suas estatísticas de partidas <strong className="text-gray-200">Normais</strong>{' '}
+            e de <strong className="text-gray-200">Turbo</strong>: medalha,
             vitórias, heróis mais jogados e últimas partidas.
           </p>
           <div className="mt-6"><SteamButton /></div>
@@ -166,7 +166,7 @@ export default function ProfilePage() {
   const profile = summary?.profile;
   const medal = medalOf(summary?.rankTier, summary?.leaderboardRank);
   const data = modeData[mode];
-  const noMatchesAnywhere = summary && ['ranked', 'casual', 'turbo'].every((m) => !summary.totals[m] || summary.totals[m].win + summary.totals[m].lose === 0);
+  const noMatchesAnywhere = summary && ['normal', 'turbo'].every((m) => !summary.totals[m] || summary.totals[m].win + summary.totals[m].lose === 0);
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen space-y-6">
@@ -238,7 +238,7 @@ export default function ProfilePage() {
       {noMatchesAnywhere && <PrivateDataNotice />}
 
       {/* TOTAIS POR MODO (também servem de abas) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {Object.entries(MODES).map(([id, cfg]) => {
           const wl = summary?.totals?.[id];
           const wr = winRate(wl);
@@ -253,6 +253,7 @@ export default function ProfilePage() {
               }`}
             >
               <div className={`text-[11px] font-black uppercase tracking-wider ${active ? 'text-amber-400' : 'text-gray-400'}`}>{cfg.label}</div>
+              <div className="text-[10px] text-gray-500">{cfg.hint}</div>
               {wl ? (
                 <div className="mt-1.5 flex items-baseline gap-3">
                   <span className="text-2xl font-black text-white font-mono">{(wl.win + wl.lose).toLocaleString('pt-BR')}</span>

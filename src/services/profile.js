@@ -58,11 +58,12 @@ export async function unlinkProfile() {
 
 // ---- Modos de jogo ----
 
-// Ranked = lobby 7; Turbo = modo 23; Casual = lobby normal (0) que não é Turbo
+// Mesma separação da OpenDota: a visão padrão dela (significant=1) traz as
+// partidas "normais" — ranked e não ranqueadas — e deixa o Turbo de fora; o Turbo
+// (modo 23) só aparece pedindo o modo com significant=0
 export const MODES = {
-  ranked: { label: 'Ranked', query: { lobby_type: 7 } },
-  casual: { label: 'Casual', query: { lobby_type: 0 }, exclude: (m) => m.game_mode === 23 },
-  turbo: { label: 'Turbo', query: { game_mode: 23 } }
+  normal: { label: 'Normal', hint: 'Ranked e não ranqueadas, sem Turbo', query: {} },
+  turbo: { label: 'Turbo', hint: 'Partidas de Turbo', query: { game_mode: 23, significant: 0 } }
 };
 
 const MEDALS = ['', 'Arauto', 'Guardião', 'Cruzado', 'Arconte', 'Lenda', 'Ancestral', 'Divino', 'Imortal'];
@@ -88,31 +89,26 @@ async function getJson(path, timeout = 10000) {
   return res.json();
 }
 
-// significant=0: por padrão a OpenDota esconde modos "não padrão", e o Turbo é um deles
-const qs = (obj) => new URLSearchParams(Object.entries({ ...obj, significant: 0 }).map(([k, v]) => [k, String(v)])).toString();
+const qs = (obj) => new URLSearchParams(Object.entries(obj).map(([k, v]) => [k, String(v)])).toString();
 
 /** Perfil da conta e vitórias/derrotas totais por modo. */
 export async function fetchProfileSummary(accountId) {
-  const key = `profile_summary_v2_${accountId}`;
+  const key = `profile_summary_v3_${accountId}`;
   const cached = getCached(key, 10 * 60 * 1000);
   if (cached) return cached;
 
-  const [player, ranked, normal, turbo] = await Promise.all([
+  const [player, normal, turbo] = await Promise.all([
     getJson(`/players/${accountId}`),
-    getJson(`/players/${accountId}/wl?${qs(MODES.ranked.query)}`).catch(() => null),
-    getJson(`/players/${accountId}/wl?${qs({ lobby_type: 0 })}`).catch(() => null),
+    getJson(`/players/${accountId}/wl?${qs(MODES.normal.query)}`).catch(() => null),
     getJson(`/players/${accountId}/wl?${qs(MODES.turbo.query)}`).catch(() => null)
   ]);
-  // Turbo também é lobby normal: casual = normal − turbo
-  const turboNormal = turbo ? { win: turbo.win, lose: turbo.lose } : { win: 0, lose: 0 };
   const result = {
     profile: player?.profile || null,
     rankTier: player?.rank_tier || null,
     leaderboardRank: player?.leaderboard_rank || null,
     totals: {
-      ranked: ranked,
-      casual: normal ? { win: Math.max(0, normal.win - turboNormal.win), lose: Math.max(0, normal.lose - turboNormal.lose) } : null,
-      turbo: turbo
+      normal,
+      turbo
     }
   };
   setCache(key, result);
@@ -121,24 +117,11 @@ export async function fetchProfileSummary(accountId) {
 
 const MATCH_FIELDS = ['hero_id', 'kills', 'deaths', 'assists', 'duration', 'start_time', 'radiant_win', 'player_slot', 'game_mode', 'lobby_type', 'gold_per_min', 'xp_per_min', 'last_hits'];
 
-/**
- * Heróis do modo em TODO o histórico da conta na OpenDota (não só nas últimas
- * partidas). Casual = lobby normal menos o Turbo, herói a herói.
- */
+/** Heróis do modo em TODO o histórico da conta na OpenDota (não só nas últimas partidas). */
 async function fetchModeHeroes(accountId, mode) {
-  const toMap = (list) => new Map((Array.isArray(list) ? list : []).filter((h) => h.games > 0).map((h) => [h.hero_id, h]));
-  const all = toMap(await getJson(`/players/${accountId}/heroes?${qs(MODES[mode].query)}`, 12000));
-  if (mode === 'casual') {
-    const turbo = toMap(await getJson(`/players/${accountId}/heroes?${qs(MODES.turbo.query)}`, 12000));
-    for (const [id, t] of turbo) {
-      const h = all.get(id);
-      if (!h) continue;
-      const games = h.games - t.games;
-      if (games <= 0) all.delete(id);
-      else all.set(id, { ...h, games, win: Math.max(0, h.win - t.win) });
-    }
-  }
-  return [...all.values()]
+  const list = await getJson(`/players/${accountId}/heroes?${qs(MODES[mode].query)}`, 12000);
+  return (Array.isArray(list) ? list : [])
+    .filter((h) => h.games > 0)
     .map((h) => ({ heroId: Number(h.hero_id), games: h.games, wins: h.win, lastPlayed: h.last_played || null }))
     .sort((a, b) => b.games - a.games || b.wins - a.wins);
 }
@@ -146,16 +129,14 @@ async function fetchModeHeroes(accountId, mode) {
 /** Últimas partidas de um modo (até 100), médias delas e heróis do histórico completo. */
 export async function fetchModeMatches(accountId, mode) {
   const cfg = MODES[mode];
-  const key = `profile_matches_v3_${accountId}_${mode}`;
+  const key = `profile_matches_v4_${accountId}_${mode}`;
   const cached = getCached(key, 10 * 60 * 1000);
   if (cached) return cached;
 
-  const query = qs({ ...cfg.query, limit: cfg.exclude ? 150 : 100 });
+  const query = qs({ ...cfg.query, limit: 100 });
   const project = MATCH_FIELDS.map((f) => `project=${f}`).join('&');
   const list = await getJson(`/players/${accountId}/matches?${query}&${project}`, 12000);
   const matches = (Array.isArray(list) ? list : [])
-    .filter((m) => !cfg.exclude || !cfg.exclude(m))
-    .slice(0, 100)
     .map((m) => ({ ...m, won: (m.player_slot < 128) === Boolean(m.radiant_win) }));
 
   const heroes = await fetchModeHeroes(accountId, mode).catch(() => []);
@@ -182,7 +163,7 @@ export async function refreshProfile(accountId) {
   } catch { /* segue mesmo se o pedido falhar */ }
   try {
     for (const k of Object.keys(localStorage)) {
-      if (k.includes(`profile_summary_v2_${accountId}`) || k.includes(`profile_matches_v3_${accountId}_`)) localStorage.removeItem(k);
+      if (k.includes(`profile_summary_v3_${accountId}`) || k.includes(`profile_matches_v4_${accountId}_`)) localStorage.removeItem(k);
     }
   } catch { /* ignore */ }
 }
