@@ -20,6 +20,7 @@ import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
 import { useApp } from '../context/AppContext';
 import { seriesKey } from '../utils/matchRoute';
+import { aliasMap, applyAliasesToSeries } from '../utils/teamAliases';
 import { useOpenTeam } from '../utils/teamRoute';
 import { seriesStatus } from '../utils/seriesStatus';
 
@@ -35,8 +36,10 @@ const direNameOf = (m) => m?.dire_team?.name || m?.dire_name || 'Dire';
  * Nomes da Liquipedia no lugar dos da OpenDota quando a série os traz
  * (series.teamNames = { idDoTime: nome }), ex.: "The Bot^$" → "Skyreavers".
  */
-function withTeamNames(match, teamNames) {
-  if (!match || !teamNames) return match;
+function withTeamNames(match, seriesNames) {
+  // Nomes da série (chaveamento do campeonato) + equivalências já conhecidas no site
+  const teamNames = { ...aliasMap(), ...(seriesNames || {}) };
+  if (!match) return match;
   const rId = match.radiant_team_id || match.radiant_team?.team_id;
   const dId = match.dire_team_id || match.dire_team?.team_id;
   const r = teamNames[rId];
@@ -104,7 +107,7 @@ export default function MatchDetailPage() {
 
   const [fallbackSeries, setFallbackSeries] = useState(null);
   const [seriesError, setSeriesError] = useState(false);
-  const series = knownSeries || fallbackSeries;
+  const series = useMemo(() => applyAliasesToSeries(knownSeries || fallbackSeries), [knownSeries, fallbackSeries]);
   const games = series?.games || [];
 
   // Sem ?jogo=, abre o mapa do próprio match_id da URL (links de mapas avulsos)

@@ -13,6 +13,7 @@ import {
 } from '../services/api';
 import { SITE_CONFIG } from '../config/siteConfig';
 import { loadTeamLogoRegistry } from '../utils/teamLogos';
+import { learnAliases, applyAliasesToSeries, applyAliasesToLiveGame } from '../utils/teamAliases';
 
 const AppContext = createContext(null);
 
@@ -174,8 +175,17 @@ export function AppProvider({ children }) {
 
       const rawMatches = proData?.rawMatches || [];
 
+      // Times que a OpenDota conhece por outro nome: aprende pela agenda da Liquipedia
+      // e aplica os nomes da Liquipedia nas séries e nos jogos ao vivo
+      if (proData?.finishedSeries?.length) {
+        const allSeries = [...proData.finishedSeries, ...(proData.tournaments || []).flatMap((t) => t.seriesList || [])];
+        learnAliases(allSeries, allWikiMatches);
+        setFinishedSeries(proData.finishedSeries.map(applyAliasesToSeries));
+        setTournamentsList((proData.tournaments || []).map((t) => (t.seriesList ? { ...t, seriesList: t.seriesList.map(applyAliasesToSeries) } : t)));
+      }
+
       // Detecta jogos em andamento
-      const currentLive = withLeagueNames((gotvLiveData || []).filter((g) => {
+      const currentLive = withLeagueNames((gotvLiveData || []).map(applyAliasesToLiveGame).filter((g) => {
         const isFinished = rawMatches.some(
           (m) => String(m.match_id) === String(g.match_id) || String(m.match_id) === String(g.matchId)
         );

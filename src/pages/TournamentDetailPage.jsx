@@ -28,6 +28,7 @@ import TournamentBracket from '../components/TournamentBracket';
 import TournamentTeams from '../components/TournamentTeams';
 import { useApp } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
+import { rememberAliases } from '../utils/teamAliases';
 import { useTheme } from '../context/ThemeContext';
 import TeamLogo from '../utils/teamLogos';
 import { formatDateRange, formatPrize, tierLabel, statusLabel, leagueFromDatabase } from '../utils/tournamentFormat';
@@ -132,6 +133,7 @@ function withLiquipediaNames(list, brackets) {
     const next = nameA || nameB ? { ...s, timeA: nameA || s.timeA, timeB: nameB || s.timeB } : s;
     return Object.keys(idToName).length ? { ...next, teamNames: idToName } : next;
   });
+  rememberAliases(idToName);
   return { list: renamed, inBracket };
 }
 
