@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Medal, User, Loader2, RefreshCw, LogOut, ExternalLink, ShieldAlert, ChevronRight, Swords, Trophy, Clock } from 'lucide-react';
+import { Medal, Sigma, Users, MessageSquare, BarChart3, User, Loader2, RefreshCw, LogOut, ExternalLink, ShieldAlert, ChevronRight, Swords, Trophy, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
 import {
   MODES, steamLoginUrl, hasSteamReturn, completeSteamLogin, fetchProfileLink, unlinkProfile,
-  fetchProfileSummary, fetchModeMatches, fetchModeRecords, RECORD_FIELDS, refreshProfile, medalOf
+  fetchProfileSummary, fetchModeMatches, fetchModeRecords, RECORD_FIELDS, fetchModeTotals, fetchModePeers,
+  fetchModeWordcloud, fetchRankings, refreshProfile, medalOf
 } from '../services/profile';
 
 const GAME_MODES = {
@@ -13,7 +14,21 @@ const GAME_MODES = {
   16: 'Captains Draft', 18: 'Ability Draft', 22: 'All Pick', 23: 'Turbo'
 };
 
-const fmtDuration = (secs) => `${Math.floor((secs || 0) / 60)}:${String((secs || 0) % 60).padStart(2, '0')}`;
+// Abas do perfil (mesmas da OpenDota); as que dependem do modo usam Normal/Turbo
+const VIEWS = [
+  { id: 'resumo', label: 'Resumo', icon: Swords },
+  { id: 'recordes', label: 'Recordes', icon: Medal, load: fetchModeRecords },
+  { id: 'totais', label: 'Totais', icon: Sigma, load: fetchModeTotals },
+  { id: 'parceiros', label: 'Parceiros', icon: Users, load: fetchModePeers },
+  { id: 'nuvem', label: 'Nuvem de palavras', icon: MessageSquare, load: fetchModeWordcloud },
+  { id: 'classificacoes', label: 'Classificações', icon: BarChart3, load: (accountId) => fetchRankings(accountId), noMode: true }
+];
+const viewKey = (view, mode) => (VIEWS.find((v) => v.id === view)?.noMode ? view : `${view}:${mode}`);
+const fmtBig = (n) => Math.round(n).toLocaleString('pt-BR');
+const fmtAvg = (n) => n.toLocaleString('pt-BR', { maximumFractionDigits: n < 10 ? 2 : 1 });
+const fmtHours = (secs) => `${Math.round(secs / 3600).toLocaleString('pt-BR')} h`;
+
+const fmtDuration =(secs) => `${Math.floor((secs || 0) / 60)}:${String((secs || 0) % 60).padStart(2, '0')}`;
 const fmtWhen = (secs) => new Date(secs * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
 const winRate = (wl) => (wl && wl.win + wl.lose > 0 ? (wl.win / (wl.win + wl.lose)) * 100 : null);
 
@@ -57,8 +72,9 @@ export default function ProfilePage() {
   const [summaryError, setSummaryError] = useState(false);
   const [mode, setMode] = useState('normal');
   const [modeData, setModeData] = useState({});
-  const [view, setView] = useState('resumo'); // 'resumo' | 'recordes'
-  const [recordsData, setRecordsData] = useState({});
+  const [view, setView] = useState('resumo');
+  // Conteúdo das abas extras, por aba e modo (ex.: "totais:turbo")
+  const [extra, setExtra] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -112,22 +128,24 @@ export default function ProfilePage() {
     return () => { active = false; };
   }, [accountId, mode, modeData]);
 
-  // Recordes do modo, carregados só ao abrir a aba
+  // Abas extras: carregadas só quando abertas
+  const currentKey = viewKey(view, mode);
   useEffect(() => {
-    if (!accountId || view !== 'recordes' || recordsData[mode]) return;
+    const cfg = VIEWS.find((v) => v.id === view);
+    if (!accountId || !cfg?.load || extra[currentKey]) return;
     let active = true;
-    fetchModeRecords(accountId, mode)
-      .then((r) => { if (active) setRecordsData((prev) => ({ ...prev, [mode]: r.length ? r : { error: true } })); })
-      .catch(() => { if (active) setRecordsData((prev) => ({ ...prev, [mode]: { error: true } })); });
+    cfg.load(accountId, mode)
+      .then((r) => { if (active) setExtra((prev) => ({ ...prev, [currentKey]: Array.isArray(r) ? r : { error: true } })); })
+      .catch(() => { if (active) setExtra((prev) => ({ ...prev, [currentKey]: { error: true } })); });
     return () => { active = false; };
-  }, [accountId, view, mode, recordsData]);
+  }, [accountId, view, mode, currentKey, extra]);
 
   const handleRefresh = useCallback(async () => {
     if (!accountId) return;
     setRefreshing(true);
     await refreshProfile(accountId);
     setModeData({});
-    setRecordsData({});
+    setExtra({});
     setReloadKey((k) => k + 1);
     setRefreshing(false);
   }, [accountId]);
@@ -180,6 +198,188 @@ export default function ProfilePage() {
   const medal = medalOf(summary?.rankTier, summary?.leaderboardRank);
   const data = modeData[mode];
   const noMatchesAnywhere = summary && ['normal', 'turbo'].every((m) => !summary.totals[m] || summary.totals[m].win + summary.totals[m].lose === 0);
+
+  function renderExtra() {
+    const content = extra[currentKey];
+    const label = VIEWS.find((v) => v.id === view)?.label || '';
+    if (!content) {
+      return (
+        <div className="py-12 flex flex-col items-center gap-3 text-gray-400">
+          <Loader2 className="w-7 h-7 animate-spin text-amber-400" />
+          <span className="text-xs">Carregando {label.toLowerCase()}...</span>
+        </div>
+      );
+    }
+    if (content.error || content.length === 0) {
+      return (
+        <div className="bg-surface border border-line rounded-xl p-6 text-center text-xs text-gray-400">
+          {content.error ? 'Não foi possível carregar agora.' : 'Nada encontrado para este modo.'}{' '}
+          {content.error && (
+            <button type="button" onClick={() => setExtra((p) => { const n = { ...p }; delete n[currentKey]; return n; })} className="font-bold text-amber-400">
+              Tentar novamente
+            </button>
+          )}
+        </div>
+      );
+    }
+    const scope = `todo o histórico de ${MODES[mode].label} na OpenDota`;
+
+    if (view === 'recordes') {
+      return (
+        <div className="space-y-3">
+          <p className="text-[11px] text-gray-500">Sua melhor partida em cada estatística, em {scope}. Clique para abrir a partida.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+            {RECORD_FIELDS.map(({ field, label: name, format }) => {
+              const r = content.find((x) => x.field === field);
+              if (!r) return null;
+              return (
+                <button
+                  key={field}
+                  type="button"
+                  onClick={() => openMatch(r.matchId)}
+                  className="text-left bg-surface border border-line hover:border-amber-500/40 rounded-xl p-3.5 shadow-lg transition-all group"
+                >
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{name}</div>
+                  <div className="mt-1 text-2xl font-black font-mono text-amber-400">{format(r.value)}</div>
+                  <div className="mt-2 flex items-center gap-2 min-w-0">
+                    <img src={getHeroImg(constants, r.heroId)} alt="" className="w-10 h-6 rounded object-cover border border-line shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-bold text-white truncate group-hover:text-amber-400">{getHeroName(constants, r.heroId)}</div>
+                      <div className="text-[10px] text-gray-500">
+                        {fmtWhen(r.startTime)} · <span className={r.won ? 'text-emerald-400' : 'text-rose-400'}>{r.won ? 'Vitória' : 'Derrota'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    if (view === 'totais') {
+      return (
+        <div className="space-y-3">
+          <p className="text-[11px] text-gray-500">Soma de {scope}, com a média por partida.</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {content.map((t) => (
+              <div key={t.field} className="bg-surface border border-line rounded-xl p-3.5 shadow-lg">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t.label}</div>
+                <div className="mt-1 text-xl font-black font-mono text-amber-400">{t.time ? fmtHours(t.sum) : fmtBig(t.sum)}</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">
+                  {t.time ? `média ${fmtDuration(Math.round(t.average))} por partida` : `média ${fmtAvg(t.average)} por partida`}
+                  {' · '}{t.n.toLocaleString('pt-BR')} partidas
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (view === 'parceiros') {
+      return (
+        <div className="space-y-3">
+          <p className="text-[11px] text-gray-500">Jogadores com quem você mais jogou junto, em {scope}. Clique para ver o perfil na OpenDota.</p>
+          <div className="bg-surface border border-line rounded-2xl overflow-x-auto shadow-lg">
+            <table className="w-full text-left text-xs min-w-[560px]">
+              <thead className="text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b border-line">
+                <tr>
+                  <th className="p-3 pl-4">Jogador</th>
+                  <th className="p-3 text-center">Juntos</th>
+                  <th className="p-3 text-center">Vitórias juntos</th>
+                  <th className="p-3 text-center">Contra</th>
+                  <th className="p-3 pr-4 text-right">Último jogo</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line text-gray-300">
+                {content.map((p) => {
+                  const wr = p.withGames ? (p.withWin / p.withGames) * 100 : 0;
+                  return (
+                    <tr key={p.accountId} className="hover:bg-surface-2/60">
+                      <td className="p-3 pl-4">
+                        <a href={`https://www.opendota.com/players/${p.accountId}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 group">
+                          {p.avatar
+                            ? <img src={p.avatar} alt="" referrerPolicy="no-referrer" className="w-7 h-7 rounded-md border border-line shrink-0" />
+                            : <div className="w-7 h-7 rounded-md bg-surface-2 border border-line shrink-0" />}
+                          <span className="font-bold text-white truncate max-w-[220px] group-hover:text-amber-400">{p.name}</span>
+                        </a>
+                      </td>
+                      <td className="p-3 text-center font-mono font-bold">{p.withGames.toLocaleString('pt-BR')}</td>
+                      <td className="p-3 text-center font-mono font-bold">
+                        <span className={wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{wr.toFixed(0)}%</span>
+                      </td>
+                      <td className="p-3 text-center font-mono">
+                        {p.againstGames ? `${p.againstGames} (${Math.round((p.againstWin / p.againstGames) * 100)}% V)` : '—'}
+                      </td>
+                      <td className="p-3 pr-4 text-right text-gray-500">{p.lastPlayed ? fmtWhen(p.lastPlayed) : '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    if (view === 'nuvem') {
+      const max = content[0][1];
+      const min = content[content.length - 1][1];
+      const size = (n) => 12 + ((n - min) / Math.max(1, max - min)) * 30;
+      // Ordem alfabética, como numa nuvem: o tamanho mostra a frequência
+      const words = [...content].sort((a, b) => a[0].localeCompare(b[0]));
+      return (
+        <div className="space-y-3">
+          <p className="text-[11px] text-gray-500">Palavras que você mais escreveu no chat das partidas, em {scope}. Quanto maior, mais vezes.</p>
+          <div className="bg-surface border border-line rounded-2xl p-6 shadow-lg flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            {words.map(([word, n]) => (
+              <span
+                key={word}
+                title={`${n.toLocaleString('pt-BR')} vezes`}
+                style={{ fontSize: `${size(n)}px` }}
+                className={`font-black leading-none break-all ${n >= max * 0.5 ? 'text-amber-400' : n >= max * 0.2 ? 'text-white' : 'text-gray-400'}`}
+              >
+                {word}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Classificações
+    return (
+      <div className="space-y-3">
+        <p className="text-[11px] text-gray-500">
+          Seu desempenho com cada herói comparado com todos os jogadores daquele herói (cálculo da OpenDota, todas as partidas).
+          Ex.: 95% = melhor que 95% dos jogadores.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {content.map((r) => {
+            const pct = r.percentRank * 100;
+            return (
+              <div key={r.heroId} className="bg-surface border border-line rounded-xl p-3 shadow-lg flex items-center gap-3">
+                <img src={getHeroImg(constants, r.heroId)} alt="" className="w-14 h-8 rounded object-cover border border-line shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-white truncate">{getHeroName(constants, r.heroId)}</span>
+                    <span className="text-xs font-black font-mono text-amber-400 shrink-0">
+                      {pct >= 99.95 ? 'Top 0,1%' : `${pct.toFixed(1).replace('.', ',')}%`}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                    <div className="h-full rounded-full bg-amber-500" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen space-y-6">
@@ -284,14 +484,14 @@ export default function ProfilePage() {
         })}
       </div>
 
-      {/* ABAS: RESUMO / RECORDES */}
-      <div className="flex items-center gap-2 border-b border-line pb-3">
-        {[['resumo', 'Resumo', Swords], ['recordes', 'Recordes', Medal]].map(([id, label, Icon]) => (
+      {/* ABAS DO PERFIL */}
+      <div className="flex items-center gap-2 border-b border-line pb-3 overflow-x-auto">
+        {VIEWS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setView(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
               view === id ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -300,48 +500,8 @@ export default function ProfilePage() {
         ))}
       </div>
 
-      {view === 'recordes' ? (
-        !recordsData[mode] ? (
-          <div className="py-12 flex flex-col items-center gap-3 text-gray-400">
-            <Loader2 className="w-7 h-7 animate-spin text-amber-400" />
-            <span className="text-xs">Buscando seus recordes de {MODES[mode].label}...</span>
-          </div>
-        ) : recordsData[mode].error ? (
-          <div className="bg-surface border border-line rounded-xl p-6 text-center text-xs text-gray-400">
-            Não foi possível carregar os recordes agora.{' '}
-            <button type="button" onClick={() => setRecordsData((p) => { const n = { ...p }; delete n[mode]; return n; })} className="font-bold text-amber-400">Tentar novamente</button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-[11px] text-gray-500">Sua melhor partida em cada estatística, em todo o histórico de {MODES[mode].label} na OpenDota. Clique para abrir a partida.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-              {RECORD_FIELDS.map(({ field, label, format }) => {
-                const r = recordsData[mode].find((x) => x.field === field);
-                if (!r) return null;
-                return (
-                  <button
-                    key={field}
-                    type="button"
-                    onClick={() => openMatch(r.matchId)}
-                    className="text-left bg-surface border border-line hover:border-amber-500/40 rounded-xl p-3.5 shadow-lg transition-all group"
-                  >
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{label}</div>
-                    <div className="mt-1 text-2xl font-black font-mono text-amber-400">{format(r.value)}</div>
-                    <div className="mt-2 flex items-center gap-2 min-w-0">
-                      <img src={getHeroImg(constants, r.heroId)} alt="" className="w-10 h-6 rounded object-cover border border-line shrink-0" />
-                      <div className="min-w-0">
-                        <div className="text-[11px] font-bold text-white truncate group-hover:text-amber-400">{getHeroName(constants, r.heroId)}</div>
-                        <div className="text-[10px] text-gray-500">
-                          {fmtWhen(r.startTime)} · <span className={r.won ? 'text-emerald-400' : 'text-rose-400'}>{r.won ? 'Vitória' : 'Derrota'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )
+      {view !== 'resumo' ? (
+        renderExtra()
       ) : !data ? (
         <div className="py-12 flex flex-col items-center gap-3 text-gray-400">
           <Loader2 className="w-7 h-7 animate-spin text-amber-400" />

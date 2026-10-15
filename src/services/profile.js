@@ -216,6 +216,95 @@ export async function fetchModeRecords(accountId, mode) {
   return result;
 }
 
+// ---- Totais, Parceiros, Nuvem de palavras e Classificações (abas da OpenDota) ----
+
+// Campos do /totals com rótulo; avg = média por partida
+export const TOTAL_FIELDS = [
+  { field: 'kills', label: 'Abates', avg: true },
+  { field: 'deaths', label: 'Mortes', avg: true },
+  { field: 'assists', label: 'Assistências', avg: true },
+  { field: 'last_hits', label: 'Last hits', avg: true },
+  { field: 'denies', label: 'Denies', avg: true },
+  { field: 'hero_damage', label: 'Dano em heróis', avg: true },
+  { field: 'tower_damage', label: 'Dano em torres', avg: true },
+  { field: 'hero_healing', label: 'Cura em heróis', avg: true },
+  { field: 'tower_kills', label: 'Torres destruídas', avg: true },
+  { field: 'neutral_kills', label: 'Neutros abatidos', avg: true },
+  { field: 'courier_kills', label: 'Couriers abatidos', avg: true },
+  { field: 'stuns', label: 'Atordoamento (s)', avg: true },
+  { field: 'duration', label: 'Tempo jogado', time: true },
+  { field: 'purchase_tpscroll', label: 'TPs comprados', avg: true },
+  { field: 'purchase_ward_observer', label: 'Observer wards', avg: true },
+  { field: 'purchase_ward_sentry', label: 'Sentry wards', avg: true },
+  { field: 'purchase_gem', label: 'Gemas compradas', avg: true },
+  { field: 'purchase_rapier', label: 'Rapiers compradas', avg: true },
+  { field: 'pings', label: 'Pings', avg: true }
+];
+
+async function cachedFetch(key, ttlMs, loader) {
+  const cached = getCached(key, ttlMs);
+  if (cached) return cached;
+  const data = await loader();
+  setCache(key, data);
+  return data;
+}
+
+/** Somas e médias por partida em todo o histórico do modo. */
+export function fetchModeTotals(accountId, mode) {
+  return cachedFetch(`profile_totals_v1_${accountId}_${mode}`, 6 * 3600 * 1000, async () => {
+    const list = await getJson(`/players/${accountId}/totals?${qs(MODES[mode].query)}`, 15000);
+    const byField = Object.fromEntries((Array.isArray(list) ? list : []).map((t) => [t.field, t]));
+    return TOTAL_FIELDS.map((f) => {
+      const t = byField[f.field];
+      return t && t.n ? { ...f, sum: t.sum, n: t.n, average: t.sum / t.n } : null;
+    }).filter(Boolean);
+  });
+}
+
+/** Com quem a conta mais jogou junto (e contra), no modo. */
+export function fetchModePeers(accountId, mode) {
+  return cachedFetch(`profile_peers_v1_${accountId}_${mode}`, 6 * 3600 * 1000, async () => {
+    const list = await getJson(`/players/${accountId}/peers?${qs(MODES[mode].query)}`, 15000);
+    return (Array.isArray(list) ? list : [])
+      .filter((p) => p.with_games > 0)
+      .sort((a, b) => b.with_games - a.with_games)
+      .slice(0, 30)
+      .map((p) => ({
+        accountId: p.account_id,
+        name: p.personaname || p.name || `Jogador ${p.account_id}`,
+        avatar: p.avatar || null,
+        withGames: p.with_games,
+        withWin: p.with_win,
+        againstGames: p.against_games,
+        againstWin: p.against_win,
+        lastPlayed: p.last_played || null
+      }));
+  });
+}
+
+/** Palavras mais usadas no chat das partidas (o próprio jogador), no modo. */
+export function fetchModeWordcloud(accountId, mode) {
+  return cachedFetch(`profile_words_v1_${accountId}_${mode}`, 6 * 3600 * 1000, async () => {
+    const data = await getJson(`/players/${accountId}/wordcloud?${qs(MODES[mode].query)}`, 15000);
+    return Object.entries(data?.my_word_counts || {})
+      .filter(([word]) => word.length >= 2)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 80);
+  });
+}
+
+/** Percentil da conta com cada herói (a OpenDota calcula sobre todas as partidas). */
+export function fetchRankings(accountId) {
+  return cachedFetch(`profile_rankings_v1_${accountId}`, 6 * 3600 * 1000, async () => {
+    const list = await getJson(`/players/${accountId}/rankings`, 15000);
+    return (Array.isArray(list) ? list : [])
+      .filter((r) => r.hero_id && r.percent_rank !== undefined)
+      .sort((a, b) => b.percent_rank - a.percent_rank)
+      .slice(0, 30)
+      .map((r) => ({ heroId: Number(r.hero_id), percentRank: r.percent_rank, score: r.score }));
+  });
+}
+
 /** Pede para a OpenDota buscar as partidas novas da conta e limpa o cache local. */
 export async function refreshProfile(accountId) {
   try {
@@ -223,7 +312,7 @@ export async function refreshProfile(accountId) {
   } catch { /* segue mesmo se o pedido falhar */ }
   try {
     for (const k of Object.keys(localStorage)) {
-      if (k.includes(`profile_summary_v3_${accountId}`) || k.includes(`profile_matches_v4_${accountId}_`) || k.includes(`profile_records_v1_${accountId}_`)) localStorage.removeItem(k);
+      if (k.includes(`profile_summary_v3_${accountId}`) || k.includes(`profile_matches_v4_${accountId}_`) || k.includes(`profile_records_v1_${accountId}_`) || /^dota_cache_profile_(totals|peers|words|rankings)_v1_/.test(k) && k.includes(String(accountId))) localStorage.removeItem(k);
     }
   } catch { /* ignore */ }
 }
