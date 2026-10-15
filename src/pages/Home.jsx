@@ -4,6 +4,7 @@ import HomeHero from '../components/home/HomeHero';
 import HomeStatsCards from '../components/home/HomeStatsCards';
 import Upcoming24h from '../components/home/Upcoming24h';
 import RecentResultsHome from '../components/home/RecentResultsHome';
+import NewsPanel from '../components/home/NewsPanel';
 import { useApp } from '../context/AppContext';
 
 export default function Home() {
@@ -14,20 +15,24 @@ export default function Home() {
       {/* 1. Faixa de Partidas Ao Vivo */}
       <LiveTickerStrip />
 
-      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 2. Hero Principal */}
-        <HomeHero />
+      {/* Telas largas: notícias numa coluna à direita; nas menores, abaixo do conteúdo */}
+      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
+        <div className="min-w-0">
+          {/* 2. Hero Principal */}
+          <HomeHero />
 
-        {/* 3. Destaque dos Times Favoritos */}
+          {/* 3. Grid de Próximas Partidas (24h) e Resultados Recentes */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+            <Upcoming24h />
+            <RecentResultsHome />
+          </div>
 
-        {/* 4. Grid de Próximas Partidas (24h) e Resultados Recentes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-          <Upcoming24h />
-          <RecentResultsHome />
+          {/* 4. Cards de Estatísticas Gerais do Dia/Semana */}
+          <HomeStatsCards />
         </div>
 
-        {/* 5. Cards de Estatísticas Gerais do Dia/Semana */}
-        <HomeStatsCards />
+        {/* 5. Notícias e transferências */}
+        <NewsPanel />
       </div>
     </div>
   );

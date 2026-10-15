@@ -713,6 +713,26 @@ export async function fetchLiveGames() {
 // recentes) com banner, datas, local, premiação e tier — ver api/tournaments.js
 const TOURNAMENTS_CACHE_KEY = "liquipedia_tournaments_v1";
 
+// Notícias (Valve, Dotabuff) e transferências (Liquipedia) — ver api/news.js
+export async function fetchNews() {
+  const key = "news_v1";
+  const cached = getCached(key, 20 * 60 * 1000);
+  if (cached) return cached;
+  try {
+    const res = await fetchWithTimeout("/api/news", {}, 20000);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.news?.length || data?.transfers?.length) {
+        setCache(key, data);
+        return data;
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso ao buscar notícias:", err.message || err);
+  }
+  return getCachedFast(key) || { news: [], transfers: [] };
+}
+
 // Lista de campeonatos já salva no navegador (sem esperar a rede)
 export function getCachedTournaments() {
   return getCachedFast(TOURNAMENTS_CACHE_KEY) || [];
