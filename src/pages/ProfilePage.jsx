@@ -314,6 +314,7 @@ export default function ProfilePage() {
               <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-400" /> Heróis mais jogados
               </h2>
+              <p className="text-[10px] text-gray-500 -mt-2 mb-3">Todo o histórico de {MODES[mode].label} registrado na OpenDota.</p>
               <ul className="space-y-2">
                 {data.heroes.slice(0, 10).map((h) => {
                   const wr = (h.wins / h.games) * 100;
@@ -322,9 +323,9 @@ export default function ProfilePage() {
                       <img src={getHeroImg(constants, h.heroId)} alt="" className="w-12 h-7 rounded object-cover border border-line shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-bold text-white truncate">{getHeroName(constants, h.heroId)}</div>
-                        <div className="text-[10px] text-gray-500 font-mono">
-                          KDA {((h.kills + h.assists) / Math.max(h.deaths, 1)).toFixed(2)}
-                        </div>
+                        {h.lastPlayed && (
+                          <div className="text-[10px] text-gray-500">Último jogo: {fmtWhen(h.lastPlayed)}</div>
+                        )}
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-xs font-black font-mono text-white">{h.games}</div>

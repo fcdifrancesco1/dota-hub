@@ -121,10 +121,32 @@ export async function fetchProfileSummary(accountId) {
 
 const MATCH_FIELDS = ['hero_id', 'kills', 'deaths', 'assists', 'duration', 'start_time', 'radiant_win', 'player_slot', 'game_mode', 'lobby_type', 'gold_per_min', 'xp_per_min', 'last_hits'];
 
-/** Últimas partidas de um modo (até 100) com resumo de heróis e médias. */
+/**
+ * Heróis do modo em TODO o histórico da conta na OpenDota (não só nas últimas
+ * partidas). Casual = lobby normal menos o Turbo, herói a herói.
+ */
+async function fetchModeHeroes(accountId, mode) {
+  const toMap = (list) => new Map((Array.isArray(list) ? list : []).filter((h) => h.games > 0).map((h) => [h.hero_id, h]));
+  const all = toMap(await getJson(`/players/${accountId}/heroes?${qs(MODES[mode].query)}`, 12000));
+  if (mode === 'casual') {
+    const turbo = toMap(await getJson(`/players/${accountId}/heroes?${qs(MODES.turbo.query)}`, 12000));
+    for (const [id, t] of turbo) {
+      const h = all.get(id);
+      if (!h) continue;
+      const games = h.games - t.games;
+      if (games <= 0) all.delete(id);
+      else all.set(id, { ...h, games, win: Math.max(0, h.win - t.win) });
+    }
+  }
+  return [...all.values()]
+    .map((h) => ({ heroId: Number(h.hero_id), games: h.games, wins: h.win, lastPlayed: h.last_played || null }))
+    .sort((a, b) => b.games - a.games || b.wins - a.wins);
+}
+
+/** Últimas partidas de um modo (até 100), médias delas e heróis do histórico completo. */
 export async function fetchModeMatches(accountId, mode) {
   const cfg = MODES[mode];
-  const key = `profile_matches_v2_${accountId}_${mode}`;
+  const key = `profile_matches_v3_${accountId}_${mode}`;
   const cached = getCached(key, 10 * 60 * 1000);
   if (cached) return cached;
 
@@ -136,20 +158,12 @@ export async function fetchModeMatches(accountId, mode) {
     .slice(0, 100)
     .map((m) => ({ ...m, won: (m.player_slot < 128) === Boolean(m.radiant_win) }));
 
-  const byHero = {};
-  for (const m of matches) {
-    const h = (byHero[m.hero_id] ||= { heroId: m.hero_id, games: 0, wins: 0, kills: 0, deaths: 0, assists: 0 });
-    h.games++;
-    if (m.won) h.wins++;
-    h.kills += m.kills || 0;
-    h.deaths += m.deaths || 0;
-    h.assists += m.assists || 0;
-  }
+  const heroes = await fetchModeHeroes(accountId, mode).catch(() => []);
   const n = matches.length || 1;
   const avg = (field) => matches.reduce((a, m) => a + (m[field] || 0), 0) / n;
   const result = {
     matches,
-    heroes: Object.values(byHero).sort((a, b) => b.games - a.games || b.wins - a.wins),
+    heroes,
     averages: matches.length ? {
       kills: avg('kills'), deaths: avg('deaths'), assists: avg('assists'),
       gpm: Math.round(avg('gold_per_min')), xpm: Math.round(avg('xp_per_min')),
@@ -168,7 +182,7 @@ export async function refreshProfile(accountId) {
   } catch { /* segue mesmo se o pedido falhar */ }
   try {
     for (const k of Object.keys(localStorage)) {
-      if (k.includes(`profile_summary_v2_${accountId}`) || k.includes(`profile_matches_v2_${accountId}_`)) localStorage.removeItem(k);
+      if (k.includes(`profile_summary_v2_${accountId}`) || k.includes(`profile_matches_v3_${accountId}_`)) localStorage.removeItem(k);
     }
   } catch { /* ignore */ }
 }
