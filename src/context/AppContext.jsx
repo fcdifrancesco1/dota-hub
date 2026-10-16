@@ -123,10 +123,12 @@ export function AppProvider({ children }) {
   const cachedUpcoming = normalizeUpcomingList(getCachedFast(UPCOMING_CACHE_KEY));
   const cachedConstants = getCachedFast('constants_v6');
 
-  const initialSplit = splitWikiMatches(cachedUpcoming, cachedPro?.finishedSeries, []);
+  // Nomes da Liquipedia já conhecidos (ex.: "The Bot^$" → Skyreavers) valem desde a primeira exibição
+  const cachedFinished = (cachedPro?.finishedSeries || []).map(applyAliasesToSeries);
+  const initialSplit = splitWikiMatches(cachedUpcoming, cachedFinished, []);
 
   const [constants, setConstants] = useState(cachedConstants || { heroes: {}, itemsById: {} });
-  const [finishedSeries, setFinishedSeries] = useState(cachedPro?.finishedSeries || []);
+  const [finishedSeries, setFinishedSeries] = useState(cachedFinished);
   const [tournamentsList, setTournamentsList] = useState(cachedPro?.tournaments || []);
   const [liveGames, setLiveGames] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState(initialSplit.upcoming);
@@ -158,7 +160,7 @@ export function AppProvider({ children }) {
     try {
       const proPromise = fetchProMatches().then((proData) => {
         if (proData?.finishedSeries?.length) {
-          setFinishedSeries(proData.finishedSeries);
+          setFinishedSeries(proData.finishedSeries.map(applyAliasesToSeries));
           setTournamentsList(proData.tournaments || []);
         }
         return proData;
@@ -175,12 +177,17 @@ export function AppProvider({ children }) {
 
       const rawMatches = proData?.rawMatches || [];
 
+      // Séries concluídas da OpenDota com os nomes da Liquipedia: usadas também para
+      // tirar da lista "em andamento" as séries que a OpenDota já registrou
+      let finished = (proData?.finishedSeries || []).map(applyAliasesToSeries);
+
       // Times que a OpenDota conhece por outro nome: aprende pela agenda da Liquipedia
       // e aplica os nomes da Liquipedia nas séries e nos jogos ao vivo
       if (proData?.finishedSeries?.length) {
         const allSeries = [...proData.finishedSeries, ...(proData.tournaments || []).flatMap((t) => t.seriesList || [])];
         learnAliases(allSeries, allWikiMatches);
-        setFinishedSeries(proData.finishedSeries.map(applyAliasesToSeries));
+        finished = proData.finishedSeries.map(applyAliasesToSeries);
+        setFinishedSeries(finished);
         setTournamentsList((proData.tournaments || []).map((t) => (t.seriesList ? { ...t, seriesList: t.seriesList.map(applyAliasesToSeries) } : t)));
       }
 
@@ -193,7 +200,7 @@ export function AppProvider({ children }) {
       }), allWikiMatches);
 
       // Assim que a partida começa, sai da agenda e vai para "em andamento"
-      const { upcoming, ongoing } = splitWikiMatches(allWikiMatches, proData?.finishedSeries, currentLive);
+      const { upcoming, ongoing } = splitWikiMatches(allWikiMatches, finished, currentLive);
       setUpcomingMatches(upcoming);
       setOngoingSeries(ongoing);
       setLiveGames(currentLive);
