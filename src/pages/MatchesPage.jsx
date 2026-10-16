@@ -7,6 +7,7 @@ import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
 import { isSeriesOngoing } from '../utils/seriesStatus';
 import MatchPreviewModal from '../components/MatchPreviewModal';
+import { useOpenWikiSeries } from '../utils/wikiSeries';
 
 export default function MatchesPage() {
   const { finishedSeries, upcomingMatches, ongoingSeries, liveGames } = useApp();
@@ -14,6 +15,7 @@ export default function MatchesPage() {
   const openLiveMatch = useOpenLiveMatch();
   // Partida da agenda (sem mapa ao vivo): janela com os jogadores no torneio
   const [preview, setPreview] = useState(null);
+  const openWikiSeries = useOpenWikiSeries();
   // Aba vem da URL (/partidas?aba=agenda) para links diretos, voltar e recarregar
   const [searchParams, setSearchParams] = useSearchParams();
   const filterMode = searchParams.get('aba') === 'agenda' ? 'upcoming' : 'finished'; // 'finished' | 'upcoming'
@@ -161,7 +163,7 @@ export default function MatchesPage() {
                 match={m}
                 liveGame={findLiveGameFor(m, liveGames)}
                 onOpenLive={openLiveMatch}
-                onOpenPreview={setPreview}
+                onOpenPreview={(m) => openWikiSeries(m, setPreview)}
               />
             ))}
           </div>
@@ -315,7 +317,7 @@ function OngoingCard({ match: m, liveGame, onOpenLive, onOpenPreview }) {
           <span className="text-amber-400 font-bold flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
         ) : (
           <span className="text-amber-400 font-bold flex items-center gap-1">
-            {done ? 'Jogadores no torneio' : 'Intervalo · Jogadores'} <ChevronRight className="w-3.5 h-3.5" />
+            {scoreA + scoreB > 0 ? 'Ver mapas jogados' : done ? 'Jogadores no torneio' : 'Intervalo · Jogadores'} <ChevronRight className="w-3.5 h-3.5" />
           </span>
         )}
       </div>

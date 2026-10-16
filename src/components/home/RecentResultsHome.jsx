@@ -7,6 +7,7 @@ import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import TeamLogo from '../../utils/teamLogos';
 import { isSeriesOngoing } from '../../utils/seriesStatus';
 import MatchPreviewModal from '../MatchPreviewModal';
+import { useOpenWikiSeries } from '../../utils/wikiSeries';
 
 export default function RecentResultsHome() {
   const { finishedSeries, ongoingSeries, liveGames, loading } = useApp();
@@ -14,6 +15,7 @@ export default function RecentResultsHome() {
   const openLiveMatch = useOpenLiveMatch();
   // Série da Liquipedia sem mapa ao vivo nem dados na OpenDota: janela com os jogadores no torneio
   const [preview, setPreview] = useState(null);
+  const openWikiSeries = useOpenWikiSeries();
 
   // Séries da Liquipedia (em andamento ou recém-encerradas, ainda sem registro na
   // OpenDota) junto com as concluídas da OpenDota: em andamento primeiro, depois
@@ -85,7 +87,7 @@ export default function RecentResultsHome() {
                 ? () => openSeries(series)
                 : liveGame
                   ? () => openLiveMatch(liveGame)
-                  : () => setPreview(series);
+                  : () => openWikiSeries(series, setPreview);
 
               return (
                 <div
