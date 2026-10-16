@@ -6,11 +6,14 @@ import { useOpenSeries } from '../utils/matchRoute';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
 import { isSeriesOngoing } from '../utils/seriesStatus';
+import MatchPreviewModal from '../components/MatchPreviewModal';
 
 export default function MatchesPage() {
   const { finishedSeries, upcomingMatches, ongoingSeries, liveGames } = useApp();
   const openSeries = useOpenSeries();
   const openLiveMatch = useOpenLiveMatch();
+  // Partida da agenda (sem mapa ao vivo): janela com os jogadores no torneio
+  const [preview, setPreview] = useState(null);
   // Aba vem da URL (/partidas?aba=agenda) para links diretos, voltar e recarregar
   const [searchParams, setSearchParams] = useSearchParams();
   const filterMode = searchParams.get('aba') === 'agenda' ? 'upcoming' : 'finished'; // 'finished' | 'upcoming'
@@ -158,6 +161,7 @@ export default function MatchesPage() {
                 match={m}
                 liveGame={findLiveGameFor(m, liveGames)}
                 onOpenLive={openLiveMatch}
+                onOpenPreview={setPreview}
               />
             ))}
           </div>
@@ -223,16 +227,10 @@ export default function MatchesPage() {
                         <Clock className="w-3.5 h-3.5 text-cyan-400" />
                         {s.startTime || 'Horário a definir'}
                       </span>
-                      {s.streamUrl ? (
-                        <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                          <span>{hasStarted ? 'Em andamento · Assistir' : 'Onde assistir'}</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </span>
-                      ) : hasStarted ? (
-                        <span className="text-red-400 font-bold">Em andamento</span>
-                      ) : (
-                        <span className="text-gray-500">Agendada</span>
-                      )}
+                      <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                        <span>{hasStarted ? 'Em andamento · Jogadores' : 'Jogadores no torneio'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
                     </>
                   ) : (
                     <>
@@ -252,15 +250,13 @@ export default function MatchesPage() {
 
             const cardClass = "bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-2xl p-5 transition-all shadow-xl group flex flex-col justify-between";
 
-            // Partidas futuras não têm replay: o card leva à transmissão (se houver).
+            // Partidas futuras não têm replay: o card abre as estatísticas dos jogadores no torneio
             if (isUpcoming) {
               const key = `${tA}-${tB}-${s.timestamp || idx}`;
-              return s.streamUrl ? (
-                <a key={key} href={s.streamUrl} target="_blank" rel="noopener noreferrer" className={`${cardClass} cursor-pointer`}>
+              return (
+                <button key={key} type="button" onClick={() => setPreview(s)} className={`${cardClass} cursor-pointer text-left`}>
                   {cardContent}
-                </a>
-              ) : (
-                <div key={key} className={cardClass}>{cardContent}</div>
+                </button>
               );
             }
 
@@ -276,12 +272,14 @@ export default function MatchesPage() {
           })
         )}
       </div>
+
+      {preview && <MatchPreviewModal match={preview} onClose={() => setPreview(null)} />}
     </div>
   );
 }
 
 /** Série começada ou recém-encerrada, com o placar da Liquipedia. */
-function OngoingCard({ match: m, liveGame, onOpenLive }) {
+function OngoingCard({ match: m, liveGame, onOpenLive, onOpenPreview }) {
   const done = Boolean(m.isCompleted || m.winner);
   const scoreA = m.scoreA || 0;
   const scoreB = m.scoreB || 0;
@@ -315,12 +313,10 @@ function OngoingCard({ match: m, liveGame, onOpenLive }) {
         </span>
         {liveGame ? (
           <span className="text-amber-400 font-bold flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
-        ) : done ? (
-          <span className="text-gray-500">Estatísticas em processamento</span>
-        ) : m.streamUrl ? (
-          <span className="text-amber-400 font-bold flex items-center gap-1">Assistir <ChevronRight className="w-3.5 h-3.5" /></span>
         ) : (
-          <span className="text-gray-500">Intervalo entre mapas</span>
+          <span className="text-amber-400 font-bold flex items-center gap-1">
+            {done ? 'Jogadores no torneio' : 'Intervalo · Jogadores'} <ChevronRight className="w-3.5 h-3.5" />
+          </span>
         )}
       </div>
     </>
@@ -334,12 +330,10 @@ function OngoingCard({ match: m, liveGame, onOpenLive }) {
       </button>
     );
   }
-  if (!done && m.streamUrl) {
-    return (
-      <a href={m.streamUrl} target="_blank" rel="noopener noreferrer" className={`${cls} hover:border-amber-500/50 transition-colors`}>
-        {body}
-      </a>
-    );
-  }
-  return <div className={cls}>{body}</div>;
+  // Sem mapa ao vivo (intervalo ou recém-encerrada): estatísticas dos jogadores no torneio
+  return (
+    <button type="button" onClick={() => onOpenPreview(m)} className={`${cls} text-left hover:border-amber-500/50 transition-colors`}>
+      {body}
+    </button>
+  );
 }

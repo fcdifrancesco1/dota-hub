@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trophy, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp, findLiveGameFor } from '../../context/AppContext';
@@ -6,11 +6,14 @@ import { useOpenSeries } from '../../utils/matchRoute';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import TeamLogo from '../../utils/teamLogos';
 import { isSeriesOngoing } from '../../utils/seriesStatus';
+import MatchPreviewModal from '../MatchPreviewModal';
 
 export default function RecentResultsHome() {
   const { finishedSeries, ongoingSeries, liveGames, loading } = useApp();
   const openSeries = useOpenSeries();
   const openLiveMatch = useOpenLiveMatch();
+  // Série da Liquipedia sem mapa ao vivo nem dados na OpenDota: janela com os jogadores no torneio
+  const [preview, setPreview] = useState(null);
 
   // Séries da Liquipedia (em andamento ou recém-encerradas, ainda sem registro na
   // OpenDota) junto com as concluídas da OpenDota: em andamento primeiro, depois
@@ -73,7 +76,7 @@ export default function RecentResultsHome() {
               const isWinnerA = decided && scoreA > scoreB;
               const isWinnerB = decided && scoreB > scoreA;
 
-              // Série da Liquipedia: abre a partida ao vivo (se houver) ou a transmissão
+              // Série da Liquipedia: abre a partida ao vivo (se houver) ou as estatísticas dos jogadores
               const liveGame = series.fromWiki ? findLiveGameFor(series, liveGames) : null;
               const wikiStatus = series.fromWiki
                 ? (liveGame ? 'Ao vivo' : isDone(series) ? 'Encerrada' : 'Em andamento')
@@ -82,9 +85,7 @@ export default function RecentResultsHome() {
                 ? () => openSeries(series)
                 : liveGame
                   ? () => openLiveMatch(liveGame)
-                  : (!isDone(series) && series.streamUrl)
-                    ? () => window.open(series.streamUrl, '_blank', 'noopener')
-                    : undefined;
+                  : () => setPreview(series);
 
               return (
                 <div
@@ -144,6 +145,8 @@ export default function RecentResultsHome() {
       <div className="mt-4 pt-3 border-t border-white/5 text-[11px] text-gray-500 text-center">
         Clique em qualquer série para conferir o draft completo e a tabela de jogadores.
       </div>
+
+      {preview && <MatchPreviewModal match={preview} onClose={() => setPreview(null)} />}
     </div>
   );
 }
