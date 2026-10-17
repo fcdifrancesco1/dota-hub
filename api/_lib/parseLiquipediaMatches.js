@@ -1,3 +1,5 @@
+import { cleanTeamName } from './teamName.js';
+
 // Parser único de partidas da Liquipedia, usado por todas as rotas serverless
 // que precisam ler a página "Liquipedia:Matches". Mantido em um só lugar para
 // não haver cópias divergentes do mesmo regex em vários arquivos.
@@ -39,7 +41,7 @@ export function parseLiquipediaMatches(html, options = {}) {
       const getTeam = (chunk) => {
         const nameMatch = chunk.match(/<span class="name"[^>]*><a[^>]*?title="([^"]+)"[^>]*>([^<]+)<\/a>/);
         const plainNameMatch = chunk.match(/<span class="name"[^>]*>([^<]+)<\/span>/);
-        let full = nameMatch ? cleanTeamText(nameMatch[1]) : "";
+        let full = nameMatch ? cleanTeamName(cleanTeamText(nameMatch[1])) : "";
         const short = nameMatch ? cleanTeamText(nameMatch[2]) : cleanTeamText(plainNameMatch?.[1]);
         if (!full || full.includes('/') || full.includes('#')) full = short;
         return { name: full || "TBD", short: short || full || "TBD" };

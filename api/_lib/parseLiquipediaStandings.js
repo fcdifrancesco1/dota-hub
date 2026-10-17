@@ -1,6 +1,7 @@
 // Lê as tabelas de classificação (GroupTableLeague) do HTML renderizado de uma
 // página de campeonato da Liquipedia. Os números (séries e mapas) são calculados
 // pela própria Liquipedia na renderização — o wikitext só lista os times.
+import { cleanTeamName } from './teamName.js';
 
 const decode = (s) => String(s || '')
   .replace(/<[^>]+>/g, '')
@@ -48,9 +49,9 @@ function parseTable(tableHtml) {
     const posCell = cells[slotIdx - 1] || '';
     const bg = (posCell.match(/class="bg-([a-z]+)"/) || tr.match(/class="bg-([a-z]+)"/) || [])[1] || null;
     const slot = cells[slotIdx];
-    const name = decode(slot.match(/team-template-text"[^>]*>\s*<a[^>]*title="([^"]+)"/)?.[1])
+    const name = cleanTeamName(decode(slot.match(/team-template-text"[^>]*>\s*<a[^>]*title="([^"]+)"/)?.[1])
       || decode(slot.match(/team-template-text"[^>]*>([\s\S]*?)<\/span>/)?.[1])
-      || decode(slot);
+      || decode(slot));
     if (!name) continue;
 
     const stats = cells.slice(slotIdx + 1).map((c) => decode(c)).filter(Boolean);
@@ -101,7 +102,7 @@ export function parseLiquipediaParticipants(html) {
   for (const card of text.split('team-participant-card__opponent-compact').slice(1)) {
     const title = card.match(/<a href="\/dota2\/[^"]*" title="([^"]+)"/);
     const span = card.match(/<span class="name"[^>]*>(?:<a[^>]*>)?([^<]+)/);
-    const name = decode((title?.[1] || span?.[1] || '').replace(/\s*\(page does not exist\)/i, ''));
+    const name = cleanTeamName(decode(title?.[1] || span?.[1] || ''));
     if (name && name !== 'TBD' && !names.includes(name)) names.push(name);
   }
   return names;
@@ -120,7 +121,7 @@ export function parseLiquipediaParticipantTeams(html) {
     const compact = card.split('team-participant-card__opponent-full')[0];
     const title = compact.match(/<a href="\/dota2\/[^"]*" title="([^"]+)"/);
     const span = compact.match(/<span class="name"[^>]*>(?:<a[^>]*>)?([^<]+)/);
-    const name = decode((title?.[1] || span?.[1] || '').replace(/\s*\(page does not exist\)/i, ''));
+    const name = cleanTeamName(decode(title?.[1] || span?.[1] || ''));
     if (!name || name === 'TBD' || teams.some((t) => t.name === name)) continue;
 
     const imgs = [...compact.matchAll(/<img[^>]*>/g)].map((m) => pickImg(m[0])).filter(Boolean)

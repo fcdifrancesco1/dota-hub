@@ -1,3 +1,5 @@
+import { cleanTeamName } from './teamName.js';
+
 // Lê os chaveamentos (brkts-bracket) do HTML renderizado de uma página de
 // campeonato da Liquipedia e devolve uma árvore fácil de desenhar:
 //
@@ -95,7 +97,7 @@ function parseOpponent(entryHtml) {
     || entryHtml.match(/<div class="team-shortname">([\s\S]*?)<\/div>/)?.[1];
   const literal = decode(entryHtml.match(/brkts-opponent-block-literal[^>]*>([\s\S]*?)<\/div>/)?.[1]);
   const scoreText = decode(entryHtml.match(/brkts-opponent-score-inner[^>]*>([\s\S]*?)<\/div>/)?.[1]);
-  const name = decode(teamName) || null;
+  const name = cleanTeamName(decode(teamName)) || null;
   return {
     name,
     shortName: decode(shortName) || null,

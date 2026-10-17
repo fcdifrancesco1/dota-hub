@@ -3,7 +3,7 @@
 // guardada pelo ID do time na OpenDota e aplicada em todas as telas.
 import { isSameTeamMatch } from '../services/api';
 
-const KEY = 'dotahub_team_aliases_v2';
+const KEY = 'dotahub_team_aliases_v3';
 const MAX_AGE_MS = 30 * 24 * 3600 * 1000;
 const WINDOW_SECS = 3 * 3600; // série da OpenDota e da Liquipedia começam com até 3 h de diferença
 

@@ -3,6 +3,7 @@
 // transferências recentes de jogadores (Liquipedia). Só título, resumo curto,
 // imagem e link para a matéria original. Cache de 20 min na CDN da Vercel.
 import { fetchLiquipediaApi } from './_lib/liquipediaClient.js';
+import { cleanTeamName } from './_lib/teamName.js';
 
 const STEAM_NEWS = 'https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=570&count=15&maxlength=0&feeds=steam_community_announcements&format=json';
 const DOTABUFF_RSS = 'https://www.dotabuff.com/blog.rss';
@@ -80,7 +81,7 @@ function cellOf(row, cls) {
 const absolute = (src) => (src && !src.startsWith('http') ? `https://liquipedia.net${src}` : src);
 
 function teamSide(cell) {
-  const name = decodeEntities((cell.match(/data-highlighting-class="([^"]+)"/) || [])[1] || '') || null;
+  const name = cleanTeamName(decodeEntities((cell.match(/data-highlighting-class="([^"]+)"/) || [])[1] || '')) || null;
   const dark = cell.match(/team-template-darkmode"[\s\S]*?<img[^>]*src="([^"]+)"/);
   const any = cell.match(/team-template-image-icon[\s\S]*?<img[^>]*src="([^"]+)"/);
   const role = decodeEntities((cell.match(/font-size:85%">\(([^)]+)\)/) || [])[1] || '') || null;
