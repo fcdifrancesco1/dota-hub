@@ -87,7 +87,7 @@ function bracketMatches(brackets) {
     if (!node) return;
     const m = node.match;
     if (m?.matchIds?.length && m.opponents?.length === 2 && m.opponents.every((o) => o?.name)) {
-      out.push({ ids: new Set(m.matchIds.map(String)), a: m.opponents[0], b: m.opponents[1] });
+      out.push({ ids: new Set(m.matchIds.map(String)), idList: m.matchIds.map(String), a: m.opponents[0], b: m.opponents[1], timestamp: m.timestamp || null });
     }
     (node.children || []).forEach(walk);
   };
@@ -143,6 +143,41 @@ const TAB_TO_URL = {
   players: 'jogadores', heroes: 'herois', info: 'informacoes'
 };
 const TAB_FROM_URL = Object.fromEntries(Object.entries(TAB_TO_URL).map(([k, v]) => [v, k]));
+
+/**
+ * Séries do chaveamento da Liquipedia que a lista da OpenDota ainda não tem
+ * (o banco de consultas da OpenDota demora a incluir algumas ligas, como as
+ * classificatórias). Times, placar e data vêm da Liquipedia; os mapas, pelo
+ * número, abrem na página da partida direto da OpenDota.
+ */
+function seriesFromBracket(brackets, known, stage) {
+  const knownIds = new Set(known.flatMap((s) => (s.games || []).map((g) => String(g.match_id))));
+  return bracketMatches(brackets)
+    .filter((m) => !m.idList.some((id) => knownIds.has(id)))
+    .map((m) => {
+      const scoreA = Number(m.a.score) || 0;
+      const scoreB = Number(m.b.score) || 0;
+      const played = m.idList.slice(0, scoreA + scoreB);
+      const wins = Math.max(scoreA, scoreB);
+      return {
+        series_id: null,
+        fromBracket: true,
+        stage,
+        formato: wins >= 3 ? 'BO5' : wins === 1 && scoreA + scoreB === 1 ? 'BO1' : 'BO3',
+        timeA: m.a.name,
+        timeB: m.b.name,
+        logoA: m.a.logo?.dark || null,
+        logoB: m.b.logo?.dark || null,
+        scoreA,
+        scoreB,
+        startTime: m.timestamp,
+        lastMatchTime: m.timestamp,
+        dateStr: m.timestamp ? new Date(m.timestamp * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '',
+        games: played.map((id, idx) => ({ mapNumber: idx + 1, match_id: id }))
+      };
+    })
+    .filter((s) => s.games.length > 0);
+}
 
 const DAY = 86400;
 const isoToSecs = (iso) => (iso ? Date.parse(`${iso}T00:00:00Z`) / 1000 : null);
@@ -264,8 +299,10 @@ export default function TournamentDetailPage() {
     const { list: named, inBracket } = withLiquipediaNames(raw, brackets);
     // A lista da liga vem sem nome de campeonato: usa o desta página
     const all = named.map((x) => (x.stage && x.stage !== 'Torneio Profissional' ? x : { ...x, stage: t.name }));
-    if (!shared) return all;
-    return participants === null ? [] : filterOwnSeries(all, t, participants, inBracket);
+    const own = !shared ? all : participants === null ? [] : filterOwnSeries(all, t, participants, inBracket);
+    // Completa com as séries do chaveamento que a OpenDota ainda não listou
+    return [...own, ...seriesFromBracket(brackets, own, t.name)]
+      .sort((x, y) => (y.startTime || 0) - (x.startTime || 0));
   }, [tournament, tournamentsList, finishedSeries, leagueSeries, shared, participants, brackets]);
 
   // Liga dividida: as estatísticas contam só os mapas deste campeonato, depois
@@ -519,13 +556,13 @@ export default function TournamentDetailPage() {
                       <span className="text-[10px] font-mono text-gray-500 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>
                       <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
                         <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${aWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeA}</span>
-                        <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} className="w-6 h-6 shrink-0" />
+                        <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} logoUrl={s.logoA} className="w-6 h-6 shrink-0" />
                       </div>
                       <span className="font-mono font-black text-sm px-2 sm:px-3 py-1 rounded-lg bg-black/40 border border-white/10 text-white shrink-0 whitespace-nowrap">
                         {s.scoreA} : {s.scoreB}
                       </span>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} className="w-6 h-6 shrink-0" />
+                        <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} logoUrl={s.logoB} className="w-6 h-6 shrink-0" />
                         <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${bWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeB}</span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 shrink-0" />
