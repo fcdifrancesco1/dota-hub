@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import {
   AlertTriangle,
-  ArrowLeft,
   Ban,
   Clock,
   Coins,
@@ -20,6 +19,7 @@ import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
 import { useApp } from '../context/AppContext';
 import { seriesKey } from '../utils/matchRoute';
+import BackButton from '../components/BackButton';
 import { aliasMap, applyAliasesToSeries } from '../utils/teamAliases';
 import { useOpenTeam } from '../utils/teamRoute';
 import { seriesStatus } from '../utils/seriesStatus';
@@ -172,18 +172,11 @@ export default function MatchDetailPage() {
   const openTeam = useOpenTeam();
   const match = activeMatchId ? withTeamNames(matchData[activeMatchId], series?.teamNames) : undefined;
 
-  // Volta para a página de onde a série foi aberta (campeonato, time...); link direto volta para Partidas
-  const backTo = location.state?.from?.path ? location.state.from : { path: '/partidas', label: 'Partidas' };
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
-      <Link
-        to={backTo.path}
-        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 transition-colors mb-5"
-      >
-        <ArrowLeft className="w-4 h-4 shrink-0" />
-        <span>Voltar para {backTo.label}</span>
-      </Link>
+      {/* Volta para a página anterior; link direto volta para Partidas */}
+      <BackButton fallbackPath="/partidas" fallbackLabel="Partidas" />
 
       {!series ? (
         seriesError ? (

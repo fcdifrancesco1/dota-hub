@@ -1,22 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Calendar, MapPin, DollarSign, Search, ChevronRight, Users, Wifi, Crown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { fetchTournaments, fetchTournamentArchive } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 import { formatDateRange, formatPrize, tierLabel, statusLabel, sortTournaments, leagueFromDatabase, tournamentPath } from '../utils/tournamentFormat';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const FIRST_YEAR = 2011; // primeiro ano com campeonatos no histórico da Liquipedia
+const STATUS_TO_URL = { ongoing: 'andamento', upcoming: 'proximos', finished: 'encerrados' };
+const STATUS_FROM_URL = Object.fromEntries(Object.entries(STATUS_TO_URL).map(([k, v]) => [v, k]));
 const YEARS = Array.from({ length: CURRENT_YEAR - FIRST_YEAR + 1 }, (_, i) => CURRENT_YEAR - i);
 import { fetchLeagues, isSupabaseConfigured } from '../services/supabase';
 
 export default function TournamentsPage() {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'ongoing' | 'upcoming' | 'finished'
+  // Filtro e ano ficam no endereço (?status=encerrados&ano=2025): ao voltar de um campeonato, a lista reabre igual
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusFilter = STATUS_FROM_URL[searchParams.get('status')] || 'all'; // 'all' | 'ongoing' | 'upcoming' | 'finished'
+  const updateParams = (changes) => {
+    const next = new URLSearchParams(searchParams);
+    for (const [k, v] of Object.entries(changes)) (v === null ? next.delete(k) : next.set(k, v));
+    setSearchParams(next, { replace: true });
+  };
+  const setStatusFilter = (status) => updateParams({ status: status === 'all' ? null : STATUS_TO_URL[status] });
   const [search, setSearch] = useState('');
   // Histórico de encerrados (Tier 1 e 2) por ano
-  const [archiveYear, setArchiveYear] = useState(CURRENT_YEAR);
+  const yearParam = Number(searchParams.get('ano'));
+  const archiveYear = yearParam >= FIRST_YEAR && yearParam <= CURRENT_YEAR ? yearParam : CURRENT_YEAR;
+  const setArchiveYear = (year) => updateParams({ ano: year === CURRENT_YEAR ? null : String(year) });
   const [archive, setArchive] = useState({});
   const { theme } = useTheme();
 

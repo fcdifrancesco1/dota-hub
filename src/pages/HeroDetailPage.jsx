@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
-  ArrowLeft,
   Sparkles,
   Zap,
   Shield,
@@ -13,6 +12,7 @@ import {
 } from 'lucide-react';
 import { fetchHeroFullDetails, getHeroImg, getHeroName } from '../services/api';
 import { useApp } from '../context/AppContext';
+import BackButton from '../components/BackButton';
 
 export default function HeroDetailPage() {
   const { id } = useParams();
@@ -35,13 +35,7 @@ export default function HeroDetailPage() {
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
       {/* VOLTAR */}
-      <Link
-        to="/herois"
-        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 transition-colors mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Voltar para Meta de Heróis</span>
-      </Link>
+      <BackButton fallbackPath="/herois" fallbackLabel="Meta de Heróis" className="mb-6" />
 
       {/* HERO BANNER */}
       <div className="rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">

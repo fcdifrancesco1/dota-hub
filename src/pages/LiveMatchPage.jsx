@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Radio } from 'lucide-react';
+import { Loader2, Radio } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import LiveMatchDetail from '../components/LiveMatchDetail';
 import { liveMatchKey } from '../utils/liveMatchRoute';
 import { useOpenTeam } from '../utils/teamRoute';
+import BackButton from '../components/BackButton';
 
 export default function LiveMatchPage() {
   const { matchKey } = useParams();
@@ -50,13 +51,7 @@ export default function LiveMatchPage() {
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
-      <Link
-        to="/ao-vivo"
-        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 transition-colors mb-5"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Voltar para Central Ao Vivo</span>
-      </Link>
+      <BackButton fallbackPath="/ao-vivo" fallbackLabel="Central Ao Vivo" />
 
       {game ? (
         <LiveMatchDetail

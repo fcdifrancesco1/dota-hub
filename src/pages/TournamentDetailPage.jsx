@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import {
   Trophy,
   Calendar,
   MapPin,
   DollarSign,
-  ArrowLeft,
   Swords,
   Users,
   Sparkles,
@@ -28,6 +27,7 @@ import TournamentBracket from '../components/TournamentBracket';
 import TournamentTeams from '../components/TournamentTeams';
 import { useApp } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
+import BackButton from '../components/BackButton';
 import { rememberAliases } from '../utils/teamAliases';
 import { useTheme } from '../context/ThemeContext';
 import TeamLogo from '../utils/teamLogos';
@@ -137,6 +137,13 @@ function withLiquipediaNames(list, brackets) {
   return { list: renamed, inBracket };
 }
 
+// Nome das abas no endereço
+const TAB_TO_URL = {
+  matches: 'partidas', teams: 'equipes', standings: 'classificacao', bracket: 'chaveamento',
+  players: 'jogadores', heroes: 'herois', info: 'informacoes'
+};
+const TAB_FROM_URL = Object.fromEntries(Object.entries(TAB_TO_URL).map(([k, v]) => [v, k]));
+
 const DAY = 86400;
 const isoToSecs = (iso) => (iso ? Date.parse(`${iso}T00:00:00Z`) / 1000 : null);
 
@@ -157,14 +164,21 @@ function filterOwnSeries(list, t, participants, inBracket = new Set()) {
 
 export default function TournamentDetailPage() {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const pageParam = searchParams.get('p');
   const { tournamentsList, finishedSeries, upcomingMatches, constants } = useApp();
   const openSeries = useOpenSeries();
   const { theme } = useTheme();
   const [tournament, setTournament] = useState(null);
   const [notFound, setNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'standings' | 'bracket' | 'heroes' | 'info'
+  // Aba aberta fica no endereço (?aba=chaveamento), para o "Voltar" de uma partida reabrir a mesma aba
+  const activeTab = TAB_FROM_URL[searchParams.get('aba')] || 'matches';
+  const setActiveTab = (tab) => {
+    const next = new URLSearchParams(searchParams);
+    if (tab === 'matches') next.delete('aba');
+    else next.set('aba', TAB_TO_URL[tab] || tab);
+    setSearchParams(next, { replace: true });
+  };
   const [standings, setStandings] = useState([]);
   const [brackets, setBrackets] = useState([]);
   const [heroStats, setHeroStats] = useState(null);
@@ -295,9 +309,7 @@ export default function TournamentDetailPage() {
   if (notFound) {
     return (
       <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
-        <Link to="/campeonatos" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 mb-6">
-          <ArrowLeft className="w-4 h-4" /> Voltar para Campeonatos
-        </Link>
+        <BackButton fallbackPath="/campeonatos" fallbackLabel="Campeonatos" className="mb-6" />
         <div className="bg-surface border border-line rounded-2xl p-10 text-center text-sm text-gray-400">
           Campeonato não encontrado.
         </div>
@@ -339,13 +351,7 @@ export default function TournamentDetailPage() {
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
-      <Link
-        to="/campeonatos"
-        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 transition-colors mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Voltar para Campeonatos</span>
-      </Link>
+      <BackButton fallbackPath="/campeonatos" fallbackLabel="Campeonatos" className="mb-6" />
 
       {/* CABEÇALHO DO CAMPEONATO */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">

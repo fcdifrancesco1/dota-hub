@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Medal, Sigma, Users, MessageSquare, BarChart3, User, Loader2, RefreshCw, LogOut, ExternalLink, ShieldAlert, ChevronRight, Swords, Trophy, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
@@ -70,9 +70,18 @@ export default function ProfilePage() {
   const [linkError, setLinkError] = useState(null);
   const [summary, setSummary] = useState(null);
   const [summaryError, setSummaryError] = useState(false);
-  const [mode, setMode] = useState('normal');
+  // Modo e aba ficam no endereço (?modo=turbo&aba=recordes): ao voltar de uma partida, o perfil reabre igual
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mode = MODES[searchParams.get('modo')] ? searchParams.get('modo') : 'normal';
+  const setParam = (key, value, fallback) => {
+    const next = new URLSearchParams(searchParams);
+    if (value === fallback) next.delete(key); else next.set(key, value);
+    setSearchParams(next, { replace: true });
+  };
+  const setMode = (m) => setParam('modo', m, 'normal');
   const [modeData, setModeData] = useState({});
-  const [view, setView] = useState('resumo');
+  const view = VIEWS.some((v) => v.id === searchParams.get('aba')) ? searchParams.get('aba') : 'resumo';
+  const setView = (v) => setParam('aba', v, 'resumo');
   // Conteúdo das abas extras, por aba e modo (ex.: "totais:turbo")
   const [extra, setExtra] = useState({});
   const [refreshing, setRefreshing] = useState(false);

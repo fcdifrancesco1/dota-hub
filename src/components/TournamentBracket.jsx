@@ -101,7 +101,7 @@ function MatchCard({ match }) {
   return (
     <Wrapper
       type={matchId ? 'button' : undefined}
-      onClick={matchId ? () => navigate(`/partidas/${matchId}`) : undefined}
+      onClick={matchId ? () => navigate(`/partidas/${matchId}`, { state: { from: { label: 'Chaveamento' } } }) : undefined}
       className={`block text-left bg-surface border border-line rounded-lg overflow-hidden shadow-sm shrink-0 ${
         matchId ? 'hover:border-amber-500/60 transition-colors cursor-pointer' : ''
       }`}
