@@ -6,7 +6,7 @@ import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
 import { fetchTournaments } from '../../services/api';
-import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize } from '../../utils/tournamentFormat';
+import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize, tournamentPath } from '../../utils/tournamentFormat';
 
 export default function HomeHero() {
   const { upcomingMatches, liveGames } = useApp();
@@ -29,6 +29,8 @@ export default function HomeHero() {
   const featuredTournament = pickFeaturedTournament(tournaments) || headline?.tournament || null;
   const featuredPrize = featuredTournament ? formatPrize(featuredTournament) : null;
   const featuredTier = featuredTournament ? tierLetter(featuredTournament.tier) : null;
+  // Campeonato da partida em destaque (ou o torneio em destaque); sem nenhum, a lista de campeonatos
+  const linkedTournament = headline?.tournament || featuredTournament;
 
   // Contagem regressiva dinâmica para a próxima partida
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
@@ -114,10 +116,11 @@ export default function HomeHero() {
             )}
 
             <Link
-              to="/campeonatos"
+              to={linkedTournament ? tournamentPath(linkedTournament) : '/campeonatos'}
+              title={linkedTournament ? linkedTournament.name : undefined}
               className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-surface-3 hover:bg-surface-3 border border-white/10 hover:border-amber-500/40 text-gray-200 hover:text-white font-bold uppercase tracking-wider text-xs transition-all"
             >
-              <span>Ver Campeonatos</span>
+              <span>{linkedTournament ? 'Ver Campeonato' : 'Ver Campeonatos'}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
