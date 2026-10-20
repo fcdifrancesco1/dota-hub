@@ -18,6 +18,17 @@ import {
 import { fetchPlayerComprehensiveData } from '../services/playerProfile';
 import { useTheme } from '../context/ThemeContext';
 import { medalStyle } from '../utils/medals';
+import { tournamentPath } from '../utils/tournamentFormat';
+
+// Página do campeonato no site a partir da página dele na Liquipedia (ex.: "BLAST/SLAM/8")
+function tournamentLinkFromSlug(slug) {
+  if (!slug) return null;
+  let page = slug;
+  try { page = decodeURIComponent(slug); } catch { /* mantém como veio */ }
+  page = page.replace(/_/g, ' ');
+  const id = page.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return id ? tournamentPath({ id, page }) : null;
+}
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
@@ -624,10 +635,18 @@ export default function PlayerDetailPage() {
               <div className="divide-y divide-line">
                 {displayedAchievements.map((item, idx) => {
                   const is1st = item.isChampion;
+                  // Clique leva à página do campeonato (partidas, chaveamento, estatísticas)
+                  const link = tournamentLinkFromSlug(item.tourneySlug);
+                  const open = () => link && navigate(link, { state: { from: { label: 'Títulos' } } });
                   return (
                     <div
                       key={idx}
-                      className="p-5 sm:px-7 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-surface-2/50 transition-colors"
+                      role={link ? 'link' : undefined}
+                      tabIndex={link ? 0 : undefined}
+                      onClick={open}
+                      onKeyDown={(e) => { if (link && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open(); } }}
+                      title={link ? `Abrir ${item.tournament}` : undefined}
+                      className={`p-5 sm:px-7 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-surface-2/50 transition-colors ${link ? 'cursor-pointer' : ''}`}
                     >
                       {/* Lado Esquerdo: Colocação, Torneio e Tier */}
                       <div className="flex items-start gap-4 min-w-0">

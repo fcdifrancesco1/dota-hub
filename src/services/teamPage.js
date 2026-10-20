@@ -40,6 +40,20 @@ export async function resolveTeamId(idOrName) {
       setCache(key, found.team_id);
       return found.team_id;
     }
+  } catch { /* segue para o banco de consultas */ }
+  // A lista /teams só traz ~1000 times ativos: procura o nome exato no banco da
+  // OpenDota e fica com o time que jogou por último (ex.: Zero Tenacity)
+  try {
+    const name = raw.toLowerCase().replace(/'/g, "''");
+    const sql = `SELECT t.team_id, max(m.start_time) AS ultimo FROM teams t
+      LEFT JOIN matches m ON m.radiant_team_id = t.team_id OR m.dire_team_id = t.team_id
+      WHERE lower(t.name) = '${name}' GROUP BY t.team_id ORDER BY ultimo DESC NULLS LAST LIMIT 1`;
+    const data = await getJson(`${OPENDOTA_BASE}/explorer?sql=${encodeURIComponent(sql)}`, 15000);
+    const id = data?.rows?.[0]?.team_id;
+    if (id) {
+      setCache(key, id);
+      return id;
+    }
   } catch { /* segue sem ID */ }
   return null;
 }

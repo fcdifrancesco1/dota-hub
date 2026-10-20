@@ -7,7 +7,6 @@ import {
   ArrowUpDown,
   ChevronRight,
   Loader2,
-  Sparkles,
   Globe,
   ArrowUp,
   ArrowDown,
@@ -84,10 +83,10 @@ export default function TeamsPage() {
   const top2 = teams[1];
   const top3 = teams[2];
 
+  // Pelo ID da OpenDota quando conhecido; senão pelo nome (a página do time resolve o ID)
   const handleTeamClick = (team) => {
-    if (team?.teamId) {
-      navigate(`/times/${team.teamId}`);
-    }
+    if (team?.teamId) navigate(`/times/${team.teamId}`);
+    else if (team?.name) navigate(`/times/${encodeURIComponent(team.name)}`);
   };
 
   const renderMovement = (change) => {
@@ -156,8 +155,8 @@ export default function TeamsPage() {
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-slate-400/10 blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="px-3 py-1 rounded-full border font-mono font-black text-xs uppercase flex items-center gap-1.5" style={medalStyle(2)}>
-                    <span>#2 Prata</span>
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-black text-sm" style={medalStyle(2)} aria-label="2º lugar">
+                    <span>2</span>
                   </span>
                   <div className="flex items-center gap-2">
                     {renderMovement(top2.change)}
@@ -211,9 +210,8 @@ export default function TeamsPage() {
             <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="px-3.5 py-1 rounded-full border font-mono font-black text-xs uppercase flex items-center gap-1.5" style={medalStyle(1)}>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>#1 Líder Mundial</span>
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-black text-sm" style={medalStyle(1)} aria-label="1º lugar">
+                  <span>1</span>
                 </span>
                 <div className="flex items-center gap-2">
                   {renderMovement(top1.change)}
@@ -270,8 +268,8 @@ export default function TeamsPage() {
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-amber-700/10 blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="px-3 py-1 rounded-full border font-mono font-black text-xs uppercase flex items-center gap-1.5" style={medalStyle(3)}>
-                    <span>#3 Bronze</span>
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-black text-sm" style={medalStyle(3)} aria-label="3º lugar">
+                    <span>3</span>
                   </span>
                   <div className="flex items-center gap-2">
                     {renderMovement(top3.change)}
