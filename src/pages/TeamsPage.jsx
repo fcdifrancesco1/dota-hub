@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { fetchTeamsRanking } from '../services/teamsRanking';
 import TeamLogo from '../utils/teamLogos';
+import { medalStyle } from '../utils/medals';
 
 export default function TeamsPage() {
   const navigate = useNavigate();
@@ -155,7 +156,7 @@ export default function TeamsPage() {
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-slate-400/10 blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="px-3 py-1 rounded-full bg-slate-300/20 text-slate-300 border border-slate-300/40 font-mono font-black text-xs uppercase flex items-center gap-1.5 shadow-sm">
+                  <span className="px-3 py-1 rounded-full border font-mono font-black text-xs uppercase flex items-center gap-1.5" style={medalStyle(2)}>
                     <span>#2 Prata</span>
                   </span>
                   <div className="flex items-center gap-2">
@@ -210,7 +211,7 @@ export default function TeamsPage() {
             <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="px-3.5 py-1 rounded-full bg-amber-500 text-on-accent font-mono font-black text-xs uppercase flex items-center gap-1.5 shadow-lg shadow-amber-500/25">
+                <span className="px-3.5 py-1 rounded-full border font-mono font-black text-xs uppercase flex items-center gap-1.5" style={medalStyle(1)}>
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>#1 Líder Mundial</span>
                 </span>
@@ -269,7 +270,7 @@ export default function TeamsPage() {
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-amber-700/10 blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="px-3 py-1 rounded-full bg-amber-700/20 text-amber-600 dark:text-amber-400 border border-amber-700/40 font-mono font-black text-xs uppercase flex items-center gap-1.5 shadow-sm">
+                  <span className="px-3 py-1 rounded-full border font-mono font-black text-xs uppercase flex items-center gap-1.5" style={medalStyle(3)}>
                     <span>#3 Bronze</span>
                   </span>
                   <div className="flex items-center gap-2">
@@ -412,14 +413,9 @@ export default function TeamsPage() {
                       <td className="p-4 pl-6 text-center font-mono">
                         <span
                           className={`inline-flex items-center justify-center w-7 h-7 rounded-xl font-black text-xs ${
-                            isTop1
-                              ? 'bg-amber-500 text-on-accent shadow-md shadow-amber-500/30'
-                              : isTop2
-                              ? 'bg-slate-300/30 text-slate-200 border border-slate-300/50'
-                              : isTop3
-                              ? 'bg-amber-700/30 text-amber-400 border border-amber-700/50'
-                              : 'text-gray-400 bg-surface-2'
+                            isTop1 || isTop2 || isTop3 ? 'border' : 'text-gray-400 bg-surface-2'
                           }`}
+                          style={medalStyle(t.rank) || undefined}
                         >
                           {t.rank}
                         </span>

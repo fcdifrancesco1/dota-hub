@@ -16,6 +16,8 @@ import {
   DollarSign
 } from 'lucide-react';
 import { fetchPlayerComprehensiveData } from '../services/playerProfile';
+import { useTheme } from '../context/ThemeContext';
+import { medalStyle } from '../utils/medals';
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
@@ -67,6 +69,7 @@ export default function PlayerDetailPage() {
 
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('heroes'); // 'heroes' | 'matches' | 'badges'
   const [titleFilter, setTitleFilter] = useState('champions'); // 'champions' | 'podiums' | 'tier1' | 'all'
 
@@ -518,7 +521,7 @@ export default function PlayerDetailPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="tilt-card glass-panel rounded-3xl p-5 border border-amber-500/40 shadow-xl bg-gradient-to-br from-amber-500/10 to-transparent">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/30">
+                <div className="p-3 rounded-2xl border" style={medalStyle(1)}>
                   <Trophy className="w-5 h-5" />
                 </div>
                 <div>
@@ -621,8 +624,6 @@ export default function PlayerDetailPage() {
               <div className="divide-y divide-line">
                 {displayedAchievements.map((item, idx) => {
                   const is1st = item.isChampion;
-                  const is2nd = /2(?:nd)?/i.test(item.placement);
-                  const is3rd = /3(?:rd)?/i.test(item.placement);
                   return (
                     <div
                       key={idx}
@@ -630,24 +631,29 @@ export default function PlayerDetailPage() {
                     >
                       {/* Lado Esquerdo: Colocação, Torneio e Tier */}
                       <div className="flex items-start gap-4 min-w-0">
-                        <div
-                          className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-md ${
-                            is1st
-                              ? 'bg-amber-500 text-on-accent font-black shadow-amber-500/25 border-2 border-amber-300'
-                              : is2nd
-                              ? 'bg-slate-300/20 text-slate-200 border border-slate-300/40'
-                              : is3rd
-                              ? 'bg-amber-700/20 text-amber-500 border border-amber-700/40'
-                              : 'bg-surface-2 text-gray-400 border border-line'
-                          }`}
-                        >
-                          {is1st ? (
-                            <Trophy className="w-5 h-5 text-on-accent" />
-                          ) : (
-                            <Medal className="w-5 h-5" />
-                          )}
-                          <span className="text-[10px] font-mono font-black leading-tight mt-0.5">
-                            {item.placement}
+                        <div className="flex flex-col items-center gap-1.5 shrink-0 w-14">
+                          <div className="w-12 h-12 rounded-2xl bg-surface-2 border border-line flex items-center justify-center p-1.5 shadow-sm">
+                            {item.tournamentIcon ? (
+                              <img
+                                src={item.tournamentIcon[theme] || item.tournamentIcon.dark || item.tournamentIcon.light}
+                                alt={item.tournament}
+                                referrerPolicy="no-referrer"
+                                loading="lazy"
+                                className="max-w-full max-h-full object-contain"
+                              />
+                            ) : is1st ? (
+                              <Trophy className="w-5 h-5 text-gray-400" />
+                            ) : (
+                              <Medal className="w-5 h-5 text-gray-400" />
+                            )}
+                          </div>
+                          <span
+                            className={`px-1.5 py-px rounded-md border text-[10px] font-mono font-black leading-tight whitespace-nowrap ${
+                              medalStyle(item.placement) ? '' : 'bg-surface-2 text-gray-400 border-line'
+                            }`}
+                            style={medalStyle(item.placement) || undefined}
+                          >
+                            {item.placement.replace(/&#160;/g, ' ')}
                           </span>
                         </div>
 

@@ -33,7 +33,7 @@ export async function getProPlayerInfo(accountId) {
 // teamName: o elenco do time na Liquipedia mostra qual é a página do jogador lá
 export async function fetchPlayerAchievements(playerName, accountId, teamName) {
   if (!playerName) return { titles: [], allAchievements: [], summary: {} };
-  const key = `player_achievements_v4_${accountId || playerName}`;
+  const key = `player_achievements_v5_${accountId || playerName}`;
   const cached = getCached(key, 60 * 60 * 1000);
   if (cached) return cached;
 
@@ -55,7 +55,7 @@ export async function fetchPlayerAchievements(playerName, accountId, teamName) {
 
 export async function fetchPlayerComprehensiveData(accountId) {
   if (!accountId) return null;
-  const key = `player_full_profile_v4_${accountId}`;
+  const key = `player_full_profile_v5_${accountId}`;
   const cached = getCached(key, PLAYER_TTL);
   if (cached) return cached;
 

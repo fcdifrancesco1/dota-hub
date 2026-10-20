@@ -90,6 +90,26 @@ export function parsePlayerAchievements(html) {
       prize = prizeM ? prizeM[1] : cleanText(prizeTd);
     }
 
+    // 8. Logo oficial do campeonato (variantes para fundo claro e escuro)
+    const leagueIcon = (mode) => {
+      const span = row.match(new RegExp(`league-icon-small-image ${mode}"[\\s\\S]*?<img[^>]*>`, 'i'));
+      if (!span) return null;
+      const img = span[0].match(/<img[^>]*>/i)[0];
+      const x2 = img.match(/srcset="[^"]*?,\s*([^\s"]+)\s+2x"/i);
+      const src = (x2 || img.match(/src="([^"]+)"/i) || [])[1];
+      return src ? (src.startsWith('http') ? src : `https://liquipedia.net${src}`) : null;
+    };
+    // Campeonatos com logo única para os dois temas: <span class="league-icon-small-image">
+    const iconAll = (() => {
+      const span = row.match(/league-icon-small-image"[\s\S]*?<img[^>]*>/i);
+      const img = span && span[0].match(/<img[^>]*>/i)[0];
+      const src = img && (img.match(/srcset="[^"]*?,\s*([^\s"]+)\s+2x"/i) || img.match(/src="([^"]+)"/i) || [])[1];
+      return src ? (src.startsWith('http') ? src : `https://liquipedia.net${src}`) : null;
+    })();
+    const iconLight = leagueIcon('lightmode') || iconAll;
+    const iconDark = leagueIcon('darkmode') || iconLight;
+    const tournamentIcon = iconLight || iconDark ? { light: iconLight || iconDark, dark: iconDark } : null;
+
     const isChampion = /^1(?:st)?$/i.test(placement) || placement === '1';
     const isPodium = /^(1(?:st)?|2(?:nd)?|3(?:rd)?)$/i.test(placement);
 
@@ -102,6 +122,7 @@ export function parsePlayerAchievements(html) {
         tier,
         tournament,
         tourneySlug,
+        tournamentIcon,
         teamName: teamName || 'Equipe Profissional',
         teamLogo,
         score,
