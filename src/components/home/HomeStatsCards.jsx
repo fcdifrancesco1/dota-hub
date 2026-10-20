@@ -100,18 +100,18 @@ export default function HomeStatsCards() {
   return (
     <div className="mb-10">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex flex-wrap items-center gap-2">
-          <span className="w-1.5 h-4 bg-blue-600 dark:bg-amber-500 rounded-full"></span>
+        <h2 className="text-sm font-black uppercase tracking-wider text-white flex flex-wrap items-center gap-2">
+          <span className="w-1.5 h-4 bg-amber-500 rounded-full"></span>
           <span>Estatísticas do {tournament.name}</span>
           {tierLetter(tournament.tier) && (
-            <span className="px-2 py-0.5 rounded bg-blue-500/10 dark:bg-amber-500/10 border border-blue-500/20 dark:border-amber-500/20 text-blue-700 dark:text-amber-400 text-[10px] font-black">
+            <span className="px-2 py-0.5 rounded bg-surface-2 border border-line text-amber-500 text-[10px] font-black">
               {tierLetter(tournament.tier)}
             </span>
           )}
         </h2>
         <Link
           to={tournamentPath(tournament)}
-          className="text-xs font-bold text-blue-600 dark:text-amber-400 hover:text-blue-700 dark:hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider transition-colors"
+          className="text-xs font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 uppercase tracking-wider transition-colors"
         >
           <span>Ver campeonato</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -124,13 +124,13 @@ export default function HomeStatsCards() {
           return (
             <div
               key={card.title}
-              className="tilt-card glass-panel rounded-2xl border border-slate-200/80 dark:border-white/10 p-3 sm:p-4 transition-all hover:scale-[1.02] shadow-sm group"
+              className="tilt-card glass-panel rounded-2xl border border-line p-3 sm:p-4 transition-all hover:scale-[1.02] shadow-sm group"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 leading-tight">
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-gray-400 leading-tight">
                   {card.title}
                 </span>
-                <div className={`p-1.5 rounded-lg bg-slate-100 dark:bg-black/40 ${card.iconColor} shadow-inner`}>
+                <div className={`p-1.5 rounded-lg bg-surface-2 border border-line ${card.iconColor} shadow-inner`}>
                   <Icon className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -140,15 +140,15 @@ export default function HomeStatsCards() {
                   <img
                     src={card.heroImg}
                     alt={card.value}
-                    className="w-10 h-7 shrink-0 object-cover rounded shadow border border-slate-200 dark:border-white/10"
+                    className="w-10 h-7 shrink-0 object-cover rounded shadow border border-line"
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 )}
                 <div className="min-w-0">
-                  <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight break-words line-clamp-2">
+                  <div className="text-base sm:text-xl font-black text-white leading-tight break-words line-clamp-2">
                     {card.value}
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-gray-400 font-medium mt-1 leading-snug">
+                  <div className="text-[10px] text-gray-400 font-medium mt-1 leading-snug">
                     {card.subtitle}
                   </div>
                 </div>

@@ -12,7 +12,7 @@ export default function Home() {
   const { loading } = useApp();
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-gray-100 pb-16">
+    <div className="min-h-screen text-white pb-16">
       {/* 1. Faixa de Partidas Ao Vivo */}
       <LiveTickerStrip />
 

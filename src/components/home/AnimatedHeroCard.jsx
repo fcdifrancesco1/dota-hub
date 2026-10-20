@@ -87,13 +87,13 @@ export default function AnimatedHeroCard() {
       <div className="flex items-center justify-between px-1 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500 animate-spin-slow" />
-          <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-100">
+          <span className="text-xs font-black uppercase tracking-wider text-white">
             Destaque do Meta (Card Animado)
           </span>
         </div>
 
         {/* BOTÕES DE SELEÇÃO RÁPIDA DE HERÓIS */}
-        <div className="flex items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-slate-200/70 dark:bg-white/5 border border-slate-300/60 dark:border-white/10">
+        <div className="flex items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2 border border-line">
           {HERO_ROSTER.map((h) => {
             const isActive = selectedHero.key === h.key;
             return (
@@ -103,8 +103,8 @@ export default function AnimatedHeroCard() {
                 onClick={() => handleSelectHero(h)}
                 className={`px-2.5 py-1 rounded-lg transition-all ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm font-black'
-                    : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-blue-600 text-on-accent shadow-sm font-black'
+                    : 'text-gray-400 hover:text-white hover:bg-surface-3'
                 }`}
               >
                 {h.name}
@@ -119,18 +119,18 @@ export default function AnimatedHeroCard() {
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="tilt-card glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden group cursor-pointer shadow-xl"
+        className="tilt-card glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden group cursor-pointer shadow-xl border border-line"
       >
         <div className="holo-sheen" />
 
         {/* TOPO: BADGE E STATUS */}
         <div className="flex items-center justify-between mb-4 relative z-20">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-sm">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-surface-2 text-blue-600 dark:text-blue-400 border border-line shadow-sm">
             <Flame className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>HERÓI MAIS DISPUTADO DO META</span>
           </div>
 
-          <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/60 shadow-sm">
+          <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-surface-2 text-amber-500 border border-line shadow-sm">
             {selectedHero.tier}
           </span>
         </div>
@@ -176,31 +176,31 @@ export default function AnimatedHeroCard() {
           <div className="md:col-span-7 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h4 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                <h4 className="text-3xl font-black tracking-tight text-white">
                   {selectedHero.name}
                 </h4>
-                <span className="text-xs font-semibold text-slate-500 dark:text-gray-400">
+                <span className="text-xs font-semibold text-gray-400">
                   {selectedHero.role}
                 </span>
               </div>
 
               <div className="text-right">
-                <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 font-mono block">
+                <span className="text-2xl font-black text-emerald-500 font-mono block">
                   {selectedHero.winrate}
                 </span>
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
                   Taxa de Vitória
                 </span>
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
               {selectedHero.description}
             </p>
 
-            <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs shadow-sm">
-              <span className="text-slate-500 dark:text-gray-400 font-medium">Jogador Especialista:</span>
-              <span className="font-bold text-blue-700 dark:text-blue-400">
+            <div className="p-3 rounded-2xl bg-surface-2 border border-line flex items-center justify-between text-xs shadow-sm">
+              <span className="text-gray-400 font-medium">Jogador Especialista:</span>
+              <span className="font-bold text-blue-600 dark:text-amber-500">
                 {selectedHero.specialist}
               </span>
             </div>
@@ -208,7 +208,7 @@ export default function AnimatedHeroCard() {
             <div className="pt-1">
               <Link
                 to="/herois"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-md hover:shadow-lg hover:scale-[1.02]"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all text-on-accent bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:scale-[1.02]"
               >
                 <span>Ver Enciclopédia de Heróis</span>
                 <ChevronRight className="w-4 h-4" />

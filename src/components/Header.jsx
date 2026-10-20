@@ -54,7 +54,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 glass-panel border-b border-slate-200/80 dark:border-white/10 transition-all">
+      <header className="sticky top-0 z-50 glass-panel border-b border-line transition-all">
         <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* LOGO & BRAND: volta para o hub HanG0V3R (a página inicial do Dota fica em "Início") */}
@@ -74,14 +74,14 @@ export default function Header() {
               <span className="text-[10px] font-black tracking-widest text-blue-600 dark:text-amber-500 uppercase leading-none">
                 Competitive
               </span>
-              <span className="text-base sm:text-lg font-black tracking-wider text-slate-900 dark:text-white uppercase leading-tight font-serif">
+              <span className="text-base sm:text-lg font-black tracking-wider text-white uppercase leading-tight font-serif">
                 {SITE_CONFIG.name}
               </span>
             </div>
           </a>
 
           {/* DESKTOP NAVIGATION */}
-          <nav className="hidden xl:flex items-center gap-1 bg-slate-100/80 dark:bg-white/5 px-2 py-1.5 rounded-2xl border border-slate-200/80 dark:border-white/10">
+          <nav className="hidden xl:flex items-center gap-1 bg-surface-2 px-2 py-1.5 rounded-2xl border border-line">
             {navLinks.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.to || 
@@ -93,11 +93,11 @@ export default function Header() {
                   to={item.to}
                   className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 font-black'
-                      : 'text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10'
+                      ? 'bg-blue-600 text-on-accent shadow-md shadow-blue-500/25 font-black'
+                      : 'text-gray-400 hover:text-white hover:bg-surface-3'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-blue-600 dark:text-amber-400'}`} />
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-on-accent' : 'text-blue-600 dark:text-amber-400'}`} />
                   <span>{item.label}</span>
 
                   {/* Badge Ao Vivo */}
@@ -114,7 +114,7 @@ export default function Header() {
               onClick={refreshData}
               disabled={loadingRefresh}
               title={`Atualizado às ${lastUpdated || 'recentemente'}. Clique para atualizar.`}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-amber-400 transition-all disabled:opacity-50 shadow-sm"
+              className="p-2 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white transition-all disabled:opacity-50 shadow-sm"
             >
               <RefreshCw className={`w-4 h-4 ${loadingRefresh ? 'animate-spin text-blue-600 dark:text-amber-400' : ''}`} />
             </button>
@@ -124,7 +124,7 @@ export default function Header() {
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'}
               aria-label={theme === 'dark' ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-amber-400 transition-all shadow-sm"
+              className="p-2 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white transition-all shadow-sm"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
@@ -132,7 +132,7 @@ export default function Header() {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-200 hover:text-slate-900 dark:hover:text-white"
+              className="xl:hidden p-2 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white"
               aria-label="Abrir menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -151,21 +151,21 @@ export default function Header() {
           />
 
           {/* Drawer Menu */}
-          <div className="fixed inset-y-0 right-0 w-full max-w-xs glass-panel bg-white/95 dark:bg-canvas/95 border-l border-slate-200 dark:border-white/10 p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+          <div className="fixed inset-y-0 right-0 w-full max-w-xs glass-panel border-l border-line p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
             <div>
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-6 border-b border-slate-200/80 dark:border-white/10">
+              <div className="flex items-center justify-between pb-6 border-b border-line">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
                     <Flame className="w-4 h-4 text-blue-600 dark:text-amber-400" />
                   </div>
-                  <span className="font-serif font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
+                  <span className="font-serif font-black text-white uppercase tracking-wider text-sm">
                     {SITE_CONFIG.name}
                   </span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white bg-slate-100 dark:bg-white/5"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-white bg-surface-2"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -185,12 +185,12 @@ export default function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
                         isActive
-                          ? 'bg-blue-600 text-white font-black shadow-md shadow-blue-500/25'
-                          : 'text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-950 dark:hover:text-white'
+                          ? 'bg-blue-600 text-on-accent font-black shadow-md shadow-blue-500/25'
+                          : 'text-gray-400 hover:text-white hover:bg-surface-2'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-blue-600 dark:text-amber-400'}`} />
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-on-accent' : 'text-blue-600 dark:text-amber-400'}`} />
                         <span>{item.label}</span>
                       </div>
                       {item.badge > 0 && <LiveBadge count={item.badge} />}
@@ -201,8 +201,8 @@ export default function Header() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="pt-6 border-t border-slate-200/80 dark:border-white/10 flex flex-col gap-3">
-              <div className="text-[11px] text-slate-500 dark:text-gray-400 text-center">
+            <div className="pt-6 border-t border-line flex flex-col gap-3">
+              <div className="text-[11px] text-gray-400 text-center">
                 Última sincronização: {lastUpdated || '--:--'}
               </div>
             </div>

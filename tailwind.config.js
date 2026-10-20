@@ -14,7 +14,7 @@ import plugin from 'tailwindcss/plugin';
  */
 
 // Paletas do Tailwind que viram variáveis (as que o projeto usa)
-const THEMED_PALETTES = ['gray', 'slate', 'amber', 'emerald', 'rose', 'red', 'cyan', 'purple', 'blue'];
+const THEMED_PALETTES = ['gray', 'amber', 'emerald', 'rose', 'red', 'cyan', 'purple', 'blue'];
 const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 
 // Tokens semânticos de superfície (substituem os hex fixos como bg-[#0C0E14])
@@ -48,10 +48,6 @@ const LIGHT = {
   white: '#18202B',
   black: '#E6EAF0',
   gray: {
-    50: '#0E141C', 100: '#1F2630', 200: '#2A323C', 300: '#3B4450', 400: '#4F5863',
-    500: '#5F6873', 600: '#687180', 700: '#B4BAC2', 800: '#D5DAE0', 900: '#E9ECF0', 950: '#F4F6F9'
-  },
-  slate: {
     50: '#0E141C', 100: '#1F2630', 200: '#2A323C', 300: '#3B4450', 400: '#4F5863',
     500: '#5F6873', 600: '#687180', 700: '#B4BAC2', 800: '#D5DAE0', 900: '#E9ECF0', 950: '#F4F6F9'
   },

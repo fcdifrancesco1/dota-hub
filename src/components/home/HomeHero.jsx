@@ -79,16 +79,16 @@ export default function HomeHero() {
             <span>{featuredTournament ? `Torneio em Destaque${featuredTier ? ` • ${featuredTier}` : ''}` : 'Dota 2 Competitivo'}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight font-serif leading-tight">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white uppercase tracking-tight font-serif leading-tight">
             {featuredTournament ? featuredTournament.name : 'Cenário profissional de Dota 2'}
           </h1>
 
-          <p className="text-slate-600 dark:text-gray-300 text-sm sm:text-base max-w-xl leading-relaxed">
+          <p className="text-gray-300 text-sm sm:text-base max-w-xl leading-relaxed">
             {featuredTournament ? (
               <>
                 Acompanhe em tempo real as potências mundiais de Dota 2 disputando o título
                 {featuredPrize ? (
-                  <> e a premiação de <span className="text-amber-600 dark:text-amber-400 font-bold">{featuredPrize}</span>.</>
+                  <> e a premiação de <span className="text-amber-500 font-bold">{featuredPrize}</span>.</>
                 ) : '.'}
               </>
             ) : (
@@ -101,17 +101,17 @@ export default function HomeHero() {
             {hasLive ? (
               <button
                 onClick={() => openLiveMatch(liveGames[0])}
-                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black uppercase tracking-wider text-xs shadow-lg shadow-red-900/30 hover:scale-105 transition-all"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-red-900/30 hover:scale-105 transition-all"
               >
-                <Radio className="w-4 h-4 animate-pulse text-white" />
+                <Radio className="w-4 h-4 animate-pulse text-on-accent" />
                 <span>Assistir Ao Vivo Agora</span>
               </button>
             ) : (
               <Link
                 to="/ao-vivo"
-                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black uppercase tracking-wider text-xs shadow-lg shadow-blue-600/30 hover:scale-105 transition-all"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-blue-600/30 hover:scale-105 transition-all"
               >
-                <Radio className="w-4 h-4 text-white" />
+                <Radio className="w-4 h-4 text-on-accent" />
                 <span>Central Ao Vivo</span>
               </Link>
             )}
@@ -119,7 +119,7 @@ export default function HomeHero() {
             <Link
               to={linkedTournament ? tournamentPath(linkedTournament) : '/campeonatos'}
               title={linkedTournament ? linkedTournament.name : undefined}
-              className="flex items-center gap-2 px-5 py-3.5 rounded-xl glass-panel hover:bg-slate-200/50 dark:hover:bg-white/10 border border-slate-300/80 dark:border-white/15 text-slate-800 dark:text-gray-200 hover:text-slate-950 dark:hover:text-white font-bold uppercase tracking-wider text-xs transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line hover:border-amber-500/40 text-white font-bold uppercase tracking-wider text-xs transition-all shadow-sm"
             >
               <span>{linkedTournament ? 'Ver Campeonato' : 'Ver Campeonatos'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -128,29 +128,29 @@ export default function HomeHero() {
         </div>
 
         {/* Lado Direito: Próximo Confronto com Contagem Regressiva */}
-        <div className="lg:col-span-5 min-w-0 tilt-card glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-200/80 dark:border-white/10">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-white/10 text-xs">
-            <span className="text-slate-600 dark:text-gray-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
+        <div className="lg:col-span-5 min-w-0 tilt-card bg-surface rounded-2xl p-5 sm:p-6 shadow-xl border border-line">
+          <div className="flex items-center justify-between pb-3 border-b border-line text-xs">
+            <span className="text-gray-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-500" />
               <span>Próxima Grande Partida</span>
             </span>
             {nextMatch && (
-              <span className="text-blue-700 dark:text-amber-400 font-mono font-bold text-[11px] bg-blue-500/10 dark:bg-amber-500/10 px-2 py-0.5 rounded border border-blue-500/20 dark:border-amber-500/20">
+              <span className="text-amber-500 font-mono font-bold text-[11px] bg-surface-2 px-2 py-0.5 rounded border border-line">
                 {nextMatch.formato || 'BO3'}
               </span>
             )}
           </div>
 
           {!nextMatch ? (
-            <div className="py-10 text-center text-xs text-slate-500 dark:text-gray-400">
+            <div className="py-10 text-center text-xs text-gray-400">
               Nenhuma partida profissional agendada no momento.
             </div>
           ) : (
           <>
-          <div className="pt-3 flex items-center justify-center gap-2 text-[11px] font-semibold text-blue-700 dark:text-amber-400/90">
+          <div className="pt-3 flex items-center justify-center gap-2 text-[11px] font-semibold text-amber-500">
             <span className="truncate">{nextMatch.tourneyName}</span>
             {tierLetter(headline?.tournament?.tier) && (
-              <span className="shrink-0 px-1.5 py-0.5 rounded bg-blue-500/10 dark:bg-amber-500/10 border border-blue-500/20 dark:border-amber-500/20 text-[9px] font-black uppercase">
+              <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-2 border border-line text-[9px] font-black uppercase">
                 {tierLetter(headline.tournament.tier)}
               </span>
             )}
@@ -160,61 +160,61 @@ export default function HomeHero() {
           <div className="py-5 flex items-center justify-between gap-2 sm:gap-4">
             {/* Time 1 */}
             <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2 flex items-center justify-center mb-2 shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center mb-2 shadow-sm">
                 <TeamLogo teamName={nextMatch.timeA} logoUrl={nextMatch.logoA} className="w-10 h-10" />
               </div>
-              <span className="w-full text-sm font-black text-slate-900 dark:text-white leading-tight break-words line-clamp-2">
+              <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
                 {nextMatch.timeA}
               </span>
             </div>
 
             {/* VS */}
             <div className="flex flex-col items-center shrink-0">
-              <span className="text-xs font-black text-blue-600 dark:text-amber-500 uppercase tracking-widest bg-blue-50 dark:bg-amber-500/10 px-3 py-1 rounded-full border border-blue-200 dark:border-amber-500/20 shadow-sm">
+              <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-surface-2 px-3 py-1 rounded-full border border-line shadow-sm">
                 VS
               </span>
             </div>
 
             {/* Time 2 */}
             <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2 flex items-center justify-center mb-2 shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center mb-2 shadow-sm">
                 <TeamLogo teamName={nextMatch.timeB} logoUrl={nextMatch.logoB} className="w-10 h-10" />
               </div>
-              <span className="w-full text-sm font-black text-slate-900 dark:text-white leading-tight break-words line-clamp-2">
+              <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
                 {nextMatch.timeB}
               </span>
             </div>
           </div>
 
           {/* Relógio / Contagem Regressiva */}
-          <div className="pt-3 border-t border-slate-200/80 dark:border-white/10">
+          <div className="pt-3 border-t border-line">
             {!timeLeft ? (
-              <div className="text-[11px] text-slate-500 dark:text-gray-400 text-center font-semibold py-2">Horário a definir</div>
+              <div className="text-[11px] text-gray-400 text-center font-semibold py-2">Horário a definir</div>
             ) : (timeLeft.hours + timeLeft.minutes + timeLeft.seconds) === 0 ? (
-              <div className="text-[11px] text-red-600 dark:text-red-400 text-center font-black uppercase tracking-wider py-2">Em andamento / começando</div>
+              <div className="text-[11px] text-red-500 text-center font-black uppercase tracking-wider py-2">Em andamento / começando</div>
             ) : (
             <>
-            <div className="text-[10px] text-slate-500 dark:text-gray-400 uppercase tracking-wider text-center mb-2 font-semibold">
+            <div className="text-[10px] text-gray-400 uppercase tracking-wider text-center mb-2 font-semibold">
               Inicia em ({nextMatch.startTime}):
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-white/70 dark:bg-surface-2 border border-slate-200/80 dark:border-line rounded-xl py-2 shadow-sm">
-                <span className="block font-mono text-xl font-black text-slate-900 dark:text-white">
+              <div className="bg-surface-2 border border-line rounded-xl py-2 shadow-sm">
+                <span className="block font-mono text-xl font-black text-white">
                   {String(timeLeft.hours).padStart(2, '0')}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-gray-400 font-bold">Horas</span>
+                <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Horas</span>
               </div>
-              <div className="bg-white/70 dark:bg-surface-2 border border-slate-200/80 dark:border-line rounded-xl py-2 shadow-sm">
-                <span className="block font-mono text-xl font-black text-blue-600 dark:text-amber-400">
+              <div className="bg-surface-2 border border-line rounded-xl py-2 shadow-sm">
+                <span className="block font-mono text-xl font-black text-amber-500">
                   {String(timeLeft.minutes).padStart(2, '0')}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-gray-400 font-bold">Minutos</span>
+                <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Minutos</span>
               </div>
-              <div className="bg-white/70 dark:bg-surface-2 border border-slate-200/80 dark:border-line rounded-xl py-2 shadow-sm">
-                <span className="block font-mono text-xl font-black text-red-600 dark:text-red-400">
+              <div className="bg-surface-2 border border-line rounded-xl py-2 shadow-sm">
+                <span className="block font-mono text-xl font-black text-red-500">
                   {String(timeLeft.seconds).padStart(2, '0')}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-gray-400 font-bold">Segundos</span>
+                <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Segundos</span>
               </div>
             </div>
             </>

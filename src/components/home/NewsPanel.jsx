@@ -54,15 +54,15 @@ export default function NewsPanel() {
   const transfers = (data?.transfers || []).slice(0, TRANSFERS_SHOWN);
 
   return (
-    <aside className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
-      <div className="flex items-center gap-1.5 pb-3 mb-4 border-b border-slate-200/80 dark:border-white/10">
+    <aside className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl border border-line">
+      <div className="flex items-center gap-1.5 pb-3 mb-4 border-b border-line">
         {[['news', 'Notícias', Newspaper], ['transfers', 'Transferências', ArrowRightLeft]].map(([id, label, Icon]) => (
           <button
             key={id}
             type="button"
             onClick={() => setTab(id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all ${
-              tab === id ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25' : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
+              tab === id ? 'bg-blue-600 text-on-accent shadow-md shadow-blue-500/25' : 'text-gray-400 hover:text-white hover:bg-surface-2'
             }`}
           >
             <Icon className="w-3.5 h-3.5" /> {label}
