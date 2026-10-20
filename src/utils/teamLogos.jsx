@@ -309,6 +309,8 @@ function cleanStr(s) {
 // componente para que um logo quebrado não seja tentado de novo a cada
 // atualização automática (era isso que fazia o espaço do logo "piscar").
 const FAILED_LOGO_URLS = new Set();
+// Logos da Liquipedia que vieram do cache como o aviso de "hotlink": recarregados sem cache
+const BYPASS_CACHE_URLS = new Set();
 
 // Versões para fundo claro dos logos da Liquipedia (url darkmode -> url lightmode).
 // Registradas quando a agenda é carregada; o TeamLogo troca a versão no tema claro.
@@ -500,11 +502,17 @@ export default function TeamLogo({
     );
   }
 
+  // Logo que voltou como o aviso de "hotlink" da Liquipedia guardado no cache do
+  // navegador: pede de novo com um parâmetro, o que ignora a cópia guardada
+  const src = BYPASS_CACHE_URLS.has(resolvedUrl)
+    ? `${resolvedUrl}${resolvedUrl.includes('?') ? '&' : '?'}nr=1`
+    : resolvedUrl;
+
   return (
     <div className={`${className} flex items-center justify-center shrink-0 overflow-hidden`}>
       <img
-        key={resolvedUrl}
-        src={resolvedUrl}
+        key={src}
+        src={src}
         alt={alt || teamName || "Logo da Equipe"}
         title={teamName || undefined}
         // team-logo-img (index.css): contorno sutil que mantém legíveis logos
@@ -513,6 +521,15 @@ export default function TeamLogo({
         referrerPolicy="no-referrer"
         loading="lazy"
         decoding="async"
+        onLoad={(e) => {
+          // O aviso de bloqueio da Liquipedia é uma faixa larga e baixa (ex.: 289×33);
+          // logos de time nunca têm esse formato
+          const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+          if (!h || w / h < 5 || !/liquipedia\.net/.test(resolvedUrl)) return;
+          if (!BYPASS_CACHE_URLS.has(resolvedUrl)) BYPASS_CACHE_URLS.add(resolvedUrl);
+          else FAILED_LOGO_URLS.add(resolvedUrl);
+          forceRender();
+        }}
         onError={() => {
           FAILED_LOGO_URLS.add(resolvedUrl);
           forceRender();

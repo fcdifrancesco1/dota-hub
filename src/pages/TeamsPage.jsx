@@ -168,11 +168,7 @@ export default function TeamsPage() {
 
                 <div className="flex items-center gap-4 my-2">
                   <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                    {top2.logo ? (
-                      <img src={top2.logo} alt={top2.name} className="w-12 h-12 object-contain" />
-                    ) : (
-                      <TeamLogo teamName={top2.name} teamId={top2.teamId} className="w-12 h-12" />
-                    )}
+                    <TeamLogo teamName={top2.name} teamId={top2.teamId} logoUrl={top2.logo} className="w-12 h-12" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-lg font-black text-white truncate group-hover:text-amber-400 transition-colors">
@@ -228,11 +224,7 @@ export default function TeamsPage() {
 
               <div className="flex items-center gap-5 my-3">
                 <div className="w-20 h-20 rounded-2xl bg-surface-2 border-2 border-amber-500/50 p-2.5 flex items-center justify-center shrink-0 shadow-xl group-hover:scale-105 transition-transform">
-                  {top1.logo ? (
-                    <img src={top1.logo} alt={top1.name} className="w-14 h-14 object-contain" />
-                  ) : (
-                    <TeamLogo teamName={top1.name} teamId={top1.teamId} className="w-14 h-14" />
-                  )}
+                  <TeamLogo teamName={top1.name} teamId={top1.teamId} logoUrl={top1.logo} className="w-14 h-14" />
                 </div>
                 <div className="min-w-0">
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 block">
@@ -290,11 +282,7 @@ export default function TeamsPage() {
 
                 <div className="flex items-center gap-4 my-2">
                   <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                    {top3.logo ? (
-                      <img src={top3.logo} alt={top3.name} className="w-12 h-12 object-contain" />
-                    ) : (
-                      <TeamLogo teamName={top3.name} teamId={top3.teamId} className="w-12 h-12" />
-                    )}
+                    <TeamLogo teamName={top3.name} teamId={top3.teamId} logoUrl={top3.logo} className="w-12 h-12" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-lg font-black text-white truncate group-hover:text-amber-400 transition-colors">
@@ -446,11 +434,7 @@ export default function TeamsPage() {
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line p-1.5 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                            {t.logo ? (
-                              <img src={t.logo} alt={t.name} className="w-7 h-7 object-contain" />
-                            ) : (
-                              <TeamLogo teamName={t.name} teamId={t.teamId} className="w-7 h-7" />
-                            )}
+                            <TeamLogo teamName={t.name} teamId={t.teamId} logoUrl={t.logo} className="w-7 h-7" />
                           </div>
                           <div>
                             <span className="font-bold text-white text-sm group-hover:text-amber-400 transition-colors block">

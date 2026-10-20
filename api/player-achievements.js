@@ -142,16 +142,43 @@ const PLAYER_WIKI_MAP = {
   'jerax': 'JerAx'
 };
 
+// Nome comparável: só letras latinas e números ("医者watson`" → "watson")
+const norm = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]/g, '');
+
+/**
+ * Página do jogador na Liquipedia. O nome profissional da OpenDota é o que o
+ * jogador escolheu (ex.: "医者watson`"), e a Liquipedia usa outro ("Watson").
+ * Procura o jogador no elenco do time na Liquipedia (links para as páginas dos
+ * jogadores, que também resolvem homônimos); sem time, usa o nome limpo.
+ */
+async function resolveWikiTitle(rawPlayer, teamName) {
+  const known = PLAYER_WIKI_MAP[rawPlayer.toLowerCase()];
+  if (known) return known;
+  const key = norm(rawPlayer);
+  if (teamName && key) {
+    const page = await fetchLiquipediaApi(teamName.replace(/ /g, '_'), { ttlMs: 6 * 60 * 60 * 1000 }).catch(() => null);
+    const html = page?.html || '';
+    const links = [...html.matchAll(/<a href="\/dota2\/([^"#?]+)" title="([^"]+)">([^<]+)<\/a>/g)];
+    // Mesmo nome exibido ou título da página; depois, nome da OpenDota que contém o da Liquipedia
+    const exact = links.find(([, , title, text]) => norm(text) === key || norm(title) === key);
+    const partial = exact || links.find(([, , , text]) => norm(text).length >= 3 && key.includes(norm(text)));
+    if (partial) return decodeURIComponent(partial[1]).replace(/_/g, ' ');
+  }
+  // Sem elenco: o trecho latino do nome (a Liquipedia põe a 1ª letra em maiúscula sozinha)
+  const latin = rawPlayer.normalize('NFKD').replace(/[^A-Za-z0-9_.-]/g, '');
+  return latin || rawPlayer;
+}
+
 export default async function handler(req, res) {
   const rawPlayer = String(req.query.player || req.query.name || '').trim();
   const accountId = req.query.account_id;
+  const teamName = String(req.query.team || '').trim();
 
   if (!rawPlayer) {
     return res.status(400).json({ error: 'Parâmetro "player" é obrigatório' });
   }
 
-  const cleanPlayer = rawPlayer.toLowerCase();
-  const wikiTitle = PLAYER_WIKI_MAP[cleanPlayer] || rawPlayer;
+  const wikiTitle = await resolveWikiTitle(rawPlayer, teamName);
 
   try {
     // 1. Tentar buscar em Player/Results

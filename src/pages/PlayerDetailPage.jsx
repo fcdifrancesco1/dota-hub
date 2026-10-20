@@ -11,11 +11,8 @@ import {
   Clock,
   ChevronRight,
   User,
-  CheckCircle2,
-  Lock,
   Loader2,
   AlertTriangle,
-  Award,
   DollarSign
 } from 'lucide-react';
 import { fetchPlayerComprehensiveData } from '../services/playerProfile';
@@ -160,7 +157,7 @@ export default function PlayerDetailPage() {
     );
   }
 
-  const { stats, topHeroes, recentMatches, badges, titles, allAchievements, achievementsSummary } = player;
+  const { stats, topHeroes, recentMatches, titles, allAchievements, achievementsSummary } = player;
   const medal = medalLabel(player.rankTier, player.leaderboardRank);
 
   return (
@@ -674,7 +671,7 @@ export default function PlayerDetailPage() {
                             <span className="text-[11px] text-gray-400 font-medium">Equipe:</span>
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-2 border border-line">
                               {item.teamLogo ? (
-                                <img src={item.teamLogo} alt={item.teamName} className="w-4 h-4 object-contain" />
+                                <img src={item.teamLogo} alt={item.teamName} referrerPolicy="no-referrer" className="w-4 h-4 object-contain" />
                               ) : (
                                 <TeamLogo teamName={item.teamName} className="w-4 h-4" />
                               )}
@@ -718,70 +715,6 @@ export default function PlayerDetailPage() {
                 })}
               </div>
             )}
-          </section>
-
-          {/* SEÇÃO SECUNDÁRIA: INSÍGNIAS E MARCOS DE CARREIRA */}
-          <section className="glass-panel border border-line rounded-3xl p-6 sm:p-8 space-y-5">
-            <div>
-              <h3 className="text-sm font-black uppercase text-white tracking-wider flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-500" />
-                <span>Insígnias de Desempenho e Estatísticas</span>
-              </h3>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Marcos acumulados de partidas públicas, MMR competitivo e performance em jogo
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {badges.map((b) => (
-                <div
-                  key={b.id}
-                  className={`rounded-2xl p-4 border transition-all flex flex-col justify-between ${
-                    b.unlocked
-                      ? 'bg-surface-2 border-amber-500/30 shadow-sm'
-                      : 'bg-surface-2/40 border-line opacity-50'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`p-2.5 rounded-xl shrink-0 ${
-                        b.unlocked
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          : 'bg-surface-3 text-gray-500'
-                      }`}
-                    >
-                      <Trophy className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-white">{b.title}</h4>
-                      <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">{b.description}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-line flex items-center justify-between text-xs">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-black uppercase font-mono ${
-                        b.unlocked
-                          ? 'bg-emerald-500/15 text-emerald-400 flex items-center gap-1'
-                          : 'bg-surface-3 text-gray-500 flex items-center gap-1'
-                      }`}
-                    >
-                      {b.unlocked ? (
-                        <>
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>Desbloqueada</span>
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-3 h-3" />
-                          <span>Bloqueada</span>
-                        </>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </section>
         </div>
       )}

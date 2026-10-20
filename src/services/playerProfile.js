@@ -30,17 +30,18 @@ export async function getProPlayerInfo(accountId) {
 }
 
 /** Busca títulos oficiais e histórico de campeonatos na Liquipedia */
-export async function fetchPlayerAchievements(playerName, accountId) {
+// teamName: o elenco do time na Liquipedia mostra qual é a página do jogador lá
+export async function fetchPlayerAchievements(playerName, accountId, teamName) {
   if (!playerName) return { titles: [], allAchievements: [], summary: {} };
-  const key = `player_achievements_v3_${accountId || playerName}`;
+  const key = `player_achievements_v4_${accountId || playerName}`;
   const cached = getCached(key, 60 * 60 * 1000);
   if (cached) return cached;
 
   try {
     const res = await fetchWithTimeout(
-      `/api/player-achievements?player=${encodeURIComponent(playerName)}&account_id=${accountId || ''}`,
+      `/api/player-achievements?player=${encodeURIComponent(playerName)}&account_id=${accountId || ''}&team=${encodeURIComponent(teamName || '')}`,
       {},
-      8000
+      20000
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
@@ -54,7 +55,7 @@ export async function fetchPlayerAchievements(playerName, accountId) {
 
 export async function fetchPlayerComprehensiveData(accountId) {
   if (!accountId) return null;
-  const key = `player_full_profile_v3_${accountId}`;
+  const key = `player_full_profile_v4_${accountId}`;
   const cached = getCached(key, PLAYER_TTL);
   if (cached) return cached;
 
@@ -134,65 +135,7 @@ export async function fetchPlayerComprehensiveData(accountId) {
 
   // Buscar títulos e conquistas na Liquipedia
   const playerName = proInfo?.name || profile.personaname || '';
-  const achievementsData = await fetchPlayerAchievements(playerName, accountId);
-
-  // Badges & Conquistas de estatísticas (secundárias)
-  const badges = [
-    {
-      id: 'pro_verified',
-      title: 'Pro Player Oficial',
-      description: 'Jogador profissional cadastrado e registrado na Valve',
-      unlocked: Boolean(proInfo?.is_pro || proInfo?.team_name)
-    },
-    {
-      id: 'immortal_top',
-      title: 'Elite Imortal',
-      description: 'Membro do Rank Imortal do Dota 2',
-      unlocked: (playerRaw.rank_tier >= 80) || Boolean(playerRaw.leaderboard_rank)
-    },
-    {
-      id: 'top100_world',
-      title: 'Top 100 Mundial',
-      description: 'Posição no Ranking Oficial da Valve entre os 100 melhores',
-      unlocked: Boolean(playerRaw.leaderboard_rank && playerRaw.leaderboard_rank <= 100)
-    },
-    {
-      id: 'veteran_1k',
-      title: 'Veterano de Batalha',
-      description: 'Mais de 1.000 partidas públicas e profissionais registradas',
-      unlocked: totalMatches >= 1000
-    },
-    {
-      id: 'legend_5k',
-      title: 'Lenda do Dota 2',
-      description: 'Mais de 5.000 partidas oficiais disputadas',
-      unlocked: totalMatches >= 5000
-    },
-    {
-      id: 'high_winrate',
-      title: 'Aproveitamento Superior',
-      description: 'Taxa de vitórias na carreira de 55% ou mais',
-      unlocked: winRate >= 55
-    },
-    {
-      id: 'high_gpm',
-      title: 'Mestre da Economia',
-      description: 'Média de ouro por minuto (GPM) superior a 600',
-      unlocked: avgGpm >= 600
-    },
-    {
-      id: 'high_kda',
-      title: 'Impacto Estratégico',
-      description: 'KDA médio de carreira acima de 3.5',
-      unlocked: kda >= 3.5
-    },
-    {
-      id: 'versatile',
-      title: 'Mestre da Versatilidade',
-      description: 'Já jogou com mais de 80 heróis diferentes',
-      unlocked: (heroesRaw?.filter(h => h.games > 0)?.length || 0) >= 80
-    }
-  ];
+  const achievementsData = await fetchPlayerAchievements(playerName, accountId, proInfo?.team_name);
 
   const result = {
     accountId,
@@ -226,7 +169,6 @@ export async function fetchPlayerComprehensiveData(accountId) {
     },
     topHeroes: sortedHeroes,
     recentMatches: formattedMatches,
-    badges,
     titles: achievementsData.titles || [],
     allAchievements: achievementsData.allAchievements || [],
     achievementsSummary: achievementsData.summary || {}
