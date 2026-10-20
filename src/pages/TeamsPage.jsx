@@ -34,12 +34,19 @@ export default function TeamsPage() {
     let cancelled = false;
     setLoading(true);
 
-    fetchTeamsRanking().then((data) => {
-      if (!cancelled) {
-        setTeams(data || []);
-        setLoading(false);
-      }
-    });
+    fetchTeamsRanking()
+      .then((data) => {
+        if (!cancelled) {
+          setTeams(data || []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.warn('Erro ao carregar ranking:', err);
+          setLoading(false);
+        }
+      });
 
     return () => { cancelled = true; };
   }, []);

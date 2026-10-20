@@ -257,13 +257,13 @@ export default function HeroDetailModal({
                         />
                         <div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-cyan-400 block">
-                            Aghanim's Scepter (Cetro)
+                            Aghanim&apos;s Scepter (Cetro)
                           </span>
-                          <strong className="text-xs text-white">{details.aghs.scepter_skill_name}</strong>
+                          <strong className="text-xs text-white">{details.aghs?.scepter_skill_name}</strong>
                         </div>
                       </div>
                       <p className="text-[11px] text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
-                        {details.aghs.scepter_desc}
+                        {details.aghs?.scepter_desc}
                       </p>
                     </div>
 
@@ -277,13 +277,13 @@ export default function HeroDetailModal({
                         />
                         <div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">
-                            Aghanim's Shard (Fragmento)
+                            Aghanim&apos;s Shard (Fragmento)
                           </span>
-                          <strong className="text-xs text-white">{details.aghs.shard_skill_name}</strong>
+                          <strong className="text-xs text-white">{details.aghs?.shard_skill_name}</strong>
                         </div>
                       </div>
                       <p className="text-[11px] text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
-                        {details.aghs.shard_desc}
+                        {details.aghs?.shard_desc}
                       </p>
                     </div>
                   </div>

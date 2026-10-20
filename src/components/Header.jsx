@@ -6,6 +6,7 @@ import {
   Radio,
   Trophy,
   Swords,
+  Shield,
   Sparkles,
   Award,
   Lock,

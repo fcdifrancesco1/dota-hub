@@ -2112,7 +2112,7 @@ function cleanValveAbilityText(text, specialValues = []) {
     });
   }
   return cleaned
-    .replace(/<br\s*[\/]?>/gi, ' ')
+    .replace(/<br\s*[/]?>/gi, ' ')
     .replace(/<[^>]+>/g, '')
     .replace(/%%/g, '%')
     .replace(/\s+/g, ' ')
@@ -2138,9 +2138,13 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
 
   try {
     const [valveRes, heroAbilitiesRes, abilitiesRes, aghsRes, benchmarksRes, matchupsRes] = await Promise.all([
-      fetchWithTimeout(`https://www.dota2.com/datafeed/herodata?language=brazilian&hero_id=${heroId}`, {}, 6500)
+      fetchWithTimeout(`/api/valve-herodata?hero_id=${heroId}`, {}, 6500)
         .then(r => r.ok ? r.json() : null)
-        .catch(() => null),
+        .catch(() => {
+          return fetchWithTimeout(`https://www.dota2.com/datafeed/herodata?language=brazilian&hero_id=${heroId}`, {}, 4000)
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null);
+        }),
       fetchWithTimeout(`${OPENDOTA_BASE}/constants/hero_abilities`, {}, 6000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetchWithTimeout(`${OPENDOTA_BASE}/constants/abilities`, {}, 6000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetchWithTimeout(`${OPENDOTA_BASE}/constants/aghs_desc`, {}, 5000).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -2162,10 +2166,16 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
 
     // Resolver chave interna do herói
     let resolvedKey = heroInternalName;
+    const constantsData = getCachedFast('constants_v6');
+    const heroInfo = constantsData?.heroes?.[heroId] || constantsData?.heroes?.[String(heroId)];
+    if (heroInfo?.name) {
+      resolvedKey = heroInfo.name;
+    }
     if (!resolvedKey || !heroAbilitiesRes[resolvedKey]) {
       const keys = Object.keys(heroAbilitiesRes);
-      resolvedKey = keys.find(k => k.includes(String(heroInternalName).toLowerCase())) ||
-                    keys.find(k => heroAbilitiesRes[k]?.hero_id === heroId) ||
+      const cleanTarget = String(heroInternalName || '').replace('npc_dota_hero_', '').toLowerCase();
+      resolvedKey = (cleanTarget ? keys.find(k => k.includes(cleanTarget)) : null) ||
+                    keys.find(k => k === `npc_dota_hero_${heroInternalName}`) ||
                     keys[0];
     }
 

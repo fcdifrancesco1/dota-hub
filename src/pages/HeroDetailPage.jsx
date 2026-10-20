@@ -32,18 +32,27 @@ export default function HeroDetailPage() {
   const heroName = heroObj.localized_name || getHeroName(id, constants);
   const heroRawKey = heroObj?.name ? heroObj.name.replace('npc_dota_hero_', '') : '';
 
+  const heroInternalName = constants?.heroes?.[id]?.name;
+
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setVideoError(false);
-    const internalName = constants?.heroes?.[id]?.name || `npc_dota_hero_${id}`;
+    const internalName = heroInternalName || `npc_dota_hero_${id}`;
     fetchHeroFullDetails(id, internalName).then((data) => {
-      setDetails(data);
-      if (data?.abilities?.length > 0) {
-        setSelectedAbility(data.abilities[0]);
+      if (!cancelled) {
+        setDetails(data);
+        if (data?.abilities?.length > 0) {
+          setSelectedAbility(data.abilities[0]);
+        }
+        setLoading(false);
       }
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [id, constants]);
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [id, heroInternalName]);
 
   // Atributo formatado
   const attrMap = {
@@ -132,7 +141,21 @@ export default function HeroDetailPage() {
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-amber-500" />
           <span className="text-xs font-bold">Carregando habilidades e dados em PT-BR diretamente da Valve...</span>
         </div>
-      ) : details && (
+      ) : !details ? (
+        <div className="glass-panel border border-line rounded-3xl p-10 text-center max-w-lg mx-auto shadow-xl my-8">
+          <Info className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+          <h2 className="text-base font-black text-white uppercase mb-2">Dados do Herói Temporariamente Indisponíveis</h2>
+          <p className="text-xs text-gray-400 mb-6">
+            Não foi possível sincronizar as habilidades deste herói no momento. Tente recarregar ou consulte os outros heróis do meta.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-2.5 rounded-xl bg-blue-600 text-on-accent text-xs font-black uppercase tracking-wider shadow-md hover:bg-blue-700 transition-all"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      ) : (
         <div className="space-y-10">
           {/* 1. SEÇÃO DE HABILIDADES TRADUZIDAS (PT-BR) */}
           <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-line shadow-xl space-y-6">
@@ -150,7 +173,7 @@ export default function HeroDetailPage() {
 
             {/* SELETOR DE HABILIDADES */}
             <div className="flex items-center gap-2.5 flex-wrap">
-              {details.abilities.map((ab, idx) => {
+              {(details.abilities || []).map((ab, idx) => {
                 const isSelected = selectedAbility?.name === ab.name;
                 return (
                   <button
@@ -217,7 +240,7 @@ export default function HeroDetailPage() {
                 {/* LORE / HISTÓRIA (SE HOUVER) */}
                 {selectedAbility.lore && (
                   <p className="text-xs italic text-gray-400 px-1 border-l-2 border-blue-500/40 pl-3">
-                    "{selectedAbility.lore}"
+                    &ldquo;{selectedAbility.lore}&rdquo;
                   </p>
                 )}
 
@@ -251,13 +274,13 @@ export default function HeroDetailPage() {
                   />
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-cyan-400 block">
-                      Aghanim's Scepter (Cetro)
+                      Aghanim&apos;s Scepter (Cetro)
                     </span>
-                    <strong className="text-sm font-black text-white">{details.aghs.scepter_skill_name}</strong>
+                    <strong className="text-sm font-black text-white">{details.aghs?.scepter_skill_name}</strong>
                   </div>
                 </div>
                 <p className="text-xs text-white leading-relaxed bg-surface-3 p-3.5 rounded-2xl border border-line">
-                  {details.aghs.scepter_desc}
+                  {details.aghs?.scepter_desc}
                 </p>
               </div>
 
@@ -271,13 +294,13 @@ export default function HeroDetailPage() {
                   />
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 block">
-                      Aghanim's Shard (Fragmento)
+                      Aghanim&apos;s Shard (Fragmento)
                     </span>
-                    <strong className="text-sm font-black text-white">{details.aghs.shard_skill_name}</strong>
+                    <strong className="text-sm font-black text-white">{details.aghs?.shard_skill_name}</strong>
                   </div>
                 </div>
                 <p className="text-xs text-white leading-relaxed bg-surface-3 p-3.5 rounded-2xl border border-line">
-                  {details.aghs.shard_desc}
+                  {details.aghs?.shard_desc}
                 </p>
               </div>
             </div>
@@ -293,7 +316,7 @@ export default function HeroDetailPage() {
             </div>
 
             <div className="space-y-3 max-w-4xl mx-auto font-mono text-xs">
-              {details.talents.map((t, idx) => (
+              {(details.talents || []).map((t, idx) => (
                 <div
                   key={idx}
                   className="bg-surface-2 border border-line rounded-2xl p-4 flex items-center justify-between gap-3 sm:gap-6 shadow-sm"
@@ -324,13 +347,13 @@ export default function HeroDetailPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-surface-2 border border-line rounded-2xl p-4 text-center shadow-sm">
                 <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">GPM Médio Pro</span>
-                <div className="text-2xl font-black text-white font-mono">{details.benchmarks.gpm.p75 || 745}</div>
-                <span className="text-[10px] text-amber-500 font-mono mt-1 block">Elite: {details.benchmarks.gpm.p90 || 830}</span>
+                <div className="text-2xl font-black text-white font-mono">{details.benchmarks?.gpm?.p75 || 745}</div>
+                <span className="text-[10px] text-amber-500 font-mono mt-1 block">Elite: {details.benchmarks?.gpm?.p90 || 830}</span>
               </div>
               <div className="bg-surface-2 border border-line rounded-2xl p-4 text-center shadow-sm">
                 <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">XPM Médio Pro</span>
-                <div className="text-2xl font-black text-white font-mono">{details.benchmarks.xpm.p75 || 790}</div>
-                <span className="text-[10px] text-blue-600 dark:text-cyan-400 font-mono mt-1 block">Elite: {details.benchmarks.xpm.p90 || 890}</span>
+                <div className="text-2xl font-black text-white font-mono">{details.benchmarks?.xpm?.p75 || 790}</div>
+                <span className="text-[10px] text-blue-600 dark:text-cyan-400 font-mono mt-1 block">Elite: {details.benchmarks?.xpm?.p90 || 890}</span>
               </div>
               <div className="bg-surface-2 border border-line rounded-2xl p-4 text-center shadow-sm">
                 <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Last Hits (10 min)</span>
@@ -339,8 +362,8 @@ export default function HeroDetailPage() {
               </div>
               <div className="bg-surface-2 border border-line rounded-2xl p-4 text-center shadow-sm">
                 <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1">Dano / Minuto</span>
-                <div className="text-2xl font-black text-emerald-500 font-mono">{details.benchmarks.damage.p75 || 820}</div>
-                <span className="text-[10px] text-emerald-500 font-mono mt-1 block">Elite: {details.benchmarks.damage.p90 || 1050}</span>
+                <div className="text-2xl font-black text-emerald-500 font-mono">{details.benchmarks?.damage?.p75 || 820}</div>
+                <span className="text-[10px] text-emerald-500 font-mono mt-1 block">Elite: {details.benchmarks?.damage?.p90 || 1050}</span>
               </div>
             </div>
           </div>
@@ -361,7 +384,7 @@ export default function HeroDetailPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Melhores Matchups (Maior Vantagem)
                 </span>
                 <div className="space-y-2">
-                  {details.bestMatchups.map((m, idx) => {
+                  {(details.bestMatchups || []).map((m, idx) => {
                     const mImg = getHeroImg(m.hero_id, constants);
                     const mName = getHeroName(m.hero_id, constants);
                     return (
@@ -390,7 +413,7 @@ export default function HeroDetailPage() {
                   <Swords className="w-4 h-4 text-rose-500" /> Maiores Counters (Pior Desvantagem)
                 </span>
                 <div className="space-y-2">
-                  {details.worstMatchups.map((m, idx) => {
+                  {(details.worstMatchups || []).map((m, idx) => {
                     const mImg = getHeroImg(m.hero_id, constants);
                     const mName = getHeroName(m.hero_id, constants);
                     return (
