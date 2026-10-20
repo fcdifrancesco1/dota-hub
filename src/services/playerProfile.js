@@ -29,9 +29,32 @@ export async function getProPlayerInfo(accountId) {
   return null;
 }
 
+/** Busca títulos oficiais e histórico de campeonatos na Liquipedia */
+export async function fetchPlayerAchievements(playerName, accountId) {
+  if (!playerName) return { titles: [], allAchievements: [], summary: {} };
+  const key = `player_achievements_v3_${accountId || playerName}`;
+  const cached = getCached(key, 60 * 60 * 1000);
+  if (cached) return cached;
+
+  try {
+    const res = await fetchWithTimeout(
+      `/api/player-achievements?player=${encodeURIComponent(playerName)}&account_id=${accountId || ''}`,
+      {},
+      8000
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    setCache(key, data);
+    return data;
+  } catch (err) {
+    console.warn(`[Player Achievements] Falha ao carregar conquistas para ${playerName}:`, err);
+    return { titles: [], allAchievements: [], summary: {} };
+  }
+}
+
 export async function fetchPlayerComprehensiveData(accountId) {
   if (!accountId) return null;
-  const key = `player_full_profile_v2_${accountId}`;
+  const key = `player_full_profile_v3_${accountId}`;
   const cached = getCached(key, PLAYER_TTL);
   if (cached) return cached;
 
@@ -109,7 +132,11 @@ export async function fetchPlayerComprehensiveData(accountId) {
       })
     : [];
 
-  // Badges & Conquistas dinâmicas
+  // Buscar títulos e conquistas na Liquipedia
+  const playerName = proInfo?.name || profile.personaname || '';
+  const achievementsData = await fetchPlayerAchievements(playerName, accountId);
+
+  // Badges & Conquistas de estatísticas (secundárias)
   const badges = [
     {
       id: 'pro_verified',
@@ -142,10 +169,10 @@ export async function fetchPlayerComprehensiveData(accountId) {
       unlocked: totalMatches >= 5000
     },
     {
-      id: 'winrate_vitorioso',
+      id: 'high_winrate',
       title: 'Aproveitamento Superior',
       description: 'Taxa de vitórias na carreira de 55% ou mais',
-      unlocked: winRate >= 55 && totalMatches >= 50
+      unlocked: winRate >= 55
     },
     {
       id: 'high_gpm',
@@ -199,7 +226,10 @@ export async function fetchPlayerComprehensiveData(accountId) {
     },
     topHeroes: sortedHeroes,
     recentMatches: formattedMatches,
-    badges
+    badges,
+    titles: achievementsData.titles || [],
+    allAchievements: achievementsData.allAchievements || [],
+    achievementsSummary: achievementsData.summary || {}
   };
 
   setCache(key, result);

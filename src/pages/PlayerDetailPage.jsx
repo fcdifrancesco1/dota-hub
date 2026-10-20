@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -8,15 +8,15 @@ import {
   Medal,
   Sparkles,
   ExternalLink,
-  Flame,
   Clock,
   ChevronRight,
-  TrendingUp,
   User,
   CheckCircle2,
   Lock,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  Award,
+  DollarSign
 } from 'lucide-react';
 import { fetchPlayerComprehensiveData } from '../services/playerProfile';
 import { useApp } from '../context/AppContext';
@@ -38,6 +38,21 @@ const fmtDate = (secs) => (secs
   ? new Date(secs * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   : '—');
 
+function formatTournamentDate(val) {
+  if (!val) return '—';
+  if (typeof val === 'string' && val.includes('-')) {
+    const parts = val.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return val;
+  }
+  const num = Number(val);
+  if (!isNaN(num) && num > 0) {
+    const ms = num > 1e11 ? num : num * 1000;
+    return new Date(ms).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  return String(val);
+}
+
 const fmtDuration = (secs) => `${Math.floor((secs || 0) / 60)}:${String((secs || 0) % 60).padStart(2, '0')}`;
 
 const ROLE_LABELS = {
@@ -56,6 +71,7 @@ export default function PlayerDetailPage() {
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('heroes'); // 'heroes' | 'matches' | 'badges'
+  const [titleFilter, setTitleFilter] = useState('champions'); // 'champions' | 'podiums' | 'tier1' | 'all'
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -84,6 +100,21 @@ export default function PlayerDetailPage() {
 
     return () => { cancelled = true; };
   }, [id]);
+
+  const displayedAchievements = useMemo(() => {
+    if (!player) return [];
+    const all = player.allAchievements || [];
+    if (titleFilter === 'champions') {
+      return all.filter((a) => a.isChampion);
+    }
+    if (titleFilter === 'podiums') {
+      return all.filter((a) => a.isPodium);
+    }
+    if (titleFilter === 'tier1') {
+      return all.filter((a) => /tier\s*1/i.test(a.tier) || /major|international|blast|riyadh/i.test(a.tournament));
+    }
+    return all;
+  }, [player, titleFilter]);
 
   const backButton = (
     <button
@@ -129,7 +160,7 @@ export default function PlayerDetailPage() {
     );
   }
 
-  const { stats, topHeroes, recentMatches, badges } = player;
+  const { stats, topHeroes, recentMatches, badges, titles, allAchievements, achievementsSummary } = player;
   const medal = medalLabel(player.rankTier, player.leaderboardRank);
 
   return (
@@ -248,17 +279,15 @@ export default function PlayerDetailPage() {
 
             <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[105px] border border-line">
               <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">KDA Médio</span>
-              <span className="text-xl font-black font-mono text-amber-400 mt-0.5 block">
+              <span className="text-xl font-black font-mono text-cyan-400 mt-0.5 block">
                 {stats.kda.toFixed(2)}
               </span>
             </div>
 
             <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[105px] border border-line">
               <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">GPM / XPM</span>
-              <span className="text-base font-black font-mono text-white mt-1 block">
-                <span className="text-amber-400">{stats.avgGpm}</span>
-                <span className="text-gray-500 mx-1">/</span>
-                <span className="text-cyan-400">{stats.avgXpm}</span>
+              <span className="text-base font-black font-mono text-amber-400 mt-1 block">
+                {stats.avgGpm} <span className="text-gray-400 font-normal text-xs">/</span> {stats.avgXpm}
               </span>
             </div>
           </div>
@@ -270,7 +299,7 @@ export default function PlayerDetailPage() {
         {[
           { id: 'heroes', label: 'Heróis de Assinatura', icon: Swords },
           { id: 'matches', label: 'Partidas Recentes', icon: Clock },
-          { id: 'badges', label: 'Conquistas & Badges', icon: Trophy }
+          { id: 'badges', label: 'Títulos & Conquistas', icon: Trophy }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -286,6 +315,11 @@ export default function PlayerDetailPage() {
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
+              {tab.id === 'badges' && titles?.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/30 text-amber-300 font-mono font-black ml-1">
+                  {titles.length}
+                </span>
+              )}
             </button>
           );
         })}
@@ -311,19 +345,19 @@ export default function PlayerDetailPage() {
 
           {topHeroes.length === 0 ? (
             <div className="p-12 text-center text-xs text-gray-400">
-              Nenhum dado de heróis disponível para este jogador.
+              Nenhum dado de herói disponível para este jogador.
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[700px]">
+              <table className="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead className="bg-surface-2/80 text-gray-400 font-mono text-[10px] uppercase border-b border-line">
                   <tr>
                     <th className="p-4 pl-6">Herói</th>
-                    <th className="p-4 text-center">Partidas Jogadas</th>
+                    <th className="p-4 text-center">Partidas</th>
                     <th className="p-4 text-center">Vitórias</th>
-                    <th className="p-4 text-center">Taxa de Vitória</th>
+                    <th className="p-4 text-center">Aproveitamento</th>
                     <th className="p-4 text-center">Último Jogo</th>
-                    <th className="p-4 pr-6 text-right">Enciclopédia</th>
+                    <th className="p-4 pr-6 text-right">Ação</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line font-medium text-gray-300">
@@ -335,18 +369,22 @@ export default function PlayerDetailPage() {
                         key={h.heroId}
                         onClick={() => navigate(`/herois/${h.heroId}`)}
                         className="hover:bg-surface-2/60 transition-colors cursor-pointer group"
-                        title={`Ver detalhes do herói ${hName}`}
                       >
                         <td className="p-4 pl-6">
                           <div className="flex items-center gap-3">
                             <img
                               src={hImg}
                               alt={hName}
-                              className="w-12 h-7 rounded-lg object-cover border border-line shrink-0 group-hover:border-amber-400 transition-colors shadow-sm"
+                              className="w-12 h-7 rounded-lg object-cover border border-line shadow-sm group-hover:scale-105 transition-transform"
                             />
-                            <span className="font-bold text-white group-hover:text-amber-400 transition-colors">
-                              {hName}
-                            </span>
+                            <div>
+                              <span className="font-bold text-white text-sm group-hover:text-amber-400 transition-colors block">
+                                {hName}
+                              </span>
+                              <span className="text-[10px] font-mono text-gray-400">
+                                ID #{h.heroId}
+                              </span>
+                            </div>
                           </div>
                         </td>
 
@@ -476,57 +514,275 @@ export default function PlayerDetailPage() {
         </section>
       )}
 
-      {/* ABA 3: CONQUISTAS & BADGES */}
+      {/* ABA 3: TÍTULOS E CONQUISTAS OFICIAIS */}
       {activeTab === 'badges' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {badges.map((b) => (
-            <div
-              key={b.id}
-              className={`tilt-card rounded-3xl p-6 border transition-all flex flex-col justify-between ${
-                b.unlocked
-                  ? 'glass-panel border-amber-500/40 shadow-xl'
-                  : 'bg-surface-2/40 border-line opacity-50'
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <div
-                  className={`p-3.5 rounded-2xl shrink-0 ${
-                    b.unlocked
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-md shadow-amber-500/10'
-                      : 'bg-surface-2 text-gray-500'
-                  }`}
-                >
-                  <Trophy className="w-6 h-6" />
+        <div className="space-y-8">
+          {/* PAINEL DE RESUMO DE TÍTULOS E PREMIAÇÃO */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="tilt-card glass-panel rounded-3xl p-5 border border-amber-500/40 shadow-xl bg-gradient-to-br from-amber-500/10 to-transparent">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/30">
+                  <Trophy className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-white">{b.title}</h3>
-                  <p className="text-xs text-gray-400 mt-1 leading-relaxed">{b.description}</p>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Títulos de Campeão</span>
+                  <span className="text-2xl font-black font-mono text-amber-400 block mt-0.5">
+                    {titles.length || (achievementsSummary?.totalChampionships || 0)}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs">
-                <span
-                  className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase font-mono ${
-                    b.unlocked
-                      ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center gap-1'
-                      : 'bg-surface-2 border border-line text-gray-500 flex items-center gap-1'
-                  }`}
-                >
-                  {b.unlocked ? (
-                    <>
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Conquistada</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>Bloqueada</span>
-                    </>
-                  )}
-                </span>
+            <div className="tilt-card glass-panel rounded-3xl p-5 border border-line shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-surface-2 text-slate-300 border border-slate-400/30">
+                  <Medal className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Pódios (Top 3)</span>
+                  <span className="text-2xl font-black font-mono text-white block mt-0.5">
+                    {achievementsSummary?.totalPodiums || allAchievements.filter(a => a.isPodium).length}
+                  </span>
+                </div>
               </div>
             </div>
-          ))}
+
+            <div className="tilt-card glass-panel rounded-3xl p-5 border border-line shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-surface-2 text-amber-500 border border-amber-500/30">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Tier 1 & Majors</span>
+                  <span className="text-2xl font-black font-mono text-white block mt-0.5">
+                    {achievementsSummary?.tier1Titles || titles.filter(a => /tier\s*1/i.test(a.tier)).length}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="tilt-card glass-panel rounded-3xl p-5 border border-line shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-surface-2 text-emerald-400 border border-emerald-500/30">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Premiação Acumulada</span>
+                  <span className="text-xl sm:text-2xl font-black font-mono text-emerald-400 block mt-0.5">
+                    {achievementsSummary?.totalPrizeUsd ? `$${achievementsSummary.totalPrizeUsd.toLocaleString('en-US')}` : '—'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* LISTA DE TÍTULOS CONQUISTADOS NOS TIMES */}
+          <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-line flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-amber-400" />
+                  <span>Títulos e Campeonatos Conquistados por Equipe</span>
+                </h2>
+                <span className="text-xs text-gray-400 mt-1 block">
+                  Histórico oficial de conquistas obtidas pelo jogador nos times em que atuou (Dados Liquipedia)
+                </span>
+              </div>
+
+              {/* Filtros de Conquistas */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {[
+                  { id: 'champions', label: '🏆 Campeão (1º Lugar)' },
+                  { id: 'podiums', label: '🏅 Pódios (Top 3)' },
+                  { id: 'tier1', label: '⭐ Tier 1 & Majors' },
+                  { id: 'all', label: '📜 Todos os Torneios' }
+                ].map((btn) => (
+                  <button
+                    key={btn.id}
+                    onClick={() => setTitleFilter(btn.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      titleFilter === btn.id
+                        ? 'bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/25'
+                        : 'bg-surface-2 border border-line text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {displayedAchievements.length === 0 ? (
+              <div className="p-16 text-center">
+                <Trophy className="w-12 h-12 text-gray-500 mx-auto mb-3 opacity-50" />
+                <h3 className="text-base font-black text-white uppercase">Nenhum título listado neste filtro</h3>
+                <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
+                  Este jogador ainda não possui conquistas oficiais registradas sob o critério selecionado na base da Liquipedia.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-line">
+                {displayedAchievements.map((item, idx) => {
+                  const is1st = item.isChampion;
+                  const is2nd = /2(?:nd)?/i.test(item.placement);
+                  const is3rd = /3(?:rd)?/i.test(item.placement);
+                  return (
+                    <div
+                      key={idx}
+                      className="p-5 sm:px-7 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-surface-2/50 transition-colors"
+                    >
+                      {/* Lado Esquerdo: Colocação, Torneio e Tier */}
+                      <div className="flex items-start gap-4 min-w-0">
+                        <div
+                          className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-md ${
+                            is1st
+                              ? 'bg-amber-500 text-on-accent font-black shadow-amber-500/25 border-2 border-amber-300'
+                              : is2nd
+                              ? 'bg-slate-300/20 text-slate-200 border border-slate-300/40'
+                              : is3rd
+                              ? 'bg-amber-700/20 text-amber-500 border border-amber-700/40'
+                              : 'bg-surface-2 text-gray-400 border border-line'
+                          }`}
+                        >
+                          {is1st ? (
+                            <Trophy className="w-5 h-5 text-on-accent" />
+                          ) : (
+                            <Medal className="w-5 h-5" />
+                          )}
+                          <span className="text-[10px] font-mono font-black leading-tight mt-0.5">
+                            {item.placement}
+                          </span>
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-black text-white text-sm sm:text-base tracking-tight truncate">
+                              {item.tournament}
+                            </h3>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-surface-3 border border-line text-blue-500 dark:text-cyan-400">
+                              {item.tier}
+                            </span>
+                            {is1st && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-amber-500/20 border border-amber-500/40 text-amber-400">
+                                Campeão
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Time pelo qual Conquistou */}
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span className="text-[11px] text-gray-400 font-medium">Equipe:</span>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-2 border border-line">
+                              {item.teamLogo ? (
+                                <img src={item.teamLogo} alt={item.teamName} className="w-4 h-4 object-contain" />
+                              ) : (
+                                <TeamLogo teamName={item.teamName} className="w-4 h-4" />
+                              )}
+                              <span className="text-xs font-black text-white">{item.teamName}</span>
+                            </div>
+                            <span className="text-gray-500 text-xs">•</span>
+                            <span className="text-[11px] text-gray-400 font-mono">
+                              {formatTournamentDate(item.date)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Lado Direito: Placar da Final e Premiação */}
+                      <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 pl-16 md:pl-0 pt-2 md:pt-0 border-t md:border-t-0 border-line/60">
+                        {item.opponent && (
+                          <div className="text-left md:text-right">
+                            <span className="text-[10px] uppercase font-bold text-gray-500 block">Final / Adversário</span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {item.score && (
+                                <span className="font-mono font-black text-white text-xs px-2 py-0.5 rounded bg-surface-2 border border-line">
+                                  {item.score}
+                                </span>
+                              )}
+                              <span className="text-xs font-bold text-gray-300">vs {item.opponent}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {item.prize && (
+                          <div className="text-right min-w-[90px]">
+                            <span className="text-[10px] uppercase font-bold text-emerald-500 block">Prêmio</span>
+                            <span className="font-mono font-black text-emerald-400 text-sm block mt-0.5">
+                              {item.prize}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* SEÇÃO SECUNDÁRIA: INSÍGNIAS E MARCOS DE CARREIRA */}
+          <section className="glass-panel border border-line rounded-3xl p-6 sm:p-8 space-y-5">
+            <div>
+              <h3 className="text-sm font-black uppercase text-white tracking-wider flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-500" />
+                <span>Insígnias de Desempenho e Estatísticas</span>
+              </h3>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Marcos acumulados de partidas públicas, MMR competitivo e performance em jogo
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {badges.map((b) => (
+                <div
+                  key={b.id}
+                  className={`rounded-2xl p-4 border transition-all flex flex-col justify-between ${
+                    b.unlocked
+                      ? 'bg-surface-2 border-amber-500/30 shadow-sm'
+                      : 'bg-surface-2/40 border-line opacity-50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`p-2.5 rounded-xl shrink-0 ${
+                        b.unlocked
+                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                          : 'bg-surface-3 text-gray-500'
+                      }`}
+                    >
+                      <Trophy className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-white">{b.title}</h4>
+                      <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">{b.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-2.5 border-t border-line flex items-center justify-between text-xs">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-black uppercase font-mono ${
+                        b.unlocked
+                          ? 'bg-emerald-500/15 text-emerald-400 flex items-center gap-1'
+                          : 'bg-surface-3 text-gray-500 flex items-center gap-1'
+                      }`}
+                    >
+                      {b.unlocked ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Desbloqueada</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-3 h-3" />
+                          <span>Bloqueada</span>
+                        </>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       )}
     </div>
