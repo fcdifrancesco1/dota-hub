@@ -393,38 +393,39 @@ export default function ProfilePage() {
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen space-y-6">
       {/* CABEÇALHO */}
-      <div className="bg-surface border border-line rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div className="flex items-center gap-4 min-w-0">
+      <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex items-center gap-5 min-w-0">
           {profile?.avatarfull
-            ? <img src={profile.avatarfull} alt="" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border border-line shrink-0" />
-            : <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-surface-2 border border-line flex items-center justify-center shrink-0"><User className="w-8 h-8 text-gray-500" /></div>}
+            ? <img src={profile.avatarfull} alt="" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border border-line shrink-0 shadow-lg" />
+            : <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-surface-2 border border-line flex items-center justify-center shrink-0 shadow-lg"><User className="w-8 h-8 text-gray-500" /></div>}
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-black text-white break-words">
+            <h1 className="text-xl sm:text-3xl font-black text-white break-words tracking-tight">
               {profile?.personaname || (summary ? 'Conta sem nome' : 'Carregando...')}
             </h1>
-            <div className="text-xs text-gray-400 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span>ID da conta: <span className="font-mono text-gray-300">{accountId}</span></span>
+            <div className="text-xs text-gray-400 mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span>ID da conta: <span className="font-mono text-gray-300 font-bold">{accountId}</span></span>
               {profile?.profileurl && (
-                <a href={profile.profileurl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-amber-400">
+                <a href={profile.profileurl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-amber-400 transition-colors">
                   Perfil Steam <ExternalLink className="w-3 h-3" />
                 </a>
               )}
-              <a href={`https://www.opendota.com/players/${accountId}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-amber-400">
+              <a href={`https://www.opendota.com/players/${accountId}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-amber-400 transition-colors">
                 OpenDota <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="relative z-10 flex items-center gap-4 flex-wrap">
           {medal && (
-            <div className="flex items-center gap-2.5">
-              <div className="relative w-14 h-14 shrink-0">
+            <div className="flex items-center gap-3 bg-surface-2/60 border border-line px-3.5 py-2 rounded-2xl">
+              <div className="relative w-12 h-12 shrink-0">
                 <img src={medal.icon} alt="" className="absolute inset-0 w-full h-full" />
                 {medal.star && <img src={medal.star} alt="" className="absolute inset-0 w-full h-full" />}
               </div>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Medalha</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Medalha</div>
                 <div className="text-sm font-black text-white">{medal.name}</div>
               </div>
             </div>
@@ -434,7 +435,7 @@ export default function ProfilePage() {
               type="button"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-2 border border-line text-xs font-bold text-gray-300 hover:text-amber-400 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-2 border border-line text-xs font-bold text-gray-300 hover:text-amber-400 hover:border-amber-500/30 transition-all disabled:opacity-50"
               title="Pede para a OpenDota buscar suas partidas mais recentes"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
@@ -442,7 +443,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={handleUnlink}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-2 border border-line text-xs font-bold text-gray-400 hover:text-rose-400"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-2 border border-line text-xs font-bold text-gray-400 hover:text-rose-400 hover:border-rose-500/30 transition-all"
             >
               <LogOut className="w-3.5 h-3.5" /> Desvincular
             </button>
@@ -460,7 +461,7 @@ export default function ProfilePage() {
       {noMatchesAnywhere && <PrivateDataNotice />}
 
       {/* TOTAIS POR MODO (também servem de abas) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {Object.entries(MODES).map(([id, cfg]) => {
           const wl = summary?.totals?.[id];
           const wr = winRate(wl);
@@ -470,24 +471,24 @@ export default function ProfilePage() {
               key={id}
               type="button"
               onClick={() => setMode(id)}
-              className={`text-left rounded-xl border p-4 transition-all ${
-                active ? 'bg-amber-500/10 border-amber-500/50 shadow-lg' : 'bg-surface border-line hover:border-amber-500/30'
+              className={`tilt-card text-left rounded-3xl border p-5 transition-all ${
+                active ? 'glass-panel border-amber-500 shadow-xl shadow-amber-500/10' : 'bg-surface-2/60 border-line hover:border-amber-500/30'
               }`}
             >
-              <div className={`text-[11px] font-black uppercase tracking-wider ${active ? 'text-amber-400' : 'text-gray-400'}`}>{cfg.label}</div>
-              <div className="text-[10px] text-gray-500">{cfg.hint}</div>
+              <div className={`text-xs font-black uppercase tracking-wider ${active ? 'text-amber-400' : 'text-gray-400'}`}>{cfg.label}</div>
+              <div className="text-[11px] text-gray-400">{cfg.hint}</div>
               {wl ? (
-                <div className="mt-1.5 flex items-baseline gap-3">
-                  <span className="text-2xl font-black text-white font-mono">{(wl.win + wl.lose).toLocaleString('pt-BR')}</span>
+                <div className="mt-2 flex items-baseline gap-3">
+                  <span className="text-3xl font-black text-white font-mono">{(wl.win + wl.lose).toLocaleString('pt-BR')}</span>
                   <span className="text-xs text-gray-400">partidas</span>
                   {wr !== null && (
-                    <span className={`ml-auto text-sm font-black font-mono ${wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{wr.toFixed(1)}%</span>
+                    <span className={`ml-auto text-base font-black font-mono ${wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{wr.toFixed(1)}%</span>
                   )}
                 </div>
               ) : (
-                <div className="mt-1.5 text-xs text-gray-500">{summary ? '—' : 'Carregando...'}</div>
+                <div className="mt-2 text-xs text-gray-400">{summary ? '—' : 'Carregando...'}</div>
               )}
-              {wl && <div className="text-[11px] text-gray-500 mt-0.5">{wl.win.toLocaleString('pt-BR')} V · {wl.lose.toLocaleString('pt-BR')} D (total na OpenDota)</div>}
+              {wl && <div className="text-xs text-gray-400 mt-1">{wl.win.toLocaleString('pt-BR')} V · {wl.lose.toLocaleString('pt-BR')} D (total na OpenDota)</div>}
             </button>
           );
         })}
@@ -501,7 +502,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setView(id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
-              view === id ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              view === id ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:text-white hover:bg-surface-2'
             }`}
           >
             <Icon className="w-3.5 h-3.5" /> {label}
@@ -517,19 +518,19 @@ export default function ProfilePage() {
           <span className="text-xs">Carregando partidas de {MODES[mode].label}...</span>
         </div>
       ) : data.error ? (
-        <div className="bg-surface border border-line rounded-xl p-6 text-center text-xs text-gray-400">
+        <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
           Não foi possível carregar as partidas agora.{' '}
           <button type="button" onClick={() => setModeData((p) => { const n = { ...p }; delete n[mode]; return n; })} className="font-bold text-amber-400">Tentar novamente</button>
         </div>
       ) : data.matches.length === 0 ? (
-        <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
+        <div className="glass-panel border border-line rounded-2xl p-8 text-center text-xs text-gray-400">
           Nenhuma partida de {MODES[mode].label} encontrada.
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* MÉDIAS + HERÓIS */}
           <div className="space-y-6">
-            <section className="bg-surface border border-line rounded-2xl p-5 shadow-lg">
+            <section className="glass-panel rounded-3xl p-6 shadow-xl border border-line">
               <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
                 <Swords className="w-4 h-4 text-amber-400" /> Últimas {data.matches.length} partidas
               </h2>
@@ -542,29 +543,29 @@ export default function ProfilePage() {
                   ['XPM', data.averages.xpm, 'text-cyan-400'],
                   ['Last hits', data.averages.lastHits, 'text-white']
                 ].map(([label, value, color]) => (
-                  <div key={label} className="bg-surface-2 rounded-xl p-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{label}</div>
+                  <div key={label} className="bg-surface-2/80 rounded-2xl p-3 border border-line">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</div>
                     <div className={`mt-0.5 text-sm font-black font-mono ${color}`}>{value}</div>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="bg-surface border border-line rounded-2xl p-5 shadow-lg">
+            <section className="glass-panel rounded-3xl p-6 shadow-xl border border-line">
               <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-400" /> Heróis mais jogados
               </h2>
-              <p className="text-[10px] text-gray-500 -mt-2 mb-3">Todo o histórico de {MODES[mode].label} registrado na OpenDota.</p>
-              <ul className="space-y-2">
+              <p className="text-xs text-gray-400 -mt-2 mb-4">Todo o histórico de {MODES[mode].label} registrado na OpenDota.</p>
+              <ul className="space-y-2.5">
                 {data.heroes.slice(0, 10).map((h) => {
                   const wr = (h.wins / h.games) * 100;
                   return (
-                    <li key={h.heroId} className="flex items-center gap-3">
-                      <img src={getHeroImg(constants, h.heroId)} alt="" className="w-12 h-7 rounded object-cover border border-line shrink-0" />
+                    <li key={h.heroId} className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-surface-2/60 transition-colors">
+                      <img src={getHeroImg(constants, h.heroId)} alt="" className="w-12 h-7 rounded-lg object-cover border border-line shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-bold text-white truncate">{getHeroName(constants, h.heroId)}</div>
                         {h.lastPlayed && (
-                          <div className="text-[10px] text-gray-500">Último jogo: {fmtWhen(h.lastPlayed)}</div>
+                          <div className="text-[10px] text-gray-400">Último jogo: {fmtWhen(h.lastPlayed)}</div>
                         )}
                       </div>
                       <div className="text-right shrink-0">
@@ -579,32 +580,32 @@ export default function ProfilePage() {
           </div>
 
           {/* ÚLTIMAS PARTIDAS */}
-          <section className="xl:col-span-2 bg-surface border border-line rounded-2xl p-5 shadow-lg">
-            <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
+          <section className="xl:col-span-2 glass-panel rounded-3xl p-6 shadow-xl border border-line">
+            <h2 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-400" /> Partidas recentes
             </h2>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {data.matches.slice(0, 20).map((m) => (
                 <button
                   key={m.match_id}
                   type="button"
                   onClick={() => openMatch(m.match_id)}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-surface-2/60 hover:bg-surface-2 border border-transparent hover:border-amber-500/30 text-left transition-all group"
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-surface-2/60 hover:bg-surface-2 border border-line hover:border-amber-500/40 text-left transition-all group"
                 >
-                  <span className={`w-1 self-stretch rounded-full shrink-0 ${m.won ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                  <img src={getHeroImg(constants, m.hero_id)} alt="" className="w-12 h-7 rounded object-cover border border-line shrink-0" />
+                  <span className={`w-1.5 self-stretch rounded-full shrink-0 ${m.won ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  <img src={getHeroImg(constants, m.hero_id)} alt="" className="w-12 h-7 rounded-lg object-cover border border-line shrink-0" />
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-bold text-white truncate">{getHeroName(constants, m.hero_id)}</div>
-                    <div className="text-[10px] text-gray-500">{GAME_MODES[m.game_mode] || 'Partida'} · {fmtWhen(m.start_time)}<span className="sm:hidden"> · {m.kills}/{m.deaths}/{m.assists}</span></div>
+                    <div className="text-[10px] text-gray-400">{GAME_MODES[m.game_mode] || 'Partida'} · {fmtWhen(m.start_time)}<span className="sm:hidden"> · {m.kills}/{m.deaths}/{m.assists}</span></div>
                   </div>
-                  <span className={`text-[10px] font-black uppercase w-14 text-center shrink-0 ${m.won ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <span className={`text-[10px] font-black uppercase w-16 text-center shrink-0 ${m.won ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {m.won ? 'Vitória' : 'Derrota'}
                   </span>
                   <span className="hidden sm:inline text-xs font-mono text-gray-300 w-24 text-center shrink-0">
                     {m.kills}/{m.deaths}/{m.assists}
                   </span>
-                  <span className="hidden sm:inline text-xs font-mono text-gray-500 w-12 text-right shrink-0">{fmtDuration(m.duration)}</span>
-                  <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 shrink-0" />
+                  <span className="hidden sm:inline text-xs font-mono text-gray-400 w-12 text-right shrink-0">{fmtDuration(m.duration)}</span>
+                  <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-amber-400 shrink-0" />
                 </button>
               ))}
             </div>

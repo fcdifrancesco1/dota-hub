@@ -223,21 +223,21 @@ export default function MatchDetailPage() {
                     key={g.match_id || idx}
                     type="button"
                     onClick={() => selectMap(idx)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all border ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all border cursor-pointer ${
                       active
-                        ? 'bg-amber-500 text-on-accent border-amber-500 shadow-lg shadow-amber-500/20'
-                        : 'bg-surface border-line text-gray-400 hover:text-white hover:border-line-strong'
+                        ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black border-blue-600 dark:border-amber-500 shadow-md'
+                        : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:bg-surface-3'
                     }`}
                   >
                     <Swords className="w-3.5 h-3.5" />
                     <span>Jogo {g.mapNumber || idx + 1}</span>
                     {g.duration ? (
-                      <span className={`font-mono normal-case ${active ? 'opacity-80' : 'text-gray-500'}`}>
+                      <span className={`font-mono normal-case ${active ? 'opacity-90' : 'text-gray-400'}`}>
                         {fmtDuration(g.duration)}
                       </span>
                     ) : null}
                     {winnerName && (
-                      <span className={`hidden sm:inline normal-case font-bold ${active ? 'opacity-80' : 'text-gray-500'}`}>
+                      <span className={`hidden sm:inline normal-case font-bold ${active ? 'opacity-90' : 'text-gray-400'}`}>
                         · {winnerName}
                       </span>
                     )}
@@ -306,18 +306,19 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
   );
 
   return (
-    <section className="rounded-2xl bg-surface border border-line p-4 sm:p-7 shadow-xl">
-      <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
-        <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
+    <section className="tilt-card glass-panel rounded-3xl border border-line p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="holo-sheen" />
+      <div className="flex flex-wrap items-center justify-center gap-2 mb-5 relative z-10">
+        <span className="text-[11px] font-black uppercase tracking-widest text-blue-600 dark:text-amber-400 bg-surface-2 border border-line px-3 py-1 rounded-full shadow-sm">
           {series.stage || 'Torneio Profissional'}
         </span>
         {series.formato && (
-          <span className="text-[11px] font-mono font-black text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-full">
+          <span className="text-[11px] font-mono font-black text-purple-600 dark:text-purple-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
             {series.formato}
           </span>
         )}
         {dateLabel && (
-          <span className="text-[11px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full">
+          <span className="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
             {dateLabel}
           </span>
         )}
@@ -326,18 +327,18 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
             Finalizado
           </span>
         ) : (
-          <span className="text-[11px] font-black uppercase text-red-400 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-full">
+          <span className="text-[11px] font-black uppercase text-red-500 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-full">
             Em andamento
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-8">
+      <div className="flex items-center gap-2 sm:gap-8 relative z-10">
         {team(series.timeA, series.preferredIdA, aWon, aAhead, 'left')}
-        <div className="shrink-0 px-3 sm:px-6 py-2 rounded-2xl bg-surface-2 border border-line font-mono text-2xl sm:text-4xl font-black whitespace-nowrap">
-          <span className={aAhead ? 'text-amber-400' : 'text-gray-400'}>{series.scoreA}</span>
-          <span className="text-gray-500 mx-1.5 sm:mx-2">:</span>
-          <span className={bAhead ? 'text-amber-400' : 'text-gray-400'}>{series.scoreB}</span>
+        <div className="shrink-0 px-4 sm:px-7 py-2.5 rounded-2xl bg-surface-2 border border-line font-mono text-2xl sm:text-4xl font-black whitespace-nowrap shadow-inner">
+          <span className={aAhead ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-gray-400'}>{series.scoreA}</span>
+          <span className="text-gray-400 mx-1.5 sm:mx-2">:</span>
+          <span className={bAhead ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-gray-400'}>{series.scoreB}</span>
         </div>
         {team(series.timeB, series.preferredIdB, bWon, bAhead, 'right')}
       </div>
@@ -357,24 +358,24 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
   return (
     <div className="space-y-6">
       {/* RESUMO DO MAPA */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-surface border border-line p-4 rounded-2xl text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 glass-panel border border-line p-4 sm:p-5 rounded-2xl text-xs shadow-md">
         <div className="flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-amber-400" />
+          <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
           <span className="text-gray-400">Vencedor do Jogo {mapNumber}:</span>
-          <strong className={match.radiant_win ? 'text-emerald-400' : 'text-rose-400'}>{winner}</strong>
+          <strong className={match.radiant_win ? 'text-emerald-500 font-black' : 'text-rose-500 font-black'}>{winner}</strong>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-[11px]">
           <span className="flex items-center gap-1.5">
-            <Swords className="w-3.5 h-3.5 text-amber-400" />
-            Abates: <strong className="text-emerald-400">{match.radiant_score ?? '—'}</strong>
-            <span className="text-gray-500">:</span>
-            <strong className="text-rose-400">{match.dire_score ?? '—'}</strong>
+            <Swords className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
+            Abates: <strong className="text-emerald-500">{match.radiant_score ?? '—'}</strong>
+            <span className="text-gray-400">:</span>
+            <strong className="text-rose-500">{match.dire_score ?? '—'}</strong>
           </span>
           <span className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-cyan-400" />
+            <Clock className="w-3.5 h-3.5 text-cyan-500" />
             Duração: <strong className="text-white">{fmtDuration(match.duration)}</strong>
           </span>
-          <span>Match ID: <strong className="text-gray-300">{match.match_id}</strong></span>
+          <span>Match ID: <strong className="text-white">{match.match_id}</strong></span>
         </div>
       </div>
 
@@ -383,9 +384,9 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div className={hasGraph ? 'xl:col-span-8' : 'xl:col-span-12'}>
           {hasGraph ? (
-            <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl h-full">
+            <div className="glass-panel border border-line rounded-3xl p-6 shadow-xl h-full">
               <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-400" />
+                <Zap className="w-4 h-4 text-blue-600 dark:text-amber-400" />
                 <span>Vantagem de Ouro e Experiência</span>
               </h3>
               <AdvantageGraph
@@ -396,7 +397,7 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
               />
             </div>
           ) : (
-            <div className="bg-surface border border-line rounded-2xl p-5 text-xs text-gray-400">
+            <div className="glass-panel border border-line rounded-3xl p-6 text-xs text-gray-400 shadow-sm">
               O gráfico de vantagem aparece quando a OpenDota termina de analisar o replay desta partida.
             </div>
           )}
@@ -466,15 +467,15 @@ function DraftPanel({ picksBans, radiant, dire, constants }) {
   };
 
   return (
-    <section className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
+    <section className="glass-panel border border-line rounded-3xl p-6 shadow-xl">
       <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-amber-400" />
+        <Sparkles className="w-4 h-4 text-blue-600 dark:text-amber-400" />
         <span>Draft</span>
-        <span className="text-[10px] font-normal normal-case text-gray-500">número = ordem da escolha</span>
+        <span className="text-[10px] font-normal normal-case text-gray-400">número = ordem da escolha</span>
       </h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {row(0, radiant, 'text-emerald-400')}
-        {row(1, dire, 'text-rose-400')}
+        {row(0, radiant, 'text-emerald-500 font-black')}
+        {row(1, dire, 'text-rose-500 font-black')}
       </div>
     </section>
   );
@@ -517,18 +518,18 @@ function Highlights({ players, constants }) {
   if (!items.length) return null;
 
   return (
-    <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl h-full">
+    <div className="glass-panel border border-line rounded-3xl p-6 shadow-xl h-full">
       <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
-        <Trophy className="w-4 h-4 text-amber-400" />
+        <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
         <span>Destaques do Jogo</span>
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
         {items.map(({ label, icon: Icon, field, color, player }) => (
-          <div key={field} className="flex items-center gap-3 bg-surface-2 border border-line rounded-xl p-3">
+          <div key={field} className="flex items-center gap-3 bg-surface-2 border border-line rounded-2xl p-3 shadow-sm">
             <img
               src={getHeroImg(constants, player.hero_id)}
               alt=""
-              className="w-12 h-7 object-cover rounded border border-line shrink-0"
+              className="w-12 h-7 object-cover rounded-lg border border-line shrink-0"
             />
             <div className="min-w-0 flex-1">
               <div className="text-[10px] uppercase font-bold text-gray-400 flex items-center gap-1">
@@ -550,28 +551,28 @@ function ItemSlot({ id, constants, className }) {
   const img = id ? getItemImg(constants, id) : null;
   const name = id ? constants?.itemsById?.[id]?.dname : null;
   return (
-    <div title={name || undefined} className={`rounded bg-surface-2 border border-line flex items-center justify-center overflow-hidden ${className}`}>
+    <div title={name || undefined} className={`rounded-lg bg-surface-3 border border-line flex items-center justify-center overflow-hidden ${className}`}>
       {img ? <img src={img} alt={name || ''} className="w-full h-full object-cover" /> : null}
     </div>
   );
 }
 
 function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, won, constants, onSelectHero }) {
-  const accent = isRadiant ? 'text-emerald-400' : 'text-rose-400';
+  const accent = isRadiant ? 'text-emerald-500' : 'text-rose-500';
   return (
-    <section className="bg-surface border border-line rounded-2xl overflow-hidden shadow-xl">
-      <div className="p-4 border-b border-line flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <TeamLogo teamName={teamName} teamId={teamId} logoUrl={teamLogo} className="w-6 h-6 shrink-0" />
+    <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-xl">
+      <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <TeamLogo teamName={teamName} teamId={teamId} logoUrl={teamLogo} className="w-7 h-7 shrink-0" />
           <h3 className={`text-sm font-black uppercase tracking-wider leading-tight break-words line-clamp-2 ${accent}`}>{teamName}</h3>
-          <span className="text-[10px] font-bold uppercase text-gray-500">{isRadiant ? 'Radiant' : 'Dire'}</span>
+          <span className="text-[10px] font-bold uppercase text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">{isRadiant ? 'Radiant' : 'Dire'}</span>
           {won && (
-            <span className="text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-black uppercase">
+            <span className="text-[10px] bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-black uppercase">
               Vitória
             </span>
           )}
         </div>
-        <span className="text-xs font-mono text-gray-400 shrink-0">Abates: <strong className="text-white">{kills ?? '—'}</strong></span>
+        <span className="text-xs font-mono text-gray-400 shrink-0">Abates: <strong className="text-white font-black">{kills ?? '—'}</strong></span>
       </div>
 
       <div className="overflow-x-auto">

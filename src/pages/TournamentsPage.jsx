@@ -96,7 +96,7 @@ export default function TournamentsPage() {
 
         {/* FILTROS & BUSCA */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
+          <div className="flex bg-surface-2 p-1 rounded-2xl border border-line shadow-sm">
             {[
               { id: 'all', label: 'Todos' },
               { id: 'ongoing', label: 'Em Andamento' },
@@ -106,8 +106,8 @@ export default function TournamentsPage() {
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap ${
-                  statusFilter === tab.id ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
+                  statusFilter === tab.id ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md' : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {tab.label}
@@ -122,7 +122,7 @@ export default function TournamentsPage() {
               placeholder="Buscar campeonato ou organizador..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-full sm:w-64"
+              className="bg-surface-2 border border-line rounded-2xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 dark:focus:border-amber-500/50 w-full sm:w-64 shadow-sm"
             />
           </div>
 
@@ -131,7 +131,7 @@ export default function TournamentsPage() {
               value={archiveYear}
               onChange={(e) => setArchiveYear(Number(e.target.value))}
               aria-label="Ano"
-              className="bg-surface-2 border border-line rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50"
+              className="bg-surface-2 border border-line rounded-2xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-blue-500 dark:focus:border-amber-500/50 shadow-sm"
             >
               {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -143,11 +143,11 @@ export default function TournamentsPage() {
       {loading || archiveLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-[380px] rounded-2xl bg-surface border border-line animate-pulse" />
+            <div key={i} className="h-[380px] rounded-3xl glass-panel border border-line animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-surface border border-line rounded-2xl p-12 text-center text-gray-400 text-xs">
+        <div className="glass-panel border border-line rounded-3xl p-12 text-center text-gray-400 text-xs">
           {statusFilter === 'finished'
             ? `Nenhum campeonato Tier 1 ou Tier 2 encerrado em ${archiveYear}${search ? ' com essa busca' : ''}.`
             : tournaments.length === 0
@@ -168,14 +168,14 @@ export default function TournamentsPage() {
               <Link
                 key={t.id}
                 to={tournamentPath(t)}
-                className="group rounded-2xl bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/50 overflow-hidden shadow-xl transition-all flex flex-col justify-between"
+                className="tilt-card glass-panel group rounded-3xl border border-line hover:border-blue-500/50 dark:hover:border-amber-500/50 overflow-hidden shadow-xl transition-all flex flex-col justify-between"
               >
                 <div>
                   {/* BANNER (logo oficial do campeonato) */}
                   <div className={`h-40 w-full relative overflow-hidden flex items-center justify-center p-6 ${
                     isOngoing
-                      ? 'bg-gradient-to-br from-red-950 via-surface-2 to-surface-2'
-                      : 'bg-gradient-to-br from-amber-950 via-surface-2 to-surface-2'
+                      ? 'bg-gradient-to-br from-red-500/10 via-surface-2 to-surface-3'
+                      : 'bg-gradient-to-br from-blue-500/10 dark:from-amber-500/10 via-surface-2 to-surface-3'
                   }`}>
                     {image ? (
                       <img
@@ -183,21 +183,21 @@ export default function TournamentsPage() {
                         alt={t.name}
                         referrerPolicy="no-referrer"
                         loading="lazy"
-                        className="max-h-24 max-w-[75%] object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-500"
+                        className="max-h-24 max-w-[75%] object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-                        <Trophy className="w-6 h-6 text-amber-400" />
+                      <div className="w-12 h-12 rounded-2xl bg-blue-500/20 dark:bg-amber-500/20 border border-blue-500/30 dark:border-amber-500/40 flex items-center justify-center">
+                        <Trophy className="w-6 h-6 text-blue-600 dark:text-amber-400" />
                       </div>
                     )}
 
-                    <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                    <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
                       isOngoing
                         ? 'bg-red-600 text-on-accent shadow-md'
                         : isUpcoming
-                        ? 'bg-amber-500 text-black'
-                        : 'bg-white/10 text-gray-400'
+                        ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
+                        : 'bg-surface-3 text-gray-400 border border-line'
                     }`}>
                       {statusLabel(t)}
                     </span>
@@ -205,52 +205,52 @@ export default function TournamentsPage() {
 
                   {/* CONTEÚDO */}
                   <div className="p-6">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-amber-500">
                         {tierLabel(t)}
                       </span>
                       {t.organizer && (
-                        <span className="text-[10px] text-gray-500 truncate max-w-[50%]">{t.organizer}</span>
+                        <span className="text-[10px] text-gray-400 truncate max-w-[50%]">{t.organizer}</span>
                       )}
                     </div>
 
-                    <h3 className="text-lg font-black text-white group-hover:text-amber-400 transition-colors leading-snug mb-3">
+                    <h3 className="text-lg font-black text-white group-hover:text-blue-600 dark:group-hover:text-amber-400 transition-colors leading-snug mb-3">
                       {t.name}
                     </h3>
 
                     <div className="space-y-2 text-xs text-gray-400">
                       {dates && (
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
-                          <span className="font-semibold text-gray-300">{dates}</span>
+                          <Calendar className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                          <span className="font-semibold text-white">{dates}</span>
                         </div>
                       )}
                       {where && (
                         <div className="flex items-center gap-2">
                           {t.type === 'Online' ? (
-                            <Wifi className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                            <Wifi className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                           ) : (
-                            <MapPin className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                            <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                           )}
                           <span className="truncate">{where}</span>
                         </div>
                       )}
                       {t.teamCount && (
                         <div className="flex items-center gap-2">
-                          <Users className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                          <Users className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                           <span>{t.teamCount} times</span>
                         </div>
                       )}
                       {t.winner && (
                         <div className="flex items-center gap-2">
-                          <Crown className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                          <Crown className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400 flex-shrink-0" />
                           <span className="truncate">
-                            Campeão: <strong className="text-amber-400">{t.winner.name}</strong>
-                            {t.runnerUp && <span className="text-gray-500"> · vice {t.runnerUp.name}</span>}
+                            Campeão: <strong className="text-blue-600 dark:text-amber-400">{t.winner.name}</strong>
+                            {t.runnerUp && <span className="text-gray-400"> · vice {t.runnerUp.name}</span>}
                           </span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 text-emerald-400 font-bold font-mono">
+                      <div className="flex items-center gap-2 text-emerald-500 font-bold font-mono">
                         <DollarSign className="w-3.5 h-3.5 flex-shrink-0" />
                         <span>{prize ? `Premiação: ${prize}` : 'Premiação não divulgada'}</span>
                       </div>
@@ -259,9 +259,9 @@ export default function TournamentsPage() {
                 </div>
 
                 {/* RODAPÉ DO CARD */}
-                <div className="px-6 py-3.5 border-t border-white/5 bg-canvas flex items-center justify-between text-xs">
+                <div className="px-6 py-3.5 border-t border-line bg-surface-2 flex items-center justify-between text-xs">
                   <span className="text-gray-400 text-[11px]">Partidas, heróis e chaveamento</span>
-                  <span className="font-bold text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                  <span className="font-bold text-blue-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
                     <span>Acessar</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>

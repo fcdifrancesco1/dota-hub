@@ -2070,21 +2070,95 @@ export async function fetchTeamProfile(teamId, teamName = "") {
   return dynamicProfile;
 }
 
-// 11. Buscar Detalhes Completos do Herói (Habilidades, Aghanim, Talentos, Benchmarks, Counters)
+// 11. Buscar Detalhes Completos do Herói (Habilidades, Aghanim, Talentos, Benchmarks, Counters em PT-BR)
+const BEHAVIOR_PT_MAP = {
+  'No Target': 'Sem Alvo',
+  'Unit Target': 'Unidade Alvo',
+  'Point Target': 'Ponto Alvo',
+  'Passive': 'Passiva',
+  'Channeled': 'Canalizada',
+  'Channelled': 'Canalizada',
+  'Instant Cast': 'Conjuração Instantânea',
+  'Area of Effect': 'Área de Efeito',
+  'AOE': 'Área de Efeito',
+  'Target Area': 'Área Alvo',
+  'Toggle': 'Alternável',
+  'Auto-Cast': 'Autoconjuração',
+  'Hidden': 'Oculta',
+  'Attack Modifier': 'Modificador de Ataque'
+};
+
+const DMG_TYPE_PT_MAP = {
+  'Magical': 'Mágico',
+  'Physical': 'Físico',
+  'Pure': 'Puro'
+};
+
+const BKB_PIERCE_PT_MAP = {
+  'Yes': 'Sim',
+  'No': 'Não'
+};
+
+function cleanValveAbilityText(text, specialValues = []) {
+  if (!text) return '';
+  let cleaned = String(text).replace(/^Em inglês:[^\n]+\n*/i, '').trim();
+  if (Array.isArray(specialValues) && specialValues.length > 0) {
+    specialValues.forEach(sv => {
+      if (!sv?.name) return;
+      const vals = Array.isArray(sv.values_float) && sv.values_float.length > 0
+        ? sv.values_float.join(' / ')
+        : (sv.values_float !== undefined ? sv.values_float : '');
+      cleaned = cleaned.replaceAll('%' + sv.name + '%', vals);
+    });
+  }
+  return cleaned
+    .replace(/<br\s*[\/]?>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/%%/g, '%')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function resolveTalentPT(valveNameLoc, openDotaDname) {
+  if (!valveNameLoc) return openDotaDname || 'Talento';
+  if (!valveNameLoc.includes('{s:')) return valveNameLoc;
+  const match = openDotaDname ? openDotaDname.match(/^[+-]?\d+(?:\.\d+)?%?/) : null;
+  if (match) {
+    const rawVal = match[0].replace(/^[+-]/, '').replace('%', '');
+    return valveNameLoc.replace(/\{s:[^}]+\}/, rawVal);
+  }
+  return valveNameLoc.replace(/\{s:[^}]+\}/, '').trim();
+}
+
 export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
   if (!heroId) return null;
-  const cacheKey = `hero_full_details_${heroId}`;
+  const cacheKey = `hero_full_details_ptbr_v2_${heroId}`;
   const cached = getCached(cacheKey, 60 * 60 * 1000);
   if (cached) return cached;
 
   try {
-    const [heroAbilitiesRes, abilitiesRes, aghsRes, benchmarksRes, matchupsRes] = await Promise.all([
+    const [valveRes, heroAbilitiesRes, abilitiesRes, aghsRes, benchmarksRes, matchupsRes] = await Promise.all([
+      fetchWithTimeout(`https://www.dota2.com/datafeed/herodata?language=brazilian&hero_id=${heroId}`, {}, 6500)
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
       fetchWithTimeout(`${OPENDOTA_BASE}/constants/hero_abilities`, {}, 6000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetchWithTimeout(`${OPENDOTA_BASE}/constants/abilities`, {}, 6000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetchWithTimeout(`${OPENDOTA_BASE}/constants/aghs_desc`, {}, 5000).then(r => r.ok ? r.json() : []).catch(() => []),
       fetchWithTimeout(`${OPENDOTA_BASE}/benchmarks?hero_id=${heroId}`, {}, 5000).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetchWithTimeout(`${OPENDOTA_BASE}/heroes/${heroId}/matchups`, {}, 5000).then(r => r.ok ? r.json() : []).catch(() => [])
     ]);
+
+    const valveHero = valveRes?.result?.data?.heroes?.[0] || null;
+    const valveAbilities = valveHero?.abilities || [];
+    const valveAbilityMap = new Map();
+    valveAbilities.forEach(a => {
+      if (a?.name) valveAbilityMap.set(a.name, a);
+    });
+
+    const valveTalentMap = new Map();
+    (valveHero?.talents || []).forEach(t => {
+      if (t?.name) valveTalentMap.set(t.name, t);
+    });
 
     // Resolver chave interna do herói
     let resolvedKey = heroInternalName;
@@ -2100,15 +2174,52 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
 
     const abilitiesList = abilityNames.map(name => {
       const raw = abilitiesRes[name] || {};
+      const valveAb = valveAbilityMap.get(name);
+
+      // Nome em PT-BR (da Valve ou OpenDota)
+      const dname = valveAb?.name_loc || raw.dname || name.replace(/_/g, ' ');
+
+      // Descrição em PT-BR (da Valve com limpeza de tags e injeção de parâmetros)
+      let desc = '';
+      if (valveAb?.desc_loc) {
+        desc = cleanValveAbilityText(valveAb.desc_loc, valveAb.special_values);
+      } else if (raw.desc) {
+        desc = raw.desc;
+      }
+
+      // Lore e notas em PT-BR
+      const lore = valveAb?.lore_loc || '';
+      const notes = Array.isArray(valveAb?.notes_loc) ? valveAb.notes_loc : [];
+
+      // Traduzir comportamento
+      let behavior = Array.isArray(raw.behavior) ? raw.behavior.join(', ') : (raw.behavior || '');
+      Object.entries(BEHAVIOR_PT_MAP).forEach(([en, pt]) => {
+        behavior = behavior.replace(new RegExp(en, 'gi'), pt);
+      });
+
+      // Traduzir tipo de dano
+      let dmg_type = raw.dmg_type || '';
+      if (DMG_TYPE_PT_MAP[dmg_type]) {
+        dmg_type = DMG_TYPE_PT_MAP[dmg_type];
+      }
+
+      // Traduzir pierce BKB
+      let bkbpierce = raw.bkbpierce || '';
+      if (BKB_PIERCE_PT_MAP[bkbpierce]) {
+        bkbpierce = BKB_PIERCE_PT_MAP[bkbpierce];
+      }
+
       return {
         name,
-        dname: raw.dname || name.replace(/_/g, ' '),
-        desc: raw.desc || '',
-        behavior: Array.isArray(raw.behavior) ? raw.behavior.join(', ') : (raw.behavior || ''),
-        dmg_type: raw.dmg_type || '',
-        bkbpierce: raw.bkbpierce || '',
-        mc: Array.isArray(raw.mc) ? raw.mc.join(' / ') : (raw.mc || ''),
-        cd: Array.isArray(raw.cd) ? raw.cd.join(' / ') : (raw.cd || ''),
+        dname,
+        desc,
+        lore,
+        notes,
+        behavior,
+        dmg_type,
+        bkbpierce,
+        mc: Array.isArray(raw.mc) ? raw.mc.join(' / ') : (raw.mc || (valveAb?.mana_costs ? valveAb.mana_costs.join(' / ') : '')),
+        cd: Array.isArray(raw.cd) ? raw.cd.join(' / ') : (raw.cd || (valveAb?.cooldowns ? valveAb.cooldowns.join(' / ') : '')),
         img: raw.img ? `${STEAM_CDN}${raw.img}` : `${STEAM_CDN}/apps/dota2/images/dota_react/abilities/${name}.png`,
         attrib: raw.attrib || []
       };
@@ -2123,14 +2234,50 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
       aghsData = aghsRes[shortKey] || aghsRes[resolvedKey] || {};
     }
 
-    // Árvore de Talentos
+    // Buscar melhorias de Aghanim e Fragmento diretamente da Valve em PT-BR
+    let scepterSkillName = aghsData.scepter_skill_name || 'Habilidade do Cetro';
+    let scepterDesc = aghsData.scepter_desc || 'Aprimora uma habilidade existente ou adiciona um novo poder ao herói.';
+    let shardSkillName = aghsData.shard_skill_name || 'Habilidade do Fragmento';
+    let shardDesc = aghsData.shard_desc || 'Concede melhorias táticas ou novos efeitos passivos ao herói.';
+
+    // Procurar nas habilidades da Valve por upgrades de cetro/shard em PT-BR
+    const scepterGrantedAb = valveAbilities.find(a => a.ability_is_granted_by_scepter && a.name_loc);
+    const scepterUpgradeAb = valveAbilities.find(a => a.scepter_loc && a.scepter_loc.trim().length > 0);
+    if (scepterGrantedAb) {
+      scepterSkillName = scepterGrantedAb.name_loc;
+      scepterDesc = cleanValveAbilityText(scepterGrantedAb.desc_loc, scepterGrantedAb.special_values);
+    } else if (scepterUpgradeAb) {
+      scepterSkillName = scepterUpgradeAb.name_loc;
+      scepterDesc = cleanValveAbilityText(scepterUpgradeAb.scepter_loc, scepterUpgradeAb.special_values);
+    }
+
+    const shardGrantedAb = valveAbilities.find(a => a.ability_is_granted_by_shard && a.name_loc);
+    const shardUpgradeAb = valveAbilities.find(a => a.shard_loc && a.shard_loc.trim().length > 0);
+    if (shardGrantedAb) {
+      shardSkillName = shardGrantedAb.name_loc;
+      shardDesc = cleanValveAbilityText(shardGrantedAb.desc_loc, shardGrantedAb.special_values);
+    } else if (shardUpgradeAb) {
+      shardSkillName = shardUpgradeAb.name_loc;
+      shardDesc = cleanValveAbilityText(shardUpgradeAb.shard_loc, shardUpgradeAb.special_values);
+    }
+
+    // Árvore de Talentos em PT-BR
     const rawTalents = heroData.talents || [];
     const talents = [4, 3, 2, 1].map(lvl => {
       const pair = rawTalents.filter(t => t.level === lvl);
+      const leftKey = pair[0]?.name;
+      const rightKey = pair[1]?.name;
+
+      const leftValve = valveTalentMap.get(leftKey);
+      const rightValve = valveTalentMap.get(rightKey);
+
+      const leftOdDname = abilitiesRes[leftKey]?.dname || leftKey || 'Talento';
+      const rightOdDname = abilitiesRes[rightKey]?.dname || rightKey || 'Talento';
+
       return {
         level: lvl === 1 ? 10 : lvl === 2 ? 15 : lvl === 3 ? 20 : 25,
-        left: abilitiesRes[pair[0]?.name]?.dname || pair[0]?.name || 'Talento',
-        right: abilitiesRes[pair[1]?.name]?.dname || pair[1]?.name || 'Talento'
+        left: resolveTalentPT(leftValve?.name_loc, leftOdDname),
+        right: resolveTalentPT(rightValve?.name_loc, rightOdDname)
       };
     });
 
@@ -2175,11 +2322,11 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
       abilities: abilitiesList,
       aghs: {
         has_scepter: aghsData.has_scepter ?? true,
-        scepter_desc: aghsData.scepter_desc || 'Aprimora uma habilidade existente ou adiciona um novo poder ao herói.',
-        scepter_skill_name: aghsData.scepter_skill_name || 'Habilidade Cetro',
+        scepter_desc: scepterDesc,
+        scepter_skill_name: scepterSkillName,
         has_shard: aghsData.has_shard ?? true,
-        shard_desc: aghsData.shard_desc || 'Concede melhorias táticas ou novos efeitos passivos ao herói.',
-        shard_skill_name: aghsData.shard_skill_name || 'Habilidade Fragmento'
+        shard_desc: shardDesc,
+        shard_skill_name: shardSkillName
       },
       talents,
       bestMatchups,

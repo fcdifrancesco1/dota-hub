@@ -81,19 +81,19 @@ export default function MatchesPage() {
         </div>
 
         {/* ALTERNADOR DE MODO (CONCLUÍDAS VS FUTURAS) */}
-        <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
+        <div className="flex bg-surface-2 p-1 rounded-2xl border border-line shadow-sm">
           <button
             onClick={() => switchMode('finished')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap ${
-              filterMode === 'finished' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
+              filterMode === 'finished' ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md' : 'text-gray-400 hover:text-white'
             }`}
           >
             Séries Concluídas
           </button>
           <button
             onClick={() => switchMode('upcoming')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap ${
-              filterMode === 'upcoming' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
+              filterMode === 'upcoming' ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md' : 'text-gray-400 hover:text-white'
             }`}
           >
             Agenda Futura
@@ -109,7 +109,7 @@ export default function MatchesPage() {
           <select
             value={selectedTournament}
             onChange={(e) => setSelectedTournament(e.target.value)}
-            className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+            className="w-full bg-surface-2 border border-line rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dark:focus:border-amber-500/50 shadow-sm"
           >
             <option value="all">Todos os Campeonatos</option>
             {tournamentsList.map((t, idx) => (
@@ -124,7 +124,7 @@ export default function MatchesPage() {
           <select
             value={selectedTeam}
             onChange={(e) => setSelectedTeam(e.target.value)}
-            className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+            className="w-full bg-surface-2 border border-line rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dark:focus:border-amber-500/50 shadow-sm"
           >
             <option value="all">Todos os Times</option>
             {teamsList.map((tm, idx) => (
@@ -143,7 +143,7 @@ export default function MatchesPage() {
               placeholder="Digite time ou torneio..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-surface-2 border border-line rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
+              className="w-full bg-surface-2 border border-line rounded-2xl pl-8 pr-3.5 py-2 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 dark:focus:border-amber-500/50 shadow-sm"
             />
           </div>
         </div>
@@ -173,7 +173,7 @@ export default function MatchesPage() {
       {/* GRID DE SÉRIES / PARTIDAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.length === 0 ? (
-          <div className="col-span-full bg-surface border border-line rounded-2xl p-12 text-center text-gray-400 text-xs">
+          <div className="col-span-full glass-panel border border-line rounded-3xl p-12 text-center text-gray-400 text-xs">
             Nenhuma partida encontrada para os filtros selecionados.
           </div>
         ) : (
@@ -194,9 +194,9 @@ export default function MatchesPage() {
             const cardContent = (
               <>
                 <div>
-                  <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-white/5 pb-2">
-                    <span className="font-semibold truncate max-w-[200px] text-amber-400/90">{tourney}</span>
-                    <span className="font-mono text-gray-400 font-bold bg-white/5 px-2 py-0.5 rounded">
+                  <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-line pb-2">
+                    <span className="font-semibold truncate max-w-[200px] text-blue-600 dark:text-amber-400">{tourney}</span>
+                    <span className="font-mono text-gray-400 font-bold bg-surface-2 border border-line px-2 py-0.5 rounded-lg">
                       {formatLabel}
                     </span>
                   </div>
@@ -204,17 +204,17 @@ export default function MatchesPage() {
                   <div className="flex items-center justify-between gap-3 py-2">
                     <div className="flex items-center gap-2.5 flex-1 min-w-0">
                       <TeamLogo teamName={tA} teamId={s.team1_id || s.preferredIdA} logoUrl={s.team1_logo || s.logoA} className="w-7 h-7" />
-                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
+                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>
                         {tA}
                       </span>
                     </div>
 
-                    <div className="font-mono font-black text-xs px-3 py-1 bg-black/60 rounded-xl border border-white/10 text-white">
+                    <div className="font-mono font-black text-xs px-3 py-1 bg-surface-2 rounded-xl border border-line text-white shadow-inner">
                       {isUpcoming ? 'VS' : `${scoreA} - ${scoreB}`}
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
-                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-amber-400 font-black' : 'text-gray-200'}`}>
+                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>
                         {tB}
                       </span>
                       <TeamLogo teamName={tB} teamId={s.team2_id || s.preferredIdB} logoUrl={s.team2_logo || s.logoB} className="w-7 h-7" />
@@ -222,25 +222,25 @@ export default function MatchesPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
+                <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-[11px]">
                   {isUpcoming ? (
                     <>
-                      <span className="flex items-center gap-1.5 text-gray-300 font-mono font-bold">
-                        <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="flex items-center gap-1.5 text-white font-mono font-bold">
+                        <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                         {s.startTime || 'Horário a definir'}
                       </span>
-                      <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                      <span className="text-blue-600 dark:text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                         <span>{hasStarted ? 'Em andamento · Jogadores' : 'Jogadores no torneio'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </span>
                     </>
                   ) : (
                     <>
-                      <span className={inProgress ? 'text-red-400 font-bold flex items-center gap-1.5' : 'text-gray-500'}>
+                      <span className={inProgress ? 'text-red-500 font-bold flex items-center gap-1.5' : 'text-gray-400'}>
                         {inProgress && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
                         {inProgress ? 'Em andamento' : s.startTime ? new Date(s.startTime * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Recentemente'}
                       </span>
-                      <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                      <span className="text-blue-600 dark:text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                         <span>Ver Replay & Draft</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </span>
@@ -250,7 +250,7 @@ export default function MatchesPage() {
               </>
             );
 
-            const cardClass = "bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-2xl p-5 transition-all shadow-xl group flex flex-col justify-between";
+            const cardClass = "tilt-card glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-3xl p-5 transition-all shadow-xl group flex flex-col justify-between";
 
             // Partidas futuras não têm replay: o card abre as estatísticas dos jogadores no torneio
             if (isUpcoming) {
@@ -291,32 +291,32 @@ function OngoingCard({ match: m, liveGame, onOpenLive, onOpenPreview }) {
 
   const body = (
     <>
-      <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-white/5 pb-2">
-        <span className="font-semibold truncate max-w-[200px] text-amber-400/90">{m.tourneyName}</span>
-        <span className="font-mono text-gray-400 font-bold bg-white/5 px-2 py-0.5 rounded">{m.formato}</span>
+      <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-line pb-2">
+        <span className="font-semibold truncate max-w-[200px] text-blue-600 dark:text-amber-400">{m.tourneyName}</span>
+        <span className="font-mono text-gray-400 font-bold bg-surface-2 border border-line px-2 py-0.5 rounded-lg">{m.formato}</span>
       </div>
       <div className="flex items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-7 h-7" />
-          <span className={`text-xs leading-tight break-words line-clamp-2 ${leadA ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeA}</span>
+          <span className={`text-xs leading-tight break-words line-clamp-2 ${leadA ? 'text-white font-black' : 'text-gray-400 font-bold'}`}>{m.timeA}</span>
         </div>
-        <div className="font-mono font-black text-xs px-3 py-1 bg-black/60 rounded-xl border border-white/10 text-white">
+        <div className="font-mono font-black text-xs px-3 py-1 bg-surface-2 rounded-xl border border-line text-white shadow-inner">
           {scoreA} - {scoreB}
         </div>
         <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
-          <span className={`text-xs leading-tight break-words line-clamp-2 text-right ${leadB ? 'text-white font-black' : 'text-gray-300 font-bold'}`}>{m.timeB}</span>
+          <span className={`text-xs leading-tight break-words line-clamp-2 text-right ${leadB ? 'text-white font-black' : 'text-gray-400 font-bold'}`}>{m.timeB}</span>
           <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-7 h-7" />
         </div>
       </div>
-      <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
-        <span className={`flex items-center gap-1.5 font-bold ${done ? 'text-gray-400' : 'text-red-400'}`}>
+      <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-[11px]">
+        <span className={`flex items-center gap-1.5 font-bold ${done ? 'text-gray-400' : 'text-red-500'}`}>
           {!done && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
           {status}
         </span>
         {liveGame ? (
-          <span className="text-amber-400 font-bold flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
+          <span className="text-blue-600 dark:text-amber-400 font-bold flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
         ) : (
-          <span className="text-amber-400 font-bold flex items-center gap-1">
+          <span className="text-blue-600 dark:text-amber-400 font-bold flex items-center gap-1">
             {scoreA + scoreB > 0 ? 'Ver mapas jogados' : done ? 'Jogadores no torneio' : 'Intervalo · Jogadores'} <ChevronRight className="w-3.5 h-3.5" />
           </span>
         )}
@@ -324,17 +324,17 @@ function OngoingCard({ match: m, liveGame, onOpenLive, onOpenPreview }) {
     </>
   );
 
-  const cls = 'bg-surface border border-red-500/30 rounded-2xl p-5 shadow-xl flex flex-col justify-between';
+  const cls = 'tilt-card glass-panel border border-red-500/40 rounded-3xl p-5 shadow-xl flex flex-col justify-between cursor-pointer';
   if (liveGame) {
     return (
-      <button type="button" onClick={() => onOpenLive(liveGame)} className={`${cls} text-left hover:border-amber-500/50 transition-colors`}>
+      <button type="button" onClick={() => onOpenLive(liveGame)} className={`${cls} text-left hover:border-blue-500/50 dark:hover:border-amber-500/50 transition-colors`}>
         {body}
       </button>
     );
   }
   // Sem mapa ao vivo (intervalo ou recém-encerrada): estatísticas dos jogadores no torneio
   return (
-    <button type="button" onClick={() => onOpenPreview(m)} className={`${cls} text-left hover:border-amber-500/50 transition-colors`}>
+    <button type="button" onClick={() => onOpenPreview(m)} className={`${cls} text-left hover:border-blue-500/50 dark:hover:border-amber-500/50 transition-colors`}>
       {body}
     </button>
   );

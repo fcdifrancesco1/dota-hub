@@ -104,13 +104,13 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
   return (
     <div className="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6">
       {/* HEADER DA ABA */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-amber-400">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-amber-500">
             <BarChart3 className="w-4 h-4" />
             Meta &amp; Tier List Competitiva
           </div>
-          <h1 className="text-2xl font-black text-white tracking-wide mt-1">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
             Estatísticas do Patch Atual
           </h1>
           <p className="text-xs text-gray-400 mt-1">
@@ -122,62 +122,62 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       {/* CARDS DE DESTAQUE DO META */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {topWinRate && (
-          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-emerald-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
-            <img src={topWinRate.img} alt={topWinRate.name} className="w-12 h-12 rounded-lg object-cover border border-emerald-400/50" />
+          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
+            <img src={topWinRate.img} alt={topWinRate.name} className="w-12 h-12 rounded-xl object-cover border border-emerald-500/40 shadow-sm" />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-emerald-400 block">Maior Winrate Pro</span>
-              <strong className="text-sm text-white truncate block">{topWinRate.name}</strong>
-              <span className="text-xs font-mono text-emerald-300 font-bold">{topWinRate.proWinRate}% WR</span>
+              <span className="text-[10px] uppercase font-bold text-emerald-500 block">Maior Winrate Pro</span>
+              <strong className="text-sm font-black text-white truncate block">{topWinRate.name}</strong>
+              <span className="text-xs font-mono text-emerald-500 font-bold">{topWinRate.proWinRate}% WR</span>
             </div>
           </div>
         )}
 
         {mostPicked && (
-          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-amber-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
-            <img src={mostPicked.img} alt={mostPicked.name} className="w-12 h-12 rounded-lg object-cover border border-amber-400/50" />
+          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
+            <img src={mostPicked.img} alt={mostPicked.name} className="w-12 h-12 rounded-xl object-cover border border-blue-500/40 shadow-sm" />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-amber-400 block">Mais Escolhido Pro</span>
-              <strong className="text-sm text-white truncate block">{mostPicked.name}</strong>
-              <span className="text-xs font-mono text-amber-300 font-bold">{mostPicked.proPick} Picks</span>
+              <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-amber-500 block">Mais Escolhido Pro</span>
+              <strong className="text-sm font-black text-white truncate block">{mostPicked.name}</strong>
+              <span className="text-xs font-mono text-blue-600 dark:text-amber-400 font-bold">{mostPicked.proPick} Picks</span>
             </div>
           </div>
         )}
 
         {mostBanned && (
-          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-rose-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
-            <img src={mostBanned.img} alt={mostBanned.name} className="w-12 h-12 rounded-lg object-cover border border-rose-400/50" />
+          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
+            <img src={mostBanned.img} alt={mostBanned.name} className="w-12 h-12 rounded-xl object-cover border border-rose-500/40 shadow-sm" />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-rose-400 block">Mais Banido Pro</span>
-              <strong className="text-sm text-white truncate block">{mostBanned.name}</strong>
-              <span className="text-xs font-mono text-rose-300 font-bold">{mostBanned.proBan} Bans</span>
+              <span className="text-[10px] uppercase font-bold text-rose-500 block">Mais Banido Pro</span>
+              <strong className="text-sm font-black text-white truncate block">{mostBanned.name}</strong>
+              <span className="text-xs font-mono text-rose-500 font-bold">{mostBanned.proBan} Bans</span>
             </div>
           </div>
         )}
 
         {topImmortalPub && (
-          <div className="bg-gradient-to-br from-surface-2/90 to-surface/90 border border-cyan-500/30 rounded-xl p-3.5 flex items-center gap-3 shadow-lg">
-            <img src={topImmortalPub.img} alt={topImmortalPub.name} className="w-12 h-12 rounded-lg object-cover border border-cyan-400/50" />
+          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
+            <img src={topImmortalPub.img} alt={topImmortalPub.name} className="w-12 h-12 rounded-xl object-cover border border-cyan-500/40 shadow-sm" />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-cyan-400 block">Destaque Immortal Pub</span>
-              <strong className="text-sm text-white truncate block">{topImmortalPub.name}</strong>
-              <span className="text-xs font-mono text-cyan-300 font-bold">{topImmortalPub.pub8WinRate}% WR</span>
+              <span className="text-[10px] uppercase font-bold text-cyan-600 dark:text-cyan-400 block">Destaque Immortal</span>
+              <strong className="text-sm font-black text-white truncate block">{topImmortalPub.name}</strong>
+              <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 font-bold">{topImmortalPub.pub8WinRate}% WR</span>
             </div>
           </div>
         )}
       </div>
 
       {/* BARRA DE FILTROS E FUNÇÕES */}
-      <div className="bg-surface-2/70 border border-white/10 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="glass-panel border border-line rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-md">
         {/* Filtros de Posição / Função */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {rolesList.map((r) => (
             <button
               key={r.id}
               onClick={() => setSelectedRole(r.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedRole === r.id
-                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
+                  : 'bg-surface-2 text-gray-400 hover:text-white hover:bg-surface-3 border border-line'
               }`}
             >
               {r.label}
@@ -186,14 +186,14 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
         </div>
 
         {/* Filtro de Atributos */}
-        <div className="flex items-center gap-1.5 bg-black/40 p-1 rounded-lg border border-white/10">
+        <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-xl border border-line">
           {attrList.map((a) => (
             <button
               key={a.id}
               onClick={() => setSelectedAttr(a.id)}
-              className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                 selectedAttr === a.id
-                  ? 'bg-white/20 text-white shadow-sm'
+                  ? 'bg-blue-600 text-on-accent dark:bg-white/20 dark:text-white shadow-sm'
                   : 'text-gray-400 hover:text-white'
               }`}
             >
@@ -204,10 +204,10 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       </div>
 
       {/* DICA DE INTERATIVIDADE */}
-      <div className="flex items-center justify-between text-xs text-amber-300 font-mono bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl">
+      <div className="flex items-center justify-between text-xs text-blue-600 dark:text-amber-300 font-mono bg-blue-500/10 dark:bg-amber-500/10 border border-blue-500/30 dark:border-amber-500/30 px-4 py-2.5 rounded-2xl shadow-sm">
         <span className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>Clique em qualquer herói para abrir a <strong>Enciclopédia Completa</strong>: Habilidades oficiais, Upgrades de Aghanim, Talentos e Counters!</span>
+          <Sparkles className="w-4 h-4 text-blue-600 dark:text-amber-400 shrink-0" />
+          <span>Clique em qualquer herói para abrir a <strong>Enciclopédia Completa</strong>: Habilidades em PT-BR, Upgrades de Cetro/Shard, Talentos e Counters!</span>
         </span>
       </div>
 
@@ -215,56 +215,56 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       {loading ? (
         <SkeletonTable rows={10} cols={6} />
       ) : positionFilter && !positions ? (
-        <div className="rounded-xl border border-line bg-surface p-10 text-center">
+        <div className="rounded-2xl border border-line glass-panel p-10 text-center">
           <p className="text-sm font-bold text-white">As posições dos heróis não estão disponíveis agora.</p>
           <p className="text-xs text-gray-400 mt-1.5">Elas são calculadas com as partidas profissionais da OpenDota, que não está respondendo. Tente de novo em alguns minutos.</p>
           <button
             type="button"
             onClick={() => setAttempt((n) => n + 1)}
-            className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-black text-xs font-black uppercase tracking-wider hover:bg-amber-400"
+            className="mt-4 px-4 py-2 rounded-xl bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black text-xs font-black uppercase tracking-wider hover:opacity-90 shadow-md"
           >
             Tentar novamente
           </button>
         </div>
       ) : heroes.length === 0 ? (
-        <div className="rounded-xl border border-line bg-surface p-10 text-center">
+        <div className="rounded-2xl border border-line glass-panel p-10 text-center">
           <p className="text-sm font-bold text-white">Não foi possível carregar as estatísticas dos heróis agora.</p>
           <p className="text-xs text-gray-400 mt-1.5">A OpenDota, fonte desses dados, não está respondendo. Tente de novo em alguns minutos.</p>
           <button
             type="button"
             onClick={() => setAttempt((n) => n + 1)}
-            className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-black text-xs font-black uppercase tracking-wider hover:bg-amber-400"
+            className="mt-4 px-4 py-2 rounded-xl bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black text-xs font-black uppercase tracking-wider hover:opacity-90 shadow-md"
           >
             Tentar novamente
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface/80 backdrop-blur-xl">
+        <div className="overflow-x-auto rounded-3xl border border-line glass-panel shadow-xl">
           <table className="w-full text-left text-xs border-collapse min-w-[840px]">
-            <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+            <thead className="bg-surface-2 text-gray-400 font-mono text-[10px] uppercase border-b border-line">
               <tr>
                 <th
                   onClick={() => {
                     if (sortBy === 'tier') setSortAsc(!sortAsc);
                     else { setSortBy('tier'); setSortAsc(false); }
                   }}
-                  className="p-3 pl-4 cursor-pointer hover:text-white whitespace-nowrap"
+                  className="p-3.5 pl-5 cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center gap-1">
-                    Tier {sortBy === 'tier' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
+                    Tier {sortBy === 'tier' && <ArrowUpDown className="w-3 h-3 text-blue-600 dark:text-amber-400" />}
                   </div>
                 </th>
-                <th className="p-3 whitespace-nowrap">Herói</th>
-                <th className="p-3 whitespace-nowrap">Atributo / Função</th>
+                <th className="p-3.5 whitespace-nowrap">Herói</th>
+                <th className="p-3.5 whitespace-nowrap">Atributo / Função</th>
                 <th
                   onClick={() => {
                     if (sortBy === 'proWinRate') setSortAsc(!sortAsc);
                     else { setSortBy('proWinRate'); setSortAsc(false); }
                   }}
-                  className="p-3 text-center cursor-pointer hover:text-white whitespace-nowrap"
+                  className="p-3.5 text-center cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    Winrate Pro {sortBy === 'proWinRate' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
+                    Winrate Pro {sortBy === 'proWinRate' && <ArrowUpDown className="w-3 h-3 text-blue-600 dark:text-amber-400" />}
                   </div>
                 </th>
                 <th
@@ -272,10 +272,10 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     if (sortBy === 'proPick') setSortAsc(!sortAsc);
                     else { setSortBy('proPick'); setSortAsc(false); }
                   }}
-                  className="p-3 text-center cursor-pointer hover:text-white whitespace-nowrap"
+                  className="p-3.5 text-center cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    Picks / Bans {sortBy === 'proPick' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
+                    Picks / Bans {sortBy === 'proPick' && <ArrowUpDown className="w-3 h-3 text-blue-600 dark:text-amber-400" />}
                   </div>
                 </th>
                 <th
@@ -283,51 +283,51 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     if (sortBy === 'pub8WinRate') setSortAsc(!sortAsc);
                     else { setSortBy('pub8WinRate'); setSortAsc(false); }
                   }}
-                  className="p-3 pr-4 text-right cursor-pointer hover:text-white whitespace-nowrap"
+                  className="p-3.5 pr-5 text-right cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center justify-end gap-1">
-                    Immortal Pub WR {sortBy === 'pub8WinRate' && <ArrowUpDown className="w-3 h-3 text-amber-400" />}
+                    Immortal Pub WR {sortBy === 'pub8WinRate' && <ArrowUpDown className="w-3 h-3 text-blue-600 dark:text-amber-400" />}
                   </div>
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 font-medium">
+            <tbody className="divide-y divide-line font-medium">
               {filteredHeroes.map((h) => {
                 const tierStyles = {
-                  'S+': 'bg-amber-500/20 text-amber-300 border-amber-400 shadow-amber-500/20',
-                  'S': 'bg-emerald-500/20 text-emerald-300 border-emerald-400',
-                  'A': 'bg-cyan-500/20 text-cyan-300 border-cyan-400',
-                  'B': 'bg-white/10 text-gray-300 border-white/20',
-                  'C': 'bg-rose-500/10 text-rose-300 border-rose-400/40'
+                  'S+': 'bg-amber-500/20 text-amber-500 border-amber-500/40 shadow-sm',
+                  'S': 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/40',
+                  'A': 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/40',
+                  'B': 'bg-surface-2 text-gray-400 border-line',
+                  'C': 'bg-rose-500/10 text-rose-500 border-rose-500/30'
                 };
 
                 return (
                   <tr
                     key={h.id}
                     onClick={() => onSelectHero && onSelectHero(h)}
-                    className="hover:bg-white/[0.06] transition-colors cursor-pointer group"
+                    className="hover:bg-surface-2/70 transition-colors cursor-pointer group"
                     title={`Clique para ver detalhes completos de ${h.name}`}
                   >
                     {/* Badge do Tier */}
-                    <td className="p-3 pl-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-black text-xs font-mono border ${tierStyles[h.tier] || tierStyles['B']}`}>
+                    <td className="p-3.5 pl-5 whitespace-nowrap">
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-xl font-black text-xs font-mono border ${tierStyles[h.tier] || tierStyles['B']}`}>
                         {h.tier}
                       </span>
                     </td>
 
                     {/* Herói */}
-                    <td className="p-3 whitespace-nowrap">
+                    <td className="p-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <img
                           src={h.img}
                           alt={h.name}
-                          className="w-10 h-6 object-cover rounded border border-white/10 shrink-0 group-hover:border-amber-400 transition-colors"
+                          className="w-11 h-7 object-cover rounded-lg border border-line shrink-0 group-hover:border-blue-500 dark:group-hover:border-amber-400 transition-colors shadow-sm"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <strong className="text-white text-xs block group-hover:text-amber-400 transition-colors">{h.name}</strong>
-                            <span className="opacity-0 group-hover:opacity-100 text-[10px] text-amber-400 font-mono transition-opacity">→</span>
+                            <strong className="text-white text-xs block group-hover:text-blue-600 dark:group-hover:text-amber-400 transition-colors">{h.name}</strong>
+                            <span className="opacity-0 group-hover:opacity-100 text-[10px] text-blue-600 dark:text-amber-400 font-mono transition-opacity">→</span>
                           </div>
                           <span className="text-[10px] text-gray-400">{h.attackType}</span>
                         </div>
@@ -335,9 +335,9 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     </td>
 
                     {/* Atributo e Funções */}
-                    <td className="p-3 whitespace-nowrap">
+                    <td className="p-3.5 whitespace-nowrap">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-300 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">
                           {h.primaryAttr}
                         </span>
                         {heroPositions(h).length > 0 ? (
@@ -345,8 +345,8 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                             {heroPositions(h).map((x) => (
                               <span
                                 key={x.n}
-                                className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                                  selectedRole === `pos${x.n}` ? 'bg-amber-500/20 text-amber-400' : 'bg-white/5 text-gray-400'
+                                className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
+                                  selectedRole === `pos${x.n}` ? 'bg-blue-500/20 text-blue-600 dark:text-amber-400' : 'bg-surface-2 text-gray-400 border border-line'
                                 }`}
                               >
                                 Pos {x.n} · {Math.round(x.share * 100)}%
@@ -354,7 +354,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                             ))}
                           </div>
                         ) : (
-                          <div className="text-[10px] text-gray-500 truncate max-w-[220px]">
+                          <div className="text-[10px] text-gray-400 truncate max-w-[220px]">
                             {h.roles.slice(0, 3).join(', ')}
                           </div>
                         )}
@@ -362,25 +362,25 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     </td>
 
                     {/* Winrate Pro */}
-                    <td className="p-3 text-center font-mono whitespace-nowrap">
-                      <span className={`font-bold text-xs ${h.proWinRate >= 52 ? 'text-emerald-400' : h.proWinRate >= 48 ? 'text-amber-400' : 'text-rose-400'}`}>
+                    <td className="p-3.5 text-center font-mono whitespace-nowrap">
+                      <span className={`font-black text-xs ${h.proWinRate >= 52 ? 'text-emerald-500' : h.proWinRate >= 48 ? 'text-amber-500' : 'text-rose-500'}`}>
                         {h.proPick > 0 ? `${h.proWinRate}%` : '—'}
                       </span>
                     </td>
 
                     {/* Picks / Bans */}
-                    <td className="p-3 text-center font-mono text-gray-300 whitespace-nowrap">
+                    <td className="p-3.5 text-center font-mono text-gray-400 whitespace-nowrap">
                       <span className="text-white font-bold">{h.proPick}</span>
-                      <span className="text-gray-500 mx-1">/</span>
-                      <span className="text-rose-400">{h.proBan}</span>
+                      <span className="text-gray-400 mx-1">/</span>
+                      <span className="text-rose-500 font-bold">{h.proBan}</span>
                     </td>
 
                     {/* Immortal Pub WR */}
-                    <td className="p-3 pr-4 text-right font-mono whitespace-nowrap">
-                      <span className={`font-bold ${h.pub8WinRate >= 52 ? 'text-emerald-400' : h.pub8WinRate >= 48 ? 'text-gray-300' : 'text-rose-400'}`}>
+                    <td className="p-3.5 pr-5 text-right font-mono whitespace-nowrap">
+                      <span className={`font-black ${h.pub8WinRate >= 52 ? 'text-emerald-500' : h.pub8WinRate >= 48 ? 'text-white' : 'text-rose-500'}`}>
                         {h.pub8WinRate}%
                       </span>
-                      <span className="text-[10px] text-gray-500 block">({h.pub8Pick} jogos)</span>
+                      <span className="text-[10px] text-gray-400 block">({h.pub8Pick} jogos)</span>
                     </td>
                   </tr>
                 );

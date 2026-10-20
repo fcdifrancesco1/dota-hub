@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Trophy, Flame, ChevronRight, Zap } from 'lucide-react';
 
 const HERO_ROSTER = [
   {
+    id: 8,
     key: 'juggernaut',
     name: 'Juggernaut',
     role: 'Carry • Agilidade',
@@ -15,6 +16,7 @@ const HERO_ROSTER = [
     description: 'Maior pico de dano por minuto (DPM) nos playoffs do Riyadh Masters.'
   },
   {
+    id: 74,
     key: 'invoker',
     name: 'Invoker',
     role: 'Mid • Inteligência',
@@ -26,6 +28,7 @@ const HERO_ROSTER = [
     description: 'Herói mais contestado na Fase de Grupos com 84% de presença no draft.'
   },
   {
+    id: 14,
     key: 'pudge',
     name: 'Pudge',
     role: 'Roamer • Força',
@@ -37,6 +40,7 @@ const HERO_ROSTER = [
     description: 'Fator surpresa decisivo em confrontos MD3 com hooks de alta precisão.'
   },
   {
+    id: 44,
     key: 'phantom_assassin',
     name: 'Phantom Assassin',
     role: 'Hard Carry • Agilidade',
@@ -53,6 +57,15 @@ export default function AnimatedHeroCard() {
   const [selectedHero, setSelectedHero] = useState(HERO_ROSTER[0]);
   const [videoError, setVideoError] = useState(false);
   const cardRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleCardClick = (e) => {
+    // Não navegar se o clique veio de botões ou links internos
+    if (e.target.closest('button, a')) return;
+    if (selectedHero?.id) {
+      navigate(`/herois/${selectedHero.id}`);
+    }
+  };
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
@@ -117,6 +130,7 @@ export default function AnimatedHeroCard() {
       {/* CARD 3D COM VÍDEO DO PERSONAGEM EM LOOP */}
       <div
         ref={cardRef}
+        onClick={handleCardClick}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className="tilt-card glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden group cursor-pointer shadow-xl border border-line"
@@ -205,13 +219,19 @@ export default function AnimatedHeroCard() {
               </span>
             </div>
 
-            <div className="pt-1">
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <Link
-                to="/herois"
+                to={`/herois/${selectedHero.id}`}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all text-on-accent bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:scale-[1.02]"
               >
-                <span>Ver Enciclopédia de Heróis</span>
+                <span>Ver Página de {selectedHero.name}</span>
                 <ChevronRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/herois"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-surface-2 border border-line transition-all"
+              >
+                <span>Todos os Heróis</span>
               </Link>
             </div>
           </div>

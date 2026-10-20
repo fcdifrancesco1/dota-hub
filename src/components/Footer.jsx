@@ -7,14 +7,15 @@ export default function Footer() {
   const { lastUpdated } = useApp();
 
   return (
-    <footer className="mt-20 border-t border-line bg-canvas text-gray-400 text-xs">
+    <footer className="mt-20 border-t border-line glass-panel text-gray-400 text-xs relative overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
       <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           
           {/* Coluna 1: Sobre & Marca */}
           <div className="space-y-3 md:col-span-1">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shadow-md shadow-amber-500/10">
                 <Flame className="w-4 h-4 text-amber-400" />
               </div>
               <span className="font-serif font-black text-white text-base uppercase tracking-wider">

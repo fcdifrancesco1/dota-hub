@@ -391,27 +391,28 @@ export default function TournamentDetailPage() {
       <BackButton fallbackPath="/campeonatos" fallbackLabel="Campeonatos" className="mb-6" />
 
       {/* CABEÇALHO DO CAMPEONATO */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-surface-2 via-surface to-surface-2 border border-line p-6 sm:p-8 mb-8 shadow-2xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="tilt-card glass-panel relative overflow-hidden rounded-3xl border border-line p-6 sm:p-8 mb-8 shadow-2xl">
+        <div className="holo-sheen" />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-            <div className="w-28 h-20 sm:w-40 sm:h-24 rounded-2xl bg-surface-2 border border-line flex items-center justify-center p-3 shrink-0">
+            <div className="w-28 h-20 sm:w-40 sm:h-24 rounded-2xl bg-surface-2 border border-line flex items-center justify-center p-3 shrink-0 shadow-inner">
               {image ? (
-                <img src={image} alt={t.name} referrerPolicy="no-referrer" className="max-w-full max-h-full object-contain" />
+                <img src={image} alt={t.name} referrerPolicy="no-referrer" className="max-w-full max-h-full object-contain drop-shadow" />
               ) : (
-                <Trophy className="w-10 h-10 text-amber-400" />
+                <Trophy className="w-10 h-10 text-blue-600 dark:text-amber-400" />
               )}
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-500 text-black">
+                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-sm">
                   {tierLabel(t)}
                 </span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                  t.status === 'ongoing' ? 'bg-red-950 text-red-400 border border-red-800' : 'bg-white/10 text-gray-300'
+                <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase ${
+                  t.status === 'ongoing' ? 'bg-red-600 text-on-accent shadow-sm' : 'bg-surface-2 text-gray-400 border border-line'
                 }`}>
                   {statusLabel(t)}
                 </span>
-                {t.organizer && <span className="text-[11px] text-gray-400">por <strong className="text-gray-300">{t.organizer}</strong></span>}
+                {t.organizer && <span className="text-[11px] text-gray-400">por <strong className="text-white">{t.organizer}</strong></span>}
               </div>
 
               <h1 className="text-2xl sm:text-4xl font-black text-white font-serif uppercase tracking-tight">{t.name}</h1>
@@ -419,29 +420,29 @@ export default function TournamentDetailPage() {
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-400 mt-3">
                 {dates && (
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-gray-500" />
-                    <span className="font-semibold text-gray-300">{dates}</span>
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="font-semibold text-white">{dates}</span>
                   </span>
                 )}
                 {(t.location || t.type) && (
                   <span className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-gray-500" />
+                    <MapPin className="w-3.5 h-3.5 text-gray-400" />
                     <span>{[t.location, t.venue, t.type].filter(Boolean).join(' · ')}</span>
                   </span>
                 )}
                 {t.teamCount && (
                   <span className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-gray-500" />
+                    <Users className="w-3.5 h-3.5 text-gray-400" />
                     <span>{t.teamCount} times</span>
                   </span>
                 )}
                 {t.winner && (
                   <span className="flex items-center gap-1.5">
-                    <Crown className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Campeão: <strong className="text-amber-400">{t.winner.name}</strong>{t.runnerUp && <span className="text-gray-500"> · vice {t.runnerUp.name}</span>}</span>
+                    <Crown className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
+                    <span>Campeão: <strong className="text-blue-600 dark:text-amber-400">{t.winner.name}</strong>{t.runnerUp && <span className="text-gray-400"> · vice {t.runnerUp.name}</span>}</span>
                   </span>
                 )}
-                <span className="flex items-center gap-1.5 text-emerald-400 font-bold font-mono">
+                <span className="flex items-center gap-1.5 text-emerald-500 font-bold font-mono">
                   <DollarSign className="w-3.5 h-3.5" />
                   <span>{prize ? `Premiação: ${prize}` : 'Premiação não divulgada'}</span>
                 </span>
@@ -454,7 +455,7 @@ export default function TournamentDetailPage() {
               href={t.liquipediaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="self-start md:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-2 border border-line hover:border-amber-500/40 text-xs font-bold text-gray-300 hover:text-amber-400 transition-all whitespace-nowrap"
+              className="self-start md:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/50 text-xs font-bold text-gray-400 hover:text-white transition-all whitespace-nowrap shadow-sm"
             >
               Ver na Liquipedia
               <ExternalLink className="w-3.5 h-3.5" />
@@ -474,10 +475,10 @@ export default function TournamentDetailPage() {
               onClick={() => !tab.disabled && setActiveTab(tab.id)}
               disabled={tab.disabled}
               title={tab.disabled ? 'Este campeonato ainda não tem ID de liga da Valve' : undefined}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap disabled:opacity-40 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap disabled:opacity-40 cursor-pointer ${
                 isActive
-                  ? 'bg-amber-500 text-black font-black shadow-lg shadow-amber-500/20'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md'
+                  : 'text-gray-400 hover:text-white hover:bg-surface-2'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -506,19 +507,19 @@ export default function TournamentDetailPage() {
               <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-cyan-400" /> Próximas partidas
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {scheduled.map((m, idx) => (
-                  <div key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`} className="bg-surface border border-line rounded-xl p-4">
+                  <div key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`} className="tilt-card glass-panel border border-line rounded-2xl p-4 shadow-sm">
                     <div className="flex items-center justify-between text-[10px] text-gray-400 mb-2">
-                      <span className="truncate text-amber-400/90 font-semibold">{m.tourneyName}</span>
-                      <span className="font-mono font-bold text-gray-300">{m.startTime || 'A definir'} · {m.formato}</span>
+                      <span className="truncate text-blue-600 dark:text-amber-400 font-semibold">{m.tourneyName}</span>
+                      <span className="font-mono font-bold text-white">{m.startTime || 'A definir'} · {m.formato}</span>
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-6 h-6" />
                         <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
                       </div>
-                      <span className="text-[10px] font-black text-gray-500 px-2">VS</span>
+                      <span className="text-[10px] font-black text-gray-400 px-2">VS</span>
                       <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                         <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
                         <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-6 h-6" />
@@ -532,10 +533,10 @@ export default function TournamentDetailPage() {
 
           <section>
             <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
-              <Swords className="w-4 h-4 text-amber-400" /> Séries concluídas
+              <Swords className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Séries concluídas
             </h2>
             {series.length === 0 ? (
-              <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
+              <div className="glass-panel border border-line rounded-2xl p-8 text-center text-xs text-gray-400">
                 {t.status === 'upcoming'
                   ? 'O campeonato ainda não começou.'
                   : t.leagueId && (leagueSeries === null || (shared && participants === null))
@@ -551,21 +552,21 @@ export default function TournamentDetailPage() {
                     <button
                       key={s.series_id || idx}
                       onClick={() => openSeries(s, t.name)}
-                      className="w-full bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-xl p-3 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-4 transition-all group text-left"
+                      className="w-full tilt-card glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-2xl p-3.5 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-4 transition-all group text-left shadow-sm"
                     >
-                      <span className="text-[10px] font-mono text-gray-500 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>
+                      <span className="text-[10px] font-mono text-gray-400 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>
                       <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${aWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeA}</span>
+                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${aWon ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>{s.timeA}</span>
                         <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} logoUrl={s.logoA} className="w-6 h-6 shrink-0" />
                       </div>
-                      <span className="font-mono font-black text-sm px-2 sm:px-3 py-1 rounded-lg bg-black/40 border border-white/10 text-white shrink-0 whitespace-nowrap">
+                      <span className="font-mono font-black text-sm px-2.5 sm:px-3.5 py-1 rounded-xl bg-surface-2 border border-line text-white shrink-0 whitespace-nowrap shadow-inner">
                         {s.scoreA} : {s.scoreB}
                       </span>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} logoUrl={s.logoB} className="w-6 h-6 shrink-0" />
-                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${bWon ? 'text-amber-400' : 'text-gray-300'}`}>{s.timeB}</span>
+                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${bWon ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>{s.timeB}</span>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-amber-400 shrink-0" />
                     </button>
                   );
                 })}
@@ -579,11 +580,11 @@ export default function TournamentDetailPage() {
       {activeTab === 'players' && (
         !playerStats ? (
           <div className="py-16 flex flex-col items-center gap-3 text-gray-400">
-            <Loader2 className="w-7 h-7 animate-spin text-amber-400" />
+            <Loader2 className="w-7 h-7 animate-spin text-blue-600 dark:text-amber-400" />
             <span className="text-xs">Calculando estatísticas dos jogadores...</span>
           </div>
         ) : playerStats.players.length === 0 ? (
-          <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
+          <div className="glass-panel border border-line rounded-2xl p-8 text-center text-xs text-gray-400">
             Ainda não há partidas deste campeonato registradas na OpenDota.
           </div>
         ) : (
@@ -595,11 +596,11 @@ export default function TournamentDetailPage() {
       {activeTab === 'heroes' && (
         heroLoading || !heroStats ? (
           <div className="py-16 flex flex-col items-center gap-3 text-gray-400">
-            <Loader2 className="w-7 h-7 animate-spin text-amber-400" />
+            <Loader2 className="w-7 h-7 animate-spin text-blue-600 dark:text-amber-400" />
             <span className="text-xs">Calculando picks e bans do torneio...</span>
           </div>
         ) : heroStats.heroes.length === 0 ? (
-          <div className="bg-surface border border-line rounded-xl p-8 text-center text-xs text-gray-400">
+          <div className="glass-panel border border-line rounded-2xl p-8 text-center text-xs text-gray-400">
             Ainda não há partidas com draft registradas na OpenDota para este campeonato.
           </div>
         ) : (
@@ -609,7 +610,7 @@ export default function TournamentDetailPage() {
 
       {/* ABA: INFORMAÇÕES */}
       {activeTab === 'info' && (
-        <div className="bg-surface border border-line rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 text-sm">
+        <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 text-sm shadow-xl">
           {[
             ['Nome oficial', t.name],
             ['Organizador', t.organizer],

@@ -138,11 +138,11 @@ export default function LivePage() {
 
       {/* REPRODUTOR DE STREAM INTEGRADO (TWITCH / EMBED) */}
       {showStream && (
-        <div className="mb-8 rounded-2xl overflow-hidden bg-surface border border-line-strong shadow-2xl transition-all">
+        <div className="mb-8 rounded-3xl overflow-hidden glass-panel border border-line shadow-2xl transition-all">
           {/* BARRA DE CANAIS DA TRANSMISSÃO */}
-          <div className="p-3 bg-surface-2 border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="p-3.5 bg-surface-2/80 border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`w-2 h-2 rounded-full animate-pulse ${activeStream.platform === 'youtube' ? 'bg-red-500' : 'bg-purple-500'}`}></span>
+              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${activeStream.platform === 'youtube' ? 'bg-red-500' : 'bg-purple-500'}`}></span>
               <span className="font-bold text-white">Canal Ativo:</span>
               <span className="text-purple-400 font-mono font-bold">{activeStream.name}</span>
               <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -161,7 +161,7 @@ export default function LivePage() {
 
             <div className="flex flex-wrap items-center gap-2">
               {/* Alternância de plataforma */}
-              <div className="flex items-center rounded-lg bg-surface border border-line p-0.5">
+              <div className="flex items-center rounded-xl bg-surface border border-line p-0.5">
                 {PLATFORMS.map((p) => (
                   <button
                     key={p.id}
@@ -170,9 +170,9 @@ export default function LivePage() {
                       const options = DEFAULT_STREAMS.filter((s) => s.platform === p.id);
                       setActiveStream(options.find(isChannelLive) || options[0]);
                     }}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-black uppercase transition-all ${
+                    className={`px-3 py-1 rounded-lg text-[11px] font-black uppercase transition-all ${
                       activeStream.platform === p.id
-                        ? (p.id === 'youtube' ? 'bg-red-600 text-white' : 'bg-purple-600 text-white')
+                        ? (p.id === 'youtube' ? 'bg-red-600 text-on-accent' : 'bg-purple-600 text-on-accent')
                         : 'text-gray-400 hover:text-white'
                     }`}
                   >
@@ -185,10 +185,10 @@ export default function LivePage() {
                 <button
                   key={s.key}
                   onClick={() => setActiveStream(s)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all ${
                     activeStream.key === s.key
                       ? 'bg-purple-600 text-on-accent shadow-md shadow-purple-600/30'
-                      : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                      : 'bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30'
                   }`}
                 >
                   {isChannelLive(s) && (
@@ -201,7 +201,7 @@ export default function LivePage() {
               <button
                 onClick={() => setTheaterMode(!theaterMode)}
                 title={theaterMode ? 'Modo Normal' : 'Modo Teatro'}
-                className="p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 ml-2"
+                className="p-1.5 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30 ml-2"
               >
                 {theaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
@@ -399,11 +399,11 @@ export default function LivePage() {
                   </div>
 
                   {/* RODAPÉ DO CARD */}
-                  <div className="mt-5 pt-3 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs">
-                    <span className="text-slate-500 dark:text-gray-400 text-[11px]">
+                  <div className="mt-5 pt-3 border-t border-line flex items-center justify-between text-xs">
+                    <span className="text-gray-400 text-xs">
                       Clique para ver tabela de jogadores, itens e construções
                     </span>
-                    <span className="font-bold text-blue-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                    <span className="font-bold text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
                       <span>Ver partida</span>
                       <ChevronRight className="w-4 h-4" />
                     </span>
@@ -414,27 +414,27 @@ export default function LivePage() {
           </div>
         ) : (
           /* ESTADO VAZIO AMIGÁVEL */
-          <div className="rounded-3xl glass-panel p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-xl border border-slate-200/80 dark:border-white/10">
-            <div className="w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-white/5 border border-blue-500/20 dark:border-white/10 flex items-center justify-center mx-auto mb-4">
-              <Radio className="w-8 h-8 text-blue-600 dark:text-gray-400" />
+          <div className="rounded-3xl glass-panel p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-xl border border-line">
+            <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line flex items-center justify-center mx-auto mb-4">
+              <Radio className="w-8 h-8 text-amber-400" />
             </div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight mb-2">
+            <h3 className="text-lg font-black text-white uppercase tracking-tight mb-2">
               Nenhuma Partida Ao Vivo no Momento
             </h3>
-            <p className="text-xs text-slate-500 dark:text-gray-400 leading-relaxed max-w-md mx-auto mb-6">
+            <p className="text-xs text-gray-400 leading-relaxed max-w-md mx-auto mb-6">
               Assim que a próxima partida profissional começar, o placar, o draft e as estatísticas aparecerão aqui automaticamente.
             </p>
 
             {/* PRÓXIMAS PARTIDAS IMEDIATAS */}
             {upcomingMatches && upcomingMatches.length > 0 && (
-              <div className="bg-surface-2 border border-white/5 rounded-xl p-4 text-left">
+              <div className="bg-surface-2 border border-line rounded-2xl p-4 text-left">
                 <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider block mb-2">
                   Próxima partida agendada:
                 </span>
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-white">{upcomingMatches[0].timeA}</span>
-                    <span className="text-gray-500 font-mono">vs</span>
+                    <span className="text-gray-400 font-mono">vs</span>
                     <span className="font-bold text-white">{upcomingMatches[0].timeB}</span>
                   </div>
                   <span className="font-mono text-amber-400 font-bold">

@@ -113,8 +113,8 @@ export default function PredictionsPage() {
       {/* HEADER DA PÁGINA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
-            <Award className="w-7 h-7 text-amber-500" />
+          <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-3">
+            <Award className="w-8 h-8 text-amber-500" />
             <span>Bolão de Palpites & Conquistas</span>
           </h1>
           <p className="text-gray-400 text-xs sm:text-sm mt-1">
@@ -123,17 +123,17 @@ export default function PredictionsPage() {
         </div>
 
         {/* ABAS */}
-        <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
+        <div className="flex bg-surface-2/90 p-1.5 rounded-2xl border border-line shadow-sm">
           {[
             { id: 'matches', label: 'Próximos Jogos', icon: Trophy },
-            { id: 'leaderboard', label: 'Tabela de Classificação', icon: Award },
+            { id: 'leaderboard', label: 'Classificação', icon: Award },
             { id: 'badges', label: 'Medalhas & Badges', icon: Sparkles }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap ${
-                activeTab === tab.id ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap ${
+                activeTab === tab.id ? 'bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/20' : 'text-gray-400 hover:text-white'
               }`}
             >
               {tab.label}
@@ -144,33 +144,33 @@ export default function PredictionsPage() {
 
       {/* REGRAS DE PONTUAÇÃO (CENTRALIZADAS NO ARQUIVO DE CONFIGURAÇÃO) */}
       <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-surface border border-line rounded-xl p-4 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm">
+        <div className="glass-panel rounded-2xl p-5 border border-line flex items-center gap-4 shadow-md">
+          <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-black text-sm shrink-0">
             +{SITE_CONFIG.predictionPoints.correctWinner} pts
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white uppercase">Acerto de Vencedor</h4>
-            <span className="text-[11px] text-gray-400">Palpitar o time vencedor da série</span>
+            <h4 className="text-xs font-black text-white uppercase tracking-wider">Acerto de Vencedor</h4>
+            <span className="text-xs text-gray-400">Palpitar o time vencedor da série</span>
           </div>
         </div>
 
-        <div className="bg-surface border border-line rounded-xl p-4 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 font-black text-sm">
+        <div className="glass-panel rounded-2xl p-5 border border-line flex items-center gap-4 shadow-md">
+          <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 font-black text-sm shrink-0">
             +{SITE_CONFIG.predictionPoints.exactScore} pts
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white uppercase">Placar Exato</h4>
-            <span className="text-[11px] text-gray-400">Acertar os mapas (ex: 2x0 ou 2x1)</span>
+            <h4 className="text-xs font-black text-white uppercase tracking-wider">Placar Exato</h4>
+            <span className="text-xs text-gray-400">Acertar os mapas (ex: 2x0 ou 2x1)</span>
           </div>
         </div>
 
-        <div className="bg-surface border border-line rounded-xl p-4 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400 font-black text-sm">
+        <div className="glass-panel rounded-2xl p-5 border border-line flex items-center gap-4 shadow-md">
+          <div className="p-3 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 font-black text-sm shrink-0">
             +{SITE_CONFIG.predictionPoints.upsetBonus} pts
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white uppercase">Bônus de Zebra</h4>
-            <span className="text-[11px] text-gray-400">Apostar no azarão com menos de 30%</span>
+            <h4 className="text-xs font-black text-white uppercase tracking-wider">Bônus de Zebra</h4>
+            <span className="text-xs text-gray-400">Apostar no azarão com menos de 30%</span>
           </div>
         </div>
       </div>
@@ -185,14 +185,14 @@ export default function PredictionsPage() {
             return (
               <div
                 key={matchKey}
-                className="bg-surface border border-line hover:border-amber-500/40 rounded-2xl p-5 shadow-xl transition-all flex flex-col justify-between"
+                className="tilt-card glass-panel rounded-3xl p-6 border border-line hover:border-amber-500/40 shadow-xl transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between text-[11px] text-gray-400 pb-3 border-b border-white/5 mb-4">
+                  <div className="flex items-center justify-between text-xs text-gray-400 pb-3 border-b border-line mb-4">
                     <span className="font-bold text-amber-400 truncate max-w-[200px]">
                       {m.tourneyName || 'Torneio Oficial'}
                     </span>
-                    <span className="font-mono text-gray-400 font-bold bg-white/5 px-2 py-0.5 rounded">
+                    <span className="font-mono text-gray-400 font-bold bg-surface-2 px-2.5 py-1 rounded-lg border border-line">
                       {m.startTime || 'Em breve'}
                     </span>
                   </div>
@@ -202,49 +202,49 @@ export default function PredictionsPage() {
                     {/* TIME A */}
                     <button
                       onClick={() => handlePredict(matchKey, m.timeA, '2-1')}
-                      className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
+                      className={`flex flex-col items-center flex-1 p-3.5 rounded-2xl border transition-all ${
                         pred?.teamChosen === m.timeA
-                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
-                          : 'bg-surface-2 border-white/5 hover:border-white/20 text-gray-300'
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/15'
+                          : 'bg-surface-2/80 border-line hover:border-amber-500/30 text-gray-300'
                       }`}
                     >
-                      <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-10 h-10 mb-2" />
-                      <span className="text-xs font-bold leading-tight break-words line-clamp-2 max-w-full text-center">{m.timeA}</span>
-                      <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
+                      <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-12 h-12 mb-2" />
+                      <span className="text-xs font-bold leading-tight break-words line-clamp-2 max-w-full text-center text-white">{m.timeA}</span>
+                      <span className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">Vencedor</span>
                     </button>
 
-                    <span className="text-xs font-black text-gray-500 uppercase">VS</span>
+                    <span className="text-xs font-black text-gray-400 uppercase tracking-wider">VS</span>
 
                     {/* TIME B */}
                     <button
                       onClick={() => handlePredict(matchKey, m.timeB, '1-2')}
-                      className={`flex flex-col items-center flex-1 p-3 rounded-xl border transition-all ${
+                      className={`flex flex-col items-center flex-1 p-3.5 rounded-2xl border transition-all ${
                         pred?.teamChosen === m.timeB
-                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10'
-                          : 'bg-surface-2 border-white/5 hover:border-white/20 text-gray-300'
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/15'
+                          : 'bg-surface-2/80 border-line hover:border-amber-500/30 text-gray-300'
                       }`}
                     >
-                      <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-10 h-10 mb-2" />
-                      <span className="text-xs font-bold leading-tight break-words line-clamp-2 max-w-full text-center">{m.timeB}</span>
-                      <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Vencedor</span>
+                      <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-12 h-12 mb-2" />
+                      <span className="text-xs font-bold leading-tight break-words line-clamp-2 max-w-full text-center text-white">{m.timeB}</span>
+                      <span className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">Vencedor</span>
                     </button>
                   </div>
 
                   {/* SELETOR DE PLACAR EXATO (MD3) */}
                   {pred && (
-                    <div className="mb-3 pt-2 border-t border-white/5">
-                      <span className="text-[10px] font-bold uppercase text-gray-400 block mb-1.5 text-center">
+                    <div className="mb-3 pt-3 border-t border-line">
+                      <span className="text-[10px] font-bold uppercase text-gray-400 block mb-2 text-center tracking-wider">
                         Escolha o Placar Exato da Série (MD3):
                       </span>
-                      <div className="grid grid-cols-4 gap-1.5">
+                      <div className="grid grid-cols-4 gap-2">
                         {['2-0', '2-1', '1-2', '0-2'].map((sc) => (
                           <button
                             key={sc}
                             onClick={() => handlePredict(matchKey, pred.teamChosen, sc)}
-                            className={`py-1 rounded-lg text-xs font-mono font-bold transition-all ${
+                            className={`py-1.5 rounded-xl text-xs font-mono font-bold transition-all ${
                               pred.score === sc
-                                ? 'bg-amber-500 text-black font-black'
-                                : 'bg-surface-2 border border-white/10 text-gray-400 hover:text-white'
+                                ? 'bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/20'
+                                : 'bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30'
                             }`}
                           >
                             {sc}
@@ -256,17 +256,17 @@ export default function PredictionsPage() {
                 </div>
 
                 {/* STATUS DO PALPITE */}
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+                <div className="pt-3 border-t border-line flex items-center justify-between text-xs">
                   {pred ? (
                     <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Palpite: {pred.teamChosen} ({pred.score})</span>
+                      <span>{pred.teamChosen} ({pred.score})</span>
                     </div>
                   ) : (
-                    <span className="text-gray-500 text-[11px]">Selecione um dos times para votar</span>
+                    <span className="text-gray-400 text-xs">Selecione para votar</span>
                   )}
-                  <span className="text-gray-500 font-mono text-[10px] flex items-center gap-1">
-                    <Lock className="w-3 h-3" />
+                  <span className="text-gray-400 font-mono text-[10px] flex items-center gap-1 bg-surface-2 px-2 py-0.5 rounded-md border border-line">
+                    <Lock className="w-3 h-3 text-amber-400" />
                     <span>Trava no Início</span>
                   </span>
                 </div>
@@ -278,35 +278,35 @@ export default function PredictionsPage() {
 
       {/* ABA 2: RANKING E CLASSIFICAÇÃO */}
       {activeTab === 'leaderboard' && (
-        <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto border border-line">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-line">
             <h3 className="text-base font-black uppercase text-white flex items-center gap-2">
               <Trophy className="w-5 h-5 text-amber-400" />
               <span>Quadro de Líderes do Bolão</span>
             </h3>
 
             {/* SELETOR DE RANKING (GERAL / CAMPEONATO / MENSAL) */}
-            <div className="flex bg-surface-2 p-1 rounded-xl border border-white/10">
+            <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
               <button
                 onClick={() => setRankingFilter('overall')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  rankingFilter === 'overall' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  rankingFilter === 'overall' ? 'bg-amber-500 text-on-accent font-black' : 'text-gray-400 hover:text-white'
                 }`}
               >
                 Geral
               </button>
               <button
                 onClick={() => setRankingFilter('tournament')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  rankingFilter === 'tournament' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  rankingFilter === 'tournament' ? 'bg-amber-500 text-on-accent font-black' : 'text-gray-400 hover:text-white'
                 }`}
               >
                 Por Campeonato
               </button>
               <button
                 onClick={() => setRankingFilter('monthly')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  rankingFilter === 'monthly' ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  rankingFilter === 'monthly' ? 'bg-amber-500 text-on-accent font-black' : 'text-gray-400 hover:text-white'
                 }`}
               >
                 Mensal
@@ -316,7 +316,7 @@ export default function PredictionsPage() {
 
           {currentLeaderboard.length === 0 && (
             <div className="py-12 text-center">
-              <Trophy className="w-10 h-10 text-gray-500 mx-auto mb-3" />
+              <Trophy className="w-12 h-12 text-gray-500 mx-auto mb-3" />
               <p className="text-sm font-bold text-white">Nenhum participante pontuado ainda</p>
               <p className="text-xs text-gray-400 mt-1">
                 A classificação aparece aqui conforme os palpites forem sendo apurados.
@@ -324,14 +324,14 @@ export default function PredictionsPage() {
             </div>
           )}
 
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-line">
             {currentLeaderboard.map((item) => (
               <div key={item.rank} className="py-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <span className={`w-8 h-8 rounded-xl font-mono font-black text-sm flex items-center justify-center ${
-                    item.rank === 1 ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30' :
+                    item.rank === 1 ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/30' :
                     item.rank === 2 ? 'bg-slate-300 text-black' :
-                    item.rank === 3 ? 'bg-amber-800 text-white' : 'bg-white/5 text-gray-400'
+                    item.rank === 3 ? 'bg-amber-800 text-white' : 'bg-surface-2 text-gray-400'
                   }`}>
                     #{item.rank}
                   </span>
@@ -367,23 +367,23 @@ export default function PredictionsPage() {
             return (
               <div
                 key={idx}
-                className={`rounded-2xl p-6 border transition-all ${
+                className={`tilt-card rounded-3xl p-6 border transition-all ${
                   b.unlocked
-                    ? 'bg-gradient-to-br from-surface-2 to-surface border-amber-500/40 shadow-xl'
-                    : 'bg-canvas border-white/5 opacity-60'
+                    ? 'glass-panel border-amber-500/40 shadow-xl'
+                    : 'bg-surface-2/40 border-line opacity-60'
                 }`}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-2xl ${
-                    b.unlocked ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-white/5 text-gray-500'
+                  <div className={`p-3.5 rounded-2xl ${
+                    b.unlocked ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-md shadow-amber-500/10' : 'bg-surface-2 text-gray-500'
                   }`}>
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
                     <h4 className="text-sm font-black text-white">{b.title}</h4>
                     <p className="text-xs text-gray-400 mt-1 leading-relaxed">{b.desc}</p>
-                    <span className={`inline-block mt-3 px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                      b.unlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-gray-500'
+                    <span className={`inline-block mt-3 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase ${
+                      b.unlocked ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400' : 'bg-surface-2 border border-line text-gray-500'
                     }`}>
                       {b.unlocked ? 'Conquistado ✓' : 'Bloqueado 🔒'}
                     </span>

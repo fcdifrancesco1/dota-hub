@@ -62,92 +62,92 @@ export default function HeroDetailModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-4xl bg-surface border border-amber-500/40 rounded-2xl p-4 sm:p-6 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-4xl glass-panel border border-line rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
       >
         {/* BOTÃO FECHAR */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-400 hover:text-white transition-all z-20 cursor-pointer"
+          className="absolute top-4 right-4 p-2.5 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line text-gray-400 hover:text-white transition-all z-20 cursor-pointer shadow-sm"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* CABEÇALHO DO HERÓI */}
-        <div className="border-b border-white/10 pb-4 mb-4 relative z-10 shrink-0">
+        <div className="border-b border-line pb-4 mb-4 relative z-10 shrink-0">
           <div className="flex flex-wrap items-center gap-4">
             <img
               src={heroImg}
               alt={heroName}
-              className="w-20 h-12 sm:w-24 sm:h-14 rounded-xl object-cover border-2 border-amber-400 shadow-lg shadow-amber-500/20 shrink-0"
+              className="w-20 h-12 sm:w-24 sm:h-14 rounded-2xl object-cover border-2 border-blue-500/50 dark:border-amber-400 shadow-lg shrink-0"
               onError={(e) => { e.target.style.display = 'none'; }}
             />
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-xl sm:text-2xl font-black text-white">{heroName}</h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase font-mono bg-amber-500 text-black shadow-sm">
+                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase font-mono bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-sm">
                   Tier {hero.tier || 'A'}
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-white/10 text-cyan-300 border border-white/10">
+                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold font-mono bg-surface-2 text-blue-600 dark:text-cyan-300 border border-line">
                   {hero.primaryAttr || 'Atributo'}
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-white/10 text-gray-300 border border-white/10">
+                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold font-mono bg-surface-2 text-gray-400 border border-line">
                   {hero.attackType || 'Corpo a Corpo'}
                 </span>
               </div>
 
               <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-gray-400 mt-1.5">
                 {hero.proWinRate !== undefined && (
-                  <span>Win Rate Pro: <strong className="text-emerald-400 font-bold">{hero.proWinRate}%</strong></span>
+                  <span>Win Rate Pro: <strong className="text-emerald-500 font-bold">{hero.proWinRate}%</strong></span>
                 )}
                 {hero.proPick !== undefined && (
-                  <span>Picks Pro: <strong className="text-amber-400 font-bold">{hero.proPick}</strong></span>
+                  <span>Picks Pro: <strong className="text-blue-600 dark:text-amber-400 font-bold">{hero.proPick}</strong></span>
                 )}
                 {hero.pub8WinRate !== undefined && (
-                  <span>Win Rate High MMR: <strong className="text-cyan-400 font-bold">{hero.pub8WinRate}%</strong></span>
+                  <span>Win Rate High MMR: <strong className="text-cyan-500 font-bold">{hero.pub8WinRate}%</strong></span>
                 )}
               </div>
             </div>
           </div>
 
           {/* NAVEGAÇÃO DE ABAS INTERNAS */}
-          <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-white/5 overflow-x-auto">
+          <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-line overflow-x-auto">
             <button
               onClick={() => setActiveTab('skills')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'skills'
-                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-                  : 'bg-white/5 text-gray-400 hover:text-white border border-white/5'
+                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
+                  : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
               }`}
             >
               <Zap className="w-3.5 h-3.5" /> Habilidades &amp; Aghanim
             </button>
             <button
               onClick={() => setActiveTab('talents')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'talents'
-                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-                  : 'bg-white/5 text-gray-400 hover:text-white border border-white/5'
+                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
+                  : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" /> Árvore de Talentos
             </button>
             <button
               onClick={() => setActiveTab('benchmarks')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'benchmarks'
-                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-                  : 'bg-white/5 text-gray-400 hover:text-white border border-white/5'
+                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
+                  : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" /> Benchmarks
             </button>
             <button
               onClick={() => setActiveTab('matchups')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'matchups'
-                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-                  : 'bg-white/5 text-gray-400 hover:text-white border border-white/5'
+                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
+                  : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
               }`}
             >
               <Swords className="w-3.5 h-3.5" /> Counters &amp; Vantagens
@@ -185,14 +185,14 @@ export default function HeroDetailModal({
                             onClick={() => setSelectedAbility(ab)}
                             className={`flex items-center gap-2 p-1.5 pr-3 rounded-xl border transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-amber-500/20 border-amber-400 text-white shadow-md shadow-amber-500/10'
-                                : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
+                                ? 'bg-blue-600 text-on-accent dark:bg-amber-500/20 dark:border-amber-400 dark:text-white shadow-md'
+                                : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:bg-surface-3'
                             }`}
                           >
                             <img
                               src={ab.img}
                               alt={ab.dname}
-                              className="w-8 h-8 rounded-lg object-cover border border-white/10"
+                              className="w-8 h-8 rounded-lg object-cover border border-line"
                               onError={(e) => { e.target.style.display = 'none'; }}
                             />
                             <span className="text-xs font-bold truncate max-w-[120px]">{ab.dname}</span>
@@ -204,40 +204,40 @@ export default function HeroDetailModal({
 
                   {/* Detalhes da Habilidade Selecionada */}
                   {selectedAbility && (
-                    <div className="bg-surface-2 border border-white/10 rounded-xl p-4 space-y-3">
+                    <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-3 shadow-sm">
                       <div className="flex items-start gap-3.5">
                         <img
                           src={selectedAbility.img}
                           alt={selectedAbility.dname}
-                          className="w-14 h-14 rounded-xl object-cover border-2 border-amber-400/80 shadow-md shrink-0"
+                          className="w-14 h-14 rounded-xl object-cover border-2 border-blue-500 dark:border-amber-400 shadow-md shrink-0"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div className="min-w-0 flex-1">
                           <h3 className="text-base font-black text-white">{selectedAbility.dname}</h3>
                           <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-gray-400 mt-1">
-                            {selectedAbility.behavior && <span>Tipo: <strong className="text-gray-200">{selectedAbility.behavior}</strong></span>}
-                            {selectedAbility.dmg_type && <span>Dano: <strong className="text-rose-400">{selectedAbility.dmg_type}</strong></span>}
-                            {selectedAbility.bkbpierce && <span>Atravessa BKB: <strong className="text-amber-300">{selectedAbility.bkbpierce}</strong></span>}
+                            {selectedAbility.behavior && <span>Tipo: <strong className="text-white">{selectedAbility.behavior}</strong></span>}
+                            {selectedAbility.dmg_type && <span>Dano: <strong className="text-rose-500 font-bold">{selectedAbility.dmg_type}</strong></span>}
+                            {selectedAbility.bkbpierce && <span>Atravessa BKB: <strong className="text-amber-500 font-bold">{selectedAbility.bkbpierce}</strong></span>}
                           </div>
                         </div>
                       </div>
 
                       {/* Descrição */}
-                      <p className="text-xs text-gray-300 leading-relaxed bg-black/30 p-3 rounded-lg border border-white/5">
+                      <p className="text-xs text-white leading-relaxed bg-surface-3 p-3.5 rounded-xl border border-line">
                         {selectedAbility.desc || 'Sem descrição textual detalhada.'}
                       </p>
 
                       {/* Mana & Cooldown */}
                       <div className="flex flex-wrap items-center gap-4 text-xs font-mono pt-1">
                         {selectedAbility.cd && (
-                          <div className="flex items-center gap-1.5 text-gray-300 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-                            <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                          <div className="flex items-center gap-1.5 text-gray-400 bg-surface-3 px-3 py-1.5 rounded-xl border border-line">
+                            <Clock className="w-3.5 h-3.5 text-blue-500 dark:text-cyan-400" />
                             <span>Tempo de Recarga: <strong className="text-white">{selectedAbility.cd}s</strong></span>
                           </div>
                         )}
                         {selectedAbility.mc && (
-                          <div className="flex items-center gap-1.5 text-gray-300 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-                            <Droplet className="w-3.5 h-3.5 text-blue-400" />
+                          <div className="flex items-center gap-1.5 text-gray-400 bg-surface-3 px-3 py-1.5 rounded-xl border border-line">
+                            <Droplet className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                             <span>Custo de Mana: <strong className="text-white">{selectedAbility.mc}</strong></span>
                           </div>
                         )}
@@ -248,41 +248,41 @@ export default function HeroDetailModal({
                   {/* Upgrades de Aghanim's Scepter e Shard */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     {/* Scepter */}
-                    <div className="bg-surface-2 border border-cyan-500/30 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-blue-500/30 dark:border-cyan-500/30 rounded-2xl p-4 space-y-2.5 shadow-sm">
                       <div className="flex items-center gap-2.5">
                         <img
                           src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
                           alt="Cetro de Aghanim"
-                          className="w-8 h-8 object-contain rounded bg-black/40 p-1 border border-cyan-500/40"
+                          className="w-9 h-9 object-contain rounded-xl bg-surface-3 p-1 border border-line"
                         />
                         <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-cyan-400 block">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-cyan-400 block">
                             Aghanim's Scepter (Cetro)
                           </span>
                           <strong className="text-xs text-white">{details.aghs.scepter_skill_name}</strong>
                         </div>
                       </div>
-                      <p className="text-[11px] text-gray-300 leading-relaxed bg-black/40 p-2.5 rounded-lg border border-white/5">
+                      <p className="text-[11px] text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
                         {details.aghs.scepter_desc}
                       </p>
                     </div>
 
                     {/* Shard */}
-                    <div className="bg-surface-2 border border-purple-500/30 rounded-xl p-3.5 space-y-2">
+                    <div className="bg-surface-2 border border-purple-500/30 rounded-2xl p-4 space-y-2.5 shadow-sm">
                       <div className="flex items-center gap-2.5">
                         <img
                           src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
                           alt="Fragmento de Aghanim"
-                          className="w-8 h-8 object-contain rounded bg-black/40 p-1 border border-purple-500/40"
+                          className="w-9 h-9 object-contain rounded-xl bg-surface-3 p-1 border border-line"
                         />
                         <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-400 block">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">
                             Aghanim's Shard (Fragmento)
                           </span>
                           <strong className="text-xs text-white">{details.aghs.shard_skill_name}</strong>
                         </div>
                       </div>
-                      <p className="text-[11px] text-gray-300 leading-relaxed bg-black/40 p-2.5 rounded-lg border border-white/5">
+                      <p className="text-[11px] text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
                         {details.aghs.shard_desc}
                       </p>
                     </div>
@@ -301,15 +301,15 @@ export default function HeroDetailModal({
                     {details.talents.map((t, idx) => (
                       <div
                         key={idx}
-                        className="bg-surface-2 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-2 sm:gap-4 text-xs font-mono"
+                        className="bg-surface-2 border border-line rounded-2xl p-3.5 flex items-center justify-between gap-2 sm:gap-4 text-xs font-mono shadow-sm"
                       >
-                        <div className="flex-1 text-right text-gray-200 font-medium truncate sm:whitespace-normal">
+                        <div className="flex-1 text-right text-white font-medium truncate sm:whitespace-normal">
                           {t.left}
                         </div>
-                        <div className="w-12 h-12 rounded-full bg-amber-500/20 border-2 border-amber-400 text-amber-300 font-black text-sm flex items-center justify-center shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-blue-500/15 border-2 border-blue-500 dark:bg-amber-500/20 dark:border-amber-400 text-blue-600 dark:text-amber-300 font-black text-sm flex items-center justify-center shrink-0 shadow-md">
                           {t.level}
                         </div>
-                        <div className="flex-1 text-left text-gray-200 font-medium truncate sm:whitespace-normal">
+                        <div className="flex-1 text-left text-white font-medium truncate sm:whitespace-normal">
                           {t.right}
                         </div>
                       </div>
@@ -321,83 +321,83 @@ export default function HeroDetailModal({
               {/* 3. ABA DE BENCHMARKS COMPETITIVOS */}
               {activeTab === 'benchmarks' && (
                 <div className="space-y-4">
-                  <div className="text-xs text-gray-400 bg-white/5 p-3 rounded-xl border border-white/10">
-                    Estes são os valores de referência dos jogadores mais proficientes com <strong>{heroName}</strong> em partidas de alto nível.
+                  <div className="text-xs text-gray-400 bg-surface-2 p-3.5 rounded-2xl border border-line">
+                    Estes são os valores de referência dos jogadores mais proficientes com <strong className="text-white">{heroName}</strong> em partidas de alto nível.
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
                     {/* GPM */}
-                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
-                      <span className="text-[11px] font-extrabold uppercase text-amber-400">Ouro Por Minuto (GPM)</span>
+                    <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
+                      <span className="text-[11px] font-extrabold uppercase text-amber-500">Ouro Por Minuto (GPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Médio (p50)</span>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.gpm.p50}</strong>
                         </div>
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Bom (p75)</span>
-                          <strong className="text-cyan-400 text-sm">{details.benchmarks.gpm.p75}</strong>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-gray-400 block">Bom (p75)</span>
+                          <strong className="text-blue-500 dark:text-cyan-400 text-sm">{details.benchmarks.gpm.p75}</strong>
                         </div>
-                        <div className="bg-amber-500/10 p-2 rounded-lg border border-amber-500/30">
-                          <span className="text-[10px] text-amber-400 block">Elite (p90)</span>
-                          <strong className="text-amber-400 text-sm">{details.benchmarks.gpm.p90}</strong>
+                        <div className="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/30">
+                          <span className="text-[10px] text-amber-500 block">Elite (p90)</span>
+                          <strong className="text-amber-500 text-sm">{details.benchmarks.gpm.p90}</strong>
                         </div>
                       </div>
                     </div>
 
                     {/* XPM */}
-                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
-                      <span className="text-[11px] font-extrabold uppercase text-cyan-400">XP Por Minuto (XPM)</span>
+                    <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
+                      <span className="text-[11px] font-extrabold uppercase text-blue-600 dark:text-cyan-400">XP Por Minuto (XPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Médio (p50)</span>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.xpm.p50}</strong>
                         </div>
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Bom (p75)</span>
-                          <strong className="text-cyan-400 text-sm">{details.benchmarks.xpm.p75}</strong>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-gray-400 block">Bom (p75)</span>
+                          <strong className="text-blue-500 dark:text-cyan-400 text-sm">{details.benchmarks.xpm.p75}</strong>
                         </div>
-                        <div className="bg-cyan-500/10 p-2 rounded-lg border border-cyan-500/30">
-                          <span className="text-[10px] text-cyan-400 block">Elite (p90)</span>
-                          <strong className="text-cyan-400 text-sm">{details.benchmarks.xpm.p90}</strong>
+                        <div className="bg-blue-500/10 dark:bg-cyan-500/10 p-2.5 rounded-xl border border-blue-500/30 dark:border-cyan-500/30">
+                          <span className="text-[10px] text-blue-600 dark:text-cyan-400 block">Elite (p90)</span>
+                          <strong className="text-blue-600 dark:text-cyan-400 text-sm">{details.benchmarks.xpm.p90}</strong>
                         </div>
                       </div>
                     </div>
 
                     {/* KILLS PER MIN */}
-                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
-                      <span className="text-[11px] font-extrabold uppercase text-rose-400">Abates Por Minuto (KPM)</span>
+                    <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
+                      <span className="text-[11px] font-extrabold uppercase text-rose-500">Abates Por Minuto (KPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Médio (p50)</span>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.kpm.p50}</strong>
                         </div>
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Bom (p75)</span>
-                          <strong className="text-rose-400 text-sm">{details.benchmarks.kpm.p75}</strong>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-rose-500 block">Bom (p75)</span>
+                          <strong className="text-rose-500 text-sm">{details.benchmarks.kpm.p75}</strong>
                         </div>
-                        <div className="bg-rose-500/10 p-2 rounded-lg border border-rose-500/30">
-                          <span className="text-[10px] text-rose-400 block">Elite (p90)</span>
-                          <strong className="text-rose-400 text-sm">{details.benchmarks.kpm.p90}</strong>
+                        <div className="bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/30">
+                          <span className="text-[10px] text-rose-500 block">Elite (p90)</span>
+                          <strong className="text-rose-500 text-sm">{details.benchmarks.kpm.p90}</strong>
                         </div>
                       </div>
                     </div>
 
                     {/* LAST HITS PER MIN */}
-                    <div className="bg-surface-2 border border-white/10 rounded-xl p-3.5 space-y-2">
-                      <span className="text-[11px] font-extrabold uppercase text-emerald-400">Last Hits Por Minuto (CS)</span>
+                    <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
+                      <span className="text-[11px] font-extrabold uppercase text-emerald-500">Last Hits Por Minuto (CS)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Médio (p50)</span>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.lpm.p50}</strong>
                         </div>
-                        <div className="bg-black/40 p-2 rounded-lg border border-white/5">
-                          <span className="text-[10px] text-gray-500 block">Bom (p75)</span>
-                          <strong className="text-emerald-400 text-sm">{details.benchmarks.lpm.p75}</strong>
+                        <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
+                          <span className="text-[10px] text-emerald-500 block">Bom (p75)</span>
+                          <strong className="text-emerald-500 text-sm">{details.benchmarks.lpm.p75}</strong>
                         </div>
-                        <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/30">
-                          <span className="text-[10px] text-emerald-400 block">Elite (p90)</span>
-                          <strong className="text-emerald-400 text-sm">{details.benchmarks.lpm.p90}</strong>
+                        <div className="bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/30">
+                          <span className="text-[10px] text-emerald-500 block">Elite (p90)</span>
+                          <strong className="text-emerald-500 text-sm">{details.benchmarks.lpm.p90}</strong>
                         </div>
                       </div>
                     </div>

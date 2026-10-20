@@ -132,26 +132,31 @@ export default function TeamPage() {
       <div>{back}</div>
 
       {/* CABEÇALHO DO TIME */}
-      <section className="rounded-2xl bg-surface border border-line p-5 sm:p-7 shadow-xl -mt-5">
-        <div className="flex flex-col md:flex-row md:items-center gap-5">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="w-20 h-20 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center shrink-0">
-              <TeamLogo teamName={team.name} teamId={team.id} logoUrl={team.logo} className="w-16 h-16" />
+      <section className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden -mt-5">
+        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-5 flex-1 min-w-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-2/80 border border-line p-3 flex items-center justify-center shrink-0 shadow-lg shadow-black/20">
+              <TeamLogo teamName={team.name} teamId={team.id} logoUrl={team.logo} className="w-16 h-16 sm:w-20 sm:h-20" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-black text-white truncate">{team.name}</h1>
-              <div className="flex flex-wrap items-center gap-2 mt-1 text-xs">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight truncate">{team.name}</h1>
                 {team.tag && (
-                  <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black uppercase">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 font-black text-xs uppercase tracking-wider">
                     {team.tag}
                   </span>
                 )}
-                <span className="text-gray-400">Última partida: <strong className="text-gray-300">{fmtDate(team.lastMatchTime)}</strong></span>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs">
+                <span className="text-gray-400">Última partida: <strong className="text-white font-semibold">{fmtDate(team.lastMatchTime)}</strong></span>
+                <span className="text-gray-500">•</span>
+                <span className="text-gray-400">Total de partidas: <strong className="text-white font-semibold">{totalGames.toLocaleString('pt-BR')}</strong></span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
             <StatBox label="Rating" value={team.rating ?? '—'} />
             <StatBox label="Vitórias" value={team.wins.toLocaleString('pt-BR')} tone="text-emerald-400" />
             <StatBox label="Derrotas" value={team.losses.toLocaleString('pt-BR')} tone="text-rose-400" />
@@ -161,33 +166,33 @@ export default function TeamPage() {
       </section>
 
       {/* ELENCO E ESTATÍSTICAS */}
-      <section className="bg-surface border border-line rounded-2xl shadow-xl overflow-hidden">
-        <div className="p-5 border-b border-line flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
-            <Users className="w-4 h-4 text-amber-400" />
+      <section className="glass-panel rounded-3xl overflow-hidden shadow-xl">
+        <div className="p-5 sm:p-6 border-b border-line flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <Users className="w-5 h-5 text-amber-400" />
             <span>Elenco e Estatísticas</span>
           </h2>
-          <span className="text-[11px] text-gray-500">
-            Médias das últimas 20 partidas de campeonato de cada jogador
+          <span className="text-xs text-gray-400">
+            Médias das últimas 20 partidas profissionais de cada jogador
           </span>
         </div>
 
         {roster.length === 0 ? (
-          <p className="p-5 text-xs text-gray-400">A OpenDota não lista o elenco atual deste time.</p>
+          <p className="p-6 text-xs text-gray-400">A OpenDota não lista o elenco atual deste time.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs min-w-[980px]">
-              <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-surface-2/80 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="p-3 pl-5">Jogador</th>
-                  <th className="p-3 text-center whitespace-nowrap">Pelo time</th>
-                  <th className="p-3 text-center">Partidas</th>
-                  <th className="p-3 text-center">Vitórias</th>
-                  <th className="p-3 text-center whitespace-nowrap">K / D / A</th>
-                  <th className="p-3 text-center">KDA</th>
-                  <th className="p-3 text-center whitespace-nowrap">GPM / XPM</th>
-                  <th className="p-3 text-center">LH</th>
-                  <th className="p-3 pr-5">Heróis mais jogados</th>
+                  <th className="p-3.5 pl-6">Jogador</th>
+                  <th className="p-3.5 text-center whitespace-nowrap">Pelo time</th>
+                  <th className="p-3.5 text-center">Partidas</th>
+                  <th className="p-3.5 text-center">Vitórias</th>
+                  <th className="p-3.5 text-center whitespace-nowrap">K / D / A</th>
+                  <th className="p-3.5 text-center">KDA</th>
+                  <th className="p-3.5 text-center whitespace-nowrap">GPM / XPM</th>
+                  <th className="p-3.5 text-center">LH</th>
+                  <th className="p-3.5 pr-6">Heróis mais jogados</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line text-gray-300">
@@ -201,17 +206,17 @@ export default function TeamPage() {
       </section>
 
       {/* ÚLTIMAS 10 SÉRIES */}
-      <section className="bg-surface border border-line rounded-2xl shadow-xl overflow-hidden">
-        <div className="p-5 border-b border-line flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-amber-400" />
+      <section className="glass-panel rounded-3xl overflow-hidden shadow-xl">
+        <div className="p-5 sm:p-6 border-b border-line flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-amber-400" />
             <span>Últimas {series.length} Séries</span>
           </h2>
           {series.length > 0 && (
-            <span className="text-[11px] font-bold text-gray-400">
-              <span className="text-emerald-400">{seriesWins} vitórias</span>
-              <span className="mx-1.5 text-gray-500">•</span>
-              <span className="text-rose-400">{series.length - seriesWins} derrotas</span>
+            <span className="text-xs font-bold text-gray-400">
+              <span className="text-emerald-400 font-black">{seriesWins} vitórias</span>
+              <span className="mx-2 text-gray-500">•</span>
+              <span className="text-rose-400 font-black">{series.length - seriesWins} derrotas</span>
             </span>
           )}
         </div>
@@ -298,9 +303,9 @@ export default function TeamPage() {
 
 function StatBox({ label, value, tone = 'text-white' }) {
   return (
-    <div className="bg-surface-2 border border-line rounded-xl px-4 py-3 text-center min-w-[110px]">
-      <div className="text-[10px] uppercase font-bold text-gray-400">{label}</div>
-      <div className={`text-lg font-black font-mono ${tone}`}>{value}</div>
+    <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[110px] hover:border-amber-500/30 transition-all">
+      <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">{label}</div>
+      <div className={`text-xl font-black font-mono mt-0.5 ${tone}`}>{value}</div>
     </div>
   );
 }
@@ -313,7 +318,7 @@ function PlayerRow({ player, info, constants }) {
 
   return (
     <tr className="hover:bg-surface-2/60 transition-colors">
-      <td className="p-3 pl-5">
+      <td className="p-3.5 pl-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-surface-2 border border-line overflow-hidden flex items-center justify-center shrink-0">
             {info?.avatar ? (
@@ -330,7 +335,7 @@ function PlayerRow({ player, info, constants }) {
           </div>
         </div>
       </td>
-      <td className="p-3 text-center font-mono whitespace-nowrap">
+      <td className="p-3.5 text-center font-mono whitespace-nowrap">
         {player.gamesWithTeam > 0 ? (
           <>
             <span className="text-white font-bold">{player.gamesWithTeam}</span>
@@ -338,16 +343,16 @@ function PlayerRow({ player, info, constants }) {
             <span className="text-amber-400 font-bold">{pct(player.winsWithTeam, player.gamesWithTeam)}%</span>
           </>
         ) : (
-          <span className="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase font-sans">
+          <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase font-sans">
             {player.isNewcomer ? 'Recém-chegado' : 'Sem jogos'}
           </span>
         )}
       </td>
-      <td className="p-3 text-center font-mono">{stats ? stats.matches : dash}</td>
-      <td className="p-3 text-center font-mono font-bold">
+      <td className="p-3.5 text-center font-mono">{stats ? stats.matches : dash}</td>
+      <td className="p-3.5 text-center font-mono font-bold">
         {stats ? <span className={stats.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{stats.winRate}%</span> : dash}
       </td>
-      <td className="p-3 text-center font-mono whitespace-nowrap">
+      <td className="p-3.5 text-center font-mono whitespace-nowrap">
         {stats ? (
           <>
             <span className="text-white font-bold">{stats.avgKills.toFixed(1)}</span>
@@ -358,8 +363,8 @@ function PlayerRow({ player, info, constants }) {
           </>
         ) : dash}
       </td>
-      <td className="p-3 text-center font-mono font-black text-amber-400">{stats ? stats.kda.toFixed(2) : dash}</td>
-      <td className="p-3 text-center font-mono whitespace-nowrap">
+      <td className="p-3.5 text-center font-mono font-black text-amber-400">{stats ? stats.kda.toFixed(2) : dash}</td>
+      <td className="p-3.5 text-center font-mono whitespace-nowrap">
         {stats ? (
           <>
             <span className="text-amber-400 font-bold">{stats.gpm}</span>
@@ -368,21 +373,22 @@ function PlayerRow({ player, info, constants }) {
           </>
         ) : dash}
       </td>
-      <td className="p-3 text-center font-mono">{stats ? stats.lastHits : dash}</td>
-      <td className="p-3 pr-5">
+      <td className="p-3.5 text-center font-mono">{stats ? stats.lastHits : dash}</td>
+      <td className="p-3.5 pr-6">
         {stats?.topHeroes?.length ? (
           <div className="flex items-center gap-1.5">
             {stats.topHeroes.map((h) => (
-              <div
+              <Link
                 key={h.hero_id}
-                title={`${getHeroName(constants, h.hero_id)}: ${h.games} jogos, ${h.wins} vitórias`}
-                className="relative w-12 h-7 rounded overflow-hidden border border-line bg-surface-2"
+                to={`/herois/${h.hero_id}`}
+                title={`${getHeroName(constants, h.hero_id)}: ${h.games} jogos, ${h.wins} vitórias (clique para ver detalhes)`}
+                className="relative w-12 h-7 rounded-lg overflow-hidden border border-line bg-surface-2 hover:border-amber-400 hover:scale-105 transition-all shadow-sm"
               >
                 <img src={getHeroImg(constants, h.hero_id)} alt="" className="w-full h-full object-cover" />
-                <span className="absolute bottom-0 right-0 px-1 text-[9px] font-mono font-black bg-black/70 text-white rounded-tl">
+                <span className="absolute bottom-0 right-0 px-1 text-[9px] font-mono font-black bg-black/75 text-white rounded-tl">
                   {h.games}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

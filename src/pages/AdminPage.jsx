@@ -200,7 +200,7 @@ export default function AdminPage() {
   if (!user || !isAdmin) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 min-h-screen flex items-center justify-center">
-        <div className="w-full bg-surface border border-line rounded-2xl p-8 shadow-2xl">
+        <div className="w-full glass-panel border border-line rounded-3xl p-8 shadow-2xl">
           <div className="text-center mb-6">
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-3">
               <Lock className="w-7 h-7 text-amber-400" />
@@ -247,7 +247,7 @@ export default function AdminPage() {
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black uppercase tracking-wider text-xs shadow-lg shadow-amber-500/20 transition-all"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-amber-500/20 transition-all"
             >
               Entrar no Painel
             </button>
@@ -288,7 +288,7 @@ export default function AdminPage() {
 
         <button
           onClick={() => signOut()}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:text-white transition-all w-fit"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line text-xs font-bold text-gray-300 hover:text-white transition-all w-fit"
         >
           <LogOut className="w-4 h-4" />
           <span>Sair da Conta</span>
@@ -311,7 +311,7 @@ export default function AdminPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                isActive ? 'bg-amber-500 text-black font-black' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                isActive ? 'bg-amber-500 text-on-accent font-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:text-white hover:bg-surface-2'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -324,7 +324,7 @@ export default function AdminPage() {
       {/* ABA 1: SINCRONIZAÇÃO */}
       {activeTab === 'sync' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl">
+          <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-2">Disparadores Manuais</h3>
             <p className="text-xs text-gray-400 mb-6 leading-relaxed">
               Acione as rotas serverless sob demanda para importar dados da OpenDota e da Steam Web API para o Supabase.
@@ -364,17 +364,17 @@ export default function AdminPage() {
           </div>
 
           {/* HISTÓRICO DE LOGS DE SINCRONIZAÇÃO */}
-          <div className="bg-surface border border-line rounded-2xl p-6 shadow-xl">
+          <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Registro Recente de Sincronizações</h3>
             <div className="space-y-3">
               {syncLogs.map((log, idx) => (
-                <div key={idx} className="p-3 bg-surface-2 border border-white/5 rounded-xl flex items-center justify-between text-xs">
+                <div key={idx} className="p-3.5 bg-surface-2 border border-line rounded-xl flex items-center justify-between text-xs">
                   <div>
                     <span className="font-bold text-white block">{log.source}</span>
-                    <span className="text-[11px] text-gray-500">{log.time}</span>
+                    <span className="text-[11px] text-gray-400">{log.time}</span>
                   </div>
                   <div className="text-right">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400">
+                    <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                       {log.status} ({log.items} itens)
                     </span>
                   </div>
@@ -389,7 +389,7 @@ export default function AdminPage() {
       {activeTab === 'schedule' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* FORMULÁRIO DE ADIÇÃO */}
-          <div className="lg:col-span-5 bg-surface border border-line rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-5 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4 flex items-center gap-2">
               <Plus className="w-4 h-4 text-amber-400" />
               <span>Cadastrar Próxima Partida</span>
@@ -405,7 +405,7 @@ export default function AdminPage() {
                     placeholder="ex: Team Falcons"
                     value={newTeam1}
                     onChange={(e) => setNewTeam1(e.target.value)}
-                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
                   />
                 </div>
                 <div>
@@ -416,7 +416,7 @@ export default function AdminPage() {
                     placeholder="ex: Team Liquid"
                     value={newTeam2}
                     onChange={(e) => setNewTeam2(e.target.value)}
-                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
                   />
                 </div>
               </div>
@@ -429,7 +429,7 @@ export default function AdminPage() {
                   placeholder="ex: ESL One Bangkok 2026"
                   value={newLeague}
                   onChange={(e) => setNewLeague(e.target.value)}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
                 />
               </div>
 
@@ -441,7 +441,7 @@ export default function AdminPage() {
                     placeholder="ex: 15:30"
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
-                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
                   />
                 </div>
                 <div>
@@ -460,7 +460,7 @@ export default function AdminPage() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-amber-500 text-black font-black uppercase tracking-wider text-xs shadow-md shadow-amber-500/20 hover:bg-amber-400 transition-all"
+                className="w-full py-2.5 rounded-xl bg-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-md shadow-amber-500/20 hover:bg-amber-400 transition-all"
               >
                 Adicionar à Agenda
               </button>
@@ -468,22 +468,22 @@ export default function AdminPage() {
           </div>
 
           {/* LISTA DA AGENDA CADASTRADA */}
-          <div className="lg:col-span-7 bg-surface border border-line rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-7 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Agenda Cadastrada ({scheduleList.length})</h3>
             <div className="space-y-3">
               {scheduleList.map((item) => (
-                <div key={item.id} className="p-3.5 bg-surface-2 border border-white/5 rounded-xl flex items-center justify-between gap-4">
+                <div key={item.id} className="p-3.5 bg-surface-2 border border-line rounded-xl flex items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-bold text-white text-xs">{item.team1} vs {item.team2}</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-amber-400 font-bold">{item.format}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-surface text-amber-400 font-bold border border-line">{item.format}</span>
                     </div>
                     <span className="text-[11px] text-gray-400 block">{item.league} • às {item.time} BRT</span>
                   </div>
 
                   <button
                     onClick={() => handleDeleteSchedule(item.id)}
-                    className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-950/40 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -497,7 +497,7 @@ export default function AdminPage() {
       {/* ABA 3: STREAMS E VODS */}
       {activeTab === 'streams' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5 bg-surface border border-line rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-5 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Adicionar Canal de Stream</h3>
             <form onSubmit={handleAddStream} className="space-y-4">
               <div>
@@ -508,7 +508,7 @@ export default function AdminPage() {
                   placeholder="ex: ESL Dota 2 Brasil"
                   value={newStreamName}
                   onChange={(e) => setNewStreamName(e.target.value)}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none"
                 />
               </div>
 
@@ -520,7 +520,7 @@ export default function AdminPage() {
                   placeholder="ex: esl_dota2br"
                   value={newStreamChannel}
                   onChange={(e) => setNewStreamChannel(e.target.value)}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none"
                 />
               </div>
 
@@ -546,16 +546,16 @@ export default function AdminPage() {
             </form>
           </div>
 
-          <div className="lg:col-span-7 bg-surface border border-line rounded-2xl p-6 shadow-xl">
+          <div className="lg:col-span-7 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
             <h3 className="text-base font-black uppercase text-white mb-4">Canais de Transmissão Ativos</h3>
             <div className="space-y-3">
               {streamsList.map((st) => (
-                <div key={st.id} className="p-3 bg-surface-2 border border-white/5 rounded-xl flex items-center justify-between text-xs">
+                <div key={st.id} className="p-3.5 bg-surface-2 border border-line rounded-xl flex items-center justify-between text-xs">
                   <div>
                     <span className="font-bold text-white block">{st.name}</span>
-                    <span className="text-[11px] text-gray-500 font-mono">twitch.tv/{st.channel} ({st.lang})</span>
+                    <span className="text-[11px] text-gray-400 font-mono">twitch.tv/{st.channel} ({st.lang})</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400">
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     Ativo
                   </span>
                 </div>
@@ -567,7 +567,7 @@ export default function AdminPage() {
 
       {/* ABA 4: PUBLICADOR DE ANÁLISES (MARKDOWN) */}
       {activeTab === 'analyses' && (
-        <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
+        <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
           <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
             <FileText className="w-5 h-5 text-amber-400" />
             <span>Publicar Novo Artigo / Análise Tática</span>
@@ -582,7 +582,7 @@ export default function AdminPage() {
                 placeholder="ex: Como o Meta da Posição 4 Mudou com o Patch 7.37"
                 value={articleTitle}
                 onChange={(e) => setArticleTitle(e.target.value)}
-                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
               />
             </div>
 
@@ -594,7 +594,7 @@ export default function AdminPage() {
                   placeholder="ex: como-meta-pos-4-mudou"
                   value={articleSlug}
                   onChange={(e) => setArticleSlug(e.target.value)}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -615,7 +615,7 @@ export default function AdminPage() {
                 value={articleSummary}
                 onChange={(e) => setArticleSummary(e.target.value)}
                 placeholder="Breve resumo da análise..."
-                className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-white placeholder-gray-600 focus:outline-none"
+                className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none"
               />
             </div>
 
@@ -627,13 +627,13 @@ export default function AdminPage() {
                 value={articleContent}
                 onChange={(e) => setArticleContent(e.target.value)}
                 placeholder="# Escreva em Markdown aqui...&#10;&#10;Use títulos, tópicos e negrito."
-                className="w-full bg-surface-2 border border-line rounded-xl p-3.5 text-xs text-white font-mono placeholder-gray-600 focus:outline-none"
+                className="w-full bg-surface-2 border border-line rounded-xl p-3.5 text-xs text-white font-mono placeholder-gray-500 focus:outline-none"
               />
             </div>
 
             <button
               type="submit"
-              className="px-8 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black uppercase tracking-wider text-xs shadow-lg shadow-amber-500/20 transition-all"
+              className="px-8 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-amber-500/20 transition-all"
             >
               Publicar Artigo Agora
             </button>
@@ -643,7 +643,7 @@ export default function AdminPage() {
 
       {/* ABA 5: CONFIGURAÇÕES DO SITE */}
       {activeTab === 'settings' && (
-        <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-xl max-w-2xl mx-auto">
+        <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl max-w-2xl mx-auto">
           <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
             <Settings className="w-5 h-5 text-amber-400" />
             <span>Configurações Globais da Aplicação</span>
@@ -680,7 +680,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => showToast('Configurações salvas!')}
-              className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-black uppercase tracking-wider text-xs shadow-md hover:bg-amber-400 transition-all"
+              className="px-6 py-2.5 rounded-xl bg-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-md hover:bg-amber-400 transition-all"
             >
               Salvar Alterações
             </button>

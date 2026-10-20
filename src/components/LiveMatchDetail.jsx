@@ -799,7 +799,7 @@ export default function LiveMatchDetail({
   return (
     <div className="space-y-6">
       {/* CABEÇALHO: STATUS, PLACAR E MAPAS DA SÉRIE */}
-      <section className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-surface-2 via-surface to-surface-2 p-4 sm:p-8 shadow-2xl">
+      <section className="relative overflow-hidden rounded-3xl border border-rose-500/30 glass-panel p-5 sm:p-8 shadow-2xl">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[480px] h-[240px] rounded-full bg-rose-600/10 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-[11px]">
@@ -807,7 +807,7 @@ export default function LiveMatchDetail({
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
             Ao Vivo {timeFormatted ? `· ${timeFormatted}` : ''}
           </span>
-          <span className="text-gray-300 font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
+          <span className="text-gray-300 font-bold uppercase tracking-wider bg-surface-2 border border-line px-2.5 py-1 rounded-full">
             {leagueName} ({formatStr})
           </span>
           {matchData?.spectators > 0 && (
@@ -842,13 +842,13 @@ export default function LiveMatchDetail({
 
           <div className="flex flex-col items-center shrink-0">
             {hasScore ? (
-              <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-7 py-2 sm:py-3 rounded-2xl bg-black/70 border border-rose-500/40 font-mono text-3xl sm:text-6xl font-black shadow-lg shadow-rose-500/10">
+              <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-7 py-2 sm:py-3 rounded-2xl bg-surface-2/90 border border-rose-500/40 font-mono text-3xl sm:text-6xl font-black shadow-lg shadow-rose-500/10">
                 <span className="text-emerald-400">{scoreA}</span>
-                <span className="text-gray-600 text-2xl sm:text-4xl">:</span>
+                <span className="text-gray-400 text-2xl sm:text-4xl">:</span>
                 <span className="text-rose-400">{scoreB}</span>
               </div>
             ) : (
-              <div className="px-4 py-2 rounded-xl bg-black/60 border border-white/10 font-mono text-sm font-bold text-gray-400">
+              <div className="px-4 py-2 rounded-xl bg-surface-2 border border-line font-mono text-sm font-bold text-gray-400">
                 Aguardando dados
               </div>
             )}
@@ -884,15 +884,15 @@ export default function LiveMatchDetail({
 
         {/* Mapas da série */}
         {mapsList.length > 1 && (
-          <div className="relative flex items-center justify-center gap-2 mt-6 pt-4 border-t border-white/5 flex-wrap">
+          <div className="relative flex items-center justify-center gap-2 mt-6 pt-4 border-t border-line flex-wrap">
             {mapsList.map((m, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSelectMap(m.match_id, idx)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono uppercase transition-all ${
                   activeMapIndex === idx
-                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/25 font-black'
-                    : 'bg-white/5 text-gray-300 hover:text-white border border-white/10 hover:bg-white/10'
+                    ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/25 font-black'
+                    : 'bg-surface-2 text-gray-300 hover:text-white border border-line hover:border-amber-500/30'
                 }`}
               >
                 <Swords className="w-3.5 h-3.5" />
@@ -907,7 +907,7 @@ export default function LiveMatchDetail({
                 ) : m.is_finished ? (
                   <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold border ${
                     activeMapIndex === idx
-                      ? 'bg-black/20 text-black border-black/30'
+                      ? 'bg-black/20 text-on-accent border-black/30'
                       : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                   }`}>
                     FINALIZADO
