@@ -319,8 +319,12 @@ function PlayerRow({ player, info, constants }) {
   return (
     <tr className="hover:bg-surface-2/60 transition-colors">
       <td className="p-3.5 pl-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-surface-2 border border-line overflow-hidden flex items-center justify-center shrink-0">
+        <Link
+          to={`/jogadores/${player.accountId}`}
+          className="flex items-center gap-3 group cursor-pointer"
+          title={`Ver perfil completo e estatísticas de ${player.name}`}
+        >
+          <div className="w-10 h-10 rounded-2xl bg-surface-2 border border-line overflow-hidden flex items-center justify-center shrink-0 group-hover:border-amber-400 group-hover:scale-105 transition-all shadow-sm">
             {info?.avatar ? (
               <img src={info.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
@@ -328,12 +332,15 @@ function PlayerRow({ player, info, constants }) {
             )}
           </div>
           <div className="min-w-0">
-            <div className="font-bold text-white truncate max-w-[160px]">{player.name}</div>
+            <div className="font-bold text-white group-hover:text-amber-400 transition-colors truncate max-w-[160px] flex items-center gap-1.5">
+              <span>{player.name}</span>
+              <span className="opacity-0 group-hover:opacity-100 text-[10px] text-amber-400 transition-opacity">→</span>
+            </div>
             <div className="text-[10px] text-gray-400 flex items-center gap-1">
               {medal ? (<><Shield className="w-3 h-3 text-amber-400" /> {medal}</>) : ' '}
             </div>
           </div>
-        </div>
+        </Link>
       </td>
       <td className="p-3.5 text-center font-mono whitespace-nowrap">
         {player.gamesWithTeam > 0 ? (

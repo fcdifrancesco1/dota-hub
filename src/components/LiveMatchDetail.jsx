@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Tv,
   CheckCircle2,
@@ -242,6 +243,7 @@ export default function LiveMatchDetail({
     return {
       slot: isRadiant ? idx : idx + 5,
       team_slot: slotNum,
+      accountId: pick(p, ['account_id', 'accountId']),
       name: pick(p, ['name', 'personaname']) || `${teamName} Pos ${slotNum}`,
       hero_id: heroId,
       level: levelVal,
@@ -299,19 +301,15 @@ export default function LiveMatchDetail({
       const orderNum = item.order || (idx + 1);
 
       return (
-        <div
+        <Link
           key={`${item.order || idx}-${item.hero_id}`}
-          onClick={() => {
-            if (onSelectHero && constants?.heroes?.[item.hero_id]) {
-              onSelectHero(constants.heroes[item.hero_id]);
-            }
-          }}
+          to={`/herois/${item.hero_id}`}
           className={`flex flex-col items-center p-1.5 rounded-xl border transition-all cursor-pointer group shrink-0 ${
             isPick
               ? isRadiant
                 ? 'bg-emerald-950/30 border-emerald-500/40 hover:border-emerald-400 hover:scale-105 shadow-sm shadow-emerald-500/10'
                 : 'bg-rose-950/30 border-rose-500/40 hover:border-rose-400 hover:scale-105 shadow-sm shadow-rose-500/10'
-              : 'bg-surface border-white/10 hover:border-rose-500/40 hover:scale-105 opacity-80 hover:opacity-100'
+              : 'bg-surface border-line hover:border-rose-500/40 hover:scale-105 opacity-80 hover:opacity-100'
           }`}
           title={`${hasOrder ? `${orderNum}. ` : ''}${isPick ? 'PICK' : 'BAN'}: ${hName} (${teamName})`}
         >
@@ -361,7 +359,7 @@ export default function LiveMatchDetail({
           >
             {teamName}
           </span>
-        </div>
+        </Link>
       );
     };
 
@@ -514,31 +512,43 @@ export default function LiveMatchDetail({
                 <tr key={i} className="transition-colors hover:bg-white/[0.03]">
                   {/* Jogador e Herói */}
                   <td className="p-3 pl-4 whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (onSelectHero && constants?.heroes?.[p.hero_id]) {
-                          onSelectHero(constants.heroes[p.hero_id]);
-                        }
-                      }}
-                      className="flex items-center gap-2.5 text-left group hover:opacity-85 transition-opacity"
-                      title={constants?.heroes?.[p.hero_id] ? "Ver enciclopédia do herói" : undefined}
-                    >
+                    <div className="flex items-center gap-2.5">
                       {hImg && (
-                        <img
-                          src={hImg}
-                          alt={hName}
-                          className={`w-9 h-6 object-cover rounded border ${
-                            isRadiant ? 'border-emerald-400' : 'border-rose-400'
-                          } group-hover:ring-2 group-hover:ring-amber-400/50 transition-all`}
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
+                        <Link
+                          to={`/herois/${p.hero_id}`}
+                          title={`Ver enciclopédia de ${hName}`}
+                          className="shrink-0 hover:scale-105 transition-transform"
+                        >
+                          <img
+                            src={hImg}
+                            alt={hName}
+                            className={`w-9 h-6 object-cover rounded border ${
+                              isRadiant ? 'border-emerald-400' : 'border-rose-400'
+                            } hover:ring-2 hover:ring-amber-400/50 transition-all shadow-sm`}
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        </Link>
                       )}
                       <div className="min-w-0">
-                        <span className="text-white font-bold truncate max-w-[150px] sm:max-w-[200px] block">{p.name}</span>
-                        <span className="text-[10px] text-gray-400 truncate group-hover:text-amber-400 transition-colors">{hName}</span>
+                        {p.accountId ? (
+                          <Link
+                            to={`/jogadores/${p.accountId}`}
+                            className="text-white font-bold truncate max-w-[150px] sm:max-w-[200px] block hover:text-amber-400 transition-colors"
+                            title={`Ver estatísticas do jogador ${p.name}`}
+                          >
+                            {p.name}
+                          </Link>
+                        ) : (
+                          <span className="text-white font-bold truncate max-w-[150px] sm:max-w-[200px] block">{p.name}</span>
+                        )}
+                        <Link
+                          to={`/herois/${p.hero_id}`}
+                          className="text-[10px] text-gray-400 truncate hover:text-amber-400 transition-colors block"
+                        >
+                          {hName}
+                        </Link>
                       </div>
-                    </button>
+                    </div>
                   </td>
 
                   {/* Nível */}

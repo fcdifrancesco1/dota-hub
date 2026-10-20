@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarChart3, Trophy, Flame, Shield, Swords, Sparkles, Filter, Search, ArrowUpDown, ChevronDown } from 'lucide-react';
 import { fetchHeroStats, fetchHeroPositions } from '../services/api';
 import { SkeletonTable } from './SkeletonLoader';
 
 export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
+  const navigate = useNavigate();
   const [heroes, setHeroes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedAttr, setSelectedAttr] = useState('all');
   const [sortBy, setSortBy] = useState('tier'); // 'tier' | 'proWinRate' | 'proPick' | 'proBan' | 'pub8WinRate'
   const [sortAsc, setSortAsc] = useState(false);
+
+  const goToHero = (heroId) => {
+    if (!heroId) return;
+    navigate(`/herois/${heroId}`);
+  };
 
   const [attempt, setAttempt] = useState(0);
   // Posições jogadas nas partidas profissionais (null = ainda não carregou ou indisponível)
@@ -122,44 +129,60 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
       {/* CARDS DE DESTAQUE DO META */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {topWinRate && (
-          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
-            <img src={topWinRate.img} alt={topWinRate.name} className="w-12 h-12 rounded-xl object-cover border border-emerald-500/40 shadow-sm" />
+          <div
+            onClick={() => goToHero(topWinRate.id)}
+            className="tilt-card glass-panel border border-line hover:border-emerald-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
+            title={`Clique para ver detalhes de ${topWinRate.name}`}
+          >
+            <img src={topWinRate.img} alt={topWinRate.name} className="w-12 h-12 rounded-xl object-cover border border-emerald-500/40 shadow-sm group-hover:ring-2 group-hover:ring-emerald-400/50 transition-all" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-emerald-500 block">Maior Winrate Pro</span>
-              <strong className="text-sm font-black text-white truncate block">{topWinRate.name}</strong>
+              <strong className="text-sm font-black text-white truncate block group-hover:text-emerald-400 transition-colors">{topWinRate.name}</strong>
               <span className="text-xs font-mono text-emerald-500 font-bold">{topWinRate.proWinRate}% WR</span>
             </div>
           </div>
         )}
 
         {mostPicked && (
-          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
-            <img src={mostPicked.img} alt={mostPicked.name} className="w-12 h-12 rounded-xl object-cover border border-blue-500/40 shadow-sm" />
+          <div
+            onClick={() => goToHero(mostPicked.id)}
+            className="tilt-card glass-panel border border-line hover:border-blue-500/50 dark:hover:border-amber-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
+            title={`Clique para ver detalhes de ${mostPicked.name}`}
+          >
+            <img src={mostPicked.img} alt={mostPicked.name} className="w-12 h-12 rounded-xl object-cover border border-blue-500/40 shadow-sm group-hover:ring-2 group-hover:ring-amber-400/50 transition-all" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-amber-500 block">Mais Escolhido Pro</span>
-              <strong className="text-sm font-black text-white truncate block">{mostPicked.name}</strong>
+              <strong className="text-sm font-black text-white truncate block group-hover:text-amber-400 transition-colors">{mostPicked.name}</strong>
               <span className="text-xs font-mono text-blue-600 dark:text-amber-400 font-bold">{mostPicked.proPick} Picks</span>
             </div>
           </div>
         )}
 
         {mostBanned && (
-          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
-            <img src={mostBanned.img} alt={mostBanned.name} className="w-12 h-12 rounded-xl object-cover border border-rose-500/40 shadow-sm" />
+          <div
+            onClick={() => goToHero(mostBanned.id)}
+            className="tilt-card glass-panel border border-line hover:border-rose-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
+            title={`Clique para ver detalhes de ${mostBanned.name}`}
+          >
+            <img src={mostBanned.img} alt={mostBanned.name} className="w-12 h-12 rounded-xl object-cover border border-rose-500/40 shadow-sm group-hover:ring-2 group-hover:ring-rose-400/50 transition-all" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-rose-500 block">Mais Banido Pro</span>
-              <strong className="text-sm font-black text-white truncate block">{mostBanned.name}</strong>
+              <strong className="text-sm font-black text-white truncate block group-hover:text-rose-400 transition-colors">{mostBanned.name}</strong>
               <span className="text-xs font-mono text-rose-500 font-bold">{mostBanned.proBan} Bans</span>
             </div>
           </div>
         )}
 
         {topImmortalPub && (
-          <div className="tilt-card glass-panel border border-line rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
-            <img src={topImmortalPub.img} alt={topImmortalPub.name} className="w-12 h-12 rounded-xl object-cover border border-cyan-500/40 shadow-sm" />
+          <div
+            onClick={() => goToHero(topImmortalPub.id)}
+            className="tilt-card glass-panel border border-line hover:border-cyan-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
+            title={`Clique para ver detalhes de ${topImmortalPub.name}`}
+          >
+            <img src={topImmortalPub.img} alt={topImmortalPub.name} className="w-12 h-12 rounded-xl object-cover border border-cyan-500/40 shadow-sm group-hover:ring-2 group-hover:ring-cyan-400/50 transition-all" />
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-cyan-600 dark:text-cyan-400 block">Destaque Immortal</span>
-              <strong className="text-sm font-black text-white truncate block">{topImmortalPub.name}</strong>
+              <strong className="text-sm font-black text-white truncate block group-hover:text-cyan-400 transition-colors">{topImmortalPub.name}</strong>
               <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 font-bold">{topImmortalPub.pub8WinRate}% WR</span>
             </div>
           </div>
@@ -304,9 +327,9 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                 return (
                   <tr
                     key={h.id}
-                    onClick={() => onSelectHero && onSelectHero(h)}
+                    onClick={() => goToHero(h.id)}
                     className="hover:bg-surface-2/70 transition-colors cursor-pointer group"
-                    title={`Clique para ver detalhes completos de ${h.name}`}
+                    title={`Clique para ver a enciclopédia completa de ${h.name}`}
                   >
                     {/* Badge do Tier */}
                     <td className="p-3.5 pl-5 whitespace-nowrap">

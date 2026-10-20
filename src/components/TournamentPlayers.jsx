@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowDown, Coins, Crosshair, Swords, Trophy } from 'lucide-react';
 import TeamLogo from '../utils/teamLogos';
 import { getHeroImg, getHeroName } from '../services/api';
@@ -119,7 +120,13 @@ export default function TournamentPlayers({ data, constants }) {
                         <TeamLogo teamName={p.teamName} teamId={p.teamId} logoUrl={p.teamLogo} className="w-6 h-6" />
                       </button>
                       <div className="min-w-0">
-                        <div className="font-bold text-white truncate max-w-[150px]">{p.name}</div>
+                        <Link
+                          to={`/jogadores/${p.accountId}`}
+                          className="font-bold text-white hover:text-amber-400 transition-colors truncate max-w-[150px] block"
+                          title={`Ver estatísticas e perfil de ${p.name}`}
+                        >
+                          {p.name}
+                        </Link>
                         <div className="text-[10px] text-gray-500 truncate max-w-[150px]">{p.teamName || '—'}</div>
                       </div>
                     </div>
@@ -147,16 +154,17 @@ export default function TournamentPlayers({ data, constants }) {
                   <td className="p-3 pr-4">
                     <div className="flex items-center gap-1">
                       {p.topHeroes.map((h) => (
-                        <div
+                        <Link
                           key={h.heroId}
+                          to={`/herois/${h.heroId}`}
                           title={`${getHeroName(constants, h.heroId)}: ${h.count} ${h.count === 1 ? 'jogo' : 'jogos'}`}
-                          className="relative w-10 h-6 rounded overflow-hidden border border-line bg-surface-2"
+                          className="relative w-10 h-6 rounded overflow-hidden border border-line bg-surface-2 hover:border-amber-400 transition-colors"
                         >
                           <img src={getHeroImg(constants, h.heroId)} alt="" className="w-full h-full object-cover" />
                           <span className="absolute bottom-0 right-0 px-0.5 text-[8px] font-mono font-black bg-black/70 text-white rounded-tl">
                             {h.count}
                           </span>
-                        </div>
+                        </Link>
                       ))}
                       {p.heroCount > 3 && <span className="text-[10px] text-gray-500 ml-0.5">+{p.heroCount - 3}</span>}
                     </div>

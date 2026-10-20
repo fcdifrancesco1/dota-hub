@@ -46,6 +46,7 @@ export default function Header() {
     { to: '/ao-vivo', label: 'Ao Vivo', icon: Radio, badge: liveCount },
     { to: '/campeonatos', label: 'Campeonatos', icon: Trophy },
     { to: '/partidas', label: 'Partidas', icon: Swords },
+    { to: '/times', label: 'Times', icon: Shield },
     { to: '/herois', label: 'Heróis', icon: Sparkles },
     { to: '/palpites', label: 'Palpites', icon: Award },
     { to: '/perfil', label: 'Perfil', icon: User },

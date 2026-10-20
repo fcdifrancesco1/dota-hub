@@ -485,11 +485,12 @@ function HeroChip({ pb, constants, small = false }) {
   const name = getHeroName(constants, pb.hero_id);
   const img = getHeroImg(constants, pb.hero_id);
   return (
-    <div
-      title={`${pb.is_pick ? 'Pick' : 'Ban'} #${(pb.order ?? 0) + 1}: ${name}`}
+    <Link
+      to={`/herois/${pb.hero_id}`}
+      title={`${pb.is_pick ? 'Pick' : 'Ban'} #${(pb.order ?? 0) + 1}: ${name} (clique para ver o herói)`}
       className={`relative rounded-lg overflow-hidden border ${
-        pb.is_pick ? 'border-line-strong' : 'border-line opacity-80 grayscale-[60%]'
-      } ${small ? 'w-12 h-7' : 'w-20 h-11 sm:w-24 sm:h-[54px]'} bg-surface-2`}
+        pb.is_pick ? 'border-line-strong hover:border-amber-400' : 'border-line opacity-80 grayscale-[60%] hover:grayscale-0'
+      } ${small ? 'w-12 h-7' : 'w-20 h-11 sm:w-24 sm:h-[54px]'} bg-surface-2 transition-all hover:scale-105 shadow-sm block`}
     >
       {img && <img src={img} alt={name} className="w-full h-full object-cover" />}
       {!pb.is_pick && (
@@ -500,7 +501,7 @@ function HeroChip({ pb, constants, small = false }) {
       <span className="absolute top-0 left-0 px-1 text-[9px] font-mono font-black bg-black/70 text-white rounded-br">
         {(pb.order ?? 0) + 1}
       </span>
-    </div>
+    </Link>
   );
 }
 
@@ -598,25 +599,41 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
               return (
                 <tr key={p.player_slot ?? idx} className="hover:bg-surface-2/60 transition-colors">
                   <td className="p-3 pl-4">
-                    <button
-                      type="button"
-                      onClick={() => hero && onSelectHero?.(hero)}
-                      className="flex items-center gap-3 text-left group"
-                      title={hero ? 'Ver herói' : undefined}
-                    >
-                      <img
-                        src={getHeroImg(constants, p.hero_id)}
-                        alt={heroName}
-                        className="w-12 h-7 object-cover rounded border border-line shrink-0"
-                        onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
-                      />
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={`/herois/${p.hero_id}`}
+                        title={`Ver herói ${heroName}`}
+                        className="shrink-0 hover:scale-105 transition-transform"
+                      >
+                        <img
+                          src={getHeroImg(constants, p.hero_id)}
+                          alt={heroName}
+                          className="w-12 h-7 object-cover rounded border border-line hover:border-amber-400 transition-colors shadow-sm"
+                          onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                        />
+                      </Link>
                       <div className="min-w-0">
-                        <div className="font-bold text-white truncate max-w-[170px]">
-                          {p.name || p.personaname || `Jogador ${idx + 1}`}
-                        </div>
-                        <div className="text-[10px] text-gray-400 truncate group-hover:text-amber-400 transition-colors">{heroName}</div>
+                        {p.account_id ? (
+                          <Link
+                            to={`/jogadores/${p.account_id}`}
+                            className="font-bold text-white hover:text-amber-400 transition-colors truncate max-w-[170px] block"
+                            title={`Ver perfil do jogador ${p.name || p.personaname}`}
+                          >
+                            {p.name || p.personaname || `Jogador ${idx + 1}`}
+                          </Link>
+                        ) : (
+                          <div className="font-bold text-white truncate max-w-[170px]">
+                            {p.name || p.personaname || `Jogador ${idx + 1}`}
+                          </div>
+                        )}
+                        <Link
+                          to={`/herois/${p.hero_id}`}
+                          className="text-[10px] text-gray-400 truncate hover:text-amber-400 transition-colors block"
+                        >
+                          {heroName}
+                        </Link>
                       </div>
-                    </button>
+                    </div>
                   </td>
                   <td className="p-3 text-center font-mono font-bold">{p.level ?? '—'}</td>
                   <td className="p-3 text-center font-mono whitespace-nowrap">

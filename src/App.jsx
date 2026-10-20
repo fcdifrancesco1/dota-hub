@@ -20,6 +20,8 @@ import PredictionsPage from './pages/PredictionsPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import TeamPage from './pages/TeamPage';
+import TeamsPage from './pages/TeamsPage';
+import PlayerDetailPage from './pages/PlayerDetailPage';
 
 // Modais Globais
 import HeroDetailModal from './components/HeroDetailModal';
@@ -52,7 +54,10 @@ function AppContent() {
             <Route path="/campeonatos/:id" element={<TournamentDetailPage />} />
             <Route path="/partidas" element={<MatchesPage />} />
             <Route path="/partidas/:id" element={<MatchDetailPage />} />
+            <Route path="/times" element={<TeamsPage />} />
             <Route path="/times/:id" element={<TeamPage />} />
+            <Route path="/jogadores/:id" element={<PlayerDetailPage />} />
+            <Route path="/players/:id" element={<PlayerDetailPage />} />
             <Route path="/herois" element={<HeroesPage />} />
             <Route path="/herois/:id" element={<HeroDetailPage />} />
             <Route path="/palpites" element={<PredictionsPage />} />
