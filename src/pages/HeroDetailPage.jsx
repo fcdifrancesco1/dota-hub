@@ -27,6 +27,9 @@ export default function HeroDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedAbility, setSelectedAbility] = useState(null);
   const [videoError, setVideoError] = useState(false);
+  // Itens e jogadores do herói nas partidas profissionais (OpenDota Explorer)
+  const [proData, setProData] = useState(null);
+  const [proLoading, setProLoading] = useState(true);
 
   const heroObj = constants?.heroes?.[id] || { id, localized_name: `Herói #${id}` };
   const heroName = heroObj.localized_name || getHeroName(id, constants);
@@ -53,6 +56,24 @@ export default function HeroDetailPage() {
 
     return () => { cancelled = true; };
   }, [id, heroInternalName]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setProData(null);
+    setProLoading(true);
+    fetch(`/api/results?heroDetail=${encodeURIComponent(id)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+      .then((data) => {
+        if (cancelled) return;
+        setProData(data);
+        setProLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  const pct = (wins, games) => (games ? ((wins / games) * 100).toFixed(1) : '0.0');
+  const minutes = (sec) => (sec > 0 ? `${Math.round(sec / 60)}m` : 'início');
 
   // Atributo formatado
   const attrMap = {
@@ -447,22 +468,30 @@ export default function HeroDetailPage() {
                 <span>Core Build & Itens Prioritários</span>
               </h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {[
-                  { name: 'Manta Style', winrate: 72.5, timing: '18m' },
-                  { name: 'Power Treads', winrate: 67.8, timing: '7m' },
-                  { name: 'Dragon Lance', winrate: 69.2, timing: '12m' },
-                  { name: 'Black King Bar', winrate: 74.0, timing: '23m' },
-                  { name: 'Butterfly', winrate: 81.5, timing: '29m' },
-                  { name: 'Satanic', winrate: 78.9, timing: '34m' }
-                ].map((item, idx) => (
-                  <div key={idx} className="bg-surface-2 border border-line rounded-2xl p-3.5 text-center shadow-sm">
-                    <h4 className="text-xs font-bold text-white mb-1">{item.name}</h4>
-                    <span className="text-[10px] text-gray-400 block">Tempo Médio: {item.timing}</span>
-                    <span className="text-xs font-mono font-bold text-emerald-500 block mt-1">{item.winrate}% Win</span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-[11px] text-gray-400 -mt-2">
+                Itens mais comprados nas ligas profissionais (últimos 180 dias){proData?.totalGames ? `, em ${proData.totalGames} partidas analisadas` : ''}.
+              </p>
+
+              {proLoading ? (
+                <div className="flex items-center gap-2 text-xs text-gray-400 py-6 justify-center">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Carregando itens…
+                </div>
+              ) : !proData?.items?.length ? (
+                <p className="text-xs text-gray-400 py-6 text-center">
+                  {proData ? 'Sem partidas profissionais analisadas com este herói no período.' : 'Dados indisponíveis no momento (OpenDota).'}
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {proData.items.map((item) => (
+                    <div key={item.key} className="bg-surface-2 border border-line rounded-2xl p-3.5 text-center shadow-sm">
+                      {item.img && <img src={item.img} alt="" loading="lazy" className="w-11 h-8 rounded-md object-cover mx-auto mb-1.5 border border-line" />}
+                      <h4 className="text-xs font-bold text-white mb-1">{item.name}</h4>
+                      <span className="text-[10px] text-gray-400 block">Compra média: {minutes(item.avgTime)} · {item.games} jogos</span>
+                      <span className="text-xs font-mono font-bold text-emerald-500 block mt-1">{pct(item.wins, item.games)}% Win</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* ATLETAS QUE MAIS SE DESTACAM COM O HERÓI */}
@@ -472,40 +501,36 @@ export default function HeroDetailPage() {
                 <span>Especialistas no Cenário Mundial</span>
               </h3>
 
-              <div className="space-y-3">
-                <div className="bg-surface-2 border border-line rounded-2xl p-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <h4 className="text-sm font-black text-white">skiter</h4>
-                    <span className="text-xs text-amber-500 font-medium">Team Falcons</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-emerald-500">82.4% Win</span>
-                    <span className="text-[10px] text-gray-400 block">17 partidas</span>
-                  </div>
-                </div>
+              <p className="text-[11px] text-gray-400 -mt-2">Quem mais jogou o herói nas ligas profissionais (últimos 365 dias).</p>
 
-                <div className="bg-surface-2 border border-line rounded-2xl p-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <h4 className="text-sm font-black text-white">miCKe</h4>
-                    <span className="text-xs text-blue-500 font-medium">Team Liquid</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-emerald-500">76.9% Win</span>
-                    <span className="text-[10px] text-gray-400 block">13 partidas</span>
-                  </div>
+              {proLoading ? (
+                <div className="flex items-center gap-2 text-xs text-gray-400 py-6 justify-center">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Carregando jogadores…
                 </div>
-
-                <div className="bg-surface-2 border border-line rounded-2xl p-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <h4 className="text-sm font-black text-white">Yatoro / Raddan</h4>
-                    <span className="text-xs text-amber-500 font-medium">Team Spirit</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-emerald-500">71.4% Win</span>
-                    <span className="text-[10px] text-gray-400 block">14 partidas</span>
-                  </div>
+              ) : !proData?.players?.length ? (
+                <p className="text-xs text-gray-400 py-6 text-center">
+                  {proData ? 'Nenhum jogador profissional usou este herói no período.' : 'Dados indisponíveis no momento (OpenDota).'}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {proData.players.map((p) => (
+                    <Link
+                      key={p.account_id}
+                      to={`/jogadores/${p.account_id}`}
+                      className="bg-surface-2 hover:bg-surface-3 border border-line rounded-2xl p-4 flex items-center justify-between shadow-sm transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-black text-white truncate">{p.name || `Jogador ${p.account_id}`}</h4>
+                        <span className="text-xs text-amber-500 font-medium">{p.team_name || 'Sem time'}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-mono font-bold text-emerald-500">{pct(p.wins, p.games)}% Win</span>
+                        <span className="text-[10px] text-gray-400 block">{p.games} {p.games === 1 ? 'partida' : 'partidas'}</span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

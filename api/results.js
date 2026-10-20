@@ -84,9 +84,99 @@ async function handleHeroPositions(res) {
   }
 }
 
+const explorer = async (sql) => {
+  const r = await fetch(`https://api.opendota.com/api/explorer?sql=${encodeURIComponent(sql)}`, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(20000)
+  });
+  const data = r.ok ? await r.json() : null;
+  if (!Array.isArray(data?.rows)) throw new Error(data?.err || `HTTP ${r.status}`);
+  return data.rows;
+};
+
+const PRO_MATCHES = `FROM matches m
+  JOIN leagues l ON l.leagueid = m.leagueid AND l.tier IN ('premium', 'professional')
+  JOIN player_matches pm ON pm.match_id = m.match_id`;
+
+/**
+ * GET /api/results?heroDetail=<hero_id>
+ * Itens e jogadores do herói nas partidas das ligas profissionais/premium:
+ * - itens: 1ª compra de cada item nos últimos 180 dias (partidas analisadas,
+ *   que têm o registro de compras), com vitórias e minuto médio da compra;
+ * - jogadores: quem mais jogou o herói nos últimos 365 dias.
+ * Só entram itens montados (com receita), sem consumíveis e sem os que são
+ * peça de outro item (ex.: Yasha), exceto os caros (BKB, Butterfly…).
+ */
+async function handleHeroDetail(heroId, res) {
+  try {
+    const [itemRows, playerRows, itemsConst] = await Promise.all([
+      explorer(`WITH b AS (
+  SELECT pm.match_id, pm.player_slot, ((pm.player_slot < 128) = m.radiant_win) AS win,
+    e->>'key' AS item, MIN((e->>'time')::int) AS t
+  ${PRO_MATCHES}
+  CROSS JOIN LATERAL unnest(pm.purchase_log) e
+  WHERE pm.hero_id = ${heroId} AND m.start_time > extract(epoch from now()) - 180 * 86400
+  GROUP BY 1, 2, 3, 4
+)
+SELECT item, COUNT(*) AS games, SUM(CASE WHEN win THEN 1 ELSE 0 END) AS wins, ROUND(AVG(t)) AS t,
+  (SELECT COUNT(DISTINCT (match_id, player_slot)) FROM b) AS total
+FROM b GROUP BY item ORDER BY games DESC LIMIT 80`),
+      explorer(`SELECT pm.account_id, np.name, np.team_name, COUNT(*) AS games,
+  SUM(CASE WHEN (pm.player_slot < 128) = m.radiant_win THEN 1 ELSE 0 END) AS wins
+${PRO_MATCHES}
+LEFT JOIN notable_players np ON np.account_id = pm.account_id
+WHERE pm.hero_id = ${heroId} AND m.start_time > extract(epoch from now()) - 365 * 86400
+GROUP BY 1, 2, 3 ORDER BY games DESC, wins DESC LIMIT 5`),
+      fetch('https://api.opendota.com/api/constants/items', { signal: AbortSignal.timeout(9000) }).then((r) => (r.ok ? r.json() : {}))
+    ]);
+
+    const componentOf = new Set();
+    Object.values(itemsConst || {}).forEach((it) => (it?.components || []).forEach((c) => componentOf.add(c)));
+    const isCore = (key) => {
+      const it = itemsConst?.[key];
+      if (!it || !it.components?.length || it.qual === 'consumable') return false;
+      if ((it.cost || 0) < 1200) return false;
+      return !componentOf.has(key) || it.cost >= 3000;
+    };
+
+    const totalGames = Number(itemRows[0]?.total || 0);
+    const items = itemRows
+      .filter((x) => isCore(x.item))
+      .slice(0, 6)
+      .map((x) => ({
+        key: x.item,
+        name: itemsConst[x.item]?.dname || x.item,
+        img: itemsConst[x.item]?.img ? `https://cdn.cloudflare.steamstatic.com${itemsConst[x.item].img}` : null,
+        games: Number(x.games),
+        wins: Number(x.wins),
+        avgTime: Number(x.t)
+      }));
+
+    const players = playerRows.map((x) => ({
+      account_id: Number(x.account_id),
+      name: x.name || null,
+      team_name: x.team_name || null,
+      games: Number(x.games),
+      wins: Number(x.wins)
+    }));
+
+    res.setHeader('Cache-Control', 's-maxage=21600, stale-while-revalidate=604800');
+    return res.status(200).json({ totalGames, items, players });
+  } catch (err) {
+    console.error('[Results API] heroDetail indisponível:', err.message);
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(503).json({ error: 'OpenDota indisponível' });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.query?.heroStats) return handleHeroStats(res);
   if (req.query?.heroPositions) return handleHeroPositions(res);
+  if (req.query?.heroDetail) {
+    const heroId = parseInt(req.query.heroDetail, 10);
+    if (!Number.isInteger(heroId) || heroId <= 0 || heroId > 1000) return res.status(400).json({ error: 'hero inválido' });
+    return handleHeroDetail(heroId, res);
+  }
   try {
     const proRes = await fetch("https://api.opendota.com/api/proMatches", {
       headers: { "Accept": "application/json" },
