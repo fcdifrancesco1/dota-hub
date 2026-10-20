@@ -1,6 +1,7 @@
 import React from 'react';
 import LiveTickerStrip from '../components/home/LiveTickerStrip';
 import HomeHero from '../components/home/HomeHero';
+import AnimatedHeroCard from '../components/home/AnimatedHeroCard';
 import HomeStatsCards from '../components/home/HomeStatsCards';
 import Upcoming24h from '../components/home/Upcoming24h';
 import RecentResultsHome from '../components/home/RecentResultsHome';
@@ -11,7 +12,7 @@ export default function Home() {
   const { loading } = useApp();
 
   return (
-    <div className="min-h-screen text-gray-100 pb-16">
+    <div className="min-h-screen text-slate-900 dark:text-gray-100 pb-16">
       {/* 1. Faixa de Partidas Ao Vivo */}
       <LiveTickerStrip />
 
@@ -20,6 +21,11 @@ export default function Home() {
         <div className="min-w-0">
           {/* 2. Hero Principal */}
           <HomeHero />
+
+          {/* 2.5 Destaque Interativo do Meta (Card 3D Animado) */}
+          <div className="mb-8">
+            <AnimatedHeroCard />
+          </div>
 
           {/* 3. Grid de Próximas Partidas (24h) e Resultados Recentes */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">

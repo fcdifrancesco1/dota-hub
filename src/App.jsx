@@ -39,7 +39,7 @@ function AppContent() {
   } = useApp();
 
   return (
-    <div className="min-h-screen bg-canvas app-backdrop text-gray-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-canvas app-backdrop text-slate-900 dark:text-gray-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white dark:selection:bg-amber-500 dark:selection:text-black">
       <div>
         <ScrollToTop />
         <Header />

@@ -279,22 +279,22 @@ export default function LivePage() {
                 <div
                   key={game.match_id || idx}
                   onClick={() => openLiveMatch(game)}
-                  className="bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/50 rounded-2xl p-6 shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+                  className="tilt-card glass-panel rounded-3xl p-6 sm:p-7 shadow-xl hover:shadow-2xl border border-slate-200/80 dark:border-white/10 hover:border-blue-500/50 transition-all cursor-pointer group flex flex-col justify-between"
                 >
                   <div>
                     {/* TOPO: TORNEIO & SÉRIE */}
-                    <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4 text-xs">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-white/10 mb-4 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                        <span className="font-bold text-amber-400 truncate max-w-[220px]">
+                        <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                        <span className="font-bold text-blue-700 dark:text-amber-400 truncate max-w-[220px]">
                           {game.league_name || 'Torneio Oficial'}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-gray-400 font-mono text-[11px] bg-white/5 px-2 py-0.5 rounded">
+                        <span className="text-slate-600 dark:text-gray-400 font-mono text-[11px] bg-slate-100 dark:bg-white/5 px-2.5 py-0.5 rounded-lg border border-slate-200 dark:border-white/10">
                           {game.series_type ? `MD${game.series_type}` : 'MD3'}
                         </span>
-                        <span className="font-mono text-white font-black bg-black/60 px-2.5 py-0.5 rounded border border-white/10">
+                        <span className="font-mono text-slate-900 dark:text-white font-black bg-slate-200/70 dark:bg-black/60 px-3 py-0.5 rounded-lg border border-slate-300 dark:border-white/10">
                           {durationMin}:{durationSec}
                         </span>
                       </div>
@@ -308,25 +308,25 @@ export default function LivePage() {
                           teamName={radName}
                           teamId={game.team_id_radiant || game.radiant_team_id || game.radiant_team?.team_id}
                           logoUrl={game.radiant_logo || game.logoA}
-                          className="w-14 h-14 rounded-xl mb-2 bg-black/40 border border-white/10 p-1"
+                          className="w-14 h-14 rounded-2xl mb-2 bg-white/80 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-1.5 shadow-sm"
                         />
-                        <span className="text-xs font-bold text-emerald-400 leading-tight break-words line-clamp-2 block">
+                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 leading-tight break-words line-clamp-2 block">
                           {radName}
                         </span>
-                        <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">
+                        <span className="text-[10px] text-slate-400 dark:text-gray-500 uppercase tracking-widest font-semibold">
                           Radiante
                         </span>
                       </div>
 
                       {/* PLACAR DE KILLS */}
                       <div className="flex flex-col items-center">
-                        <div className="flex items-center gap-3 font-mono text-2xl sm:text-3xl font-black px-4 py-1.5 rounded-2xl bg-black/70 border border-white/10 shadow-inner">
-                          <span className="text-emerald-400">{radScore}</span>
-                          <span className="text-gray-500 text-lg">:</span>
-                          <span className="text-red-400">{direScore}</span>
+                        <div className="flex items-center gap-3 font-mono text-2xl sm:text-3xl font-black px-4 py-1.5 rounded-2xl bg-slate-100 dark:bg-black/70 border border-slate-300 dark:border-white/10 shadow-inner">
+                          <span className="text-emerald-700 dark:text-emerald-400">{radScore}</span>
+                          <span className="text-slate-400 dark:text-gray-500 text-lg">:</span>
+                          <span className="text-rose-700 dark:text-rose-400">{direScore}</span>
                         </div>
-                        <span className="text-[11px] font-bold font-mono mt-2 text-gray-300 flex items-center gap-1">
-                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-[11px] font-bold font-mono mt-2 text-slate-600 dark:text-gray-300 flex items-center gap-1">
+                          <Zap className="w-3.5 h-3.5 text-amber-500" />
                           <span>
                             {goldLead > 0
                               ? `Radiant +${(goldLead / 1000).toFixed(1)}k ouro`
@@ -399,11 +399,11 @@ export default function LivePage() {
                   </div>
 
                   {/* RODAPÉ DO CARD */}
-                  <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-                    <span className="text-gray-400 text-[11px]">
+                  <div className="mt-5 pt-3 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs">
+                    <span className="text-slate-500 dark:text-gray-400 text-[11px]">
                       Clique para ver tabela de jogadores, itens e construções
                     </span>
-                    <span className="font-bold text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                    <span className="font-bold text-blue-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
                       <span>Ver partida</span>
                       <ChevronRight className="w-4 h-4" />
                     </span>
@@ -414,14 +414,14 @@ export default function LivePage() {
           </div>
         ) : (
           /* ESTADO VAZIO AMIGÁVEL */
-          <div className="rounded-2xl bg-surface border border-line p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-2xl">
-            <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
-              <Radio className="w-8 h-8 text-gray-500" />
+          <div className="rounded-3xl glass-panel p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-xl border border-slate-200/80 dark:border-white/10">
+            <div className="w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-white/5 border border-blue-500/20 dark:border-white/10 flex items-center justify-center mx-auto mb-4">
+              <Radio className="w-8 h-8 text-blue-600 dark:text-gray-400" />
             </div>
-            <h3 className="text-lg font-black text-white uppercase tracking-tight mb-2">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight mb-2">
               Nenhuma Partida Ao Vivo no Momento
             </h3>
-            <p className="text-xs text-gray-400 leading-relaxed max-w-md mx-auto mb-6">
+            <p className="text-xs text-slate-500 dark:text-gray-400 leading-relaxed max-w-md mx-auto mb-6">
               Assim que a próxima partida profissional começar, o placar, o draft e as estatísticas aparecerão aqui automaticamente.
             </p>
 

@@ -20,25 +20,25 @@ const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '9
 // Tokens semânticos de superfície (substituem os hex fixos como bg-[#0C0E14])
 const SURFACE_TOKENS = {
   //             escuro       claro
-  canvas:      ['#0A0C10', '#F7EFE4'], // fundo da página
+  canvas:      ['#0A0C10', '#FBF7F0'], // fundo da página Pearl/Pergaminho no claro
   surface:     ['#0C0E14', '#FFFFFF'], // cards
-  'surface-2': ['#141824', '#F3F5F8'], // painéis internos, inputs, cabeçalhos de tabela
-  'surface-3': ['#1C2230', '#E9EDF2'], // hover / elevação
-  line:        ['#212838', '#E3E6EB'], // bordas
-  'line-strong': ['#262F44', '#CDD3DB'],
+  'surface-2': ['#141824', '#F4F6F9'], // painéis internos, inputs, cabeçalhos de tabela
+  'surface-3': ['#1C2230', '#EAEFF5'], // hover / elevação
+  line:        ['#212838', '#E2E8F0'], // bordas
+  'line-strong': ['#262F44', '#CBD5E1'],
   'on-accent': ['#FFFFFF', '#FFFFFF'] // texto sobre preenchimento colorido (vermelho, roxo...)
 };
 
 // Paleta legada `dota-*` do projeto
 const DOTA_TOKENS = {
-  bg:     ['#0D0F14', '#F7EFE4'],
+  bg:     ['#0D0F14', '#FBF7F0'],
   surface:['#151821', '#FFFFFF'],
-  card:   ['#1B1F2B', '#F3F5F8'],
-  border: ['#282E3F', '#E3E6EB'],
-  accent: ['#E5A93C', '#023266'],
-  cyan:   ['#00E5FF', '#1F6F99'],
-  text:   ['#E2E8F0', '#18202B'],
-  dim:    ['#8E99AD', '#4F5863']
+  card:   ['#1B1F2B', '#F4F6F9'],
+  border: ['#282E3F', '#E2E8F0'],
+  accent: ['#E5A93C', '#1D4ED8'],
+  cyan:   ['#00E5FF', '#0284C7'],
+  text:   ['#E2E8F0', '#0F172A'],
+  dim:    ['#8E99AD', '#475569']
 };
 
 // Tema claro. "white" é a cor de texto principal do tema escuro, então no claro

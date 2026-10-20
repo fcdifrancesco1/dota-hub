@@ -19,11 +19,11 @@ export default function Upcoming24h() {
 
   if (loading) {
     return (
-      <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl">
-        <div className="h-6 w-40 bg-white/5 rounded animate-pulse mb-4" />
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
+        <div className="h-6 w-40 bg-slate-200 dark:bg-white/5 rounded-xl animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-slate-200 dark:bg-white/5 rounded-2xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -31,18 +31,18 @@ export default function Upcoming24h() {
   }
 
   return (
-    <div className="bg-surface border border-line rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+    <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/5 mb-4">
+        <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/10 mb-4">
           <div className="flex items-center gap-2 min-w-0">
-            <Calendar className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-black uppercase tracking-wider text-white whitespace-nowrap">
+            <Calendar className="w-4 h-4 text-blue-600 dark:text-amber-400" />
+            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white whitespace-nowrap">
               Próximas 24h <span className="hidden sm:inline">(Brasília)</span>
             </h3>
           </div>
           <Link
             to="/partidas?aba=agenda"
-            className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider whitespace-nowrap shrink-0"
+            className="text-xs font-bold text-blue-600 dark:text-amber-400 hover:text-blue-700 dark:hover:text-amber-300 flex items-center gap-1 uppercase tracking-wider whitespace-nowrap shrink-0 transition-colors"
           >
             <span>Ver Agenda</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -50,7 +50,7 @@ export default function Upcoming24h() {
         </div>
 
         {next24hMatches.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 text-xs">
+          <div className="text-center py-8 text-slate-500 dark:text-gray-500 text-xs">
             Nenhuma partida oficial agendada para as próximas 24 horas.
           </div>
         ) : (
@@ -76,17 +76,17 @@ export default function Upcoming24h() {
                   key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`}
                   onClick={() => setSelected(m)}
                   title="Ver estatísticas dos jogadores no torneio"
-                  className="block w-full text-left bg-surface-2 hover:bg-surface-2 border border-surface-3 hover:border-amber-500/30 rounded-xl p-3 transition-all"
+                  className="block w-full text-left bg-white/70 dark:bg-white/5 hover:bg-white/95 dark:hover:bg-white/10 border border-slate-200/80 dark:border-white/10 hover:border-blue-500/40 rounded-2xl p-3.5 transition-all shadow-sm group cursor-pointer"
                 >
-                  <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
-                    <span className="font-semibold truncate max-w-[180px] text-amber-400/80">
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-gray-400 mb-1.5">
+                    <span className="font-semibold truncate max-w-[180px] text-blue-700 dark:text-amber-400/90">
                       {m.tourneyName || 'Torneio'}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                      <span className="font-mono text-blue-700 dark:text-cyan-400 bg-blue-50 dark:bg-cyan-500/10 border border-blue-200 dark:border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
                         {m.formato}
                       </span>
-                      <span className="font-mono text-gray-300 bg-white/5 px-1.5 py-0.5 rounded font-bold">
+                      <span className="font-mono text-slate-700 dark:text-gray-300 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded font-bold">
                         {dayLabel ? `${dayLabel} ` : ''}{formattedTime} BRT
                       </span>
                     </span>
@@ -96,14 +96,14 @@ export default function Upcoming24h() {
                     {/* Time 1 */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-5 h-5 shrink-0" />
-                      <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
                     </div>
 
-                    <span className="text-[10px] font-black text-gray-500 uppercase px-1">vs</span>
+                    <span className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase px-1">vs</span>
 
                     {/* Time 2 */}
                     <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                      <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
                       <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-5 h-5 shrink-0" />
                     </div>
                   </div>
@@ -114,7 +114,7 @@ export default function Upcoming24h() {
         )}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-white/5 text-[11px] text-gray-500 text-center">
+      <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/10 text-[11px] text-slate-500 dark:text-gray-400 text-center">
         Toque em uma partida para ver as estatísticas dos jogadores no torneio.
       </div>
 
