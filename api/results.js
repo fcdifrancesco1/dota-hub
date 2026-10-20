@@ -200,7 +200,7 @@ async function pageInfo(path, query) {
     const b = m?.dire_team?.name || m?.dire_name;
     if (a && b) {
       title = `${a} vs ${b} · Resultado`;
-      description = `Resultado, mapas, heróis e estatísticas de ${a} vs ${b}${m.league?.name ? ` no ${m.league.name}` : ''}.`;
+      description = `Resultado, mapas, heróis e estatísticas de ${a} vs ${b}${m.league?.name?.trim() ? ` no ${m.league.name.trim()}` : ''}.`;
     }
   } else if (section === 'times' && id) {
     const t = /^\d+$/.test(id) ? await getJson(`${OPENDOTA}/teams/${id}`) : { name: id };
