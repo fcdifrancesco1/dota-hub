@@ -14,6 +14,14 @@
   ],
   "rewrites": [
     {
+      "source": "/api/valve-herodata",
+      "destination": "/api/valve?type=herodata"
+    },
+    {
+      "source": "/api/leaderboard",
+      "destination": "/api/valve?type=leaderboard"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
