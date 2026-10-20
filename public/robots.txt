@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /perfil
+Disallow: /api/
+
+Sitemap: https://dota.hangover.com.br/sitemap.xml

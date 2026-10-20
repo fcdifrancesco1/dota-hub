@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { usePageMeta } from '../utils/pageMeta';
 import {
   ArrowLeft,
   Shield,
@@ -80,6 +81,7 @@ export default function PlayerDetailPage() {
 
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
+  usePageMeta(player?.name, player?.name ? `Títulos, heróis mais jogados e partidas recentes de ${player.name} no Dota 2 profissional.` : null);
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('heroes'); // 'heroes' | 'matches' | 'badges'
   const [titleFilter, setTitleFilter] = useState('champions'); // 'champions' | 'podiums' | 'tier1' | 'all'
@@ -97,9 +99,6 @@ export default function PlayerDetailPage() {
         if (!cancelled) {
           setPlayer(data);
           setLoading(false);
-          if (data?.name) {
-            document.title = `${data.name} · Jogador · DotaHub Brasil`;
-          }
         }
       })
       .catch((err) => {

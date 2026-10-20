@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { usePageMeta } from '../utils/pageMeta';
 import {
   Sparkles,
   Zap,
@@ -33,6 +34,7 @@ export default function HeroDetailPage() {
 
   const heroObj = constants?.heroes?.[id] || { id, localized_name: `Herói #${id}` };
   const heroName = heroObj.localized_name || getHeroName(id, constants);
+  usePageMeta(heroObj.localized_name, heroObj.localized_name ? `Habilidades, itens mais comprados e especialistas de ${heroObj.localized_name} nas partidas profissionais de Dota 2.` : null);
   const heroRawKey = heroObj?.name ? heroObj.name.replace('npc_dota_hero_', '') : '';
 
   const heroInternalName = constants?.heroes?.[id]?.name;

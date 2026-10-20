@@ -191,3 +191,47 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/* Acessibilidade: contorno visível ao navegar pelo teclado (Tab). Só aparece no
+   foco por teclado, não no clique, e vale também onde o Tailwind tirou o outline. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible,
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  outline: 2px solid var(--accent-gold) !important;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-gold) !important;
+  outline-offset: 1px;
+}
+
+/* O que aparece no hover também aparece no foco pelo teclado */
+.tilt-card:focus-visible,
+.tilt-card:has(:focus-visible) {
+  transform: translateY(-4px);
+}
+
+/* Quem pediu ao sistema para reduzir movimento: sem animações e transições longas */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .tilt-card:hover,
+  .tilt-card:focus-visible,
+  .tilt-card:has(:focus-visible) {
+    transform: none;
+  }
+}

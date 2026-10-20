@@ -350,7 +350,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                         <div>
                           <div className="flex items-center gap-1.5">
                             <strong className="text-white text-xs block group-hover:text-blue-600 dark:group-hover:text-amber-400 transition-colors">{h.name}</strong>
-                            <span className="opacity-0 group-hover:opacity-100 text-[10px] text-blue-600 dark:text-amber-400 font-mono transition-opacity">→</span>
+                            <span className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 text-[10px] text-blue-600 dark:text-amber-400 font-mono transition-opacity">→</span>
                           </div>
                           <span className="text-[10px] text-gray-400">{h.attackType}</span>
                         </div>

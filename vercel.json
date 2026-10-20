@@ -26,6 +26,21 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/results?sitemap=1"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|WhatsApp|Discordbot|TelegramBot|Twitterbot|Slackbot|LinkedInBot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Mastodon|Bluesky).*"
+        }
+      ],
+      "destination": "/api/results?og=1&path=/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

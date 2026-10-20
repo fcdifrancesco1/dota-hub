@@ -63,7 +63,7 @@ export default function CenterChampion({ onOpenTeamProfile }) {
             <div className="text-[10px] text-gray-400 font-semibold uppercase">Equipe Campeã</div>
             <div className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors flex items-center gap-1">
               {champion.teamName}
-              <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+              <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 group-focus-visible:opacity-100" />
             </div>
           </div>
         </button>

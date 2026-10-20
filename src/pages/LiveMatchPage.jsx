@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { usePageMeta } from '../utils/pageMeta';
 import { Loader2, Radio } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import LiveMatchDetail from '../components/LiveMatchDetail';
@@ -43,11 +44,8 @@ export default function LiveMatchPage() {
 
   const teamA = game?.timeA || game?.radiant_name;
   const teamB = game?.timeB || game?.dire_name;
-  useEffect(() => {
-    const previous = document.title;
-    if (teamA && teamB) document.title = `${teamA} vs ${teamB} · Ao Vivo · DotaHub Brasil`;
-    return () => { document.title = previous; };
-  }, [teamA, teamB]);
+  usePageMeta(teamA && teamB ? `${teamA} vs ${teamB} · Ao vivo` : null,
+    teamA && teamB ? `Placar, abates e ouro de ${teamA} vs ${teamB} em tempo real.` : null);
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">

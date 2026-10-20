@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL, routeMeta } from '../src/utils/routeMeta.js';
+
 function normalizeTeamKey(name) {
   if (!name) return "";
   return String(name)
@@ -169,7 +171,135 @@ GROUP BY 1, 2, 3 ORDER BY games DESC, wins DESC LIMIT 5`),
   }
 }
 
+const OPENDOTA = 'https://api.opendota.com/api';
+const STEAM_CDN = 'https://cdn.cloudflare.steamstatic.com';
+const getJson = (url, ms = 3500) =>
+  fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(ms) })
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null);
+
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Nome do campeonato pelo endereço: ?p=PGL/Wallachia/9 ou o próprio slug (pgl-wallachia-9)
+function tournamentNameFromUrl(slug, page) {
+  const raw = page ? decodeURIComponent(page).replace(/[/_]/g, ' ') : decodeURIComponent(slug || '').replace(/-/g, ' ');
+  return raw.replace(/\s+/g, ' ').trim().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+}
+
+/** Título, descrição e imagem de uma página do site, com o nome real do item quando dá. */
+async function pageInfo(path, query) {
+  const base = routeMeta(path);
+  const [, section, rawId] = path.split('/');
+  const id = rawId ? decodeURIComponent(rawId) : '';
+  let { title, description } = base;
+  let image = null;
+
+  if (section === 'partidas' && /^\d+$/.test(id)) {
+    const m = await getJson(`${OPENDOTA}/matches/${id}`);
+    const a = m?.radiant_team?.name || m?.radiant_name;
+    const b = m?.dire_team?.name || m?.dire_name;
+    if (a && b) {
+      title = `${a} vs ${b} · Resultado`;
+      description = `Resultado, mapas, heróis e estatísticas de ${a} vs ${b}${m.league?.name ? ` no ${m.league.name}` : ''}.`;
+    }
+  } else if (section === 'times' && id) {
+    const t = /^\d+$/.test(id) ? await getJson(`${OPENDOTA}/teams/${id}`) : { name: id };
+    if (t?.name) {
+      title = t.name;
+      description = `Elenco, resultados recentes e estatísticas do ${t.name} no Dota 2 profissional.`;
+      image = t.logo_url || null;
+    }
+  } else if ((section === 'jogadores' || section === 'players') && /^\d+$/.test(id)) {
+    const p = await getJson(`${OPENDOTA}/players/${id}`);
+    const name = p?.profile?.name || p?.profile?.personaname;
+    if (name) {
+      title = name;
+      description = `Títulos, heróis mais jogados e partidas recentes de ${name} no Dota 2 profissional.`;
+      image = p.profile.avatarfull || null;
+    }
+  } else if (section === 'herois' && /^\d+$/.test(id)) {
+    const heroes = await getJson(`${OPENDOTA}/constants/heroes`);
+    const h = heroes?.[id];
+    if (h?.localized_name) {
+      title = h.localized_name;
+      description = `Habilidades, itens mais comprados e especialistas de ${h.localized_name} nas partidas profissionais de Dota 2.`;
+      image = h.img ? `${STEAM_CDN}${h.img.split('?')[0]}` : null;
+    }
+  } else if (section === 'campeonatos' && id) {
+    const name = tournamentNameFromUrl(id, query.p);
+    if (name) {
+      title = name;
+      description = `Partidas, chaveamento, equipes, jogadores e heróis do ${name}.`;
+    }
+  }
+  return { title, description, image };
+}
+
+/**
+ * GET /api/results?og=1&path=/partidas/123
+ * Página só com as tags de prévia (título, descrição e imagem) para os robôs do
+ * WhatsApp, Discord, Telegram, Facebook etc., que não executam JavaScript. O
+ * vercel.json manda para cá apenas esses robôs; pessoas e buscadores recebem o site.
+ */
+async function handleOpenGraph(req, res) {
+  const path = String(req.query.path || '/').split('?')[0] || '/';
+  const { title, description, image } = await pageInfo(path, req.query);
+  const fullTitle = title ? `${title} · ${SITE_NAME}` : `${SITE_NAME} - Portal Competitivo de Dota 2`;
+  const qs = req.query.p ? `?p=${encodeURIComponent(req.query.p)}` : '';
+  const url = `${SITE_URL}${path}${qs}`;
+  const img = image || `${SITE_URL}/aegis.png`;
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="UTF-8" />
+<title>${escapeHtml(fullTitle)}</title>
+<meta name="description" content="${escapeHtml(description)}" />
+<link rel="canonical" href="${escapeHtml(url)}" />
+<meta property="og:site_name" content="${SITE_NAME}" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="${escapeHtml(fullTitle)}" />
+<meta property="og:description" content="${escapeHtml(description)}" />
+<meta property="og:url" content="${escapeHtml(url)}" />
+<meta property="og:image" content="${escapeHtml(img)}" />
+<meta name="twitter:card" content="${image ? 'summary' : 'summary_large_image'}" />
+</head><body><h1>${escapeHtml(fullTitle)}</h1><p>${escapeHtml(description)}</p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></body></html>`;
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+  return res.status(200).send(html);
+}
+
+/**
+ * GET /sitemap.xml (reescrito para /api/results?sitemap=1)
+ * Seções do site, todos os heróis e os times com melhor rating na OpenDota.
+ */
+async function handleSitemap(res) {
+  const [heroes, teams] = await Promise.all([
+    getJson(`${OPENDOTA}/constants/heroes`, 8000),
+    getJson(`${OPENDOTA}/teams`, 8000)
+  ]);
+  const urls = [
+    ['/', 'hourly', '1.0'],
+    ['/ao-vivo', 'always', '0.9'],
+    ['/partidas', 'hourly', '0.9'],
+    ['/campeonatos', 'daily', '0.9'],
+    ['/times', 'daily', '0.8'],
+    ['/herois', 'daily', '0.8'],
+    ['/palpites', 'daily', '0.5'],
+    ...Object.keys(heroes || {}).map((hid) => [`/herois/${hid}`, 'weekly', '0.6']),
+    ...(Array.isArray(teams) ? teams : []).slice(0, 100).map((t) => [`/times/${t.team_id}`, 'weekly', '0.6'])
+  ];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map(([loc, freq, prio]) => `  <url><loc>${SITE_URL}${loc}</loc><changefreq>${freq}</changefreq><priority>${prio}</priority></url>`).join('\n')}
+</urlset>`;
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800');
+  return res.status(200).send(xml);
+}
+
 export default async function handler(req, res) {
+  if (req.query?.og) return handleOpenGraph(req, res);
+  if (req.query?.sitemap) return handleSitemap(res);
   if (req.query?.heroStats) return handleHeroStats(res);
   if (req.query?.heroPositions) return handleHeroPositions(res);
   if (req.query?.heroDetail) {

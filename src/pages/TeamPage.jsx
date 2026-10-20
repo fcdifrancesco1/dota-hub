@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { usePageMeta } from '../utils/pageMeta';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -72,11 +73,7 @@ export default function TeamPage() {
   }, [id, navigate]);
 
   const teamName = state.data?.team?.name;
-  useEffect(() => {
-    const previous = document.title;
-    if (teamName) document.title = `${teamName} · Times · DotaHub Brasil`;
-    return () => { document.title = previous; };
-  }, [teamName]);
+  usePageMeta(teamName, teamName ? `Elenco, resultados recentes e estatísticas do ${teamName} no Dota 2 profissional.` : null);
 
   const back = (
     <button
@@ -334,7 +331,7 @@ function PlayerRow({ player, info, constants }) {
           <div className="min-w-0">
             <div className="font-bold text-white group-hover:text-amber-400 transition-colors truncate max-w-[160px] flex items-center gap-1.5">
               <span>{player.name}</span>
-              <span className="opacity-0 group-hover:opacity-100 text-[10px] text-amber-400 transition-opacity">→</span>
+              <span className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 text-[10px] text-amber-400 transition-opacity">→</span>
             </div>
             <div className="text-[10px] text-gray-400 flex items-center gap-1">
               {medal ? (<><Shield className="w-3 h-3 text-amber-400" /> {medal}</>) : ' '}

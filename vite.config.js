@@ -51,5 +51,17 @@ export default defineConfig(({ mode }) => {
   for (const [key, value] of Object.entries(loadEnv(mode, process.cwd(), ''))) {
     if (process.env[key] === undefined) process.env[key] = value;
   }
-  return { plugins: [react(), apiMiddlewarePlugin()] };
+  return {
+    plugins: [react(), apiMiddlewarePlugin()],
+    build: {
+      rollupOptions: {
+        output: {
+          // Ícones num arquivo só, em vez de dezenas de arquivos minúsculos (menos requisições)
+          manualChunks(id) {
+            if (id.includes('node_modules/lucide-react')) return 'icons';
+          }
+        }
+      }
+    }
+  };
 });

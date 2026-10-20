@@ -551,7 +551,7 @@ export default function TournamentsView({
                                 <img
                                   src={heroImg}
                                   alt={heroName}
-                                  className="w-full h-full object-cover filter grayscale contrast-125 opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                                  className="w-full h-full object-cover filter grayscale contrast-125 opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-all duration-300"
                                   onError={(e) => { e.target.style.display = 'none'; }}
                                 />
                                 <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-colors"></div>

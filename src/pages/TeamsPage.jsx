@@ -26,7 +26,6 @@ export default function TeamsPage() {
   const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
-    document.title = 'Ranking Mundial de Times · Liquipedia & SAP · DotaHub Brasil';
     let cancelled = false;
     setLoading(true);
 

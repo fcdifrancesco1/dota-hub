@@ -60,7 +60,7 @@ export default function PlayerStatsModal({ team, stats, loading, onClose }) {
                             className="font-bold text-white hover:text-amber-400 flex items-center gap-1 group transition-colors"
                           >
                             <span>{p.name}</span>
-                            <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity" />
                           </Link>
                         ) : (
                           <span className="font-bold text-white">{p.name}</span>

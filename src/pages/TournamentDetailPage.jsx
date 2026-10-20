@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { usePageMeta } from '../utils/pageMeta';
 import {
   Trophy,
   Calendar,
@@ -206,6 +207,7 @@ export default function TournamentDetailPage() {
   const { theme } = useTheme();
   const [tournament, setTournament] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  usePageMeta(tournament?.name, tournament?.name ? `Partidas, chaveamento, equipes, jogadores e heróis do ${tournament.name}.` : null);
   // Aba aberta fica no endereço (?aba=chaveamento), para o "Voltar" de uma partida reabrir a mesma aba
   const activeTab = TAB_FROM_URL[searchParams.get('aba')] || 'matches';
   const setActiveTab = (tab) => {

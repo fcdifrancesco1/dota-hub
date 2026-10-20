@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { usePageMeta } from '../utils/pageMeta';
 import {
   AlertTriangle,
   Ban,
@@ -157,11 +158,8 @@ export default function MatchDetailPage() {
 
   const teamA = series?.timeA;
   const teamB = series?.timeB;
-  useEffect(() => {
-    const previous = document.title;
-    if (teamA && teamB) document.title = `${teamA} vs ${teamB} · Resultado · DotaHub Brasil`;
-    return () => { document.title = previous; };
-  }, [teamA, teamB]);
+  usePageMeta(teamA && teamB ? `${teamA} vs ${teamB} · Resultado` : null,
+    teamA && teamB ? `Resultado, mapas, heróis e estatísticas de ${teamA} vs ${teamB} no Dota 2 profissional.` : null);
 
   const selectMap = (idx) => {
     const next = new URLSearchParams(searchParams);

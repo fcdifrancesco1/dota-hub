@@ -1,27 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import { RouteMeta } from './utils/pageMeta';
 
-// Páginas
+// Páginas: a inicial vai no pacote principal; as demais são baixadas só quando abertas
 import Home from './pages/Home';
-import LivePage from './pages/LivePage';
-import LiveMatchPage from './pages/LiveMatchPage';
-import TournamentsPage from './pages/TournamentsPage';
-import TournamentDetailPage from './pages/TournamentDetailPage';
-import MatchesPage from './pages/MatchesPage';
-import MatchDetailPage from './pages/MatchDetailPage';
-import HeroesPage from './pages/HeroesPage';
-import HeroDetailPage from './pages/HeroDetailPage';
-import PredictionsPage from './pages/PredictionsPage';
-import ProfilePage from './pages/ProfilePage';
-import AdminPage from './pages/AdminPage';
-import TeamPage from './pages/TeamPage';
-import TeamsPage from './pages/TeamsPage';
-import PlayerDetailPage from './pages/PlayerDetailPage';
+const LivePage = lazy(() => import('./pages/LivePage'));
+const LiveMatchPage = lazy(() => import('./pages/LiveMatchPage'));
+const TournamentsPage = lazy(() => import('./pages/TournamentsPage'));
+const TournamentDetailPage = lazy(() => import('./pages/TournamentDetailPage'));
+const MatchesPage = lazy(() => import('./pages/MatchesPage'));
+const MatchDetailPage = lazy(() => import('./pages/MatchDetailPage'));
+const HeroesPage = lazy(() => import('./pages/HeroesPage'));
+const HeroDetailPage = lazy(() => import('./pages/HeroDetailPage'));
+const PredictionsPage = lazy(() => import('./pages/PredictionsPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const TeamPage = lazy(() => import('./pages/TeamPage'));
+const TeamsPage = lazy(() => import('./pages/TeamsPage'));
+const PlayerDetailPage = lazy(() => import('./pages/PlayerDetailPage'));
+
+function PageLoading() {
+  return (
+    <div className="flex justify-center items-center py-32" role="status" aria-label="Carregando página">
+      <div className="w-8 h-8 rounded-full border-2 border-line border-t-amber-500 animate-spin" />
+    </div>
+  );
+}
 
 // Modais Globais
 import HeroDetailModal from './components/HeroDetailModal';
@@ -44,8 +53,10 @@ function AppContent() {
     <div className="min-h-screen bg-canvas app-backdrop text-white flex flex-col justify-between selection:bg-amber-500 selection:text-black">
       <div>
         <ScrollToTop />
+        <RouteMeta />
         <Header />
         <main>
+          <Suspense fallback={<PageLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/ao-vivo" element={<LivePage />} />
@@ -66,6 +77,7 @@ function AppContent() {
             {/* Fallback route */}
             <Route path="*" element={<Home />} />
           </Routes>
+          </Suspense>
         </main>
       </div>
 
