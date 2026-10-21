@@ -101,7 +101,7 @@ export default function AnimatedHeroCard() {
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500 animate-spin-slow" />
           <span className="text-xs font-black uppercase tracking-wider text-white">
-            Destaque do Meta (Card Animado)
+            Destaque do Meta
           </span>
         </div>
 
