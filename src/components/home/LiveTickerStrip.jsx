@@ -12,7 +12,7 @@ export default function LiveTickerStrip() {
   if (!liveGames || liveGames.length === 0) {
     return (
       <div className="w-full glass-panel border-y border-line py-2.5 px-4 mb-6 transition-all">
-        <div className="max-w-[1680px] mx-auto flex items-center justify-between gap-4 text-xs text-gray-400">
+        <div className="w-full flex items-center justify-between gap-4 text-xs text-gray-400">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="font-semibold text-white">Servidores DotaTV Conectados:</span>
@@ -32,7 +32,7 @@ export default function LiveTickerStrip() {
 
   return (
     <div className="w-full glass-panel border-y border-line py-3 px-4 mb-6 shadow-sm">
-      <div className="max-w-[1680px] mx-auto">
+      <div className="w-full">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">

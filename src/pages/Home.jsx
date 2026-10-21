@@ -6,6 +6,7 @@ import HomeStatsCards from '../components/home/HomeStatsCards';
 import Upcoming24h from '../components/home/Upcoming24h';
 import RecentResultsHome from '../components/home/RecentResultsHome';
 import NewsPanel from '../components/home/NewsPanel';
+import RankingsCard from '../components/home/RankingsCard';
 import { useApp } from '../context/AppContext';
 
 export default function Home() {
@@ -16,13 +17,18 @@ export default function Home() {
       {/* 1. Faixa de Partidas Ao Vivo */}
       <LiveTickerStrip />
 
-      {/* Telas largas: notícias numa coluna à direita; nas menores, abaixo do conteúdo */}
-      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
-        <div className="min-w-0">
+      {/* Largura total da tela: rankings à esquerda, conteúdo no meio e notícias à direita.
+          Telas médias: rankings + conteúdo, notícias embaixo; celular: tudo empilhado */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px] gap-6 items-start">
+        <aside className="order-2 xl:order-1 xl:sticky xl:top-20">
+          <RankingsCard />
+        </aside>
+
+        <div className="min-w-0 order-1 xl:order-2">
           {/* 2. Hero Principal */}
           <HomeHero />
 
-          {/* 2.5 Destaque Interativo do Meta (Card 3D Animado) */}
+          {/* 2.5 Destaque do meta: heróis mais disputados nas partidas profissionais */}
           <div className="mb-8">
             <AnimatedHeroCard />
           </div>
@@ -38,7 +44,9 @@ export default function Home() {
         </div>
 
         {/* 5. Notícias e transferências */}
-        <NewsPanel />
+        <div className="order-3 xl:col-span-2 2xl:col-span-1 min-w-0">
+          <NewsPanel />
+        </div>
       </div>
     </div>
   );

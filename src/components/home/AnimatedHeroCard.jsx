@@ -1,70 +1,56 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, Trophy, Flame, ChevronRight, Zap } from 'lucide-react';
+import { Sparkles, Flame, ChevronRight, Loader2 } from 'lucide-react';
+import { fetchHeroStats } from '../../services/api';
 
-const HERO_ROSTER = [
-  {
-    id: 8,
-    key: 'juggernaut',
-    name: 'Juggernaut',
-    role: 'Carry • Agilidade',
-    winrate: '68.4%',
-    tier: 'TIER S+',
-    specialist: 'Yatoro (14 vitórias)',
-    primaryColor: '#059669', // Emerald
-    accentColor: '#D97706',  // Amber
-    description: 'Maior pico de dano por minuto (DPM) nos playoffs do Riyadh Masters.'
-  },
-  {
-    id: 74,
-    key: 'invoker',
-    name: 'Invoker',
-    role: 'Mid • Inteligência',
-    winrate: '62.1%',
-    tier: 'TIER S',
-    specialist: 'bzm (11 vitórias)',
-    primaryColor: '#2563EB', // Cobalt
-    accentColor: '#9333EA',  // Purple
-    description: 'Herói mais contestado na Fase de Grupos com 84% de presença no draft.'
-  },
-  {
-    id: 14,
-    key: 'pudge',
-    name: 'Pudge',
-    role: 'Roamer • Força',
-    winrate: '58.0%',
-    tier: 'TIER S',
-    specialist: 'Save- (9 vitórias)',
-    primaryColor: '#EA580C', // Orange
-    accentColor: '#16A34A',  // Green
-    description: 'Fator surpresa decisivo em confrontos MD3 com hooks de alta precisão.'
-  },
-  {
-    id: 44,
-    key: 'phantom_assassin',
-    name: 'Phantom Assassin',
-    role: 'Hard Carry • Agilidade',
-    winrate: '64.7%',
-    tier: 'TIER S+',
-    specialist: 'Satanic (12 vitórias)',
-    primaryColor: '#7C3AED', // Violet
-    accentColor: '#0284C7',  // Sky
-    description: 'Evolução mais rápida de patrimônio líquido (GPM 860+) na grande final.'
-  }
-];
+// Cores da aura atrás do herói, pelo atributo principal
+const ATTR_COLORS = { str: '#DC2626', agi: '#059669', int: '#2563EB', all: '#9333EA' };
+const HOW_MANY = 4;
+
+// "…/heroes/juggernaut.png?" → "juggernaut" (nome do vídeo animado da Valve)
+const heroKey = (hero) => (hero?.img || '').split('/').pop().split('.')[0];
 
 export default function AnimatedHeroCard() {
-  const [selectedHero, setSelectedHero] = useState(HERO_ROSTER[0]);
+  // Os heróis mais disputados (escolhas + banimentos) nas partidas profissionais recentes da OpenDota
+  const [heroes, setHeroes] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
   const [videoError, setVideoError] = useState(false);
+  const [specialists, setSpecialists] = useState({});
   const cardRef = useRef(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    let active = true;
+    fetchHeroStats().then((list) => {
+      if (!active) return;
+      const top = [...(list || [])]
+        .filter((h) => h.proPick + h.proBan > 0)
+        .sort((a, b) => (b.proPick + b.proBan) - (a.proPick + a.proBan))
+        .slice(0, HOW_MANY);
+      setHeroes(top);
+      setSelectedId((id) => id ?? top[0]?.id ?? null);
+    });
+    return () => { active = false; };
+  }, []);
+
+  const selectedHero = heroes?.find((h) => h.id === selectedId) || null;
+
+  // Jogador que mais usou o herói nas ligas profissionais (mesma fonte da página do herói)
+  useEffect(() => {
+    if (!selectedId || specialists[selectedId] !== undefined) return undefined;
+    let active = true;
+    fetch(`/api/results?heroDetail=${selectedId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+      .then((data) => {
+        if (active) setSpecialists((s) => ({ ...s, [selectedId]: data?.players?.[0] || null }));
+      });
+    return () => { active = false; };
+  }, [selectedId, specialists]);
+
   const handleCardClick = (e) => {
-    // Não navegar se o clique veio de botões ou links internos
     if (e.target.closest('button, a')) return;
-    if (selectedHero?.id) {
-      navigate(`/herois/${selectedHero.id}`);
-    }
+    if (selectedHero) navigate(`/herois/${selectedHero.id}`);
   };
 
   const handleMouseMove = (e) => {
@@ -72,27 +58,26 @@ export default function AnimatedHeroCard() {
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateX = ((y - centerY) / centerY) * -6;
-    const rotateY = ((x - centerX) / centerX) * 6;
-
+    const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -6;
+    const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 6;
     cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
     cardRef.current.style.setProperty('--mouse-x', `${(x / rect.width * 100).toFixed(1)}%`);
     cardRef.current.style.setProperty('--mouse-y', `${(y / rect.height * 100).toFixed(1)}%`);
   };
 
   const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+    if (cardRef.current) cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
   };
 
   const handleSelectHero = (hero) => {
-    setSelectedHero(hero);
+    setSelectedId(hero.id);
     setVideoError(false);
   };
+
+  if (heroes && !heroes.length) return null;
+
+  const key = heroKey(selectedHero);
+  const specialist = selectedHero ? specialists[selectedHero.id] : undefined;
 
   return (
     <div className="space-y-3">
@@ -100,143 +85,125 @@ export default function AnimatedHeroCard() {
       <div className="flex items-center justify-between px-1 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500 animate-spin-slow" />
-          <span className="text-xs font-black uppercase tracking-wider text-white">
-            Destaque do Meta
-          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-white">Destaque do Meta</span>
         </div>
 
-        {/* BOTÕES DE SELEÇÃO RÁPIDA DE HERÓIS */}
-        <div className="flex items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2 border border-line">
-          {HERO_ROSTER.map((h) => {
-            const isActive = selectedHero.key === h.key;
-            return (
+        {heroes && (
+          <div className="flex items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2 border border-line">
+            {heroes.map((h) => (
               <button
-                key={h.key}
+                key={h.id}
                 type="button"
                 onClick={() => handleSelectHero(h)}
                 className={`px-2.5 py-1 rounded-lg transition-all ${
-                  isActive
-                    ? 'bg-blue-600 text-on-accent shadow-sm font-black'
-                    : 'text-gray-400 hover:text-white hover:bg-surface-3'
+                  selectedId === h.id ? 'bg-blue-600 text-on-accent shadow-sm font-black' : 'text-gray-400 hover:text-white hover:bg-surface-3'
                 }`}
               >
                 {h.name}
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* CARD 3D COM VÍDEO DO PERSONAGEM EM LOOP */}
-      <div
-        ref={cardRef}
-        onClick={handleCardClick}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        className="tilt-card glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden group cursor-pointer shadow-xl border border-line"
-      >
-        <div className="holo-sheen" />
-
-        {/* TOPO: BADGE E STATUS */}
-        <div className="flex items-center justify-between mb-4 relative z-20">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-surface-2 text-blue-600 dark:text-blue-400 border border-line shadow-sm">
-            <Flame className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-            <span>HERÓI MAIS DISPUTADO DO META</span>
-          </div>
-
-          <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-surface-2 text-amber-500 border border-line shadow-sm">
-            {selectedHero.tier}
-          </span>
+      {!selectedHero ? (
+        <div className="glass-panel rounded-3xl border border-line flex justify-center py-12">
+          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
         </div>
+      ) : (
+        /* CARD 3D COM VÍDEO DO PERSONAGEM EM LOOP */
+        <div
+          ref={cardRef}
+          onClick={handleCardClick}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className="tilt-card glass-panel rounded-3xl p-4 sm:p-5 relative overflow-hidden group cursor-pointer shadow-xl border border-line"
+        >
+          <div className="holo-sheen" />
 
-        {/* CORPO DO CARD: RESPONSIVO (LADO A LADO EM DESKTOP) */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative z-20">
-          {/* COLUNA ESQUERDA: VÍDEO ANIMADO (VALVE WEBM RENDER) */}
-          <div className="md:col-span-5 relative w-full h-64 sm:h-72 md:h-80 flex items-center justify-center overflow-hidden">
-            {/* Aura luminosa difusa atrás do herói */}
-            <div
-              className="absolute w-56 h-56 rounded-full blur-3xl opacity-35 dark:opacity-25 pointer-events-none animate-pulse"
-              style={{
-                background: `radial-gradient(circle, ${selectedHero.primaryColor}, transparent 70%)`
-              }}
-            />
-
-            {/* VÍDEO DO PERSONAGEM EM ALTA QUALIDADE */}
-            {!videoError ? (
-              <video
-                key={selectedHero.key}
-                autoPlay
-                loop
-                muted
-                playsInline
-                onError={() => setVideoError(true)}
-                className="w-full h-full object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.22)] animate-hero-float"
-              >
-                <source
-                  src={`https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/${selectedHero.key}.webm`}
-                  type="video/webm"
-                />
-              </video>
-            ) : (
-              <img
-                src={`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${selectedHero.key}.png`}
-                alt={selectedHero.name}
-                className="w-full h-full object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.22)] animate-hero-float"
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center relative z-20">
+            {/* VÍDEO ANIMADO (VALVE WEBM RENDER) */}
+            <div className="sm:col-span-4 relative w-full h-32 sm:h-36 md:h-40 flex items-center justify-center overflow-hidden">
+              <div
+                className="absolute w-28 h-28 rounded-full blur-3xl opacity-35 dark:opacity-25 pointer-events-none animate-pulse"
+                style={{ background: `radial-gradient(circle, ${ATTR_COLORS[selectedHero.attrCode] || '#2563EB'}, transparent 70%)` }}
               />
-            )}
-          </div>
-
-          {/* COLUNA DIREITA: INFORMAÇÕES TÁTICAS E WINRATE */}
-          <div className="md:col-span-7 space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h4 className="text-3xl font-black tracking-tight text-white">
-                  {selectedHero.name}
-                </h4>
-                <span className="text-xs font-semibold text-gray-400">
-                  {selectedHero.role}
-                </span>
-              </div>
-
-              <div className="text-right">
-                <span className="text-2xl font-black text-emerald-500 font-mono block">
-                  {selectedHero.winrate}
-                </span>
-                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
-                  Taxa de Vitória
-                </span>
-              </div>
+              {!videoError && key ? (
+                <video
+                  key={key}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  onError={() => setVideoError(true)}
+                  className="w-full h-full object-contain filter drop-shadow-[0_10px_18px_rgba(0,0,0,0.22)] animate-hero-float"
+                >
+                  <source src={`https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/${key}.webm`} type="video/webm" />
+                </video>
+              ) : (
+                <img
+                  src={selectedHero.img}
+                  alt={selectedHero.name}
+                  className="w-full h-full object-contain filter drop-shadow-[0_10px_18px_rgba(0,0,0,0.22)] animate-hero-float"
+                />
+              )}
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-              {selectedHero.description}
-            </p>
+            {/* INFORMAÇÕES DAS PARTIDAS PROFISSIONAIS */}
+            <div className="sm:col-span-8 space-y-2.5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="inline-flex items-center gap-1 mb-1 text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    <Flame className="w-3 h-3" /> Mais disputado no profissional
+                  </div>
+                  <h4 className="text-xl font-black tracking-tight text-white truncate">{selectedHero.name}</h4>
+                  <span className="text-[11px] font-semibold text-gray-400">
+                    {[selectedHero.roles?.[0], selectedHero.primaryAttr].filter(Boolean).join(' • ')}
+                  </span>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-lg font-black text-emerald-500 font-mono block">{selectedHero.proWinRate}%</span>
+                  <span className="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Vitórias (pro)</span>
+                </div>
+              </div>
 
-            <div className="p-3 rounded-2xl bg-surface-2 border border-line flex items-center justify-between text-xs shadow-sm">
-              <span className="text-gray-400 font-medium">Jogador Especialista:</span>
-              <span className="font-bold text-blue-600 dark:text-amber-500">
-                {selectedHero.specialist}
-              </span>
-            </div>
+              <p className="text-xs text-gray-300">
+                Escolhido <strong className="text-white">{selectedHero.proPick}</strong> vezes e banido{' '}
+                <strong className="text-white">{selectedHero.proBan}</strong> vezes nas partidas profissionais recentes.
+              </p>
 
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <Link
-                to={`/herois/${selectedHero.id}`}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all text-on-accent bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:scale-[1.02]"
-              >
-                <span>Ver Página de {selectedHero.name}</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/herois"
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-surface-2 border border-line transition-all"
-              >
-                <span>Todos os Heróis</span>
-              </Link>
+              <div className="px-3 py-2 rounded-xl bg-surface-2 border border-line flex items-center justify-between gap-2 text-[11px]">
+                <span className="text-gray-400 font-medium shrink-0">Quem mais jogou (12 meses):</span>
+                {specialist === undefined ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
+                ) : specialist ? (
+                  <Link to={`/jogadores/${specialist.account_id}`} className="font-bold text-blue-600 dark:text-amber-500 truncate hover:underline">
+                    {specialist.name || `Jogador ${specialist.account_id}`} ({specialist.games} {specialist.games === 1 ? 'partida' : 'partidas'})
+                  </Link>
+                ) : (
+                  <span className="text-gray-500">—</span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  to={`/herois/${selectedHero.id}`}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all text-on-accent bg-blue-600 hover:bg-blue-700 shadow-md"
+                >
+                  <span>Ver {selectedHero.name}</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  to="/herois"
+                  className="inline-flex items-center justify-center px-3 py-2 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:bg-surface-2 border border-line transition-all"
+                >
+                  Todos os Heróis
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

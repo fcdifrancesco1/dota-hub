@@ -235,3 +235,15 @@ textarea:focus-visible {
     transform: none;
   }
 }
+
+/* Barra que mostra o tempo até a próxima troca do card de rankings */
+@keyframes rankingsProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+.rankings-progress {
+  width: 0%;
+  animation-name: rankingsProgress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}

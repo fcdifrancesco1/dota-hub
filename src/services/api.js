@@ -1203,7 +1203,8 @@ export async function fetchOfficialLeaderboard(division = "europe") {
   try {
     let players = [];
     try {
-      const res = await fetch(`/api/leaderboard?division=${division}`);
+      // Rota direta (a /api/leaderboard é só um atalho na Vercel e não existe no servidor local)
+      const res = await fetch(`/api/valve?type=leaderboard&division=${division}`);
       if (res.ok) {
         const data = await res.json();
         players = data.leaderboard || [];
@@ -1218,7 +1219,8 @@ export async function fetchOfficialLeaderboard(division = "europe") {
       }
     }
 
-    setCache(`leaderboard_${division}`, players);
+    // Lista vazia (falha na Valve) não vai para o cache, para tentar de novo na próxima vez
+    if (players.length) setCache(`leaderboard_${division}`, players);
     return players;
   } catch {
     return [];
