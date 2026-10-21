@@ -33,7 +33,7 @@ export async function getProPlayerInfo(accountId) {
 // teamName: o elenco do time na Liquipedia mostra qual é a página do jogador lá
 export async function fetchPlayerAchievements(playerName, accountId, teamName) {
   if (!playerName) return { titles: [], allAchievements: [], summary: {} };
-  const key = `player_achievements_v5_${accountId || playerName}`;
+  const key = `player_achievements_v6_${accountId || playerName}`;
   const cached = getCached(key, 60 * 60 * 1000);
   if (cached) return cached;
 
@@ -55,7 +55,7 @@ export async function fetchPlayerAchievements(playerName, accountId, teamName) {
 
 export async function fetchPlayerComprehensiveData(accountId) {
   if (!accountId) return null;
-  const key = `player_full_profile_v5_${accountId}`;
+  const key = `player_full_profile_v6_${accountId}`;
   const cached = getCached(key, PLAYER_TTL);
   if (cached) return cached;
 
@@ -152,6 +152,9 @@ export async function fetchPlayerComprehensiveData(accountId) {
       name: proInfo.team_name,
       tag: proInfo.team_tag
     } : null,
+    // Posição pela ficha da Liquipedia; o fantasy_role da OpenDota só diz núcleo (1) ou suporte (2)
+    position: achievementsData.position || null,
+    role: achievementsData.role || null,
     fantasyRole: proInfo?.fantasy_role || null,
     stats: {
       wins,

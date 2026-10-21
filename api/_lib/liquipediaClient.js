@@ -54,7 +54,7 @@ export async function fetchLiquipediaApi(page, { ttlMs = 10 * 60 * 1000 } = {}) 
     }
 
     try {
-      const targetUrl = `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(page)}&format=json`;
+      const targetUrl = `https://liquipedia.net/dota2/api.php?action=parse&page=${encodeURIComponent(page)}&redirects=1&format=json`;
       const response = await fetch(targetUrl, {
         headers: {
           'User-Agent': USER_AGENT,

@@ -135,6 +135,30 @@ export function parsePlayerAchievements(html) {
   return achievements;
 }
 
+/**
+ * Função principal do jogador na ficha da Liquipedia ("Roles: Offlaner, Carry"):
+ * a primeira da lista, com a posição correspondente (Carry 1, Mid 2, Offlaner 3,
+ * Soft Support 4, Hard Support 5; "Support" sem detalhe fica sem número).
+ */
+export function parsePlayerRole(html) {
+  const cell = String(html || '').match(/infobox-description">Roles?:<\/div>\s*<div[^>]*>([\s\S]*?)<\/div>/i);
+  if (!cell) return { role: null, position: null };
+  const roles = cell[1].split(/<br\s*\/?>/i).map((r) => cleanText(r)).filter(Boolean);
+  const POSITIONS = [
+    [/hard\s*support|position\s*5|pos\s*5/i, 5],
+    [/soft\s*support|position\s*4|pos\s*4/i, 4],
+    [/^carry/i, 1],
+    [/^mid/i, 2],
+    [/^off\s*lane/i, 3],
+    [/support/i, null]
+  ];
+  for (const role of roles) {
+    const found = POSITIONS.find(([re]) => re.test(role));
+    if (found) return { role, position: found[1] };
+  }
+  return { role: null, position: null };
+}
+
 // Apelidos e mapeamento para páginas corretas na Liquipedia
 const PLAYER_WIKI_MAP = {
   'raddan': 'Yatoro',
@@ -199,16 +223,18 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Parâmetro "player" é obrigatório' });
   }
 
-  const wikiTitle = await resolveWikiTitle(rawPlayer, teamName);
+  let wikiTitle = await resolveWikiTitle(rawPlayer, teamName);
 
   try {
-    // 1. Tentar buscar em Player/Results
+    // 1. Página principal: segue redirecionamentos de IDs alternativos ("AMMAR THE F" → "ATF")
+    //    e traz a ficha com as funções do jogador
+    const mainRes = await fetchLiquipediaApi(wikiTitle, { ttlMs: 2 * 60 * 60 * 1000 });
+    wikiTitle = mainRes?.raw?.parse?.title || wikiTitle;
+    const { role, position } = parsePlayerRole(mainRes?.html);
+
+    // 2. Resultados completos ficam em <Jogador>/Results; sem essa subpágina, usa a principal
     let liquiRes = await fetchLiquipediaApi(`${wikiTitle}/Results`, { ttlMs: 2 * 60 * 60 * 1000 });
-    
-    // 2. Fallback para a página principal do jogador se a /Results não existir
-    if (!liquiRes?.html || liquiRes.html.length < 500) {
-      liquiRes = await fetchLiquipediaApi(wikiTitle, { ttlMs: 2 * 60 * 60 * 1000 });
-    }
+    if (!liquiRes?.html || liquiRes.html.length < 500) liquiRes = mainRes;
 
     let achievements = [];
     if (liquiRes?.html) {
@@ -236,6 +262,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       player: wikiTitle,
       accountId,
+      role,
+      position,
       summary: {
         totalChampionships: championships.length,
         totalPodiums: podiums.length,

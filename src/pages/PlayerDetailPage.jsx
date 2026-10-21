@@ -66,13 +66,21 @@ function formatTournamentDate(val) {
 
 const fmtDuration = (secs) => `${Math.floor((secs || 0) / 60)}:${String((secs || 0) % 60).padStart(2, '0')}`;
 
-const ROLE_LABELS = {
+const POSITION_LABELS = {
   1: 'Carry (Pos 1)',
   2: 'Midlane (Pos 2)',
-  3: 'Offlane (Pos 3)',
-  4: 'Suporte 4',
-  5: 'Suporte 5'
+  3: 'Offlaner (Pos 3)',
+  4: 'Suporte (Pos 4)',
+  5: 'Suporte (Pos 5)'
 };
+// Sem posição na Liquipedia: o fantasy_role da OpenDota só separa núcleo de suporte
+const FANTASY_ROLE_LABELS = { 1: 'Núcleo', 2: 'Suporte' };
+
+function roleLabel(player) {
+  if (player.position) return POSITION_LABELS[player.position];
+  if (player.role) return /support/i.test(player.role) ? 'Suporte' : player.role;
+  return FANTASY_ROLE_LABELS[player.fantasyRole] || null;
+}
 
 export default function PlayerDetailPage() {
   const { id } = useParams();
@@ -237,10 +245,10 @@ export default function PlayerDetailPage() {
                   <Medal className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-white">{medal}</span>
                 </span>
-                {player.fantasyRole && (
+                {roleLabel(player) && (
                   <>
                     <span className="text-gray-500">•</span>
-                    <span className="text-amber-400 font-bold">{ROLE_LABELS[player.fantasyRole]}</span>
+                    <span className="text-amber-400 font-bold">{roleLabel(player)}</span>
                   </>
                 )}
                 {player.profileUrl && (
