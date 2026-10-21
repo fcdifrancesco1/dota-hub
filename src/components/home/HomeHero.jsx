@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Radio, ArrowRight, Clock, Flame, Calendar, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
@@ -11,6 +12,7 @@ import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize, tou
 export default function HomeHero() {
   const { upcomingMatches, liveGames } = useApp();
   const openLiveMatch = useOpenLiveMatch();
+  const { theme } = useTheme();
 
   // Campeonatos da Liquipedia (tier, premiação) — cache de 30 min
   const [tournaments, setTournaments] = useState([]);
@@ -29,6 +31,10 @@ export default function HomeHero() {
   const featuredTournament = pickFeaturedTournament(tournaments) || headline?.tournament || null;
   const featuredPrize = featuredTournament ? formatPrize(featuredTournament) : null;
   const featuredTier = featuredTournament ? tierLetter(featuredTournament.tier) : null;
+  // Logo oficial do campeonato (versão do tema atual); se não houver ou não carregar, fica o nome em texto
+  const featuredLogo = featuredTournament?.image?.[theme] || featuredTournament?.icon?.[theme] || null;
+  const [logoFailed, setLogoFailed] = useState(false);
+  useEffect(() => { setLogoFailed(false); }, [featuredLogo]);
   // Campeonato da partida em destaque (ou o torneio em destaque); sem nenhum, a lista de campeonatos
   const linkedTournament = headline?.tournament || featuredTournament;
 
@@ -79,9 +85,22 @@ export default function HomeHero() {
             <span>{featuredTournament ? `Torneio em Destaque${featuredTier ? ` • ${featuredTier}` : ''}` : 'Dota 2 Competitivo'}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white uppercase tracking-tight font-serif leading-tight">
-            {featuredTournament ? featuredTournament.name : 'Cenário profissional de Dota 2'}
-          </h1>
+          {featuredLogo && !logoFailed ? (
+            <h1>
+              <img
+                src={featuredLogo}
+                alt={featuredTournament.name}
+                title={featuredTournament.name}
+                referrerPolicy="no-referrer"
+                className="h-20 sm:h-24 lg:h-28 w-auto max-w-full object-contain object-left drop-shadow-md"
+                onError={() => setLogoFailed(true)}
+              />
+            </h1>
+          ) : (
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white uppercase tracking-tight font-serif leading-tight">
+              {featuredTournament ? featuredTournament.name : 'Cenário profissional de Dota 2'}
+            </h1>
+          )}
 
           <p className="text-gray-300 text-sm sm:text-base max-w-xl leading-relaxed">
             {featuredTournament ? (
