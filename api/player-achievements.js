@@ -249,14 +249,18 @@ export default async function handler(req, res) {
     // Times distintos pelos quais conquistou títulos
     const teamsWithTitles = [...new Set(championships.map(c => c.teamName).filter(Boolean))];
 
-    // Total de premiação acumulada em prêmios
-    let totalPrizeUsd = 0;
-    achievements.forEach(a => {
-      if (a.prize) {
-        const val = Number(a.prize.replace(/[^0-9]/g, ''));
-        if (!isNaN(val)) totalPrizeUsd += val;
-      }
-    });
+    // Premiação do jogador: "Approx. Total Winnings" da ficha (a parte dele). A soma da
+    // tabela de resultados é o prêmio do time inteiro, então só serve se a ficha não tiver o valor
+    const winnings = String(mainRes?.html || '').match(/Approx\. Total Winnings:<\/div>\s*<div[^>]*>\s*\$([\d,]+)/i);
+    let totalPrizeUsd = winnings ? Number(winnings[1].replace(/,/g, '')) : 0;
+    if (!winnings) {
+      achievements.forEach(a => {
+        if (a.prize) {
+          const val = Number(a.prize.replace(/[^0-9]/g, ''));
+          if (!isNaN(val)) totalPrizeUsd += val;
+        }
+      });
+    }
 
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200');
     return res.status(200).json({
