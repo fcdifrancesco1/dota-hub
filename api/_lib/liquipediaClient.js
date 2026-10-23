@@ -5,7 +5,7 @@
 // 3. Cache em memória para evitar chamadas repetidas à mesma página.
 // 4. Tratamento gracioso de erros 429 / 503.
 
-const USER_AGENT = 'DotaHubApp/2.1 (https://github.com/fcdifrancesco1/dota-hub; contact: felipe@dota-hub.local)';
+export const USER_AGENT = 'DotaHubApp/2.1 (https://github.com/fcdifrancesco1/dota-hub; contact: felipe@dota-hub.local)';
 const MIN_REQUEST_INTERVAL_MS = 2050;
 
 // Cache em memória compartilhado durante a execução do processo Node.js

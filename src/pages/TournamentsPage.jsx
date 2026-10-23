@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Calendar, MapPin, DollarSign, Search, ChevronRight, Users, Wifi, Crown } from 'lucide-react';
+import { liquipediaImage } from '../utils/liquipediaImage';
 import { Link, useSearchParams } from 'react-router-dom';
 import { fetchTournaments, fetchTournamentArchive } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
@@ -179,7 +180,7 @@ export default function TournamentsPage() {
                   }`}>
                     {image ? (
                       <img
-                        src={image}
+                        src={liquipediaImage(image)}
                         alt={t.name}
                         referrerPolicy="no-referrer"
                         loading="lazy"

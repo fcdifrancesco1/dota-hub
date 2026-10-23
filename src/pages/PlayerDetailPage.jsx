@@ -33,6 +33,7 @@ function tournamentLinkFromSlug(slug) {
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
+import { liquipediaImage } from '../utils/liquipediaImage';
 
 const MEDALS = ['', 'Arauto', 'Guardião', 'Cruzado', 'Arconte', 'Lenda', 'Ancestral', 'Divino', 'Imortal'];
 
@@ -661,7 +662,7 @@ export default function PlayerDetailPage() {
                           <div className="w-12 h-12 rounded-2xl bg-surface-2 border border-line flex items-center justify-center p-1.5 shadow-sm">
                             {item.tournamentIcon ? (
                               <img
-                                src={item.tournamentIcon[theme] || item.tournamentIcon.dark || item.tournamentIcon.light}
+                                src={liquipediaImage(item.tournamentIcon[theme] || item.tournamentIcon.dark || item.tournamentIcon.light)}
                                 alt={item.tournament}
                                 referrerPolicy="no-referrer"
                                 loading="lazy"
@@ -703,7 +704,7 @@ export default function PlayerDetailPage() {
                             <span className="text-[11px] text-gray-400 font-medium">Equipe:</span>
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-2 border border-line">
                               {item.teamLogo ? (
-                                <img src={item.teamLogo} alt={item.teamName} referrerPolicy="no-referrer" className="w-4 h-4 object-contain" />
+                                <img src={liquipediaImage(item.teamLogo)} alt={item.teamName} referrerPolicy="no-referrer" className="w-4 h-4 object-contain" />
                               ) : (
                                 <TeamLogo teamName={item.teamName} className="w-4 h-4" />
                               )}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Newspaper, ArrowRightLeft, ExternalLink, Loader2 } from 'lucide-react';
 import { fetchNews } from '../../services/api';
 import TeamLogo from '../../utils/teamLogos';
+import { liquipediaImage } from '../../utils/liquipediaImage';
 import { teamPath } from '../../utils/teamRoute';
 
 const NEWS_SHOWN = 8;
@@ -91,7 +92,7 @@ export default function NewsPanel() {
                 >
                   {n.image ? (
                     <img
-                      src={n.image}
+                      src={liquipediaImage(n.image)}
                       alt=""
                       loading="lazy"
                       referrerPolicy="no-referrer"

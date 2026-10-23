@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Shield } from 'lucide-react';
+import { liquipediaImage } from './liquipediaImage';
 
 // Mapeamento de logos locais de alta resolução e Steam CDN oficiais verificados
 const LOCAL_TEAM_LOGOS = {
@@ -504,9 +505,10 @@ export default function TeamLogo({
 
   // Logo que voltou como o aviso de "hotlink" da Liquipedia guardado no cache do
   // navegador: pede de novo com um parâmetro, o que ignora a cópia guardada
+  const proxiedUrl = liquipediaImage(resolvedUrl);
   const src = BYPASS_CACHE_URLS.has(resolvedUrl)
-    ? `${resolvedUrl}${resolvedUrl.includes('?') ? '&' : '?'}nr=1`
-    : resolvedUrl;
+    ? `${proxiedUrl}${proxiedUrl.includes('?') ? '&' : '?'}nr=1`
+    : proxiedUrl;
 
   return (
     <div className={`${className} flex items-center justify-center shrink-0 overflow-hidden`}>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Crown, Sparkles, ExternalLink, Shield } from 'lucide-react';
+import { liquipediaImage } from '../utils/liquipediaImage';
 
 export default function CenterChampion({ onOpenTeamProfile }) {
   const champion = {
@@ -52,7 +53,7 @@ export default function CenterChampion({ onOpenTeamProfile }) {
           className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-500/50 px-4 py-2 rounded-xl transition-all group"
         >
           <img
-            src={champion.teamLogo}
+            src={liquipediaImage(champion.teamLogo)}
             alt={champion.teamName}
             className="w-8 h-8 object-contain"
             onError={(e) => {
@@ -79,7 +80,7 @@ export default function CenterChampion({ onOpenTeamProfile }) {
             {/* Foto com Posição Flutuante */}
             <div className="relative w-14 h-14 mb-2.5">
               <img
-                src={player.photo}
+                src={liquipediaImage(player.photo)}
                 alt={player.nick}
                 className="w-full h-full rounded-full object-cover border-2 border-amber-400/80 bg-black/50 shadow-md shadow-amber-500/20 group-hover:border-amber-300 transition-colors"
                 onError={(e) => {

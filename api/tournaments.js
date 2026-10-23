@@ -1,4 +1,4 @@
-import { fetchLiquipediaQuery, fetchLiquipediaApi } from './_lib/liquipediaClient.js';
+import { fetchLiquipediaQuery, fetchLiquipediaApi, USER_AGENT } from './_lib/liquipediaClient.js';
 import { parseTournamentList, parseInfobox, buildTournament, parseTournamentsListing } from './_lib/parseLiquipediaTournaments.js';
 import { parseLiquipediaStandings, parseLiquipediaParticipants, parseLiquipediaParticipantTeams } from './_lib/parseLiquipediaStandings.js';
 import { parseLiquipediaBrackets } from './_lib/parseLiquipediaBrackets.js';
@@ -44,6 +44,39 @@ async function handleStandings(page, res) {
   } catch (error) {
     console.error('[Tournaments API] Erro na classificação:', error.message);
     return res.status(200).json({ page, tables: [], brackets: [], participants: [], teams: [] });
+  }
+}
+
+// Caminho de uma imagem da Liquipedia (ex.: "/commons/images/thumb/d/d9/X.png/640px-X.png");
+// só imagens, para a rota não virar um proxy genérico
+const IMG_RE = /^\/commons\/images\/[\w./%()+,'~-]{1,300}\.(png|jpe?g|gif|svg|webp)$/i;
+
+/**
+ * GET /api/tournaments?img=<caminho>
+ * Imagem da Liquipedia (logos de times e campeonatos) entregue pelo cache da
+ * Vercel: o navegador não acessa a Liquipedia direto, que limita (429) quem
+ * pede muitas imagens e às vezes troca o logo pelo aviso de "hotlink".
+ * Os arquivos da Liquipedia não mudam no mesmo endereço, então o cache é longo.
+ */
+async function handleImage(path, res) {
+  if (!IMG_RE.test(path) || path.includes('..')) return res.status(400).json({ error: 'Imagem inválida' });
+  try {
+    const r = await fetch(`https://liquipedia.net${path}`, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'image/*' },
+      signal: AbortSignal.timeout(8000)
+    });
+    const type = r.headers.get('content-type') || '';
+    if (!r.ok || !type.startsWith('image/')) throw new Error(`HTTP ${r.status}`);
+    const body = Buffer.from(await r.arrayBuffer());
+    res.setHeader('Content-Type', type);
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=2592000');
+    res.statusCode = 200;
+    return res.end(body);
+  } catch (error) {
+    console.warn('[Tournaments API] Imagem indisponível:', path, error.message);
+    // Cache curto do erro, para não repassar à Liquipedia cada pedido enquanto ela limita
+    res.setHeader('Cache-Control', 'public, s-maxage=60');
+    return res.status(502).json({ error: 'Imagem indisponível' });
   }
 }
 
@@ -143,6 +176,7 @@ async function handlePage(page, res) {
 }
 
 export default async function handler(req, res) {
+  if (req.query?.img) return handleImage(String(req.query.img), res);
   if (req.query?.standings) return handleStandings(String(req.query.standings), res);
   if (req.query?.archive) return handleArchive(String(req.query.archive), res);
   if (req.query?.page) return handlePage(String(req.query.page), res);

@@ -32,6 +32,7 @@ import BackButton from '../components/BackButton';
 import { rememberAliases } from '../utils/teamAliases';
 import { useTheme } from '../context/ThemeContext';
 import TeamLogo from '../utils/teamLogos';
+import { liquipediaImage } from '../utils/liquipediaImage';
 import { formatDateRange, formatPrize, tierLabel, statusLabel, leagueFromDatabase } from '../utils/tournamentFormat';
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -399,7 +400,7 @@ export default function TournamentDetailPage() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="w-28 h-20 sm:w-40 sm:h-24 rounded-2xl bg-surface-2 border border-line flex items-center justify-center p-3 shrink-0 shadow-inner">
               {image ? (
-                <img src={image} alt={t.name} referrerPolicy="no-referrer" className="max-w-full max-h-full object-contain drop-shadow" />
+                <img src={liquipediaImage(image)} alt={t.name} referrerPolicy="no-referrer" className="max-w-full max-h-full object-contain drop-shadow" />
               ) : (
                 <Trophy className="w-10 h-10 text-blue-600 dark:text-amber-400" />
               )}

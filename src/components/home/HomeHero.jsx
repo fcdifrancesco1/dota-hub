@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
+import { liquipediaImage } from '../../utils/liquipediaImage';
 import { fetchTournaments } from '../../services/api';
 import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize, tournamentPath } from '../../utils/tournamentFormat';
 
@@ -88,7 +89,7 @@ export default function HomeHero() {
           {featuredLogo && !logoFailed ? (
             <h1>
               <img
-                src={featuredLogo}
+                src={liquipediaImage(featuredLogo)}
                 alt={featuredTournament.name}
                 title={featuredTournament.name}
                 referrerPolicy="no-referrer"

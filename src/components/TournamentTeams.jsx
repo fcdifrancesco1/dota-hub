@@ -1,6 +1,7 @@
 import React from 'react';
 import { Users } from 'lucide-react';
 import TeamLogo from '../utils/teamLogos';
+import { liquipediaImage } from '../utils/liquipediaImage';
 import { useOpenTeam } from '../utils/teamRoute';
 
 // Posições do Dota 2 (número da Liquipedia)
@@ -33,7 +34,7 @@ function MemberRow({ member, isCoach }) {
       </span>
       {member.flag && (
         <img
-          src={member.flag}
+          src={liquipediaImage(member.flag)}
           alt={member.country || ''}
           title={member.country || ''}
           referrerPolicy="no-referrer"
