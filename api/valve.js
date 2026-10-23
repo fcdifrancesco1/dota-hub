@@ -15,7 +15,8 @@ export default async function handler(req, res) {
       });
 
       if (!response.ok) {
-        return res.status(response.status).json({ error: `Valve HTTP ${response.status}` });
+        res.setHeader('Cache-Control', 'no-store');
+        return res.status(502).json({ error: `Valve HTTP ${response.status}` });
       }
 
       const data = await response.json();
@@ -37,6 +38,14 @@ export default async function handler(req, res) {
         'Accept': 'application/json',
       },
     });
+
+    // A Valve responde com uma página HTML (ex.: 403 do firewall) quando bloqueia o pedido
+    const isJson = (response.headers.get('content-type') || '').includes('json');
+    if (!response.ok || !isJson) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(502).json({ error: `Valve HTTP ${response.status}` });
+    }
+
     const data = await response.json();
     res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=3600');
     return res.status(200).json(data);

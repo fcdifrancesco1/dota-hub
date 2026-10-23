@@ -1,4 +1,5 @@
 import { SITE_NAME, SITE_URL, routeMeta } from '../src/utils/routeMeta.js';
+import { saveSnapshot, respondWithSnapshot } from './_lib/snapshot.js';
 
 function normalizeTeamKey(name) {
   if (!name) return "";
@@ -14,7 +15,8 @@ function normalizeTeamKey(name) {
  * Estatísticas de heróis da OpenDota com cache na CDN da Vercel: a resposta vale
  * 30 min e continua sendo servida por até 7 dias enquanto revalida, então a
  * página de heróis segue funcionando quando a OpenDota fica fora do ar.
- * Falhas respondem 503 para não substituir a cópia boa em cache.
+ * Sem cópia na CDN (ex.: logo após um deploy), usa a última resposta salva no
+ * Supabase; sem ela, responde 503 para não substituir a cópia boa em cache.
  */
 async function handleHeroStats(res) {
   try {
@@ -24,12 +26,11 @@ async function handleHeroStats(res) {
     });
     const list = r.ok ? await r.json() : null;
     if (!Array.isArray(list) || list.length === 0) throw new Error(`HTTP ${r.status}`);
+    await saveSnapshot('heroStats', list);
     res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=604800');
     return res.status(200).json(list);
   } catch (err) {
-    console.error('[Results API] heroStats indisponível:', err.message);
-    res.setHeader('Cache-Control', 'no-store');
-    return res.status(503).json({ error: 'OpenDota indisponível' });
+    return respondWithSnapshot(res, 'heroStats', 'heroStats', err);
   }
 }
 
@@ -77,12 +78,12 @@ async function handleHeroPositions(res) {
     const data = r.ok ? await r.json() : null;
     const rows = Array.isArray(data?.rows) ? data.rows : [];
     if (!rows.length) throw new Error(data?.err || `HTTP ${r.status}`);
+    const positions = rows.map((x) => ({ hero_id: Number(x.hero_id), position: Number(x.position), games: Number(x.games) }));
+    await saveSnapshot('heroPositions', positions);
     res.setHeader('Cache-Control', 's-maxage=43200, stale-while-revalidate=604800');
-    return res.status(200).json(rows.map((x) => ({ hero_id: Number(x.hero_id), position: Number(x.position), games: Number(x.games) })));
+    return res.status(200).json(positions);
   } catch (err) {
-    console.error('[Results API] heroPositions indisponível:', err.message);
-    res.setHeader('Cache-Control', 'no-store');
-    return res.status(503).json({ error: 'OpenDota indisponível' });
+    return respondWithSnapshot(res, 'heroPositions', 'heroPositions', err);
   }
 }
 
@@ -162,12 +163,12 @@ GROUP BY 1, 2, 3 ORDER BY games DESC, wins DESC LIMIT 5`),
       wins: Number(x.wins)
     }));
 
+    const detail = { totalGames, items, players };
+    await saveSnapshot(`heroDetail:${heroId}`, detail);
     res.setHeader('Cache-Control', 's-maxage=21600, stale-while-revalidate=604800');
-    return res.status(200).json({ totalGames, items, players });
+    return res.status(200).json(detail);
   } catch (err) {
-    console.error('[Results API] heroDetail indisponível:', err.message);
-    res.setHeader('Cache-Control', 'no-store');
-    return res.status(503).json({ error: 'OpenDota indisponível' });
+    return respondWithSnapshot(res, `heroDetail:${heroId}`, 'heroDetail', err);
   }
 }
 
