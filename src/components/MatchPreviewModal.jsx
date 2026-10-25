@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { X, Loader2, Trophy, ChevronRight } from 'lucide-react';
 import TeamLogo from '../utils/teamLogos';
@@ -81,7 +82,9 @@ export default function MatchPreviewModal({ match, onClose }) {
     { name: match.timeB, logo: match.logoB, ...data.b }
   ] : [];
 
-  return (
+  // Desenhada direto no <body>: dentro de um card com efeito de vidro (backdrop-filter)
+  // ou transform, o position: fixed passa a valer só para o card e a janela fica cortada
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
       onClick={onClose}
@@ -90,7 +93,7 @@ export default function MatchPreviewModal({ match, onClose }) {
       aria-label={`${match.timeA} vs ${match.timeB}`}
     >
       <div
-        className="bg-surface border border-line rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+        className="bg-surface border border-line rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* CABEÇALHO */}
@@ -221,6 +224,7 @@ export default function MatchPreviewModal({ match, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
