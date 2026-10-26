@@ -495,16 +495,32 @@ export function saveFinishedTournament(tournament) {
   return [];
 }
 
+// v9: a partir desta versão, só partidas de campeonatos da Liquipedia (ver isTournamentMatch)
+export const PRO_MATCHES_CACHE_KEY = "pro_matches_v9";
+
+// Partida de torneio profissional: liga de um campeonato acompanhado pela
+// Liquipedia (Tier 1 a 3). A OpenDota marca como "professional" também ligas
+// amadoras (ex.: 护鼠宝, com "Radiant" vs "Dire" sem times). Sem a lista de
+// campeonatos, exige ao menos os dois times cadastrados.
+function isTournamentMatch(m, tournamentLeagueIds) {
+  if (tournamentLeagueIds.size > 0) return tournamentLeagueIds.has(Number(m.leagueid));
+  return Boolean(m.leagueid && m.radiant_name && m.dire_name);
+}
+
 // 3. Buscar Partidas Profissionais Recentes (com timeout e cache de 3 min)
 export async function fetchProMatches() {
-  const cached = getCached("pro_matches_v8", 3 * 60 * 1000);
+  const cached = getCached(PRO_MATCHES_CACHE_KEY, 3 * 60 * 1000);
   if (cached) return cached;
 
   try {
-    const res = await fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 5000);
+    const [res, tournaments] = await Promise.all([
+      fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 5000),
+      fetchTournaments()
+    ]);
     if (res.ok) {
       const list = await res.json();
-      const rawList = Array.isArray(list) ? list : [];
+      const tournamentLeagueIds = new Set((tournaments || []).map((t) => Number(t.leagueId)).filter(Boolean));
+      const rawList = (Array.isArray(list) ? list : []).filter((m) => isTournamentMatch(m, tournamentLeagueIds));
       const clustered = clusterMatchesIntoSeries(rawList);
       const valid = clustered
         .filter(s => s.games.length >= 2 || (s.scoreA + s.scoreB === 1))
@@ -555,13 +571,13 @@ export async function fetchProMatches() {
         tournaments: allTournaments
       };
 
-      setCache("pro_matches_v8", result);
+      setCache(PRO_MATCHES_CACHE_KEY, result);
       return result;
     }
   } catch (err) {
     console.warn("Aviso ao buscar proMatches (usando cache anterior):", err);
   }
-  const cachedFallback = getCachedFast("pro_matches_v8") || { rawMatches: [], finishedSeries: [], tournaments: [] };
+  const cachedFallback = getCachedFast(PRO_MATCHES_CACHE_KEY) || { rawMatches: [], finishedSeries: [], tournaments: [] };
   if (!cachedFallback.tournaments || cachedFallback.tournaments.length === 0) {
     cachedFallback.tournaments = getArchivedTournaments();
   }
@@ -962,7 +978,7 @@ export async function findLiveMatchDetails(game) {
 
     // 1. Mapas finalizados recentes (últimas 36h) no proMatches
     try {
-      const cachedPro = getCached("pro_matches_v8", 5 * 60 * 1000);
+      const cachedPro = getCached(PRO_MATCHES_CACHE_KEY, 5 * 60 * 1000);
       let proList = cachedPro?.rawMatches;
       if (!proList || !proList.length) {
         const proRes = await fetchWithTimeout(`${OPENDOTA_BASE}/proMatches`, {}, 3500);

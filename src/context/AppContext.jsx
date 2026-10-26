@@ -9,7 +9,8 @@ import {
   getCachedTournaments,
   fetchTournaments,
   normalizeUpcomingList,
-  UPCOMING_CACHE_KEY
+  UPCOMING_CACHE_KEY,
+  PRO_MATCHES_CACHE_KEY
 } from '../services/api';
 import { SITE_CONFIG } from '../config/siteConfig';
 import { loadTeamLogoRegistry } from '../utils/teamLogos';
@@ -119,7 +120,7 @@ function splitWikiMatches(list, finishedSeries, liveGames, now = Date.now()) {
 
 export function AppProvider({ children }) {
   // Stale-While-Revalidate initial state
-  const cachedPro = getCachedFast('pro_matches_v8');
+  const cachedPro = getCachedFast(PRO_MATCHES_CACHE_KEY);
   const cachedUpcoming = normalizeUpcomingList(getCachedFast(UPCOMING_CACHE_KEY));
   const cachedConstants = getCachedFast('constants_v6');
 

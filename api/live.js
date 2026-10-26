@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getTournamentLeagueIds } from './_lib/tournamentLeagues.js';
 
 // Dicionário de Ligas Conhecidas (para exibir o nome real do torneio pelo league_id)
 const KNOWN_LEAGUES = {
@@ -158,13 +159,16 @@ async function getProLeagueIds() {
   return proLeagueCache.ids; // pode ser a lista anterior (expirada) ou null
 }
 
-// Partida profissional: liga premium/professional. Se a lista de ligas estiver
-// indisponível, exige ao menos liga e os dois times cadastrados.
-function isProGame(leagueId, radiantName, direName, proLeagueIds) {
+// Partida profissional: liga de um campeonato acompanhado pela Liquipedia (ver
+// _lib/tournamentLeagues.js). Sem essa lista, liga premium/professional da
+// OpenDota com os dois times cadastrados; sem nenhuma lista, só os dois times.
+function isProGame(leagueId, radiantName, direName, { tournamentIds, proLeagueIds }) {
   const id = Number(leagueId);
   if (!id) return false;
-  if (proLeagueIds) return proLeagueIds.has(id);
-  return Boolean(radiantName && direName);
+  if (tournamentIds) return tournamentIds.has(id);
+  const hasTeams = Boolean(radiantName && direName);
+  if (proLeagueIds) return proLeagueIds.has(id) && hasTeams;
+  return hasTeams;
 }
 
 // Lê chave de ambiente ou arquivo local (.env.local / .env)
@@ -817,7 +821,8 @@ export default async function handler(req, res) {
 
     let games = [];
     let source = "none";
-    const proLeagueIds = await getProLeagueIds();
+    const [tournamentIds, proLeagueIds] = await Promise.all([getTournamentLeagueIds(req), getProLeagueIds()]);
+    const leagues = { tournamentIds, proLeagueIds };
 
     // 1. Consulta prioritária: Valve Steam Web API Oficial (GetLiveLeagueGames) se houver chave
     if (key) {
@@ -836,7 +841,7 @@ export default async function handler(req, res) {
           const rawGames = steamData?.result?.games || [];
           if (rawGames.length > 0) {
             // Só ligas profissionais (a Steam também lista ligas amadoras)
-            const proGames = rawGames.filter(g => isProGame(g.league_id, g.radiant_team?.team_name, g.dire_team?.team_name, proLeagueIds));
+            const proGames = rawGames.filter(g => isProGame(g.league_id, g.radiant_team?.team_name, g.dire_team?.team_name, leagues));
             const normalized = proGames.map(normalizeValveLiveGame).filter(Boolean);
             games = filterAndDeduplicateLiveGames(normalized);
             source = "steam_valve_official";
@@ -863,7 +868,7 @@ export default async function handler(req, res) {
           if (matchId) {
             const specific = rawList.find(g =>
               String(g.match_id) === String(matchId) &&
-              isProGame(g.league_id, g.team_name_radiant, g.team_name_dire, proLeagueIds)
+              isProGame(g.league_id, g.team_name_radiant, g.team_name_dire, leagues)
             );
             if (specific) {
               const liveGame = normalizeOpenDotaLive(specific);
@@ -910,7 +915,7 @@ export default async function handler(req, res) {
           } else {
             // Somente partidas de ligas profissionais (nunca partidas públicas ou amadoras)
             const tournamentMatches = rawList.filter(g =>
-              isProGame(g.league_id, g.team_name_radiant, g.team_name_dire, proLeagueIds)
+              isProGame(g.league_id, g.team_name_radiant, g.team_name_dire, leagues)
             );
 
             if (tournamentMatches.length > 0) {
