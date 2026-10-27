@@ -1,18 +1,57 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Flame, ChevronRight, Loader2 } from 'lucide-react';
-import { fetchHeroStats } from '../../services/api';
+import { fetchHeroStats, fetchHeroPositions } from '../../services/api';
 
 // Cores da aura atrás do herói, pelo atributo principal
 const ATTR_COLORS = { str: '#DC2626', agi: '#059669', int: '#2563EB', all: '#9333EA' };
 const HOW_MANY = 4;
+const POSITIONS = [
+  { n: 1, label: 'Carry' },
+  { n: 2, label: 'Midlane' },
+  { n: 3, label: 'Offlane' },
+  { n: 4, label: 'Suporte 4' },
+  { n: 5, label: 'Suporte 5' }
+];
+// Herói conta numa posição quando foi jogado nela em pelo menos 15% dos seus
+// jogos profissionais recentes (e no mínimo 3 vezes), como na página de heróis
+const MIN_SHARE = 0.15;
+const MIN_GAMES = 3;
+
+const contest = (h) => h.proPick + h.proBan;
+
+/**
+ * Um destaque por posição: o herói mais disputado (escolhas + banimentos) entre
+ * os que jogam principalmente naquela posição; se nenhum, entre os que jogam nela
+ * com frequência. Sem os dados de posição, os mais disputados no geral.
+ */
+function pickHighlights(list, positions) {
+  const ranked = [...(list || [])].filter((h) => contest(h) > 0).sort((a, b) => contest(b) - contest(a));
+  if (!positions) return ranked.slice(0, HOW_MANY).map((h) => ({ hero: h, position: null }));
+
+  const share = (h, n) => {
+    const p = positions[h.id];
+    return p?.total && p[n] >= MIN_GAMES ? p[n] / p.total : 0;
+  };
+  const mainPosition = (h) => [1, 2, 3, 4, 5].reduce((best, n) => (share(h, n) > share(h, best) ? n : best), 1);
+
+  const used = new Set();
+  return POSITIONS.map((pos) => {
+    const hero =
+      ranked.find((h) => !used.has(h.id) && share(h, pos.n) > 0 && mainPosition(h) === pos.n) ||
+      ranked.find((h) => !used.has(h.id) && share(h, pos.n) >= MIN_SHARE);
+    if (!hero) return null;
+    used.add(hero.id);
+    return { hero, position: pos };
+  }).filter(Boolean);
+}
 
 // "…/heroes/juggernaut.png?" → "juggernaut" (nome do vídeo animado da Valve)
 const heroKey = (hero) => (hero?.img || '').split('/').pop().split('.')[0];
 
 export default function AnimatedHeroCard() {
-  // Os heróis mais disputados (escolhas + banimentos) nas partidas profissionais recentes da OpenDota
-  const [heroes, setHeroes] = useState(null);
+  // O herói mais disputado (escolhas + banimentos) de cada posição nas partidas profissionais recentes da OpenDota
+  const [highlights, setHighlights] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [videoError, setVideoError] = useState(false);
   const [specialists, setSpecialists] = useState({});
@@ -21,19 +60,17 @@ export default function AnimatedHeroCard() {
 
   useEffect(() => {
     let active = true;
-    fetchHeroStats().then((list) => {
+    Promise.all([fetchHeroStats(), fetchHeroPositions()]).then(([list, positions]) => {
       if (!active) return;
-      const top = [...(list || [])]
-        .filter((h) => h.proPick + h.proBan > 0)
-        .sort((a, b) => (b.proPick + b.proBan) - (a.proPick + a.proBan))
-        .slice(0, HOW_MANY);
-      setHeroes(top);
-      setSelectedId((id) => id ?? top[0]?.id ?? null);
+      const top = pickHighlights(list, positions);
+      setHighlights(top);
+      setSelectedId((id) => id ?? top[0]?.hero.id ?? null);
     });
     return () => { active = false; };
   }, []);
 
-  const selectedHero = heroes?.find((h) => h.id === selectedId) || null;
+  const selected = highlights?.find((x) => x.hero.id === selectedId) || null;
+  const selectedHero = selected?.hero || null;
 
   // Jogador que mais usou o herói nas ligas profissionais (mesma fonte da página do herói)
   useEffect(() => {
@@ -74,7 +111,7 @@ export default function AnimatedHeroCard() {
     setVideoError(false);
   };
 
-  if (heroes && !heroes.length) return null;
+  if (highlights && !highlights.length) return null;
 
   const key = heroKey(selectedHero);
   const specialist = selectedHero ? specialists[selectedHero.id] : undefined;
@@ -88,17 +125,19 @@ export default function AnimatedHeroCard() {
           <span className="text-xs font-black uppercase tracking-wider text-white">Destaque do Meta</span>
         </div>
 
-        {heroes && (
-          <div className="flex items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2 border border-line">
-            {heroes.map((h) => (
+        {highlights && (
+          <div className="flex flex-wrap items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2 border border-line">
+            {highlights.map(({ hero: h, position }) => (
               <button
                 key={h.id}
                 type="button"
                 onClick={() => handleSelectHero(h)}
+                title={position ? `Pos ${position.n} · ${position.label}` : undefined}
                 className={`px-2.5 py-1 rounded-lg transition-all ${
                   selectedId === h.id ? 'bg-blue-600 text-on-accent shadow-sm font-black' : 'text-gray-400 hover:text-white hover:bg-surface-3'
                 }`}
               >
+                {position && <span className="opacity-70 mr-1">{position.n}</span>}
                 {h.name}
               </button>
             ))}
@@ -154,7 +193,10 @@ export default function AnimatedHeroCard() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="inline-flex items-center gap-1 mb-1 text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                    <Flame className="w-3 h-3" /> Mais disputado no profissional
+                    <Flame className="w-3 h-3" />
+                    {selected.position
+                      ? `Mais disputado na Pos ${selected.position.n} · ${selected.position.label}`
+                      : 'Mais disputado no profissional'}
                   </div>
                   <h4 className="text-xl font-black tracking-tight text-white truncate">{selectedHero.name}</h4>
                   <span className="text-[11px] font-semibold text-gray-400">
