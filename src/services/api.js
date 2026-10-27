@@ -2177,6 +2177,19 @@ function resolveTalentPT(valveTalent, valveAbilities, openDotaDname) {
   if (!text.includes('{s:')) return text;
   // Último recurso: o número no começo do nome da OpenDota (ex.: "+15 Damage")
   const odNumber = openDotaDname?.match(/^[+-]?(\d+(?:\.\d+)?)/)?.[1] || null;
+
+  // Sem valor em nenhuma fonte (a Valve não liga o talento a nenhuma habilidade):
+  // texto sem o sinal e a unidade soltos, ex.: "-{s:x}s de canalização para Transporte Keen"
+  // → "Menos tempo de canalização para Transporte Keen"
+  const lead = text.match(/^([+-])\{s:([^}]+)\}(s|%|x)?\s+/);
+  if (lead && !odNumber && talentParamValue(valveTalent, lead[2], valveAbilities) == null) {
+    const more = lead[1] === '+' ? 'Mais' : 'Menos';
+    const rest = text.slice(lead[0].length);
+    return lead[3] === 's'
+      ? `${more} tempo ${rest}`
+      : `${more} ${rest.replace(/^(para (o|a|os|as)|de|do|da) /i, '')}`;
+  }
+
   return text
     .replace(/\{s:([^}]+)\}/g, (_, param) => talentParamValue(valveTalent, param, valveAbilities) ?? odNumber ?? '')
     .replace(/\s+/g, ' ')
