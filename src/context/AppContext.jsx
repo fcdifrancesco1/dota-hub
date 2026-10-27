@@ -96,6 +96,20 @@ function isUpcomingFinished(m, finishedSeries) {
 }
 
 /**
+ * Formato da série pela agenda da Liquipedia: a Valve às vezes marca MD1 como
+ * MD3 (series_type 1), e uma MD1 encerrada ficaria "em andamento" em 1x0.
+ * Usa a partida da Liquipedia com os mesmos times marcada até 3h do 1º mapa.
+ */
+function withWikiFormat(series, wikiMatches) {
+  if (!series?.startTime) return series;
+  const wiki = (wikiMatches || []).find((m) =>
+    m.formato && m.timestamp &&
+    Math.abs(Number(m.timestamp) - series.startTime) < 3 * 3600 &&
+    isSeriesMatch(m.timeA, m.timeB, series.timeA, series.timeB));
+  return wiki && wiki.formato !== series.formato ? { ...series, formato: wiki.formato } : series;
+}
+
+/**
  * Separa a lista da Liquipedia em:
  *  - upcoming: ainda não começou (agenda)
  *  - ongoing: já começou (placar parcial ou mapa ao vivo) ou terminou há pouco e
@@ -125,7 +139,7 @@ export function AppProvider({ children }) {
   const cachedConstants = getCachedFast('constants_v6');
 
   // Nomes da Liquipedia já conhecidos (ex.: "The Bot^$" → Skyreavers) valem desde a primeira exibição
-  const cachedFinished = (cachedPro?.finishedSeries || []).map(applyAliasesToSeries);
+  const cachedFinished = (cachedPro?.finishedSeries || []).map((s) => withWikiFormat(applyAliasesToSeries(s), cachedUpcoming));
   const initialSplit = splitWikiMatches(cachedUpcoming, cachedFinished, []);
 
   const [constants, setConstants] = useState(cachedConstants || { heroes: {}, itemsById: {} });
@@ -187,9 +201,10 @@ export function AppProvider({ children }) {
       if (proData?.finishedSeries?.length) {
         const allSeries = [...proData.finishedSeries, ...(proData.tournaments || []).flatMap((t) => t.seriesList || [])];
         learnAliases(allSeries, allWikiMatches);
-        finished = proData.finishedSeries.map(applyAliasesToSeries);
+        const fixSeries = (s) => withWikiFormat(applyAliasesToSeries(s), allWikiMatches);
+        finished = proData.finishedSeries.map(fixSeries);
         setFinishedSeries(finished);
-        setTournamentsList((proData.tournaments || []).map((t) => (t.seriesList ? { ...t, seriesList: t.seriesList.map(applyAliasesToSeries) } : t)));
+        setTournamentsList((proData.tournaments || []).map((t) => (t.seriesList ? { ...t, seriesList: t.seriesList.map(fixSeries) } : t)));
       }
 
       // Detecta jogos em andamento
