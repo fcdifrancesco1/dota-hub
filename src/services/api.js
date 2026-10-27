@@ -2146,20 +2146,46 @@ function cleanValveAbilityText(text, specialValues = []) {
     .trim();
 }
 
-function resolveTalentPT(valveNameLoc, openDotaDname) {
-  if (!valveNameLoc) return openDotaDname || 'Talento';
-  if (!valveNameLoc.includes('{s:')) return valveNameLoc;
-  const match = openDotaDname ? openDotaDname.match(/^[+-]?\d+(?:\.\d+)?%?/) : null;
-  if (match) {
-    const rawVal = match[0].replace(/^[+-]/, '').replace('%', '');
-    return valveNameLoc.replace(/\{s:[^}]+\}/, rawVal);
+const formatTalentValue = (v) => (Array.isArray(v) ? v.join(' / ') : String(v));
+
+/**
+ * Valor de um {s:param} do texto do talento. Talentos genéricos trazem o valor
+ * no próprio talento ("{s:value}"); os exclusivos do herói trazem vazio, e o
+ * valor fica na habilidade que ele melhora, como bônus do talento:
+ * "{s:bonus_damage}" → habilidade com o valor "damage" e bônus deste talento.
+ */
+function talentParamValue(talent, param, valveAbilities) {
+  const own = (talent.special_values || []).find((sv) => sv.name === param);
+  if (own?.values_float?.length) return formatTalentValue(own.values_float);
+
+  const target = param.replace(/^bonus_/, '');
+  let fallback = null;
+  for (const ab of valveAbilities) {
+    for (const sv of ab.special_values || []) {
+      const bonus = (sv.bonuses || []).find((b) => b.name === talent.name);
+      if (!bonus) continue;
+      if (sv.name === target || sv.name === param) return formatTalentValue(bonus.value);
+      fallback ??= bonus.value;
+    }
   }
-  return valveNameLoc.replace(/\{s:[^}]+\}/, '').trim();
+  return fallback != null ? formatTalentValue(fallback) : null;
+}
+
+function resolveTalentPT(valveTalent, valveAbilities, openDotaDname) {
+  const text = valveTalent?.name_loc;
+  if (!text) return openDotaDname || 'Talento';
+  if (!text.includes('{s:')) return text;
+  // Último recurso: o número no começo do nome da OpenDota (ex.: "+15 Damage")
+  const odNumber = openDotaDname?.match(/^[+-]?(\d+(?:\.\d+)?)/)?.[1] || null;
+  return text
+    .replace(/\{s:([^}]+)\}/g, (_, param) => talentParamValue(valveTalent, param, valveAbilities) ?? odNumber ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
   if (!heroId) return null;
-  const cacheKey = `hero_full_details_ptbr_v2_${heroId}`;
+  const cacheKey = `hero_full_details_ptbr_v3_${heroId}`;
   const cached = getCached(cacheKey, 60 * 60 * 1000);
   if (cached) return cached;
 
@@ -2313,8 +2339,8 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
 
       return {
         level: lvl === 1 ? 10 : lvl === 2 ? 15 : lvl === 3 ? 20 : 25,
-        left: resolveTalentPT(leftValve?.name_loc, leftOdDname),
-        right: resolveTalentPT(rightValve?.name_loc, rightOdDname)
+        left: resolveTalentPT(leftValve, valveAbilities, leftOdDname),
+        right: resolveTalentPT(rightValve, valveAbilities, rightOdDname)
       };
     });
 
