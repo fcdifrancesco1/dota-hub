@@ -153,7 +153,7 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
             return (
               <g key={idx}>
                 <line x1={x} y1={paddingY} x2={x} y2={height - paddingY} stroke={`rgba(${C.ink}, 0.06)`} strokeWidth="1" />
-                <text x={x} y={height - 6} fill={`rgba(${C.ink}, 0.5)`} fontSize="9" textAnchor="middle" fontFamily="monospace">
+                <text x={x} y={height - 6} fill={`rgba(${C.ink}, 0.5)`} fontSize="9" textAnchor="middle" fontFamily="inherit" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {minIndex}m
                 </text>
               </g>

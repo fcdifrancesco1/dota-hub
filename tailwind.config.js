@@ -115,6 +115,11 @@ function buildVars(mode) {
 }
 
 /** @type {import('tailwindcss').Config} */
+const SITE_FONT = [
+  '"Segoe UI Variable Text"', '"Segoe UI Variable"', '"Segoe UI"',
+  '-apple-system', 'BlinkMacSystemFont', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'
+];
+
 export default {
   // Variante dark: para os raros casos que precisam de valores diferentes por tema
   // (ex.: cores de marca como Discord/WhatsApp, que não passam pelos tokens)
@@ -122,7 +127,15 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      colors: buildColors()
+      colors: buildColors(),
+      // Segoe UI Variable em todo o site (Windows 11); nos outros sistemas, a fonte do sistema.
+      // font-mono também usa a Segoe, com algarismos de largura fixa (index.css), e
+      // font-serif (títulos grandes) usa o corte Display da mesma família
+      fontFamily: {
+        sans: SITE_FONT,
+        mono: SITE_FONT,
+        serif: ['"Segoe UI Variable Display"', ...SITE_FONT]
+      }
     },
   },
   plugins: [
