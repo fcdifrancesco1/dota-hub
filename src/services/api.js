@@ -395,6 +395,14 @@ export function clusterMatchesIntoSeries(rawMatches) {
     }
   });
 
+  // Um time não joga duas séries ao mesmo tempo: se um dos times já começou outra
+  // série depois do último mapa desta, esta acabou (mesmo com mapas faltando na OpenDota)
+  const sharesTeam = (s, o) => [s.teamAKey, s.teamBKey].some((k) => k && (k === o.teamAKey || k === o.teamBKey));
+  const isClosedByLater = (s) => {
+    const last = s.games[s.games.length - 1]?.start_time || 0;
+    return seriesList.some((o) => o !== s && sharesTeam(s, o) && (o.games[0]?.start_time || 0) > last);
+  };
+
   return seriesList.map((s) => {
     const firstGameTime = s.games[0]?.start_time;
     const lastGameTime = s.games[s.games.length - 1]?.start_time || firstGameTime;
@@ -428,6 +436,7 @@ export function clusterMatchesIntoSeries(rawMatches) {
       dateStr,
       startTime: firstGameTime,
       lastMatchTime: lastGameTime,
+      closedByLaterSeries: isClosedByLater(s),
       games: s.games.map((g, idx) => ({
         mapNumber: idx + 1,
         match_id: String(g.match_id),

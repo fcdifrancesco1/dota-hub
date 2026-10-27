@@ -1,11 +1,14 @@
 /**
  * A série terminou? Pelo formato (MD1/MD3/MD5) quando conhecido. Uma série
  * incompleta só é considerada em andamento se o último mapa foi há menos de
- * 6h (séries antigas com dados incompletos continuam como finalizadas).
+ * 6h (séries antigas com dados incompletos continuam como finalizadas) e se
+ * nenhum dos times já começou outra série depois dela.
  * Usado com as séries montadas a partir da OpenDota, que lista cada mapa assim
  * que termina — uma MD3 em 1x0 ainda não acabou.
  */
 export function seriesStatus(series) {
+  // Um dos times já começou outra série depois: esta acabou
+  if (series?.closedByLaterSeries) return 'finished';
   const a = series?.scoreA || 0;
   const b = series?.scoreB || 0;
   const fmt = String(series?.formato || '').toUpperCase();
