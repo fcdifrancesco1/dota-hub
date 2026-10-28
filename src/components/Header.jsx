@@ -15,7 +15,6 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { SITE_CONFIG } from '../config/siteConfig';
 
 // Contador de partidas ao vivo: cores fixas (não dependem do tema) para o
 // número ficar sempre legível; só o halo por trás pulsa, o número não.
@@ -68,14 +67,9 @@ export default function Header() {
               height="44"
               className="w-11 h-11 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] group-hover:scale-105 transition-transform"
             />
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black tracking-widest text-blue-600 dark:text-amber-500 uppercase leading-none">
-                Competitive
-              </span>
-              <span className="text-base sm:text-lg font-black tracking-wider text-white uppercase leading-tight font-serif">
-                {SITE_CONFIG.name}
-              </span>
-            </div>
+            <span className="text-base sm:text-lg font-black tracking-wider text-white uppercase leading-tight font-serif">
+              Dota
+            </span>
           </a>
 
           {/* DESKTOP NAVIGATION */}
@@ -148,7 +142,7 @@ export default function Header() {
                     <Flame className="w-4 h-4 text-blue-600 dark:text-amber-400" />
                   </div>
                   <span className="font-serif font-black text-white uppercase tracking-wider text-sm">
-                    {SITE_CONFIG.name}
+                    Dota
                   </span>
                 </div>
                 <button
