@@ -481,7 +481,7 @@ export default function TournamentDetailPage() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap disabled:opacity-40 cursor-pointer ${
                 isActive
                   ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-surface-2'
+                  : 'bg-surface/80 border border-line text-gray-400 hover:text-white hover:bg-surface'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -658,12 +658,23 @@ function HeroCard({ h, constants }) {
   );
 }
 
-/** Todos os heróis escolhidos no torneio, e à parte os que só foram banidos. */
+/** Todos os heróis escolhidos no torneio; à parte os só escolhidos, só banidos e os que ficaram de fora. */
 function TournamentHeroes({ heroStats, constants }) {
   const [sortId, setSortId] = useState('contested');
   const sort = HERO_SORTS.find((s) => s.id === sortId) || HERO_SORTS[0];
   const picked = heroStats.heroes.filter((h) => h.picks > 0).sort(sort.fn);
   const bannedOnly = heroStats.heroes.filter((h) => h.picks === 0 && h.bans > 0).sort((a, b) => b.bans - a.bans);
+  const pickedOnly = picked.filter((h) => h.bans === 0);
+  const seen = new Set(heroStats.heroes.filter((h) => h.picks > 0 || h.bans > 0).map((h) => String(h.hero_id)));
+  const untouched = Object.values(constants?.heroes || {})
+    .filter((h) => h?.id && !seen.has(String(h.id)))
+    .map((h) => ({ hero_id: h.id, picks: 0, bans: 0, winRate: 0 }))
+    .sort((a, b) => getHeroName(constants, a.hero_id).localeCompare(getHeroName(constants, b.hero_id)));
+  const groups = [
+    ['Só escolhidos', pickedOnly],
+    ['Só banidos', bannedOnly],
+    ['Nem escolhidos nem banidos', untouched]
+  ];
 
   return (
     <div className="space-y-8">
@@ -692,16 +703,16 @@ function TournamentHeroes({ heroStats, constants }) {
         {picked.map((h) => <HeroCard key={h.hero_id} h={h} constants={constants} />)}
       </div>
 
-      {bannedOnly.length > 0 && (
-        <section>
+      {groups.filter(([, list]) => list.length > 0).map(([title, list]) => (
+        <section key={title}>
           <h3 className="text-xs font-black uppercase tracking-wider text-white mb-3">
-            Só banidos ({bannedOnly.length})
+            {title} ({list.length})
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {bannedOnly.map((h) => <HeroCard key={h.hero_id} h={h} constants={constants} />)}
+            {list.map((h) => <HeroCard key={h.hero_id} h={h} constants={constants} />)}
           </div>
         </section>
-      )}
+      ))}
     </div>
   );
 }
