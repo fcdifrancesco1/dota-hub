@@ -5,7 +5,7 @@ import { useApp, findLiveGameFor } from '../../context/AppContext';
 import { useOpenSeries } from '../../utils/matchRoute';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import TeamLogo from '../../utils/teamLogos';
-import { isSeriesOngoing } from '../../utils/seriesStatus';
+import { isSeriesOngoing, wikiScore } from '../../utils/seriesStatus';
 import MatchPreviewModal from '../MatchPreviewModal';
 import { useOpenWikiSeries } from '../../utils/wikiSeries';
 
@@ -70,13 +70,15 @@ export default function RecentResultsHome() {
             {recent10.map((series, idx) => {
               const teamAName = series.team1_name || series.timeA || 'Team 1';
               const teamBName = series.team2_name || series.timeB || 'Team 2';
-              const scoreA = series.score_team1 ?? series.scoreA ?? 0;
-              const scoreB = series.score_team2 ?? series.scoreB ?? 0;
+              // Série da Liquipedia vencida por W.O.: "W" e "FF" no lugar de 0 - 0
+              const wiki = series.fromWiki ? wikiScore(series) : null;
+              const scoreA = wiki ? wiki.a : series.score_team1 ?? series.scoreA ?? 0;
+              const scoreB = wiki ? wiki.b : series.score_team2 ?? series.scoreB ?? 0;
               const tourney = series.league_name || series.tourneyName || series.stage || 'Torneio';
               // Série em andamento não tem vencedor ainda
               const decided = isDone(series);
-              const isWinnerA = decided && scoreA > scoreB;
-              const isWinnerB = decided && scoreB > scoreA;
+              const isWinnerA = decided && (wiki ? wiki.winA : scoreA > scoreB);
+              const isWinnerB = decided && (wiki ? wiki.winB : scoreB > scoreA);
 
               // Série da Liquipedia: abre a partida ao vivo (se houver) ou as estatísticas dos jogadores
               const liveGame = series.fromWiki ? findLiveGameFor(series, liveGames) : null;

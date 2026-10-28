@@ -23,3 +23,17 @@ export function seriesStatus(series) {
 }
 
 export const isSeriesOngoing = (series) => seriesStatus(series) === 'ongoing';
+
+/**
+ * Placar de uma série da Liquipedia para exibir. Encerrada com vencedor e sem
+ * mapas (vitória por W.O.): a Liquipedia mostra "W" e "FF" no lugar dos números.
+ */
+export function wikiScore(m) {
+  const scoreA = m?.scoreA || 0;
+  const scoreB = m?.scoreB || 0;
+  if (m?.winner && scoreA + scoreB === 0) {
+    const winA = m.winner === m.timeA;
+    return { a: winA ? 'W' : 'FF', b: winA ? 'FF' : 'W', winA, winB: !winA, walkover: true };
+  }
+  return { a: scoreA, b: scoreB, winA: scoreA > scoreB, winB: scoreB > scoreA, walkover: false };
+}

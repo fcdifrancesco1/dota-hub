@@ -5,7 +5,7 @@ import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
-import { isSeriesOngoing } from '../utils/seriesStatus';
+import { isSeriesOngoing, wikiScore } from '../utils/seriesStatus';
 import MatchPreviewModal from '../components/MatchPreviewModal';
 import { useOpenWikiSeries } from '../utils/wikiSeries';
 
@@ -283,10 +283,7 @@ export default function MatchesPage() {
 /** Série começada ou recém-encerrada, com o placar da Liquipedia. */
 function OngoingCard({ match: m, liveGame, onOpenLive, onOpenPreview }) {
   const done = Boolean(m.isCompleted || m.winner);
-  const scoreA = m.scoreA || 0;
-  const scoreB = m.scoreB || 0;
-  const leadA = scoreA > scoreB;
-  const leadB = scoreB > scoreA;
+  const { a: scoreA, b: scoreB, winA: leadA, winB: leadB, walkover } = wikiScore(m);
   const status = liveGame ? 'Ao vivo' : done ? 'Encerrada' : 'Em andamento';
 
   const body = (
@@ -317,7 +314,7 @@ function OngoingCard({ match: m, liveGame, onOpenLive, onOpenPreview }) {
           <span className="text-blue-600 dark:text-amber-400 font-bold flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
         ) : (
           <span className="text-blue-600 dark:text-amber-400 font-bold flex items-center gap-1">
-            {scoreA + scoreB > 0 ? 'Ver mapas jogados' : done ? 'Jogadores no torneio' : 'Intervalo · Jogadores'} <ChevronRight className="w-3.5 h-3.5" />
+            {!walkover && scoreA + scoreB > 0 ? 'Ver mapas jogados' : done ? 'Jogadores no torneio' : 'Intervalo · Jogadores'} <ChevronRight className="w-3.5 h-3.5" />
           </span>
         )}
       </div>
