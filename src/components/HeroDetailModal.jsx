@@ -103,9 +103,6 @@ export default function HeroDetailModal({
                 {hero.proPick !== undefined && (
                   <span>Picks Pro: <strong className="text-blue-600 dark:text-amber-400 font-bold">{hero.proPick}</strong></span>
                 )}
-                {hero.pub8WinRate !== undefined && (
-                  <span>Win Rate High MMR: <strong className="text-cyan-500 font-bold">{hero.pub8WinRate}%</strong></span>
-                )}
               </div>
             </div>
           </div>

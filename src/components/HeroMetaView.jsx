@@ -10,7 +10,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedAttr, setSelectedAttr] = useState('all');
-  const [sortBy, setSortBy] = useState('tier'); // 'tier' | 'proWinRate' | 'proPick' | 'proBan' | 'pub8WinRate'
+  const [sortBy, setSortBy] = useState('tier'); // 'tier' | 'proWinRate' | 'proPick' | 'proBan'
   const [sortAsc, setSortAsc] = useState(false);
 
   const goToHero = (heroId) => {
@@ -106,7 +106,6 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
   const topWinRate = [...heroes].sort((a, b) => b.proWinRate - a.proWinRate).find(h => h.proPick >= 5);
   const mostPicked = [...heroes].sort((a, b) => b.proPick - a.proPick)[0];
   const mostBanned = [...heroes].sort((a, b) => b.proBan - a.proBan)[0];
-  const topImmortalPub = [...heroes].sort((a, b) => b.pub8WinRate - a.pub8WinRate).find(h => h.pub8Pick >= 500);
 
   return (
     <div className="max-w-6xl mx-auto w-full p-4 sm:p-6 space-y-6">
@@ -121,13 +120,13 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
             Estatísticas do Patch Atual
           </h1>
           <p className="text-xs text-gray-400 mt-1">
-            Dados combinados de partidas profissionais e partidas no rank Immortal do Dota 2
+            Tier relativo ao patch, calculado com winrate e presença (picks + bans) nas partidas profissionais
           </p>
         </div>
       </div>
 
       {/* CARDS DE DESTAQUE DO META */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         {topWinRate && (
           <div
             onClick={() => goToHero(topWinRate.id)}
@@ -173,20 +172,6 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
           </div>
         )}
 
-        {topImmortalPub && (
-          <div
-            onClick={() => goToHero(topImmortalPub.id)}
-            className="tilt-card glass-panel border border-line hover:border-cyan-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
-            title={`Clique para ver detalhes de ${topImmortalPub.name}`}
-          >
-            <img src={topImmortalPub.img} alt={topImmortalPub.name} className="w-12 h-12 rounded-xl object-cover border border-cyan-500/40 shadow-sm group-hover:ring-2 group-hover:ring-cyan-400/50 transition-all" />
-            <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-cyan-600 dark:text-cyan-400 block">Destaque Immortal</span>
-              <strong className="text-sm font-black text-white truncate block group-hover:text-cyan-400 transition-colors">{topImmortalPub.name}</strong>
-              <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 font-bold">{topImmortalPub.pub8WinRate}% WR</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* BARRA DE FILTROS E FUNÇÕES */}
@@ -301,17 +286,6 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                     Picks / Bans {sortBy === 'proPick' && <ArrowUpDown className="w-3 h-3 text-blue-600 dark:text-amber-400" />}
                   </div>
                 </th>
-                <th
-                  onClick={() => {
-                    if (sortBy === 'pub8WinRate') setSortAsc(!sortAsc);
-                    else { setSortBy('pub8WinRate'); setSortAsc(false); }
-                  }}
-                  className="p-3.5 pr-5 text-right cursor-pointer hover:text-white whitespace-nowrap"
-                >
-                  <div className="flex items-center justify-end gap-1">
-                    Immortal Pub WR {sortBy === 'pub8WinRate' && <ArrowUpDown className="w-3 h-3 text-blue-600 dark:text-amber-400" />}
-                  </div>
-                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line font-medium">
@@ -398,13 +372,6 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
                       <span className="text-rose-500 font-bold">{h.proBan}</span>
                     </td>
 
-                    {/* Immortal Pub WR */}
-                    <td className="p-3.5 pr-5 text-right font-mono whitespace-nowrap">
-                      <span className={`font-black ${h.pub8WinRate >= 52 ? 'text-emerald-500' : h.pub8WinRate >= 48 ? 'text-white' : 'text-rose-500'}`}>
-                        {h.pub8WinRate}%
-                      </span>
-                      <span className="text-[10px] text-gray-400 block">({h.pub8Pick} jogos)</span>
-                    </td>
                   </tr>
                 );
               })}

@@ -615,24 +615,23 @@ export async function fetchMatchDetails(matchId) {
 }
 
 // 5. Buscar Meta dos Heróis do Patch (Tier List)
-// Converte a lista /heroStats da OpenDota para o formato da página de heróis
+// Fatias da lista ordenada pela nota: top 5% S+, depois 12% S, 20% A, 30% B e o resto C.
+const TIER_CUTS = [["S+", 0.05], ["S", 0.17], ["A", 0.37], ["B", 0.67]];
+
+// Converte a lista /heroStats da OpenDota para o formato da página de heróis.
+// Tier relativo: a nota usa só dados pro (a OpenDota passou a mandar os brackets
+// Immortal zerados) — winrate puxado para 50% com poucos jogos + presença (picks + bans).
 function processHeroStats(list) {
-  return (list || []).map((h) => {
+  const maxPresence = Math.max(1, ...(list || []).map((h) => (h.pro_pick || 0) + (h.pro_ban || 0)));
+  const heroes = (list || []).map((h) => {
     const proPick = h.pro_pick || 0;
     const proWin = h.pro_win || 0;
     const proBan = h.pro_ban || 0;
     const proWinRate = proPick > 0 ? (proWin / proPick) * 100 : 0;
 
-    const pub8Pick = h["8_pick"] || 0;
-    const pub8Win = h["8_win"] || 0;
-    const pub8WinRate = pub8Pick > 0 ? (pub8Win / pub8Pick) * 100 : 0;
-
-    const compositeScore = (proWinRate * 0.45) + (pub8WinRate * 0.35) + (Math.min(proPick / 5, 20));
-    let tier = "B";
-    if (compositeScore >= 60 && (proPick >= 5 || pub8Pick >= 500)) tier = "S+";
-    else if (compositeScore >= 54) tier = "S";
-    else if (compositeScore >= 49) tier = "A";
-    else if (compositeScore < 45) tier = "C";
+    const shrunkWinRate = ((proWin + 5) / (proPick + 10)) * 100;
+    const presence = ((proPick + proBan) / maxPresence) * 100;
+    const score = shrunkWinRate * 0.6 + presence * 0.4;
 
     const primaryAttrMap = {
       str: "Força",
@@ -654,22 +653,29 @@ function processHeroStats(list) {
       proWin,
       proBan,
       proWinRate: Number(proWinRate.toFixed(1)),
-      pub8Pick,
-      pub8WinRate: Number(pub8WinRate.toFixed(1)),
-      tier,
+      score,
+      tier: "C",
       baseHealth: h.base_health,
       baseMana: h.base_mana,
       moveSpeed: h.move_speed,
       turboPicks: h.turbo_picks || 0
     };
   });
+
+  const ranked = [...heroes].sort((a, b) => b.score - a.score);
+  ranked.forEach((hero, i) => {
+    if (hero.proPick + hero.proBan === 0) return;
+    const pos = i / ranked.length;
+    hero.tier = (TIER_CUTS.find(([, cut]) => pos < cut) || ["C"])[0];
+  });
+  return heroes;
 }
 
 // Estatísticas de heróis: primeiro pelo nosso servidor (com cache na CDN, que
 // segura quedas da OpenDota), depois direto na OpenDota e, por fim, a última
 // cópia salva neste navegador.
 export async function fetchHeroStats() {
-  const cached = getCached("hero_stats_v6", 30 * 60 * 1000);
+  const cached = getCached("hero_stats_v7", 30 * 60 * 1000);
   if (cached) return cached;
 
   const sources = [
@@ -683,13 +689,13 @@ export async function fetchHeroStats() {
       const list = await res.json();
       if (!Array.isArray(list) || list.length === 0) continue;
       const processed = processHeroStats(list);
-      setCache("hero_stats_v6", processed);
+      setCache("hero_stats_v7", processed);
       return processed;
     } catch (err) {
       console.warn(`Aviso ao carregar heroStats (${url}):`, err.message || err);
     }
   }
-  return getCachedFast("hero_stats_v6") || [];
+  return getCachedFast("hero_stats_v7") || [];
 }
 
 // Posições em que cada herói foi jogado nas partidas profissionais dos últimos
