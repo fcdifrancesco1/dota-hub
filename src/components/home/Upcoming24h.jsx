@@ -54,7 +54,7 @@ export default function Upcoming24h() {
             Nenhuma partida oficial agendada para as próximas 24 horas.
           </div>
         ) : (
-          <div className="divide-y divide-line/50">
+          <div className="divide-y divide-line-strong">
             {next24hMatches.map((m, idx) => {
               // Formata horário no fuso America/Sao_Paulo, indicando quando é amanhã
               let formattedTime = m.startTime || '--:--';

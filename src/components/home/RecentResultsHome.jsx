@@ -66,7 +66,7 @@ export default function RecentResultsHome() {
             Nenhum resultado recente registrado.
           </div>
         ) : (
-          <div className="divide-y divide-line/50">
+          <div className="divide-y divide-line-strong">
             {recent10.map((series, idx) => {
               const teamAName = series.team1_name || series.timeA || 'Team 1';
               const teamBName = series.team2_name || series.timeB || 'Team 2';
