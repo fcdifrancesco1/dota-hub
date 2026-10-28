@@ -22,7 +22,9 @@ export default function Home() {
           Telas médias: rankings + conteúdo, notícias embaixo; celular: tudo empilhado */}
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="home-shell grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px] items-start">
-          <aside className="order-2 xl:order-1 xl:sticky xl:top-20 p-2 sm:p-3 border-t border-line/60 xl:border-t-0">
+          {/* Fixo ao rolar só quando as notícias têm coluna própria (2xl); no xl elas ficam
+              embaixo, ocupando as duas colunas, e o ranking passaria por cima delas */}
+          <aside className="order-2 xl:order-1 2xl:sticky 2xl:top-20 p-2 sm:p-3 border-t border-line/60 xl:border-t-0">
             <RankingsCard />
           </aside>
 
