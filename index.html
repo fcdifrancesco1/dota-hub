@@ -7,18 +7,8 @@
     <meta name="description" content="Acompanhe a cena profissional de Dota 2 em tempo real: partidas ao vivo, agenda, campeonatos, estatísticas, meta de heróis e bolão de palpites." />
     <meta name="theme-color" content="#F7EFE4" />
 
-    <!-- Aplica o tema salvo antes da primeira pintura (evita piscar o tema errado) -->
-    <script>
-      (function () {
-        var theme = 'light';
-        try {
-          var saved = localStorage.getItem('dotahub-theme');
-          if (saved === 'dark' || saved === 'light') theme = saved;
-        } catch (e) {}
-        document.documentElement.setAttribute('data-theme', theme);
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#0C0E14' : '#F7EFE4');
-      })();
-    </script>
+    <!-- Site só tem o tema claro -->
+    <script>document.documentElement.setAttribute('data-theme', 'light');</script>
 
     <!-- Open Graph / SEO -->
     <meta property="og:type" content="website" />

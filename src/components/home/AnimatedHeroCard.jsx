@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Flame, ChevronRight, Loader2 } from 'lucide-react';
 import { fetchHeroStats, fetchHeroPositions } from '../../services/api';
@@ -55,7 +55,6 @@ export default function AnimatedHeroCard() {
   const [selectedId, setSelectedId] = useState(null);
   const [videoError, setVideoError] = useState(false);
   const [specialists, setSpecialists] = useState({});
-  const cardRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -90,22 +89,6 @@ export default function AnimatedHeroCard() {
     if (selectedHero) navigate(`/herois/${selectedHero.id}`);
   };
 
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -6;
-    const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 6;
-    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
-    cardRef.current.style.setProperty('--mouse-x', `${(x / rect.width * 100).toFixed(1)}%`);
-    cardRef.current.style.setProperty('--mouse-y', `${(y / rect.height * 100).toFixed(1)}%`);
-  };
-
-  const handleMouseLeave = () => {
-    if (cardRef.current) cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
-  };
-
   const handleSelectHero = (hero) => {
     setSelectedId(hero.id);
     setVideoError(false);
@@ -126,7 +109,7 @@ export default function AnimatedHeroCard() {
         </div>
 
         {highlights && (
-          <div className="flex flex-wrap items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2 border border-line">
+          <div className="flex flex-wrap items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2/80">
             {highlights.map(({ hero: h, position }) => (
               <button
                 key={h.id}
@@ -146,20 +129,15 @@ export default function AnimatedHeroCard() {
       </div>
 
       {!selectedHero ? (
-        <div className="glass-panel rounded-3xl border border-line flex justify-center py-12">
+        <div className="flex justify-center py-12">
           <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
         </div>
       ) : (
         /* CARD 3D COM VÍDEO DO PERSONAGEM EM LOOP */
         <div
-          ref={cardRef}
           onClick={handleCardClick}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          className="tilt-card glass-panel rounded-3xl p-4 sm:p-5 relative overflow-hidden group cursor-pointer shadow-xl border border-line"
+          className="rounded-[20px] p-4 sm:p-5 relative overflow-hidden group cursor-pointer transition-colors hover:bg-surface-2/60"
         >
-          <div className="holo-sheen" />
-
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center relative z-20">
             {/* VÍDEO ANIMADO (VALVE WEBM RENDER) */}
             <div className="sm:col-span-4 relative w-full h-32 sm:h-36 md:h-40 flex items-center justify-center overflow-hidden">
@@ -214,7 +192,7 @@ export default function AnimatedHeroCard() {
                 <strong className="text-white">{selectedHero.proBan}</strong> vezes nas partidas profissionais recentes.
               </p>
 
-              <div className="px-3 py-2 rounded-xl bg-surface-2 border border-line flex items-center justify-between gap-2 text-[11px]">
+              <div className="px-3 py-2 rounded-xl bg-surface-2/70 flex items-center justify-between gap-2 text-[11px]">
                 <span className="text-gray-400 font-medium shrink-0">Quem mais jogou (12 meses):</span>
                 {specialist === undefined ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
@@ -237,7 +215,7 @@ export default function AnimatedHeroCard() {
                 </Link>
                 <Link
                   to="/herois"
-                  className="inline-flex items-center justify-center px-3 py-2 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:bg-surface-2 border border-line transition-all"
+                  className="inline-flex items-center justify-center px-3 py-2 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:bg-surface-2 ring-1 ring-line/70 transition-all"
                 >
                   Todos os Heróis
                 </Link>

@@ -72,16 +72,16 @@ export default function HomeHero() {
   const hasLive = liveGames && liveGames.length > 0;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-10 mb-8 shadow-2xl transition-all">
+    <div className="relative overflow-hidden rounded-[22px] home-hero-bg p-6 sm:p-8">
       {/* Aurora Ambient Glows */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-600/15 dark:bg-blue-500/10 blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 -mb-20 w-80 h-80 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 left-0 -ml-20 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Lado Esquerdo: Informações do Torneio em Destaque */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-blue-700 text-xs font-bold uppercase tracking-wider">
             <Trophy className="w-3.5 h-3.5" />
             <span>{featuredTournament ? `Torneio em Destaque${featuredTier ? ` • ${featuredTier}` : ''}` : 'Dota 2 Competitivo'}</span>
           </div>
@@ -139,7 +139,7 @@ export default function HomeHero() {
             <Link
               to={linkedTournament ? tournamentPath(linkedTournament) : '/campeonatos'}
               title={linkedTournament ? linkedTournament.name : undefined}
-              className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line hover:border-amber-500/40 text-white font-bold uppercase tracking-wider text-xs transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-surface/80 hover:bg-surface text-white font-bold uppercase tracking-wider text-xs transition-all ring-1 ring-line/70"
             >
               <span>{linkedTournament ? 'Ver Campeonato' : 'Ver Campeonatos'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -148,14 +148,14 @@ export default function HomeHero() {
         </div>
 
         {/* Lado Direito: Próximo Confronto com Contagem Regressiva */}
-        <div className="lg:col-span-5 min-w-0 tilt-card bg-surface rounded-2xl p-5 sm:p-6 shadow-xl border border-line">
-          <div className="flex items-center justify-between pb-3 border-b border-line text-xs">
+        <div className="lg:col-span-5 min-w-0 bg-surface/70 backdrop-blur rounded-[20px] p-5 sm:p-6 ring-1 ring-line/50">
+          <div className="flex items-center justify-between pb-3 border-b border-line/60 text-xs">
             <span className="text-gray-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-500" />
               <span>Próxima Grande Partida</span>
             </span>
             {nextMatch && (
-              <span className="text-amber-500 font-mono font-bold text-[11px] bg-surface-2 px-2 py-0.5 rounded border border-line">
+              <span className="text-amber-500 font-mono font-bold text-[11px] bg-surface-2 px-2 py-0.5 rounded-md">
                 {nextMatch.formato || 'BO3'}
               </span>
             )}
@@ -170,7 +170,7 @@ export default function HomeHero() {
           <div className="pt-3 flex items-center justify-center gap-2 text-[11px] font-semibold text-amber-500">
             <span className="truncate">{nextMatch.tourneyName}</span>
             {tierLetter(headline?.tournament?.tier) && (
-              <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-2 border border-line text-[9px] font-black uppercase">
+              <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-2 text-[9px] font-black uppercase">
                 {tierLetter(headline.tournament.tier)}
               </span>
             )}
@@ -180,7 +180,7 @@ export default function HomeHero() {
           <div className="py-5 flex items-center justify-between gap-2 sm:gap-4">
             {/* Time 1 */}
             <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center mb-2 shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-surface-2 p-2 flex items-center justify-center mb-2">
                 <TeamLogo teamName={nextMatch.timeA} logoUrl={nextMatch.logoA} className="w-10 h-10" />
               </div>
               <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
@@ -190,14 +190,14 @@ export default function HomeHero() {
 
             {/* VS */}
             <div className="flex flex-col items-center shrink-0">
-              <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-surface-2 px-3 py-1 rounded-full border border-line shadow-sm">
+              <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-surface-2 px-3 py-1 rounded-full">
                 VS
               </span>
             </div>
 
             {/* Time 2 */}
             <div className="flex flex-col items-center flex-1 basis-0 min-w-0 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center mb-2 shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-surface-2 p-2 flex items-center justify-center mb-2">
                 <TeamLogo teamName={nextMatch.timeB} logoUrl={nextMatch.logoB} className="w-10 h-10" />
               </div>
               <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
@@ -207,7 +207,7 @@ export default function HomeHero() {
           </div>
 
           {/* Relógio / Contagem Regressiva */}
-          <div className="pt-3 border-t border-line">
+          <div className="pt-3 border-t border-line/60">
             {!timeLeft ? (
               <div className="text-[11px] text-gray-400 text-center font-semibold py-2">Horário a definir</div>
             ) : (timeLeft.hours + timeLeft.minutes + timeLeft.seconds) === 0 ? (
@@ -218,19 +218,19 @@ export default function HomeHero() {
               Inicia em ({nextMatch.startTime}):
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-surface-2 border border-line rounded-xl py-2 shadow-sm">
+              <div className="bg-surface-2 rounded-xl py-2">
                 <span className="block font-mono text-xl font-black text-white">
                   {String(timeLeft.hours).padStart(2, '0')}
                 </span>
                 <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Horas</span>
               </div>
-              <div className="bg-surface-2 border border-line rounded-xl py-2 shadow-sm">
+              <div className="bg-surface-2 rounded-xl py-2">
                 <span className="block font-mono text-xl font-black text-amber-500">
                   {String(timeLeft.minutes).padStart(2, '0')}
                 </span>
                 <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Minutos</span>
               </div>
-              <div className="bg-surface-2 border border-line rounded-xl py-2 shadow-sm">
+              <div className="bg-surface-2 rounded-xl py-2">
                 <span className="block font-mono text-xl font-black text-red-500">
                   {String(timeLeft.seconds).padStart(2, '0')}
                 </span>

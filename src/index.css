@@ -138,6 +138,45 @@ body {
   background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0) 70%);
 }
 
+/* Home: uma superfície única, sem cards separados. As seções se dividem por
+   linhas finas que somem nas pontas e por fundos levemente tingidos. */
+.home-shell {
+  background: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid rgba(24, 32, 43, 0.06);
+  border-radius: 28px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 40px 80px -48px rgba(15, 23, 42, 0.22),
+    0 12px 28px -18px rgba(15, 23, 42, 0.10);
+}
+.home-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(24, 32, 43, 0.10) 12%, rgba(24, 32, 43, 0.10) 88%, transparent);
+}
+.home-stats:not(:empty)::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 2rem -0.75rem;
+  background: linear-gradient(90deg, transparent, rgba(24, 32, 43, 0.10) 12%, rgba(24, 32, 43, 0.10) 88%, transparent);
+}
+/* Fundo do destaque principal: um brilho azul bem leve, sem moldura */
+.home-hero-bg {
+  background:
+    radial-gradient(ellipse 70% 90% at 0% 0%, rgba(37, 99, 235, 0.07), transparent 70%),
+    radial-gradient(ellipse 60% 80% at 100% 100%, rgba(10, 143, 98, 0.06), transparent 70%),
+    linear-gradient(180deg, rgba(244, 246, 249, 0.7), rgba(244, 246, 249, 0.2));
+}
+/* Cards da faixa ao vivo: flutuam sobre o fundo, sem borda */
+.home-float {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.14);
+}
+.home-float:hover {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 14px 32px -14px rgba(15, 23, 42, 0.22);
+}
+
 /* Custom Scrollbars */
 ::-webkit-scrollbar,
 .custom-scrollbar::-webkit-scrollbar {

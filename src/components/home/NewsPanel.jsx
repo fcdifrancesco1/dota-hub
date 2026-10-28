@@ -55,8 +55,8 @@ export default function NewsPanel() {
   const transfers = (data?.transfers || []).slice(0, TRANSFERS_SHOWN);
 
   return (
-    <aside className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl border border-line">
-      <div className="flex items-center gap-1.5 pb-3 mb-4 border-b border-line">
+    <aside>
+      <div className="flex items-center gap-1.5 mb-4">
         {[['news', 'Notícias', Newspaper], ['transfers', 'Transferências', ArrowRightLeft]].map(([id, label, Icon]) => (
           <button
             key={id}
@@ -96,11 +96,11 @@ export default function NewsPanel() {
                       alt=""
                       loading="lazy"
                       referrerPolicy="no-referrer"
-                      className="w-20 h-14 rounded-lg object-cover border border-line shrink-0 bg-surface-2"
+                      className="w-20 h-14 rounded-lg object-cover shrink-0 bg-surface-2"
                       onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
                     />
                   ) : (
-                    <div className="w-20 h-14 rounded-lg bg-surface-2 border border-line shrink-0 flex items-center justify-center">
+                    <div className="w-20 h-14 rounded-lg bg-surface-2 shrink-0 flex items-center justify-center">
                       <Newspaper className="w-5 h-5 text-gray-500" />
                     </div>
                   )}
@@ -121,9 +121,9 @@ export default function NewsPanel() {
       ) : transfers.length === 0 ? (
         <p className="py-8 text-center text-xs text-gray-500">Não foi possível carregar as transferências agora.</p>
       ) : (
-        <ul className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-1 2xl:divide-y 2xl:divide-white/5">
+        <ul className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-1 2xl:divide-y 2xl:divide-line/50">
           {transfers.map((t, idx) => (
-            <li key={`${t.date}-${idx}`} className="py-2.5 border-b border-white/5 2xl:border-b-0">
+            <li key={`${t.date}-${idx}`} className="py-2.5 border-b border-line/50 2xl:border-b-0">
               <div className="flex items-center justify-between gap-2 text-[10px] text-gray-500 mb-1">
                 <span>{fmtDate(t.date)}</span>
                 {t.ref && (
@@ -146,7 +146,7 @@ export default function NewsPanel() {
         </ul>
       )}
 
-      <p className="mt-4 pt-3 border-t border-white/5 text-[10px] text-gray-500 text-center">
+      <p className="mt-4 text-[10px] text-gray-500 text-center">
         {tab === 'news' ? 'Fontes: Valve (Steam) e blog do Dotabuff. Clique para ler a matéria completa.' : 'Fonte: Liquipedia.'}
       </p>
     </aside>

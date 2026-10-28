@@ -19,11 +19,11 @@ export default function Upcoming24h() {
 
   if (loading) {
     return (
-      <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
-        <div className="h-6 w-40 bg-slate-200 dark:bg-white/5 rounded-xl animate-pulse mb-4" />
+      <div>
+        <div className="h-6 w-40 bg-surface-2 rounded-xl animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-slate-200 dark:bg-white/5 rounded-2xl animate-pulse" />
+            <div key={i} className="h-16 bg-surface-2 rounded-2xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -31,9 +31,9 @@ export default function Upcoming24h() {
   }
 
   return (
-    <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between border border-line">
+    <div className="flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center justify-between gap-3 pb-3 border-b border-line mb-4">
+        <div className="flex items-center justify-between gap-3 px-3 mb-2">
           <div className="flex items-center gap-2 min-w-0">
             <Calendar className="w-4 h-4 text-amber-500" />
             <h3 className="text-sm font-black uppercase tracking-wider text-white whitespace-nowrap">
@@ -54,7 +54,7 @@ export default function Upcoming24h() {
             Nenhuma partida oficial agendada para as próximas 24 horas.
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="divide-y divide-line/50">
             {next24hMatches.map((m, idx) => {
               // Formata horário no fuso America/Sao_Paulo, indicando quando é amanhã
               let formattedTime = m.startTime || '--:--';
@@ -76,17 +76,17 @@ export default function Upcoming24h() {
                   key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`}
                   onClick={() => setSelected(m)}
                   title="Ver estatísticas dos jogadores no torneio"
-                  className="block w-full text-left bg-surface-2 hover:bg-surface-3 border border-line hover:border-amber-500/40 rounded-2xl p-3.5 transition-all shadow-sm group cursor-pointer"
+                  className="block w-full text-left hover:bg-surface-2/80 rounded-xl px-3 py-3 transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[180px] text-amber-500">
                       {m.tourneyName || 'Torneio'}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="font-mono text-amber-500 bg-surface-3 border border-line px-1.5 py-0.5 rounded text-[9px] font-bold">
+                      <span className="font-mono text-amber-500 bg-surface-2 px-1.5 py-0.5 rounded text-[9px] font-bold">
                         {m.formato}
                       </span>
-                      <span className="font-mono text-white bg-surface-3 px-1.5 py-0.5 rounded font-bold">
+                      <span className="font-mono text-white bg-surface-2 px-1.5 py-0.5 rounded font-bold">
                         {dayLabel ? `${dayLabel} ` : ''}{formattedTime} BRT
                       </span>
                     </span>
@@ -114,7 +114,7 @@ export default function Upcoming24h() {
         )}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-line text-[11px] text-gray-400 text-center">
+      <div className="mt-3 px-3 text-[11px] text-gray-500">
         Toque em uma partida para ver as estatísticas dos jogadores no torneio.
       </div>
 

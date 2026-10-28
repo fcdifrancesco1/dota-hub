@@ -12,12 +12,9 @@ import {
   Lock,
   Menu,
   X,
-  RefreshCw,
-  Sun,
-  Moon
+  RefreshCw
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { useTheme } from '../context/ThemeContext';
 import { SITE_CONFIG } from '../config/siteConfig';
 
 // Contador de partidas ao vivo: cores fixas (não dependem do tema) para o
@@ -39,7 +36,6 @@ function LiveBadge({ count, className = '' }) {
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { liveCount, refreshData, loadingRefresh, lastUpdated } = useApp();
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
   const navLinks = [
@@ -119,16 +115,6 @@ export default function Header() {
               className="p-2 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white transition-all disabled:opacity-50 shadow-sm"
             >
               <RefreshCw className={`w-4 h-4 ${loadingRefresh ? 'animate-spin text-blue-600 dark:text-amber-400' : ''}`} />
-            </button>
-
-            {/* Alternar tema claro / escuro */}
-            <button
-              onClick={toggleTheme}
-              title={theme === 'dark' ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'}
-              aria-label={theme === 'dark' ? 'Mudar para o tema claro' : 'Mudar para o tema escuro'}
-              className="p-2 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white transition-all shadow-sm"
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             {/* Mobile Hamburger Button */}

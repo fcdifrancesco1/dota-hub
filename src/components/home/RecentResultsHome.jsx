@@ -31,11 +31,11 @@ export default function RecentResultsHome() {
 
   if (loading) {
     return (
-      <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl">
-        <div className="h-6 w-44 bg-slate-200 dark:bg-white/5 rounded-xl animate-pulse mb-4" />
+      <div>
+        <div className="h-6 w-44 bg-surface-2 rounded-xl animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-16 bg-slate-200 dark:bg-white/5 rounded-2xl animate-pulse" />
+            <div key={i} className="h-16 bg-surface-2 rounded-2xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -43,9 +43,9 @@ export default function RecentResultsHome() {
   }
 
   return (
-    <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between border border-line">
+    <div className="flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center justify-between gap-3 pb-3 border-b border-line mb-4">
+        <div className="flex items-center justify-between gap-3 px-3 mb-2">
           <div className="flex items-center gap-2 min-w-0">
             <Trophy className="w-4 h-4 text-amber-500" />
             <h3 className="text-sm font-black uppercase tracking-wider text-white whitespace-nowrap">
@@ -66,7 +66,7 @@ export default function RecentResultsHome() {
             Nenhum resultado recente registrado.
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="divide-y divide-line/50">
             {recent10.map((series, idx) => {
               const teamAName = series.team1_name || series.timeA || 'Team 1';
               const teamBName = series.team2_name || series.timeB || 'Team 2';
@@ -93,9 +93,9 @@ export default function RecentResultsHome() {
                 <div
                   key={series.series_id || series.id || `${teamAName}-${teamBName}-${series.sortTime || idx}`}
                   onClick={onClick}
-                  className={`bg-surface-2 hover:bg-surface-3 border rounded-2xl p-3.5 transition-all group shadow-sm ${
-                    !isDone(series) ? 'border-red-500/40' : 'border-line'
-                  } ${onClick ? 'cursor-pointer hover:border-amber-500/40 hover:scale-[1.01]' : ''}`}
+                  className={`rounded-xl px-3 py-3 transition-colors group ${
+                    !isDone(series) ? 'bg-red-500/[0.06]' : ''
+                  } ${onClick ? 'cursor-pointer hover:bg-surface-2/80' : ''}`}
                 >
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[200px] text-amber-500">
@@ -123,7 +123,7 @@ export default function RecentResultsHome() {
                     </div>
 
                     {/* Placar */}
-                    <div className="flex items-center gap-1 font-mono font-black text-xs px-2.5 py-0.5 rounded-lg bg-surface-3 border border-line shadow-inner">
+                    <div className="flex items-center gap-1 font-mono font-black text-xs px-2.5 py-0.5 rounded-lg bg-surface-2">
                       <span className={isWinnerA ? 'text-emerald-500' : 'text-gray-400'}>{scoreA}</span>
                       <span className="text-gray-400">-</span>
                       <span className={isWinnerB ? 'text-emerald-500' : 'text-gray-400'}>{scoreB}</span>
@@ -144,7 +144,7 @@ export default function RecentResultsHome() {
         )}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-line text-[11px] text-gray-400 text-center">
+      <div className="mt-3 px-3 text-[11px] text-gray-500">
         Clique em qualquer série para conferir o draft completo e a tabela de jogadores.
       </div>
 

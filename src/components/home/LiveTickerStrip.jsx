@@ -13,7 +13,7 @@ export default function LiveTickerStrip() {
 
   if (total === 0) {
     return (
-      <div className="w-full glass-panel border-y border-line py-2.5 px-4 mb-6 transition-all">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-2.5 mb-2">
         <div className="w-full flex items-center justify-between gap-4 text-xs text-gray-400">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -33,7 +33,7 @@ export default function LiveTickerStrip() {
   }
 
   return (
-    <div className="w-full glass-panel border-y border-line py-3 px-4 mb-6 shadow-sm">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-3 mb-2">
       <div className="w-full">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -70,14 +70,14 @@ export default function LiveTickerStrip() {
               <div
                 key={game.match_id || idx}
                 onClick={() => openLiveMatch(game)}
-                className="flex-shrink-0 cursor-pointer tilt-card bg-surface hover:bg-surface-2 border border-line hover:border-amber-500/40 rounded-2xl p-3 min-w-[280px] sm:min-w-[320px] transition-all shadow-md"
+                className="flex-shrink-0 cursor-pointer bg-surface/80 hover:bg-surface rounded-2xl p-3 min-w-[280px] sm:min-w-[320px] transition-all home-float"
               >
                 {/* Cabeçalho do Card */}
-                <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2 border-b border-line pb-1.5">
+                <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2 border-b border-line/60 pb-1.5">
                   <span className="font-semibold truncate max-w-[170px] text-amber-500">
                     {game.league_name || 'Torneio Oficial'}
                   </span>
-                  <span className="font-mono text-white font-bold bg-surface-2 border border-line px-2 py-0.5 rounded">
+                  <span className="font-mono text-white font-bold bg-surface-2 px-2 py-0.5 rounded">
                     {durationMin}:{durationSec}
                   </span>
                 </div>
@@ -91,7 +91,7 @@ export default function LiveTickerStrip() {
                   </div>
 
                   {/* Kills Placar */}
-                  <div className="flex items-center gap-1.5 font-mono font-black text-sm px-2.5 py-0.5 rounded-lg bg-surface-2 border border-line shrink-0 shadow-inner">
+                  <div className="flex items-center gap-1.5 font-mono font-black text-sm px-2.5 py-0.5 rounded-lg bg-surface-2 shrink-0">
                     <span className="text-emerald-500">{radScore}</span>
                     <span className="text-gray-400">:</span>
                     <span className="text-red-500">{direScore}</span>
@@ -105,7 +105,7 @@ export default function LiveTickerStrip() {
                 </div>
 
                 {/* Vantagem de Ouro / Indicador */}
-                <div className="mt-2.5 flex items-center justify-between text-[10px] text-gray-400 pt-1.5 border-t border-line">
+                <div className="mt-2.5 flex items-center justify-between text-[10px] text-gray-400 pt-1.5 border-t border-line/60">
                   <span className="flex items-center gap-1 font-medium">
                     <Zap className="w-3 h-3 text-amber-500" />
                     <span>

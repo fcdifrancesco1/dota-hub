@@ -7,45 +7,50 @@ import Upcoming24h from '../components/home/Upcoming24h';
 import RecentResultsHome from '../components/home/RecentResultsHome';
 import NewsPanel from '../components/home/NewsPanel';
 import RankingsCard from '../components/home/RankingsCard';
-import { useApp } from '../context/AppContext';
+
+// Linha suave que separa as seções dentro da superfície única da Home
+const Divider = () => <div className="home-divider my-6 sm:my-8" />;
 
 export default function Home() {
-  const { loading } = useApp();
-
   return (
     <div className="min-h-screen text-white pb-16">
       {/* 1. Faixa de Partidas Ao Vivo */}
       <LiveTickerStrip />
 
-      {/* Largura total da tela: rankings à esquerda, conteúdo no meio e notícias à direita.
+      {/* A Home é uma única superfície: as colunas são separadas por linhas finas, não por cards.
+          Largura total: rankings à esquerda, conteúdo no meio e notícias à direita.
           Telas médias: rankings + conteúdo, notícias embaixo; celular: tudo empilhado */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px] gap-6 items-start">
-        <aside className="order-2 xl:order-1 xl:sticky xl:top-20">
-          <RankingsCard />
-        </aside>
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="home-shell grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px] items-start">
+          <aside className="order-2 xl:order-1 xl:sticky xl:top-20 p-2 sm:p-3 border-t border-line/60 xl:border-t-0">
+            <RankingsCard />
+          </aside>
 
-        <div className="min-w-0 order-1 xl:order-2">
-          {/* 2. Hero Principal */}
-          <HomeHero />
+          <div className="min-w-0 order-1 xl:order-2 p-3 sm:p-5 xl:border-l border-line/60 self-stretch">
+            {/* 2. Hero Principal */}
+            <HomeHero />
 
-          {/* 2.5 Destaque do meta: heróis mais disputados nas partidas profissionais */}
-          <div className="mb-8">
+            <Divider />
+
+            {/* 2.5 Destaque do meta: heróis mais disputados nas partidas profissionais */}
             <AnimatedHeroCard />
+
+            <Divider />
+
+            {/* 3. Próximas Partidas (24h) e Resultados Recentes, lado a lado com uma linha entre eles */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-0 lg:divide-x divide-line/60">
+              <div className="lg:pr-5"><Upcoming24h /></div>
+              <div className="lg:pl-5"><RecentResultsHome /></div>
+            </div>
+
+            {/* 4. Estatísticas do campeonato em destaque (some quando não há torneio) */}
+            <div className="home-stats empty:hidden px-1 sm:px-3"><HomeStatsCards /></div>
           </div>
 
-          {/* 3. Grid de Próximas Partidas (24h) e Resultados Recentes */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-            <Upcoming24h />
-            <RecentResultsHome />
+          {/* 5. Notícias e transferências */}
+          <div className="order-3 xl:col-span-2 2xl:col-span-1 min-w-0 p-5 sm:p-6 border-t border-line/60 2xl:border-t-0 2xl:border-l self-stretch">
+            <NewsPanel />
           </div>
-
-          {/* 4. Cards de Estatísticas Gerais do Dia/Semana */}
-          <HomeStatsCards />
-        </div>
-
-        {/* 5. Notícias e transferências */}
-        <div className="order-3 xl:col-span-2 2xl:col-span-1 min-w-0">
-          <NewsPanel />
         </div>
       </div>
     </div>

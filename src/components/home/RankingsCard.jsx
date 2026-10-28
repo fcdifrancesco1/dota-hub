@@ -78,7 +78,7 @@ export default function RankingsCard() {
 
   return (
     <section
-      className="glass-panel rounded-3xl border border-line shadow-xl overflow-hidden"
+      className="overflow-hidden"
       aria-label="Rankings de times e jogadores"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -90,7 +90,7 @@ export default function RankingsCard() {
           <h2 className="text-xs font-black uppercase tracking-wider text-white">Rankings</h2>
           <span className="text-[10px] text-gray-400">{paused ? 'Pausado' : 'Troca a cada 30 s'}</span>
         </div>
-        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-surface-2 border border-line" role="tablist">
+        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-surface-2/80" role="tablist">
           {VIEWS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -109,7 +109,7 @@ export default function RankingsCard() {
       </div>
 
       {/* Barra de progresso até a próxima troca */}
-      <div className="h-0.5 bg-surface-2">
+      <div className="h-0.5 mx-4 rounded-full bg-surface-2 overflow-hidden">
         <div
           key={`${view}-${cycle}`}
           className="h-full bg-blue-600 dark:bg-amber-500 rankings-progress"
