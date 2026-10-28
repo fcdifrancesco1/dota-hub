@@ -3,6 +3,7 @@ import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { usePageMeta } from '../utils/pageMeta';
 import {
   AlertTriangle,
+  BarChart3,
   Ban,
   Clock,
   Coins,
@@ -15,7 +16,7 @@ import {
   Trophy,
   Zap
 } from 'lucide-react';
-import { fetchMatchDetails, fetchLeagueSeries, getHeroImg, getHeroName, getItemImg } from '../services/api';
+import { fetchMatchDetails, fetchLeagueSeries, getHeroImg, getHeroName, getItemImg, normalizeTeamKey } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
 import { useApp } from '../context/AppContext';
@@ -111,6 +112,10 @@ export default function MatchDetailPage() {
   const series = useMemo(() => applyAliasesToSeries(knownSeries || fallbackSeries), [knownSeries, fallbackSeries]);
   const games = series?.games || [];
 
+  // Aba "Estatísticas gerais" (?jogo=geral): totais da série, só em séries encerradas que não são MD1
+  const hasOverview = games.length > 1 && seriesStatus(series) === 'finished' && String(series?.formato || '').toUpperCase() !== 'BO1';
+  const showOverview = hasOverview && searchParams.get('jogo') === 'geral';
+
   // Sem ?jogo=, abre o mapa do próprio match_id da URL (links de mapas avulsos)
   const requestedMap = Number(searchParams.get('jogo'))
     || games.findIndex((g) => String(g.match_id) === String(id)) + 1
@@ -146,15 +151,21 @@ export default function MatchDetailPage() {
   }, [id, knownSeries]);
 
   const activeMatchId = currentMap?.match_id ? String(currentMap.match_id) : null;
-  const activeLoaded = activeMatchId ? matchData[activeMatchId] !== undefined : true;
+  // Mapas a carregar: o mapa aberto ou, na aba de estatísticas gerais, todos os mapas da série
+  const neededIds = showOverview
+    ? games.map((g) => String(g.match_id)).filter(Boolean)
+    : (activeMatchId ? [activeMatchId] : []);
+  const missingKey = neededIds.filter((mid) => matchData[mid] === undefined).join(',');
   useEffect(() => {
-    if (!activeMatchId || activeLoaded) return;
+    if (!missingKey) return;
     let cancelled = false;
-    fetchMatchDetails(activeMatchId).then((data) => {
-      if (!cancelled) setMatchData((prev) => ({ ...prev, [activeMatchId]: data || null }));
+    missingKey.split(',').forEach((mid) => {
+      fetchMatchDetails(mid).then((data) => {
+        if (!cancelled) setMatchData((prev) => ({ ...prev, [mid]: data || null }));
+      });
     });
     return () => { cancelled = true; };
-  }, [activeMatchId, activeLoaded]);
+  }, [missingKey]);
 
   const teamA = series?.timeA;
   const teamB = series?.timeB;
@@ -164,6 +175,11 @@ export default function MatchDetailPage() {
   const selectMap = (idx) => {
     const next = new URLSearchParams(searchParams);
     next.set('jogo', String(idx + 1));
+    setSearchParams(next, { replace: true, state: location.state });
+  };
+  const selectOverview = () => {
+    const next = new URLSearchParams(searchParams);
+    next.set('jogo', 'geral');
     setSearchParams(next, { replace: true, state: location.state });
   };
 
@@ -211,7 +227,7 @@ export default function MatchDetailPage() {
           {games.length > 1 && (
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
               {games.map((g, idx) => {
-                const active = idx === activeIndex;
+                const active = !showOverview && idx === activeIndex;
                 const loaded = withTeamNames(matchData[g.match_id], series.teamNames);
                 const winnerName = loaded
                   ? (loaded.radiant_win ? radiantNameOf(loaded) : direNameOf(loaded))
@@ -242,10 +258,26 @@ export default function MatchDetailPage() {
                   </button>
                 );
               })}
+              {hasOverview && (
+                <button
+                  type="button"
+                  onClick={selectOverview}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all border cursor-pointer ${
+                    showOverview
+                      ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black border-blue-600 dark:border-amber-500 shadow-md'
+                      : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:bg-surface-3'
+                  }`}
+                >
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Estatísticas gerais</span>
+                </button>
+              )}
             </div>
           )}
 
-          {match === undefined ? (
+          {showOverview ? (
+            <SeriesOverview series={series} games={games} matchData={matchData} constants={constants} />
+          ) : match === undefined ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
               <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
               <span className="text-xs font-semibold">Carregando replay, draft e estatísticas...</span>
@@ -677,6 +709,251 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
             })}
           </tbody>
         </table>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Junta os mapas da série por time e por jogador. O lado de cada time muda de um
+ * mapa para outro: o time A é reconhecido pelos jogadores (que se repetem entre
+ * os mapas), a partir do 1º mapa carregado, onde vale o id ou o nome do time.
+ */
+function aggregateSeries(series, maps) {
+  const keyOf = (name) => normalizeTeamKey(name || '');
+  const firstSideIsA = (m) => {
+    const rId = m.radiant_team_id || m.radiant_team?.team_id;
+    const dId = m.dire_team_id || m.dire_team?.team_id;
+    if (series.preferredIdA && rId === series.preferredIdA) return 'radiant';
+    if (series.preferredIdA && dId === series.preferredIdA) return 'dire';
+    if (series.preferredIdB && rId === series.preferredIdB) return 'dire';
+    if (series.preferredIdB && dId === series.preferredIdB) return 'radiant';
+    if (keyOf(direNameOf(m)) === keyOf(series.timeA) || keyOf(radiantNameOf(m)) === keyOf(series.timeB)) return 'dire';
+    return 'radiant';
+  };
+  const sideOf = (p) => (p.player_slot < 128 ? 'radiant' : 'dire');
+  const playerKey = (p) => (p.account_id ? `a${p.account_id}` : `n${p.name || p.personaname}`);
+
+  const teams = { A: { name: series.timeA, id: series.preferredIdA, players: new Map(), kills: 0, wins: 0 },
+                  B: { name: series.timeB, id: series.preferredIdB, players: new Map(), kills: 0, wins: 0 } };
+  const knownA = new Set();
+  let totalDuration = 0;
+
+  maps.forEach((m, idx) => {
+    const players = m.players || [];
+    let aSide;
+    if (!knownA.size) {
+      aSide = firstSideIsA(m);
+    } else {
+      const overlap = (side) => players.filter((p) => sideOf(p) === side && knownA.has(playerKey(p))).length;
+      aSide = overlap('radiant') >= overlap('dire') ? 'radiant' : 'dire';
+    }
+    totalDuration += m.duration || 0;
+    const aWon = (aSide === 'radiant') === Boolean(m.radiant_win);
+    teams[aWon ? 'A' : 'B'].wins += 1;
+    teams.A.kills += (aSide === 'radiant' ? m.radiant_score : m.dire_score) || 0;
+    teams.B.kills += (aSide === 'radiant' ? m.dire_score : m.radiant_score) || 0;
+
+    players.forEach((p) => {
+      const team = sideOf(p) === aSide ? teams.A : teams.B;
+      if (team === teams.A) knownA.add(playerKey(p));
+      const key = playerKey(p);
+      const acc = team.players.get(key) || {
+        key, account_id: p.account_id, name: p.name || p.personaname, heroes: [], maps: 0,
+        kills: 0, deaths: 0, assists: 0, last_hits: 0, denies: 0, gpm: 0, xpm: 0,
+        hero_damage: 0, tower_damage: 0, hero_healing: 0, net_worth: 0
+      };
+      acc.maps += 1;
+      acc.heroes.push({ hero_id: p.hero_id, map: idx + 1, won: sideOf(p) === aSide ? aWon : !aWon });
+      for (const f of ['kills', 'deaths', 'assists', 'last_hits', 'denies', 'hero_damage', 'tower_damage', 'hero_healing', 'net_worth']) {
+        acc[f] += p[f] || 0;
+      }
+      acc.gpm += p.gold_per_min || 0;
+      acc.xpm += p.xp_per_min || 0;
+      if (!acc.name) acc.name = p.name || p.personaname;
+      team.players.set(key, acc);
+    });
+  });
+
+  const finish = (t) => ({
+    ...t,
+    players: [...t.players.values()]
+      .map((p) => ({ ...p, gpm: Math.round(p.gpm / p.maps), xpm: Math.round(p.xpm / p.maps), net_worth: Math.round(p.net_worth / p.maps),
+        kda: (p.kills + p.assists) / Math.max(1, p.deaths) }))
+      .sort((a, b) => b.maps - a.maps || b.gpm - a.gpm)
+  });
+  return { A: finish(teams.A), B: finish(teams.B), totalDuration, mapsCount: maps.length };
+}
+
+function SeriesOverview({ series, games, matchData, constants }) {
+  const ids = games.map((g) => String(g.match_id));
+  const loaded = ids.map((mid) => matchData[mid]);
+  if (loaded.some((m) => m === undefined)) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+        <span className="text-xs font-semibold">Carregando os {ids.length} mapas da série...</span>
+      </div>
+    );
+  }
+  const maps = loaded.filter(Boolean);
+  if (!maps.length) return <MapUnavailable matchId={ids[0]} map={games[0]} />;
+
+  const { A, B, totalDuration, mapsCount } = aggregateSeries(series, maps);
+  const allPlayers = [...A.players, ...B.players];
+  const top = (field) => allPlayers.reduce((best, p) => (p[field] > (best?.[field] ?? -1) ? p : best), null);
+  const highlights = [
+    { label: 'Mais abates', icon: Crosshair, field: 'kills', color: 'text-rose-400', fmt: fmtNumber },
+    { label: 'Melhor KDA', icon: Sparkles, field: 'kda', color: 'text-cyan-400', fmt: (v) => v.toFixed(2) },
+    { label: 'Mais dano a heróis', icon: Swords, field: 'hero_damage', color: 'text-purple-400', fmt: fmtNumber },
+    { label: 'Mais cura', icon: HeartPulse, field: 'hero_healing', color: 'text-emerald-400', fmt: fmtNumber }
+  ].map((h) => ({ ...h, player: top(h.field) })).filter((h) => h.player && h.player[h.field] > 0);
+
+  return (
+    <div className="space-y-6">
+      {/* RESUMO DA SÉRIE */}
+      <div className="flex flex-wrap items-center justify-between gap-3 glass-panel border border-line p-4 sm:p-5 rounded-2xl text-xs shadow-md">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-blue-600 dark:text-amber-400" />
+          <span className="text-gray-400">Totais da série em {mapsCount} {mapsCount === 1 ? 'mapa' : 'mapas'}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-[11px]">
+          <span className="flex items-center gap-1.5">
+            <Swords className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
+            Abates: <strong className="text-white">{A.kills}</strong>
+            <span className="text-gray-400">:</span>
+            <strong className="text-white">{B.kills}</strong>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-cyan-500" />
+            Tempo total: <strong className="text-white">{fmtDuration(totalDuration)}</strong>
+          </span>
+          <span>
+            Média por mapa: <strong className="text-white">{fmtDuration(Math.round(totalDuration / mapsCount))}</strong>
+          </span>
+        </div>
+      </div>
+
+      {highlights.length > 0 && (
+        <div className="glass-panel border border-line rounded-3xl p-6 shadow-xl">
+          <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
+            <span>Destaques da Série</span>
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            {highlights.map(({ label, icon: Icon, field, color, fmt, player }) => (
+              <div key={field} className="flex items-center gap-3 bg-surface-2 border border-line rounded-2xl p-3 shadow-sm">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] uppercase font-bold text-gray-400 flex items-center gap-1">
+                    <Icon className={`w-3 h-3 ${color}`} /> {label}
+                  </div>
+                  <div className="text-xs font-bold text-white truncate">{player.name || 'Jogador'}</div>
+                </div>
+                <span className={`font-mono font-black text-sm ${color}`}>{fmt(player[field])}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {[A, B].map((t) => (
+        <SeriesPlayerTable key={t.name} team={t} won={t.wins > (t === A ? B : A).wins} constants={constants} />
+      ))}
+    </div>
+  );
+}
+
+function SeriesPlayerTable({ team, won, constants }) {
+  return (
+    <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-xl">
+      <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <TeamLogo teamName={team.name} teamId={team.id} className="w-7 h-7 shrink-0" />
+          <h3 className="text-sm font-black uppercase tracking-wider leading-tight break-words line-clamp-2 text-white">{team.name}</h3>
+          <span className="text-[10px] font-bold uppercase text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">
+            {team.wins} {team.wins === 1 ? 'mapa vencido' : 'mapas vencidos'}
+          </span>
+          {won && (
+            <span className="text-[10px] bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-black uppercase">
+              Vencedor
+            </span>
+          )}
+        </div>
+        <span className="text-xs font-mono text-gray-400 shrink-0">Abates: <strong className="text-white font-black">{team.kills}</strong></span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs min-w-[1000px]">
+          <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+            <tr>
+              <th className="p-3 pl-4">Jogador</th>
+              <th className="p-3">Heróis por mapa</th>
+              <th className="p-3 text-center whitespace-nowrap">K / D / A</th>
+              <th className="p-3 text-center">KDA</th>
+              <th className="p-3 text-right whitespace-nowrap">LH / DN</th>
+              <th className="p-3 text-right whitespace-nowrap" title="Média por mapa">GPM / XPM</th>
+              <th className="p-3 text-right whitespace-nowrap" title="Média por mapa">Patrimônio</th>
+              <th className="p-3 text-right whitespace-nowrap">Dano heróis</th>
+              <th className="p-3 text-right whitespace-nowrap">Dano torres</th>
+              <th className="p-3 pr-4 text-right">Cura</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line text-gray-300">
+            {team.players.map((p) => (
+              <tr key={p.key} className="hover:bg-surface-2/60 transition-colors">
+                <td className="p-3 pl-4">
+                  {p.account_id ? (
+                    <Link to={`/jogadores/${p.account_id}`} className="font-bold text-white hover:text-amber-400 transition-colors truncate max-w-[170px] block">
+                      {p.name || `Jogador ${p.account_id}`}
+                    </Link>
+                  ) : (
+                    <span className="font-bold text-white truncate max-w-[170px] block">{p.name || 'Jogador'}</span>
+                  )}
+                  <span className="text-[10px] text-gray-400">{p.maps} {p.maps === 1 ? 'mapa' : 'mapas'}</span>
+                </td>
+                <td className="p-3">
+                  <div className="flex items-center gap-1">
+                    {p.heroes.map((h) => (
+                      <Link
+                        key={h.map}
+                        to={`/herois/${h.hero_id}`}
+                        title={`Jogo ${h.map}: ${getHeroName(constants, h.hero_id)}${h.won ? ' (vitória)' : ' (derrota)'}`}
+                        className={`shrink-0 rounded border-b-2 ${h.won ? 'border-emerald-500' : 'border-rose-500'}`}
+                      >
+                        <img src={getHeroImg(constants, h.hero_id)} alt={getHeroName(constants, h.hero_id)} className="w-10 h-6 object-cover rounded-t" />
+                      </Link>
+                    ))}
+                  </div>
+                </td>
+                <td className="p-3 text-center font-mono whitespace-nowrap">
+                  <span className="font-bold text-white">{p.kills}</span>
+                  <span className="text-gray-500 mx-1">/</span>
+                  <span className="font-bold text-rose-400">{p.deaths}</span>
+                  <span className="text-gray-500 mx-1">/</span>
+                  <span className="font-bold text-cyan-400">{p.assists}</span>
+                </td>
+                <td className="p-3 text-center font-mono font-bold text-white">{p.kda.toFixed(2)}</td>
+                <td className="p-3 text-right font-mono whitespace-nowrap">
+                  <span className="text-white font-semibold">{fmtNumber(p.last_hits)}</span>
+                  <span className="text-gray-500 mx-1">/</span>
+                  <span className="text-gray-400">{p.denies}</span>
+                </td>
+                <td className="p-3 text-right font-mono whitespace-nowrap">
+                  <span className="text-amber-400 font-bold">{p.gpm}</span>
+                  <span className="text-gray-500 mx-1">/</span>
+                  <span className="text-cyan-400 font-bold">{p.xpm}</span>
+                </td>
+                <td className="p-3 text-right font-mono font-bold text-amber-400">{fmtNumber(p.net_worth)}</td>
+                <td className="p-3 text-right font-mono">{fmtNumber(p.hero_damage)}</td>
+                <td className="p-3 text-right font-mono">{fmtNumber(p.tower_damage)}</td>
+                <td className="p-3 pr-4 text-right font-mono">{fmtNumber(p.hero_healing)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="px-4 sm:px-5 py-2.5 text-[10px] text-gray-400 border-t border-line">
+        Abates, mortes, assistências, abates de creeps, dano e cura somados em todos os mapas. GPM, XPM e patrimônio são a média por mapa.
       </div>
     </section>
   );
