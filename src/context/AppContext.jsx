@@ -122,7 +122,11 @@ const MAX_SERIES_HOURS = { BO1: 2, BO2: 3.5, BO3: 4.5, BO5: 7 };
  * séries da Liquipedia com placar parcial que a OpenDota ainda não registrou.
  */
 function seriesBetweenMaps(finishedSeries, ongoingSeries, liveGames, now = Date.now()) {
-  const isLive = (a, b) => Boolean(findLiveGameFor({ timeA: a, timeB: b }, liveGames));
+  // Um time não joga duas séries ao mesmo tempo: basta um dos times estar num mapa ao vivo.
+  // Os nomes variam entre as fontes ("LVL UP academy" x "Level Up Academy"), então um lado basta.
+  const liveTeams = (liveGames || []).flatMap((g) => [g.radiant_name || g.timeA || g.team1, g.dire_name || g.timeB || g.team2]);
+  const isLive = (a, b) => Boolean(findLiveGameFor({ timeA: a, timeB: b }, liveGames)) ||
+    liveTeams.some((t) => looseSameTeam(t, a) || looseSameTeam(t, b));
   const list = [];
 
   for (const s of finishedSeries || []) {

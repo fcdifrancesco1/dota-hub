@@ -5,6 +5,10 @@ import { useOpenSeries } from '../utils/matchRoute';
 import { useOpenWikiSeries } from '../utils/wikiSeries';
 import MatchPreviewModal from './MatchPreviewModal';
 
+/** Moldura dos cards da faixa "ao vivo" da home: mesma largura para os cards ao vivo e entre mapas. */
+export const STRIP_CARD =
+  'flex-shrink-0 w-[280px] sm:w-[320px] flex flex-col justify-between cursor-pointer rounded-2xl p-3 transition-all home-float';
+
 /**
  * Série em andamento no intervalo entre mapas (sem mapa ao vivo agora): fica na
  * seção "ao vivo" com o placar da série até ela terminar.
@@ -37,7 +41,7 @@ export default function BetweenMapsCard({ item, large = false }) {
         onClick={onClick}
         className={large
           ? 'glass-panel rounded-3xl p-6 sm:p-7 shadow-xl border border-dashed border-red-500/40 hover:border-amber-500/50 transition-all cursor-pointer flex flex-col justify-between'
-          : 'flex-shrink-0 cursor-pointer bg-surface/80 hover:bg-surface ring-1 ring-red-500/15 rounded-2xl p-3 min-w-[280px] sm:min-w-[320px] transition-all home-float'}
+          : `${STRIP_CARD} bg-surface/80 hover:bg-surface ring-1 ring-red-500/15`}
       >
         <div className={`flex items-center justify-between text-[11px] text-gray-400 border-b border-line ${large ? 'pb-3 mb-4 text-xs' : 'mb-2 pb-1.5'}`}>
           <span className="font-semibold truncate max-w-[200px] text-amber-500">{item.tourneyName || 'Torneio Oficial'}</span>

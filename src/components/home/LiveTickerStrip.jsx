@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import TeamLogo from '../../utils/teamLogos';
-import BetweenMapsCard from '../BetweenMapsCard';
+import BetweenMapsCard, { STRIP_CARD } from '../BetweenMapsCard';
 
 export default function LiveTickerStrip() {
   const { liveGames, betweenMaps } = useApp();
@@ -55,7 +55,8 @@ export default function LiveTickerStrip() {
         </div>
 
         {/* Scroll Horizontal de Cards Ao Vivo */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/10">
+        {/* items-stretch + largura fixa: cards ao vivo e "entre mapas" do mesmo tamanho */}
+        <div className="flex items-stretch gap-3 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/10">
           {liveGames.map((game, idx) => {
             const radName = game.radiant_name || game.team1 || 'Radiant';
             const direName = game.dire_name || game.team2 || 'Dire';
@@ -70,7 +71,7 @@ export default function LiveTickerStrip() {
               <div
                 key={game.match_id || idx}
                 onClick={() => openLiveMatch(game)}
-                className="flex-shrink-0 cursor-pointer bg-surface/80 hover:bg-surface rounded-2xl p-3 min-w-[280px] sm:min-w-[320px] transition-all home-float"
+                className={`${STRIP_CARD} bg-surface/80 hover:bg-surface`}
               >
                 {/* Cabeçalho do Card */}
                 <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2 border-b border-line/60 pb-1.5">
