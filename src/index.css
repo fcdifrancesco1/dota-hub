@@ -38,14 +38,15 @@
   filter: drop-shadow(0 0 1px rgba(10, 20, 35, 0.55)) drop-shadow(0 0 0.5px rgba(10, 20, 35, 0.45));
 }
 
-/* Fundo da aplicação: brilho avermelhado no escuro; bege com textura suave no claro */
+/* Fundo da aplicação: brilho avermelhado no escuro; no claro, a arte dos heróis sob um véu bege
+   (mais fraco no topo, onde a arte aparece, e mais forte embaixo, atrás do conteúdo) */
 .app-backdrop {
   background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(120, 20, 20, 0.15), rgba(255, 255, 255, 0));
 }
 [data-theme="light"] .app-backdrop {
   background-image:
-    linear-gradient(rgba(247, 239, 228, 0.93), rgba(247, 239, 228, 0.97)),
-    url('/Dota_2_website_background.jpeg');
+    linear-gradient(rgba(247, 239, 228, 0.72), rgba(247, 239, 228, 0.86)),
+    url('/site-background.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -60,7 +61,7 @@
 body {
   background:
     linear-gradient(rgba(11, 13, 18, 0.78), rgba(11, 13, 18, 0.88)),
-    url('/Dota_2_website_background.jpeg') center center / cover no-repeat fixed;
+    url('/site-background.webp') center center / cover no-repeat fixed;
   color: var(--text);
   transition: background-color 0.2s ease, color 0.2s ease;
   font-family: theme('fontFamily.sans');
