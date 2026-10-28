@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   fetchConstants,
   fetchProMatches,
@@ -15,6 +15,7 @@ import {
 import { SITE_CONFIG } from '../config/siteConfig';
 import { loadTeamLogoRegistry } from '../utils/teamLogos';
 import { learnAliases, applyAliasesToSeries, applyAliasesToLiveGame } from '../utils/teamAliases';
+import { isSeriesOngoing } from '../utils/seriesStatus';
 
 const AppContext = createContext(null);
 
@@ -107,6 +108,50 @@ function withWikiFormat(series, wikiMatches) {
     Math.abs(Number(m.timestamp) - series.startTime) < 3 * 3600 &&
     isSeriesMatch(m.timeA, m.timeB, series.timeA, series.timeB));
   return wiki && wiki.formato !== series.formato ? { ...series, formato: wiki.formato } : series;
+}
+
+const WINS_NEEDED = { BO1: 1, BO2: 2, BO3: 2, BO5: 3 };
+// Duração máxima de uma série a partir do horário marcado: a Liquipedia às vezes
+// demora a marcar a série como encerrada, e ela não pode ficar "ao vivo" para sempre
+const MAX_SERIES_HOURS = { BO1: 2, BO2: 3.5, BO3: 4.5, BO5: 7 };
+
+/**
+ * Séries que já começaram e ainda não terminaram, mas sem mapa ao vivo agora
+ * (intervalo entre um mapa e outro): continuam na seção "ao vivo" até o fim da
+ * série. Vêm das séries da OpenDota ainda incompletas (ex.: 1x0 numa MD3) e das
+ * séries da Liquipedia com placar parcial que a OpenDota ainda não registrou.
+ */
+function seriesBetweenMaps(finishedSeries, ongoingSeries, liveGames, now = Date.now()) {
+  const isLive = (a, b) => Boolean(findLiveGameFor({ timeA: a, timeB: b }, liveGames));
+  const list = [];
+
+  for (const s of finishedSeries || []) {
+    if (!isSeriesOngoing(s) || isLive(s.timeA, s.timeB)) continue;
+    list.push({
+      key: `od-${s.series_id || `${s.timeA}-${s.timeB}-${s.startTime}`}`,
+      timeA: s.timeA, timeB: s.timeB, idA: s.preferredIdA, idB: s.preferredIdB, logoA: s.logoA, logoB: s.logoB,
+      scoreA: s.scoreA || 0, scoreB: s.scoreB || 0, formato: s.formato, tourneyName: s.stage,
+      series: s
+    });
+  }
+
+  for (const m of ongoingSeries || []) {
+    const a = m.scoreA || 0;
+    const b = m.scoreB || 0;
+    const fmt = String(m.formato || 'BO3').toUpperCase();
+    const needed = WINS_NEEDED[fmt] || 2;
+    const recent = m.timestamp && now - m.timestamp * 1000 < (MAX_SERIES_HOURS[fmt] || 4.5) * 3600000;
+    if (m.isCompleted || m.winner || a + b === 0 || Math.max(a, b) >= needed || !recent) continue;
+    if (isLive(m.timeA, m.timeB)) continue;
+    if (list.some((x) => isSeriesMatch(x.timeA, x.timeB, m.timeA, m.timeB))) continue;
+    list.push({
+      key: `wiki-${m.timeA}-${m.timeB}-${m.timestamp}`,
+      timeA: m.timeA, timeB: m.timeB, logoA: m.logoA, logoB: m.logoB,
+      scoreA: a, scoreB: b, formato: m.formato, tourneyName: m.tourneyName,
+      wikiMatch: m
+    });
+  }
+  return list;
 }
 
 /**
@@ -245,8 +290,14 @@ export function AppProvider({ children }) {
     return () => clearInterval(interval);
   }, [loadData]);
 
+  // Séries em andamento esperando o próximo mapa também contam como ao vivo
+  const betweenMaps = useMemo(
+    () => seriesBetweenMaps(finishedSeries, ongoingSeries, liveGames),
+    [finishedSeries, ongoingSeries, liveGames]
+  );
+
   // Contagem de partidas ao vivo
-  const liveCount = liveGames.length;
+  const liveCount = liveGames.length + betweenMaps.length;
 
   return (
     <AppContext.Provider
@@ -256,6 +307,7 @@ export function AppProvider({ children }) {
         ongoingSeries,
         tournamentsList,
         liveGames,
+        betweenMaps,
         upcomingMatches,
         loading,
         loadingRefresh,

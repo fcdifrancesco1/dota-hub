@@ -17,6 +17,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
+import BetweenMapsCard from '../components/BetweenMapsCard';
 import { getHeroImg, getHeroName } from '../services/api';
 
 // Canais oficiais das organizadoras. No YouTube, o vídeo ao vivo de cada canal é
@@ -53,6 +54,7 @@ function streamPageUrl(stream) {
 export default function LivePage() {
   const {
     liveGames,
+    betweenMaps,
     loadingRefresh,
     refreshData,
     upcomingMatches,
@@ -60,6 +62,8 @@ export default function LivePage() {
   } = useApp();
 
   const openLiveMatch = useOpenLiveMatch();
+  // Mapas ao vivo + séries em andamento esperando o próximo mapa
+  const liveTotal = (liveGames?.length || 0) + (betweenMaps?.length || 0);
   const [activeStream, setActiveStream] = useState(DEFAULT_STREAMS[0]);
   const [showStream, setShowStream] = useState(true);
   const [theaterMode, setTheaterMode] = useState(false);
@@ -253,14 +257,14 @@ export default function LivePage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
             <Flame className="w-4 h-4 text-red-500" />
-            <span>Partidas em Andamento ({liveGames?.length || 0})</span>
+            <span>Partidas em Andamento ({liveTotal})</span>
           </h2>
           <span className="text-[11px] text-gray-500 font-mono">
             Auto-atualização: a cada 30 segundos
           </span>
         </div>
 
-        {liveGames && liveGames.length > 0 ? (
+        {liveTotal > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {liveGames.map((game, idx) => {
               const radName = game.radiant_name || game.team1 || 'Radiant';
@@ -411,6 +415,9 @@ export default function LivePage() {
                 </div>
               );
             })}
+            {(betweenMaps || []).map((item) => (
+              <BetweenMapsCard key={item.key} item={item} large />
+            ))}
           </div>
         ) : (
           /* ESTADO VAZIO AMIGÁVEL */

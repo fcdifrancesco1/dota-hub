@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import TeamLogo from '../../utils/teamLogos';
+import BetweenMapsCard from '../BetweenMapsCard';
 
 export default function LiveTickerStrip() {
-  const { liveGames } = useApp();
+  const { liveGames, betweenMaps } = useApp();
   const openLiveMatch = useOpenLiveMatch();
+  const total = (liveGames?.length || 0) + (betweenMaps?.length || 0);
 
-  if (!liveGames || liveGames.length === 0) {
+  if (total === 0) {
     return (
       <div className="w-full glass-panel border-y border-line py-2.5 px-4 mb-6 transition-all">
         <div className="w-full flex items-center justify-between gap-4 text-xs text-gray-400">
@@ -40,7 +42,7 @@ export default function LiveTickerStrip() {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
             </span>
             <span className="text-xs font-black uppercase tracking-wider text-red-500">
-              Partidas Ao Vivo Agora ({liveGames.length})
+              Partidas Ao Vivo Agora ({total})
             </span>
           </div>
           <Link
@@ -119,6 +121,9 @@ export default function LiveTickerStrip() {
               </div>
             );
           })}
+          {(betweenMaps || []).map((item) => (
+            <BetweenMapsCard key={item.key} item={item} />
+          ))}
         </div>
       </div>
     </div>
