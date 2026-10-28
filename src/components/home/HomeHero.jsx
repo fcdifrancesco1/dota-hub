@@ -9,6 +9,7 @@ import TeamLogo from '../../utils/teamLogos';
 import { liquipediaImage } from '../../utils/liquipediaImage';
 import { fetchTournaments } from '../../services/api';
 import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize, tournamentPath } from '../../utils/tournamentFormat';
+import MatchPreviewModal from '../MatchPreviewModal';
 
 export default function HomeHero() {
   const { upcomingMatches, liveGames } = useApp();
@@ -27,6 +28,8 @@ export default function HomeHero() {
   // tier, a mais próxima — ver pickHeadlineMatch
   const headline = pickHeadlineMatch(upcomingMatches, tournaments);
   const nextMatch = headline?.match || null;
+  // Janela com as médias dos jogadores das duas equipes no campeonato até esta partida
+  const [showPreview, setShowPreview] = useState(false);
 
   // Torneio em destaque: o S/A-Tier em andamento; senão, o da partida em destaque
   const featuredTournament = pickFeaturedTournament(tournaments) || headline?.tournament || null;
@@ -72,7 +75,7 @@ export default function HomeHero() {
   const hasLive = liveGames && liveGames.length > 0;
 
   return (
-    <div className="relative overflow-hidden rounded-[22px] home-hero-bg p-6 sm:p-8">
+    <div className="relative overflow-clip rounded-[22px] home-hero-bg p-6 sm:p-8">
       {/* Aurora Ambient Glows */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 -mb-20 w-80 h-80 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 blur-3xl pointer-events-none" />
@@ -148,7 +151,18 @@ export default function HomeHero() {
         </div>
 
         {/* Lado Direito: Próximo Confronto com Contagem Regressiva */}
-        <div className="lg:col-span-5 min-w-0 bg-surface/70 backdrop-blur rounded-[20px] p-5 sm:p-6 ring-1 ring-line/50">
+        <div
+          {...(nextMatch ? {
+            role: 'button',
+            tabIndex: 0,
+            title: 'Ver os jogadores das duas equipes no campeonato',
+            onClick: () => setShowPreview(true),
+            onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPreview(true); } }
+          } : {})}
+          className={`lg:col-span-5 min-w-0 bg-surface/70 backdrop-blur rounded-[20px] p-5 sm:p-6 ring-1 ring-line/50 transition-all ${
+            nextMatch ? 'cursor-pointer hover:bg-surface/90 hover:ring-blue-500/40 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500' : ''
+          }`}
+        >
           <div className="flex items-center justify-between pb-3 border-b border-line/60 text-xs">
             <span className="text-gray-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-500" />
@@ -240,10 +254,16 @@ export default function HomeHero() {
             </>
             )}
           </div>
+
+          <div className="pt-3 mt-3 border-t border-line/60 text-center text-[11px] font-bold text-blue-600">
+            Ver médias dos jogadores no campeonato →
+          </div>
           </>
           )}
         </div>
       </div>
+
+      {showPreview && nextMatch && <MatchPreviewModal match={nextMatch} onClose={() => setShowPreview(false)} />}
     </div>
   );
 }
