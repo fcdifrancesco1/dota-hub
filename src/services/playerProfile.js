@@ -33,7 +33,7 @@ export async function getProPlayerInfo(accountId) {
 // teamName: o elenco do time na Liquipedia mostra qual é a página do jogador lá
 export async function fetchPlayerAchievements(playerName, accountId, teamName) {
   if (!playerName) return { titles: [], allAchievements: [], summary: {} };
-  const key = `player_achievements_v6_${accountId || playerName}`;
+  const key = `player_achievements_v7_${accountId || playerName}`;
   const cached = getCached(key, 60 * 60 * 1000);
   if (cached) return cached;
 
@@ -53,9 +53,18 @@ export async function fetchPlayerAchievements(playerName, accountId, teamName) {
   }
 }
 
+// A lista /proPlayers da OpenDota demora a acompanhar transferências: vale o
+// time da ficha da Liquipedia; o da OpenDota só quando a Liquipedia não respondeu
+function currentTeam(proInfo, wikiTeam) {
+  const sameTeam = wikiTeam && proInfo?.team_name && wikiTeam.toLowerCase() === proInfo.team_name.toLowerCase();
+  if (wikiTeam && !sameTeam) return { teamId: null, name: wikiTeam, tag: null };
+  if (!proInfo?.team_name) return null;
+  return { teamId: proInfo.team_id, name: proInfo.team_name, tag: proInfo.team_tag };
+}
+
 export async function fetchPlayerComprehensiveData(accountId) {
   if (!accountId) return null;
-  const key = `player_full_profile_v6_${accountId}`;
+  const key = `player_full_profile_v7_${accountId}`;
   const cached = getCached(key, PLAYER_TTL);
   if (cached) return cached;
 
@@ -147,11 +156,7 @@ export async function fetchPlayerComprehensiveData(accountId) {
     profileUrl: profile.profileurl,
     rankTier: playerRaw.rank_tier || null,
     leaderboardRank: playerRaw.leaderboard_rank || null,
-    team: proInfo?.team_name ? {
-      teamId: proInfo.team_id,
-      name: proInfo.team_name,
-      tag: proInfo.team_tag
-    } : null,
+    team: currentTeam(proInfo, achievementsData.team),
     // Posição pela ficha da Liquipedia; o fantasy_role da OpenDota só diz núcleo (1) ou suporte (2)
     position: achievementsData.position || null,
     role: achievementsData.role || null,

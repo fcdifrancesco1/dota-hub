@@ -34,6 +34,7 @@ import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
 import { liquipediaImage } from '../utils/liquipediaImage';
+import { teamPath } from '../utils/teamRoute';
 
 const MEDALS = ['', 'Arauto', 'Guardião', 'Cruzado', 'Arconte', 'Lenda', 'Ancestral', 'Divino', 'Imortal'];
 
@@ -82,6 +83,10 @@ function roleLabel(player) {
   if (player.role) return /support/i.test(player.role) ? 'Suporte' : player.role;
   return FANTASY_ROLE_LABELS[player.fantasyRole] || null;
 }
+
+const countryName = (code) => {
+  try { return new Intl.DisplayNames(['pt-BR'], { type: 'region' }).of(code.toUpperCase()); } catch { return code.toUpperCase(); }
+};
 
 export default function PlayerDetailPage() {
   const { id } = useParams();
@@ -220,7 +225,7 @@ export default function PlayerDetailPage() {
                 </h1>
                 {player.team && (
                   <Link
-                    to={`/times/${player.team.teamId}`}
+                    to={teamPath(player.team.teamId, player.team.name)}
                     className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:border-amber-400 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors"
                     title={`Ver página do time ${player.team.name}`}
                   >
@@ -228,10 +233,14 @@ export default function PlayerDetailPage() {
                     <span>{player.team.tag || player.team.name}</span>
                   </Link>
                 )}
-                {player.countryCode && (
-                  <span className="text-xs uppercase font-mono px-2 py-0.5 rounded bg-surface-2 border border-line text-gray-400 font-bold">
-                    {player.countryCode}
-                  </span>
+                {/^[a-z]{2}$/i.test(player.countryCode || '') && (
+                  // Imagem: o Windows não desenha bandeiras em emoji
+                  <img
+                    src={`https://flagcdn.com/${player.countryCode.toLowerCase()}.svg`}
+                    alt={countryName(player.countryCode)}
+                    title={countryName(player.countryCode)}
+                    className="h-5 w-auto rounded-sm border border-line shadow-sm"
+                  />
                 )}
               </div>
 

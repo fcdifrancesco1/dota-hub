@@ -148,7 +148,7 @@ export function parsePlayerRole(html) {
     [/hard\s*support|position\s*5|pos\s*5/i, 5],
     [/soft\s*support|position\s*4|pos\s*4/i, 4],
     [/^carry/i, 1],
-    [/^mid/i, 2],
+    [/\bmid/i, 2], // "Mid", "Midlaner" e "Solo Middle"
     [/^off\s*lane/i, 3],
     [/support/i, null]
   ];
@@ -214,6 +214,13 @@ async function resolveWikiTitle(rawPlayer, teamName) {
   return latin || rawPlayer;
 }
 
+/** Time atual na ficha da Liquipedia ("Team: OG"); null para quem está sem time. */
+export function parsePlayerTeam(html) {
+  const cell = String(html || '').match(/infobox-description">Team:<\/div>\s*<div[^>]*>([\s\S]*?)<\/div>/i);
+  const title = cell?.[1].match(/title="([^"]+)"/);
+  return title ? cleanText(title[1]) : null;
+}
+
 export default async function handler(req, res) {
   const rawPlayer = String(req.query.player || req.query.name || '').trim();
   const accountId = req.query.account_id;
@@ -231,6 +238,7 @@ export default async function handler(req, res) {
     const mainRes = await fetchLiquipediaApi(wikiTitle, { ttlMs: 2 * 60 * 60 * 1000 });
     wikiTitle = mainRes?.raw?.parse?.title || wikiTitle;
     const { role, position } = parsePlayerRole(mainRes?.html);
+    const team = parsePlayerTeam(mainRes?.html);
 
     // 2. Resultados completos ficam em <Jogador>/Results; sem essa subpágina, usa a principal
     let liquiRes = await fetchLiquipediaApi(`${wikiTitle}/Results`, { ttlMs: 2 * 60 * 60 * 1000 });
@@ -268,6 +276,7 @@ export default async function handler(req, res) {
       accountId,
       role,
       position,
+      team,
       summary: {
         totalChampionships: championships.length,
         totalPodiums: podiums.length,
