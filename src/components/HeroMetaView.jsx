@@ -4,12 +4,13 @@ import { BarChart3, Trophy, Flame, Shield, Swords, Sparkles, Filter, Search, Arr
 import { fetchHeroStats, fetchHeroPositions } from '../services/api';
 import { SkeletonTable } from './SkeletonLoader';
 
-export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
+export default function HeroMetaView({ onSelectHero }) {
   const navigate = useNavigate();
   const [heroes, setHeroes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedAttr, setSelectedAttr] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('tier'); // 'tier' | 'proWinRate' | 'proPick' | 'proBan'
   const [sortAsc, setSortAsc] = useState(false);
 
@@ -77,7 +78,7 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
   const filteredHeroes = heroes
     .filter((h) => {
       // Busca por texto
-      if (searchQuery && !h.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      if (searchQuery && !h.name.toLowerCase().includes(searchQuery.trim().toLowerCase())) {
         return false;
       }
       // Filtro de Função
@@ -192,6 +193,19 @@ export default function HeroMetaView({ searchQuery = "", onSelectHero }) {
             </button>
           ))}
         </div>
+
+        {/* Busca por nome */}
+        <label className="flex items-center gap-2 bg-surface-2 px-3 py-1.5 rounded-xl border border-line w-full sm:w-64 focus-within:ring-2 focus-within:ring-blue-500/40">
+          <Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar herói pelo nome"
+            aria-label="Buscar herói pelo nome"
+            className="bg-transparent outline-none text-xs text-white placeholder:text-gray-400 w-full"
+          />
+        </label>
 
         {/* Filtro de Atributos */}
         <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-xl border border-line">
