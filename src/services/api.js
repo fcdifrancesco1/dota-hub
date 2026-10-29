@@ -62,7 +62,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
 // Evita que o localStorage cresça indefinidamente (ex.: um "match_<id>" por
 // partida vista). Quando o número de entradas passa do limite, remove as
 // mais antigas primeiro.
-function pruneCache() {
+function pruneCache(maxEntries = MAX_CACHE_ENTRIES) {
   try {
     const entries = Object.keys(localStorage)
       .filter((k) => k.startsWith(CACHE_PREFIX))
@@ -75,7 +75,7 @@ function pruneCache() {
       })
       .sort((a, b) => a.ts - b.ts);
 
-    const excess = entries.length - MAX_CACHE_ENTRIES;
+    const excess = entries.length - maxEntries;
     if (excess > 0) {
       entries.slice(0, excess).forEach((e) => localStorage.removeItem(e.key));
     }
@@ -85,10 +85,15 @@ function pruneCache() {
 function setCache(key, data) {
   const payload = { ts: Date.now(), data };
   memoryCache.set(key, payload);
+  const json = JSON.stringify(payload);
   try {
-    localStorage.setItem(`${CACHE_PREFIX}${key}`, JSON.stringify(payload));
+    localStorage.setItem(`${CACHE_PREFIX}${key}`, json);
     pruneCache();
-  } catch (e) {}
+  } catch (e) {
+    // localStorage cheio: sem isto a limpeza nunca rodaria e o cache ficaria travado
+    pruneCache(MAX_CACHE_ENTRIES / 2);
+    try { localStorage.setItem(`${CACHE_PREFIX}${key}`, json); } catch (e2) {}
+  }
 }
 
 export function normalizeTeamKey(name) {

@@ -8,7 +8,6 @@ import {
   Swords,
   Shield,
   Sparkles,
-  Award,
   Lock,
   Menu,
   X,
@@ -44,7 +43,6 @@ export default function Header() {
     { to: '/partidas', label: 'Partidas', icon: Swords },
     { to: '/times', label: 'Times', icon: Shield },
     { to: '/herois', label: 'Heróis', icon: Sparkles },
-    { to: '/palpites', label: 'Palpites', icon: Award },
     { to: '/perfil', label: 'Perfil', icon: User },
     { to: '/admin', label: 'Admin', icon: Lock }
   ];

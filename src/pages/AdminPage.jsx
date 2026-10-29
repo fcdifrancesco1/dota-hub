@@ -5,7 +5,6 @@ import {
   RefreshCw,
   Calendar,
   Tv,
-  FileText,
   Settings,
   CheckCircle2,
   AlertCircle,
@@ -19,7 +18,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { SITE_CONFIG } from '../config/siteConfig';
-import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 export default function AdminPage() {
   const { user, isAdmin, signIn, signOut, loading: authLoading } = useAuth();
@@ -58,14 +56,6 @@ export default function AdminPage() {
   const [newStreamName, setNewStreamName] = useState('');
   const [newStreamChannel, setNewStreamChannel] = useState('');
   const [newStreamLang, setNewStreamLang] = useState('pt-BR');
-
-  // Editor de Análises (Markdown)
-  const [articleTitle, setArticleTitle] = useState('');
-  const [articleSlug, setArticleSlug] = useState('');
-  const [articleSummary, setArticleSummary] = useState('');
-  const [articleContent, setArticleContent] = useState('');
-  const [articleAuthor, setArticleAuthor] = useState('Admin DotaHub');
-  const [articleCover, setArticleCover] = useState('');
 
   // Notificação interna
   const [toast, setToast] = useState(null);
@@ -158,38 +148,6 @@ export default function AdminPage() {
     setNewStreamName('');
     setNewStreamChannel('');
     showToast('Transmissão cadastrada com sucesso!');
-  };
-
-  // Publicar Análise em Markdown
-  const handlePublishArticle = async (e) => {
-    e.preventDefault();
-    if (!articleTitle || !articleContent) return;
-
-    const payload = {
-      title: articleTitle,
-      slug: articleSlug || articleTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      summary: articleSummary,
-      content: articleContent,
-      author: articleAuthor,
-      cover_image: articleCover || 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/blog/patch737_banner.jpg',
-      tags: ['Análise', 'Meta', 'Admin'],
-      is_featured: false,
-      published_at: new Date().toISOString()
-    };
-
-    if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('analyses').upsert(payload, { onConflict: 'slug' });
-      } catch (err) {
-        console.warn('Erro ao salvar no Supabase:', err);
-      }
-    }
-
-    setArticleTitle('');
-    setArticleSlug('');
-    setArticleSummary('');
-    setArticleContent('');
-    showToast('Artigo publicado com sucesso no blog tático!');
   };
 
   // TELA DE LOGIN (PROTEÇÃO ADMIN)
@@ -301,7 +259,6 @@ export default function AdminPage() {
           { id: 'sync', label: 'Sincronização & Cron', icon: RefreshCw },
           { id: 'schedule', label: 'Cadastrar Agenda', icon: Calendar },
           { id: 'streams', label: 'Streams & VODs', icon: Tv },
-          { id: 'analyses', label: 'Publicar Análises (Markdown)', icon: FileText },
           { id: 'settings', label: 'Configurações do Site', icon: Settings }
         ].map((tab) => {
           const Icon = tab.icon;
@@ -565,83 +522,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ABA 4: PUBLICADOR DE ANÁLISES (MARKDOWN) */}
-      {activeTab === 'analyses' && (
-        <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
-          <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-amber-400" />
-            <span>Publicar Novo Artigo / Análise Tática</span>
-          </h3>
-
-          <form onSubmit={handlePublishArticle} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Título do Artigo</label>
-              <input
-                type="text"
-                required
-                placeholder="ex: Como o Meta da Posição 4 Mudou com o Patch 7.37"
-                value={articleTitle}
-                onChange={(e) => setArticleTitle(e.target.value)}
-                className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Slug URL</label>
-                <input
-                  type="text"
-                  placeholder="ex: como-meta-pos-4-mudou"
-                  value={articleSlug}
-                  onChange={(e) => setArticleSlug(e.target.value)}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Autor</label>
-                <input
-                  type="text"
-                  value={articleAuthor}
-                  onChange={(e) => setArticleAuthor(e.target.value)}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Resumo (Lead do Post)</label>
-              <textarea
-                rows={2}
-                value={articleSummary}
-                onChange={(e) => setArticleSummary(e.target.value)}
-                placeholder="Breve resumo da análise..."
-                className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Conteúdo Completo (Markdown)</label>
-              <textarea
-                rows={8}
-                required
-                value={articleContent}
-                onChange={(e) => setArticleContent(e.target.value)}
-                placeholder="# Escreva em Markdown aqui...&#10;&#10;Use títulos, tópicos e negrito."
-                className="w-full bg-surface-2 border border-line rounded-xl p-3.5 text-xs text-white font-mono placeholder-gray-500 focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="px-8 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-amber-500/20 transition-all"
-            >
-              Publicar Artigo Agora
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* ABA 5: CONFIGURAÇÕES DO SITE */}
+      {/* ABA 4: CONFIGURAÇÕES DO SITE */}
       {activeTab === 'settings' && (
         <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl max-w-2xl mx-auto">
           <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
@@ -657,25 +538,6 @@ export default function AdminPage() {
                 defaultValue={SITE_CONFIG.name}
                 className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Pontos: Acerto Vencedor</label>
-                <input
-                  type="number"
-                  defaultValue={SITE_CONFIG.predictionPoints.correctWinner}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Pontos: Placar Exato</label>
-                <input
-                  type="number"
-                  defaultValue={SITE_CONFIG.predictionPoints.exactScore}
-                  className="w-full bg-surface-2 border border-line rounded-xl px-3.5 py-2.5 text-xs text-white"
-                />
-              </div>
             </div>
 
             <button

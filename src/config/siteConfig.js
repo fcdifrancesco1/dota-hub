@@ -32,13 +32,6 @@ export const SITE_CONFIG = {
     github: "https://github.com/fcdifrancesco1/dota-hub"
   },
 
-  // Pontuação do Bolão (Palpites) - Centralizada em um único arquivo conforme especificação
-  predictionPoints: {
-    correctWinner: 3, // Acertar o vencedor da série/partida
-    exactScore: 5,    // Acertar o placar exato (ex: 2x1 em MD3)
-    upsetBonus: 2     // Bônus se apostou no time com menor % de votos
-  },
-
   // URLs CDN
   steamCdn: "https://cdn.cloudflare.steamstatic.com",
   openDotaApi: "https://api.opendota.com/api"

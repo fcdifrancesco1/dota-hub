@@ -71,7 +71,7 @@ export function parsePlayerAchievements(html) {
     let score = '';
     let opponent = '';
     if (tds.length >= 7) {
-      const scoreTd = tds.find(td => td.includes('&#58;') || /data-align="center"[^>]*>[0-9\s:a-zA-Z\/-]+<\/td>/i.test(td));
+      const scoreTd = tds.find(td => td.includes('&#58;') || /data-align="center"[^>]*>[0-9\s:a-zA-Z/-]+<\/td>/i.test(td));
       if (scoreTd) {
         score = cleanText(scoreTd);
       }

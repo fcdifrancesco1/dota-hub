@@ -28,18 +28,19 @@ const PAGE_RE = /^[\w ./()'&:+-]{1,120}$/;
 /**
  * GET /api/tournaments?standings=<página>
  * Tabelas de classificação (fase de grupos) e chaveamentos do campeonato, já
- * com séries, mapas e vencedores calculados pela Liquipedia. Cache de 5 minutos.
+ * com séries, mapas e vencedores calculados pela Liquipedia. Cache de 10 minutos.
  */
 async function handleStandings(page, res) {
   if (!PAGE_RE.test(page)) return res.status(400).json({ error: 'Página inválida' });
   try {
-    const parsed = await fetchLiquipediaApi(page, { ttlMs: 5 * 60 * 1000 });
+    const parsed = await fetchLiquipediaApi(page, { ttlMs: 10 * 60 * 1000 });
     const html = parsed?.html || '';
     const tables = parseLiquipediaStandings(html);
     const brackets = parseLiquipediaBrackets(html);
     const participants = parseLiquipediaParticipants(html);
     const teams = parseLiquipediaParticipantTeams(html);
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
+    // Cada cópia da função tem a própria fila da Liquipedia: o cache da CDN é o que segura os pedidos
+    res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=3600');
     return res.status(200).json({ page, tables, brackets, participants, teams });
   } catch (error) {
     console.error('[Tournaments API] Erro na classificação:', error.message);
@@ -167,7 +168,7 @@ async function handlePage(page, res) {
     if (!t || !t.startDate) return res.status(404).json({ error: 'Campeonato não encontrado' });
     const today = new Date().toISOString().slice(0, 10);
     t.status = t.endDate && t.endDate < today ? 'finished' : (t.startDate > today ? 'upcoming' : 'ongoing');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 's-maxage=21600, stale-while-revalidate=86400');
     return res.status(200).json(t);
   } catch (error) {
     console.error('[Tournaments API] Erro no campeonato:', error.message);

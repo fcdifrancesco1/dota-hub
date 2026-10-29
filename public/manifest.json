@@ -1,7 +1,7 @@
 {
   "short_name": "DotaHub",
   "name": "DotaHub Brasil - Hub Competitivo de Dota 2",
-  "description": "Acompanhamento profissional de Dota 2 em tempo real: telemetria ao vivo, agenda, campeonatos, rankings, meta de heróis e palpites.",
+  "description": "Acompanhamento profissional de Dota 2 em tempo real: telemetria ao vivo, agenda, campeonatos, rankings e meta de heróis.",
   "icons": [
     {
       "src": "/logo-192.png",

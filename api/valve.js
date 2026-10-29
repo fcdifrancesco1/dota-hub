@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   // Leaderboard oficial da Valve
   const division = req.query.division || 'europe';
-  const url = `https://www.dota2.com/webapi/ILeaderboard/GetDivisionLeaderboard/v0001?division=${division}&leaderboard=0`;
+  const url = `https://www.dota2.com/webapi/ILeaderboard/GetDivisionLeaderboard/v0001?division=${encodeURIComponent(division)}&leaderboard=0`;
 
   try {
     const response = await fetch(url, {
