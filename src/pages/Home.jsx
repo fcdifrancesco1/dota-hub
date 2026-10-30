@@ -49,9 +49,12 @@ export default function Home() {
             <div className="home-stats empty:hidden px-1 sm:px-3"><HomeStatsCards /></div>
           </div>
 
-          {/* 5. Notícias e transferências */}
+          {/* 5. Notícias e transferências: a coluna estica (linha divisória até o fim) e o
+              conteúdo fica fixo ao rolar, como o ranking, só quando tem coluna própria (2xl) */}
           <div className="order-3 xl:col-span-2 2xl:col-span-1 min-w-0 p-5 sm:p-6 border-t border-line/60 2xl:border-t-0 2xl:border-l self-stretch">
-            <NewsPanel />
+            <div className="2xl:sticky 2xl:top-20">
+              <NewsPanel />
+            </div>
           </div>
         </div>
       </div>
