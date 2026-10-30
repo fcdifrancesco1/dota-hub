@@ -10,13 +10,17 @@ import {
   Crosshair,
   ExternalLink,
   HeartPulse,
+  Medal,
   Loader2,
   Sparkles,
   Swords,
   Trophy,
   Zap
 } from 'lucide-react';
-import { fetchMatchDetails, fetchLeagueSeries, getHeroImg, getHeroName, getItemImg, normalizeTeamKey } from '../services/api';
+import { fetchMatchDetails, fetchLeagueSeries, fetchProBenchmarks, getHeroImg, getHeroName, getItemImg, normalizeTeamKey } from '../services/api';
+import { fetchCareerBest } from '../services/playerProfile';
+import { performanceRating, playerRow, statsFromMatchPlayers } from '../utils/proBenchmarks';
+import { RatingBadge } from '../components/PlayerPerformance';
 import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
 import { useApp } from '../context/AppContext';
@@ -125,6 +129,9 @@ export default function MatchDetailPage() {
 
   // Replays já carregados, por match_id (null = OpenDota não entregou)
   const [matchData, setMatchData] = useState({});
+  // Médias dos profissionais por posição: base da nota de cada jogador
+  const [benchmarks, setBenchmarks] = useState([]);
+  useEffect(() => { fetchProBenchmarks().then(setBenchmarks); }, []);
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
@@ -276,7 +283,7 @@ export default function MatchDetailPage() {
           )}
 
           {showOverview ? (
-            <SeriesOverview series={series} games={games} matchData={matchData} constants={constants} />
+            <SeriesOverview series={series} games={games} matchData={matchData} constants={constants} benchmarks={benchmarks} />
           ) : match === undefined ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
               <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
@@ -285,6 +292,7 @@ export default function MatchDetailPage() {
           ) : match ? (
             <MapDetail
               match={match}
+              benchmarks={benchmarks}
               mapNumber={currentMap?.mapNumber || activeIndex + 1}
               constants={constants}
               onSelectHero={setSelectedHero}
@@ -376,7 +384,53 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
   );
 }
 
-function MapDetail({ match, mapNumber, constants, onSelectHero }) {
+// Posição no time pelo farm (1 = maior GPM): usada quando o jogador não está na base dos profissionais
+const farmRank = (p, team) => [...team].sort((a, b) => (b.gold_per_min || 0) - (a.gold_per_min || 0)).indexOf(p) + 1;
+
+/** Nota (0–100) de cada jogador do mapa, por player_slot, contra os profissionais da posição. */
+function mapRatings(match, benchmarks) {
+  const out = new Map();
+  if (!benchmarks?.length) return out;
+  const players = match.players || [];
+  for (const p of players) {
+    const team = players.filter((q) => (q.player_slot < 128) === (p.player_slot < 128));
+    const teamKills = (p.player_slot < 128 ? match.radiant_score : match.dire_score) || team.reduce((n, q) => n + (q.kills || 0), 0);
+    const position = playerRow(benchmarks, p.account_id)?.position || farmRank(p, team);
+    out.set(p.player_slot, performanceRating(benchmarks, position, statsFromMatchPlayers([{ ...p, duration: match.duration }], () => teamKills)));
+  }
+  return out;
+}
+
+/** Selos "recorde da carreira" para quem mais matou e quem teve mais GPM no mapa (jogos oficiais). */
+function CareerRecords({ match }) {
+  const [records, setRecords] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    const players = (match.players || []).filter((p) => p.account_id);
+    const checks = [['kills', 'abates'], ['gold_per_min', 'GPM']].map(([field, label]) => {
+      const top = players.reduce((best, p) => ((p[field] || 0) > (best?.[field] || 0) ? p : best), null);
+      if (!top) return Promise.resolve(null);
+      return fetchCareerBest(top.account_id, field).then((best) =>
+        best && (best.matchId === match.match_id || top[field] >= best.value)
+          ? `${top.name || top.personaname}: ${top[field]} ${label}, recorde da carreira em jogos oficiais`
+          : null);
+    });
+    Promise.all(checks).then((list) => !cancelled && setRecords(list.filter(Boolean)));
+    return () => { cancelled = true; };
+  }, [match]);
+  if (!records.length) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {records.map((r) => (
+        <span key={r} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-600 text-xs font-bold">
+          <Medal className="w-3.5 h-3.5" /> {r}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function MapDetail({ match, mapNumber, constants, onSelectHero, benchmarks }) {
   const radiant = radiantNameOf(match);
   const dire = direNameOf(match);
   const players = match.players || [];
@@ -384,6 +438,9 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
   const direPlayers = players.filter((p) => p.player_slot >= 128);
   const winner = match.radiant_win ? radiant : dire;
   const hasGraph = (match.radiant_gold_adv || []).length > 0;
+  const ratings = useMemo(() => mapRatings(match, benchmarks), [match, benchmarks]);
+  const mvp = players.reduce((best, p) => ((ratings.get(p.player_slot)?.overall ?? -1) > (ratings.get(best?.player_slot)?.overall ?? -1) ? p : best), null);
+  const mvpInfo = mvp && ratings.get(mvp.player_slot) ? { player: mvp, rating: ratings.get(mvp.player_slot) } : null;
 
   return (
     <div className="space-y-6">
@@ -408,6 +465,8 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
           <span>Match ID: <strong className="text-white">{match.match_id}</strong></span>
         </div>
       </div>
+
+      <CareerRecords match={match} />
 
       <DraftPanel picksBans={match.picks_bans || []} radiant={radiant} dire={dire} constants={constants} />
 
@@ -434,12 +493,12 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
         </div>
         {hasGraph && (
           <aside className="xl:col-span-4">
-            <Highlights players={players} constants={constants} />
+            <Highlights players={players} constants={constants} mvp={mvpInfo} />
           </aside>
         )}
       </div>
 
-      {!hasGraph && <Highlights players={players} constants={constants} />}
+      {!hasGraph && <Highlights players={players} constants={constants} mvp={mvpInfo} />}
 
       <PlayerTable
         players={radiantPlayers}
@@ -451,6 +510,7 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
         won={match.radiant_win}
         constants={constants}
         onSelectHero={onSelectHero}
+        ratings={ratings}
       />
       <PlayerTable
         players={direPlayers}
@@ -462,6 +522,7 @@ function MapDetail({ match, mapNumber, constants, onSelectHero }) {
         won={!match.radiant_win}
         constants={constants}
         onSelectHero={onSelectHero}
+        ratings={ratings}
       />
 
       <ExternalLinks matchId={match.match_id} />
@@ -535,7 +596,7 @@ function HeroChip({ pb, constants, small = false }) {
   );
 }
 
-function Highlights({ players, constants }) {
+function Highlights({ players, constants, mvp }) {
   const top = (field) => players.reduce((best, p) => ((p[field] || 0) > (best?.[field] || 0) ? p : best), null);
   const items = [
     { label: 'Mais abates', icon: Crosshair, field: 'kills', color: 'text-rose-400' },
@@ -555,6 +616,7 @@ function Highlights({ players, constants }) {
         <span>Destaques do Jogo</span>
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
+        {mvp && <MvpCard player={mvp.player} rating={mvp.rating} constants={constants} label="MVP do jogo" />}
         {items.map(({ label, icon: Icon, field, color, player }) => (
           <div key={field} className="flex items-center gap-3 bg-surface-2 border border-line rounded-2xl p-3 shadow-sm">
             <img
@@ -578,6 +640,20 @@ function Highlights({ players, constants }) {
   );
 }
 
+/** Card do jogador com a maior nota (MVP do jogo ou da série). */
+function MvpCard({ player, rating, constants, label }) {
+  return (
+    <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/40 rounded-2xl p-3 shadow-sm">
+      {player.hero_id ? <img src={getHeroImg(constants, player.hero_id)} alt="" className="w-12 h-7 object-cover rounded-lg border border-line shrink-0" /> : null}
+      <div className="min-w-0 flex-1">
+        <div className="text-[10px] uppercase font-bold text-amber-600 flex items-center gap-1"><Medal className="w-3 h-3" /> {label}</div>
+        <div className="text-xs font-bold text-white truncate">{player.name || player.personaname || 'Jogador'}</div>
+      </div>
+      <RatingBadge rating={rating} size="sm" />
+    </div>
+  );
+}
+
 function ItemSlot({ id, constants, className }) {
   const img = id ? getItemImg(constants, id) : null;
   const name = id ? constants?.itemsById?.[id]?.dname : null;
@@ -588,7 +664,7 @@ function ItemSlot({ id, constants, className }) {
   );
 }
 
-function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, won, constants, onSelectHero }) {
+function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, won, constants, onSelectHero, ratings }) {
   const accent = isRadiant ? 'text-emerald-500' : 'text-rose-500';
   return (
     <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-xl">
@@ -611,6 +687,7 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
           <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
             <tr>
               <th className="p-3 pl-4">Jogador / Herói</th>
+              <th className="p-3 text-center" title="Nota de 0 a 100 contra os profissionais da mesma posição (90 dias)">Nota</th>
               <th className="p-3 text-center">Nível</th>
               <th className="p-3 text-center whitespace-nowrap">K / D / A</th>
               <th className="p-3 text-right">Patrimônio</th>
@@ -664,6 +741,9 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
                         </Link>
                       </div>
                     </div>
+                  </td>
+                  <td className="p-3" title={ratings?.get(p.player_slot)?.label}>
+                    <div className="flex justify-center">{ratings?.get(p.player_slot) ? <RatingBadge rating={ratings.get(p.player_slot)} size="sm" /> : '—'}</div>
                   </td>
                   <td className="p-3 text-center font-mono font-bold">{p.level ?? '—'}</td>
                   <td className="p-3 text-center font-mono whitespace-nowrap">
@@ -761,8 +841,11 @@ function aggregateSeries(series, maps) {
       const acc = team.players.get(key) || {
         key, account_id: p.account_id, name: p.name || p.personaname, heroes: [], maps: 0,
         kills: 0, deaths: 0, assists: 0, last_hits: 0, denies: 0, gpm: 0, xpm: 0,
-        hero_damage: 0, tower_damage: 0, hero_healing: 0, net_worth: 0
+        hero_damage: 0, tower_damage: 0, hero_healing: 0, net_worth: 0, raw: []
       };
+      const teamPlayers = players.filter((q) => sideOf(q) === sideOf(p));
+      acc.raw.push({ ...p, duration: m.duration, _farm: farmRank(p, teamPlayers),
+        _teamKills: (sideOf(p) === 'radiant' ? m.radiant_score : m.dire_score) || teamPlayers.reduce((n, q) => n + (q.kills || 0), 0) });
       acc.maps += 1;
       acc.heroes.push({ hero_id: p.hero_id, map: idx + 1, won: sideOf(p) === aSide ? aWon : !aWon });
       for (const f of ['kills', 'deaths', 'assists', 'last_hits', 'denies', 'hero_damage', 'tower_damage', 'hero_healing', 'net_worth']) {
@@ -785,7 +868,7 @@ function aggregateSeries(series, maps) {
   return { A: finish(teams.A), B: finish(teams.B), totalDuration, mapsCount: maps.length };
 }
 
-function SeriesOverview({ series, games, matchData, constants }) {
+function SeriesOverview({ series, games, matchData, constants, benchmarks }) {
   const ids = games.map((g) => String(g.match_id));
   const loaded = ids.map((mid) => matchData[mid]);
   if (loaded.some((m) => m === undefined)) {
@@ -801,6 +884,13 @@ function SeriesOverview({ series, games, matchData, constants }) {
 
   const { A, B, totalDuration, mapsCount } = aggregateSeries(series, maps);
   const allPlayers = [...A.players, ...B.players];
+  // Nota de cada jogador na série (médias por mapa) e o MVP
+  for (const p of allPlayers) {
+    const position = playerRow(benchmarks, p.account_id)?.position
+      || Math.round(p.raw.reduce((n, r) => n + r._farm, 0) / p.raw.length);
+    p.rating = benchmarks?.length ? performanceRating(benchmarks, position, statsFromMatchPlayers(p.raw, (r) => r._teamKills)) : null;
+  }
+  const mvp = allPlayers.reduce((best, p) => ((p.rating?.overall ?? -1) > (best?.rating?.overall ?? -1) ? p : best), null);
   const top = (field) => allPlayers.reduce((best, p) => (p[field] > (best?.[field] ?? -1) ? p : best), null);
   const highlights = [
     { label: 'Mais abates', icon: Crosshair, field: 'kills', color: 'text-rose-400', fmt: fmtNumber },
@@ -841,6 +931,7 @@ function SeriesOverview({ series, games, matchData, constants }) {
             <span>Destaques da Série</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            {mvp?.rating && <MvpCard player={{ ...mvp, hero_id: mvp.heroes[0]?.hero_id }} rating={mvp.rating} constants={constants} label="MVP da série" />}
             {highlights.map(({ label, icon: Icon, field, color, fmt, player }) => (
               <div key={field} className="flex items-center gap-3 bg-surface-2 border border-line rounded-2xl p-3 shadow-sm">
                 <div className="min-w-0 flex-1">
@@ -887,6 +978,7 @@ function SeriesPlayerTable({ team, won, constants }) {
           <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
             <tr>
               <th className="p-3 pl-4">Jogador</th>
+              <th className="p-3 text-center" title="Nota de 0 a 100 na série contra os profissionais da mesma posição (90 dias)">Nota</th>
               <th className="p-3">Heróis por mapa</th>
               <th className="p-3 text-center whitespace-nowrap">K / D / A</th>
               <th className="p-3 text-center">KDA</th>
@@ -910,6 +1002,9 @@ function SeriesPlayerTable({ team, won, constants }) {
                     <span className="font-bold text-white truncate max-w-[170px] block">{p.name || 'Jogador'}</span>
                   )}
                   <span className="text-[10px] text-gray-400">{p.maps} {p.maps === 1 ? 'mapa' : 'mapas'}</span>
+                </td>
+                <td className="p-3" title={p.rating?.label}>
+                  <div className="flex justify-center">{p.rating ? <RatingBadge rating={p.rating} size="sm" /> : '—'}</div>
                 </td>
                 <td className="p-3">
                   <div className="flex items-center gap-1">

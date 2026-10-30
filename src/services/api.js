@@ -730,6 +730,26 @@ export async function fetchHeroPositions() {
   return getCachedFast(key) || null;
 }
 
+// Médias dos profissionais por posição (90 dias) — ver src/utils/proBenchmarks.js
+export async function fetchProBenchmarks() {
+  const key = "pro_benchmarks_v1";
+  const cached = getCached(key, 12 * 3600 * 1000);
+  if (cached) return cached;
+  try {
+    const res = await fetchWithTimeout("/api/results?proBenchmarks=1", {}, 30000);
+    if (res.ok) {
+      const rows = await res.json();
+      if (Array.isArray(rows) && rows.length) {
+        setCache(key, rows);
+        return rows;
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso ao carregar médias dos profissionais:", err.message || err);
+  }
+  return getCachedFast(key) || [];
+}
+
 // 6. Buscar Partidas Ao Vivo
 export async function fetchLiveGames() {
   try {

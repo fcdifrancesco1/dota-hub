@@ -87,6 +87,56 @@ async function handleHeroPositions(res) {
   }
 }
 
+// Médias de cada profissional por posição nos últimos 90 dias (mín. 8 jogos):
+// base do "Top X%", da nota de desempenho e da comparação entre jogadores.
+// Posição pela rota + rank de farm no time, como em HERO_POSITIONS_SQL.
+const PRO_BENCHMARKS_SQL = `
+WITH p AS (
+  SELECT pm.account_id, pm.lane_role, pm.kills, pm.deaths, pm.assists, pm.gold_per_min, pm.xp_per_min,
+    pm.last_hits, pm.hero_damage, pm.tower_damage, pm.obs_placed, pm.sen_placed, m.duration,
+    RANK() OVER (PARTITION BY pm.match_id, (pm.player_slot < 128) ORDER BY pm.gold_per_min DESC) AS farm,
+    SUM(pm.kills) OVER (PARTITION BY pm.match_id, (pm.player_slot < 128)) AS team_kills
+  FROM matches m
+  JOIN leagues l ON l.leagueid = m.leagueid AND l.tier IN ('premium', 'professional')
+  JOIN player_matches pm ON pm.match_id = m.match_id
+  WHERE m.start_time > extract(epoch from now()) - 90 * 86400 AND pm.lane_role IN (1, 2, 3)
+), pos AS (
+  SELECT *, CASE
+    WHEN farm <= 3 AND lane_role = 1 THEN 1 WHEN farm <= 3 AND lane_role = 2 THEN 2
+    WHEN farm <= 3 AND lane_role = 3 THEN 3 WHEN farm > 3 AND lane_role = 3 THEN 4
+    WHEN farm > 3 AND lane_role = 1 THEN 5 END AS position
+  FROM p
+)
+SELECT position, account_id, COUNT(*) AS games,
+  AVG(kills) AS kills, AVG(deaths) AS deaths, AVG(assists) AS assists,
+  AVG(gold_per_min) AS gpm, AVG(xp_per_min) AS xpm,
+  AVG(last_hits * 600.0 / NULLIF(duration, 0)) AS lh10,
+  AVG(hero_damage * 60.0 / NULLIF(duration, 0)) AS dmg_min,
+  AVG(tower_damage * 60.0 / NULLIF(duration, 0)) AS tower_min,
+  AVG(COALESCE(obs_placed, 0) + COALESCE(sen_placed, 0)) AS wards,
+  AVG((kills + assists) * 100.0 / NULLIF(team_kills, 0)) AS kp
+FROM pos WHERE position IS NOT NULL AND account_id IS NOT NULL
+GROUP BY position, account_id HAVING COUNT(*) >= 8`;
+
+const BENCH_FIELDS = ['kills', 'deaths', 'assists', 'gpm', 'xpm', 'lh10', 'dmg_min', 'tower_min', 'wards', 'kp'];
+
+/** GET /api/results?proBenchmarks=1 — ver PRO_BENCHMARKS_SQL. Cache de 12 h na CDN. */
+async function handleProBenchmarks(res) {
+  try {
+    const rows = (await explorer(PRO_BENCHMARKS_SQL)).map((r) => {
+      const row = { position: Number(r.position), account_id: Number(r.account_id), games: Number(r.games) };
+      for (const k of BENCH_FIELDS) row[k] = Math.round(Number(r[k] || 0) * 10) / 10;
+      return row;
+    });
+    if (!rows.length) throw new Error('sem linhas');
+    await saveSnapshot('proBenchmarks', rows);
+    res.setHeader('Cache-Control', 's-maxage=43200, stale-while-revalidate=604800');
+    return res.status(200).json(rows);
+  } catch (err) {
+    return respondWithSnapshot(res, 'proBenchmarks', 'proBenchmarks', err);
+  }
+}
+
 const explorer = async (sql) => {
   const r = await fetch(`https://api.opendota.com/api/explorer?sql=${encodeURIComponent(sql)}`, {
     headers: { Accept: 'application/json' },
@@ -302,6 +352,7 @@ export default async function handler(req, res) {
   if (req.query?.sitemap) return handleSitemap(res);
   if (req.query?.heroStats) return handleHeroStats(res);
   if (req.query?.heroPositions) return handleHeroPositions(res);
+  if (req.query?.proBenchmarks) return handleProBenchmarks(res);
   if (req.query?.heroDetail) {
     const heroId = parseInt(req.query.heroDetail, 10);
     if (!Number.isInteger(heroId) || heroId <= 0 || heroId > 1000) return res.status(400).json({ error: 'hero inválido' });

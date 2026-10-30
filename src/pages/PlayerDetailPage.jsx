@@ -14,7 +14,8 @@ import {
   User,
   Loader2,
   AlertTriangle,
-  DollarSign
+  DollarSign,
+  Activity
 } from 'lucide-react';
 import { fetchPlayerComprehensiveData } from '../services/playerProfile';
 import { useTheme } from '../context/ThemeContext';
@@ -31,7 +32,10 @@ function tournamentLinkFromSlug(slug) {
   return id ? tournamentPath({ id, page }) : null;
 }
 import { useApp } from '../context/AppContext';
-import { getHeroImg, getHeroName } from '../services/api';
+import { getHeroImg, getHeroName, fetchProBenchmarks } from '../services/api';
+import PlayerPerformance from '../components/PlayerPerformance';
+import { performanceRating, playerRow } from '../utils/proBenchmarks';
+import { playerSummary } from '../utils/playerSummary';
 import TeamLogo from '../utils/teamLogos';
 import { liquipediaImage } from '../utils/liquipediaImage';
 import { teamPath } from '../utils/teamRoute';
@@ -84,6 +88,11 @@ function roleLabel(player) {
   return FANTASY_ROLE_LABELS[player.fantasyRole] || null;
 }
 
+// "US$ 5,9 mi" / "US$ 320 mil"
+const prizeShort = (usd) => (usd >= 1e6
+  ? `US$ ${(usd / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
+  : `US$ ${Math.round(usd / 1000).toLocaleString('pt-BR')} mil`);
+
 const countryName = (code) => {
   try { return new Intl.DisplayNames(['pt-BR'], { type: 'region' }).of(code.toUpperCase()); } catch { return code.toUpperCase(); }
 };
@@ -97,12 +106,17 @@ export default function PlayerDetailPage() {
   const [loading, setLoading] = useState(true);
   usePageMeta(player?.name, player?.name ? `Títulos, heróis mais jogados e partidas recentes de ${player.name} no Dota 2 profissional.` : null);
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState('heroes'); // 'heroes' | 'matches' | 'badges'
+  const [activeTab, setActiveTab] = useState('performance'); // 'performance' | 'heroes' | 'matches' | 'badges'
+  const [benchmarks, setBenchmarks] = useState([]);
   const [titleFilter, setTitleFilter] = useState('champions'); // 'champions' | 'podiums' | 'tier1' | 'all'
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  useEffect(() => {
+    fetchProBenchmarks().then(setBenchmarks);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -186,6 +200,27 @@ export default function PlayerDetailPage() {
 
   const { stats, topHeroes, recentMatches, titles, allAchievements, achievementsSummary } = player;
   const medal = medalLabel(player.rankTier, player.leaderboardRank);
+  const benchRow = playerRow(benchmarks, player.accountId, player.position) || playerRow(benchmarks, player.accountId);
+  const position = player.position || benchRow?.position || null;
+  const rating = benchRow ? performanceRating(benchmarks, position, benchRow) : null;
+  const titleCount = titles.length || achievementsSummary?.totalChampionships || 0;
+  const careerCounters = [
+    ['Títulos', titleCount],
+    ['Pódios', achievementsSummary?.totalPodiums || allAchievements.filter((a) => a.isPodium).length],
+    ['Campeonatos', allAchievements.length],
+    ['Premiação', achievementsSummary?.totalPrizeUsd ? prizeShort(achievementsSummary.totalPrizeUsd) : null]
+  ].filter(([, v]) => v);
+  const summary = playerSummary({
+    name: player.name,
+    position,
+    team: player.team?.name,
+    country: /^[a-z]{2}$/i.test(player.countryCode || '') ? countryName(player.countryCode) : null,
+    titles: titleCount,
+    tier1: achievementsSummary?.tier1Titles || 0,
+    prizeUsd: achievementsSummary?.totalPrizeUsd || 0,
+    heroes: topHeroes.map((h) => getHeroName(constants, h.heroId)).filter((n) => !/^Herói /.test(n)),
+    rating
+  });
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen space-y-8">
@@ -286,6 +321,29 @@ export default function PlayerDetailPage() {
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
+
+              {(careerCounters.length > 0 || recentMatches.length > 0) && (
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3">
+                  {careerCounters.map(([label, value]) => (
+                    <div key={label} className="leading-tight">
+                      <span className="block text-base font-black font-mono text-white">{value}</span>
+                      <span className="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">{label}</span>
+                    </div>
+                  ))}
+                  {recentMatches.length > 0 && (
+                    <div className="leading-tight" title="Últimas partidas, da mais recente para a mais antiga">
+                      <span className="flex gap-1">
+                        {recentMatches.slice(0, 10).map((m) => (
+                          <span key={m.matchId} className={`w-4 h-4 rounded text-[9px] font-black flex items-center justify-center text-on-accent ${m.won ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                            {m.won ? 'V' : 'D'}
+                          </span>
+                        ))}
+                      </span>
+                      <span className="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mt-1">Últimas partidas</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -320,11 +378,15 @@ export default function PlayerDetailPage() {
             </div>
           </div>
         </div>
+        {summary && (
+          <p className="relative z-10 mt-6 pt-5 border-t border-line text-sm text-gray-400 leading-relaxed max-w-4xl">{summary}</p>
+        )}
       </section>
 
       {/* NAVEGAÇÃO POR ABAS */}
       <div className="flex items-center gap-2 border-b border-line pb-3 overflow-x-auto">
         {[
+          { id: 'performance', label: 'Desempenho', icon: Activity },
           { id: 'heroes', label: 'Heróis de Assinatura', icon: Swords },
           { id: 'matches', label: 'Partidas Recentes', icon: Clock },
           { id: 'badges', label: 'Títulos & Conquistas', icon: Trophy }
@@ -352,6 +414,10 @@ export default function PlayerDetailPage() {
           );
         })}
       </div>
+
+      {activeTab === 'performance' && (
+        <PlayerPerformance accountId={player.accountId} position={position} benchmarks={benchmarks} />
+      )}
 
       {/* ABA 1: HERÓIS DE ASSINATURA */}
       {activeTab === 'heroes' && (
@@ -649,7 +715,7 @@ export default function PlayerDetailPage() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-line">
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 p-4 sm:p-6">
                 {displayedAchievements.map((item, idx) => {
                   const is1st = item.isChampion;
                   // Clique leva à página do campeonato (partidas, chaveamento, estatísticas)
@@ -663,7 +729,7 @@ export default function PlayerDetailPage() {
                       onClick={open}
                       onKeyDown={(e) => { if (link && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open(); } }}
                       title={link ? `Abrir ${item.tournament}` : undefined}
-                      className={`p-5 sm:px-7 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-surface-2/50 transition-colors ${link ? 'cursor-pointer' : ''}`}
+                      className={`p-5 rounded-2xl border flex flex-col justify-between gap-4 hover:bg-surface-2/50 transition-colors ${is1st ? 'border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-transparent' : 'border-line bg-surface/60'} ${link ? 'cursor-pointer' : ''}`}
                     >
                       {/* Lado Esquerdo: Colocação, Torneio e Tier */}
                       <div className="flex items-start gap-4 min-w-0">
@@ -695,7 +761,7 @@ export default function PlayerDetailPage() {
 
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-black text-white text-sm sm:text-base tracking-tight truncate">
+                            <h3 className="font-black text-white text-sm sm:text-base tracking-tight">
                               {item.tournament}
                             </h3>
                             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-surface-3 border border-line text-blue-500 dark:text-cyan-400">
@@ -709,7 +775,7 @@ export default function PlayerDetailPage() {
                           </div>
 
                           {/* Time pelo qual Conquistou */}
-                          <div className="flex items-center gap-2 mt-1.5">
+                          <div className="flex flex-wrap items-center gap-2 mt-1.5">
                             <span className="text-[11px] text-gray-400 font-medium">Equipe:</span>
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-2 border border-line">
                               {item.teamLogo ? (
@@ -728,9 +794,9 @@ export default function PlayerDetailPage() {
                       </div>
 
                       {/* Lado Direito: Placar da Final e Premiação */}
-                      <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 pl-16 md:pl-0 pt-2 md:pt-0 border-t md:border-t-0 border-line/60">
+                      <div className="flex items-center justify-between gap-4 pt-3 border-t border-line/60">
                         {item.opponent && (
-                          <div className="text-left md:text-right">
+                          <div className="text-left min-w-0">
                             <span className="text-[10px] uppercase font-bold text-gray-500 block">Final / Adversário</span>
                             <div className="flex items-center gap-2 mt-0.5">
                               {item.score && (

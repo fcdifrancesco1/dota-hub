@@ -22,6 +22,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const TeamPage = lazy(() => import('./pages/TeamPage'));
 const TeamsPage = lazy(() => import('./pages/TeamsPage'));
 const PlayerDetailPage = lazy(() => import('./pages/PlayerDetailPage'));
+const ComparePlayersPage = lazy(() => import('./pages/ComparePlayersPage'));
 
 function PageLoading() {
   return (
@@ -49,7 +50,7 @@ function AppContent() {
   } = useApp();
 
   return (
-    <div className="min-h-screen bg-canvas app-backdrop text-white flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-canvas app-backdrop text-white flex flex-col justify-between selection:bg-amber-500 selection:text-black pb-16 md:pb-0">
       <div>
         <ScrollToTop />
         <RouteMeta />
@@ -66,6 +67,7 @@ function AppContent() {
             <Route path="/partidas/:id" element={<MatchDetailPage />} />
             <Route path="/times" element={<TeamsPage />} />
             <Route path="/times/:id" element={<TeamPage />} />
+            <Route path="/jogadores/comparar" element={<ComparePlayersPage />} />
             <Route path="/jogadores/:id" element={<PlayerDetailPage />} />
             <Route path="/players/:id" element={<PlayerDetailPage />} />
             <Route path="/herois" element={<HeroesPage />} />

@@ -10,23 +10,73 @@ async function getJson(url, timeoutMs = 8000) {
   return res.json();
 }
 
+/** Lista de jogadores profissionais da OpenDota (nome, time, país). */
+export async function getProPlayersList() {
+  let list = getCached(PRO_PLAYERS_CACHE_KEY, PRO_PLAYERS_TTL);
+  if (!list) {
+    list = await getJson(`${OPENDOTA_BASE}/proPlayers`).catch(() => []);
+    if (Array.isArray(list) && list.length > 0) setCache(PRO_PLAYERS_CACHE_KEY, list);
+  }
+  return Array.isArray(list) ? list : [];
+}
+
 /** Busca lista de Pro Players para cruzar informações de time, role e país */
 export async function getProPlayerInfo(accountId) {
   try {
-    let list = getCached(PRO_PLAYERS_CACHE_KEY, PRO_PLAYERS_TTL);
-    if (!list) {
-      list = await getJson(`${OPENDOTA_BASE}/proPlayers`).catch(() => []);
-      if (Array.isArray(list) && list.length > 0) {
-        setCache(PRO_PLAYERS_CACHE_KEY, list);
-      }
-    }
-    if (Array.isArray(list)) {
-      return list.find((p) => String(p.account_id) === String(accountId)) || null;
-    }
+    return (await getProPlayersList()).find((p) => String(p.account_id) === String(accountId)) || null;
   } catch (e) {
     console.warn('Erro ao verificar pro player:', e);
   }
   return null;
+}
+
+/** Melhor marca da carreira em partidas oficiais num campo da OpenDota (ex.: 'kills'). */
+export async function fetchCareerBest(accountId, field) {
+  const key = `career_best_v1_${accountId}_${field}`;
+  const cached = getCached(key, 24 * 3600 * 1000);
+  if (cached) return cached;
+  const rows = await getJson(`${OPENDOTA_BASE}/players/${accountId}/matches?sort=${field}&limit=1&lobby_type=1&project=${field}`).catch(() => null);
+  const best = Array.isArray(rows) && rows[0] ? { matchId: rows[0].match_id, value: rows[0][field] } : null;
+  if (best) setCache(key, best);
+  return best;
+}
+
+/**
+ * Médias por jogo num período (`days`: null = carreira) e só em partidas
+ * oficiais de campeonato (lobby_type 1) ou em todas. Mesmo formato das métricas
+ * de src/utils/proBenchmarks.js (sem participação em abates, que a OpenDota não
+ * soma; wards = compradas, que é o que os totais trazem).
+ */
+export async function fetchPlayerPeriodStats(accountId, { days = 90, official = true } = {}) {
+  const params = [days ? `date=${days}` : '', official ? 'lobby_type=1' : ''].filter(Boolean).join('&');
+  const key = `player_period_v1_${accountId}_${params}`;
+  const cached = getCached(key, PLAYER_TTL);
+  if (cached) return cached;
+  const [totals, wl] = await Promise.all([
+    getJson(`${OPENDOTA_BASE}/players/${accountId}/totals?${params}`).catch(() => null),
+    getJson(`${OPENDOTA_BASE}/players/${accountId}/wl?${params}`).catch(() => null)
+  ]);
+  if (!Array.isArray(totals)) return null;
+  const t = Object.fromEntries(totals.map((x) => [x.field, x]));
+  const games = t.kills?.n || 0;
+  const avg = (f) => (games ? (t[f]?.sum || 0) / games : 0);
+  const perMin = (f) => (t.duration?.sum ? ((t[f]?.sum || 0) * 60) / t.duration.sum : 0);
+  const result = games ? {
+    games,
+    wins: wl?.win || 0,
+    losses: wl?.lose || 0,
+    kills: avg('kills'),
+    deaths: avg('deaths'),
+    assists: avg('assists'),
+    gpm: avg('gold_per_min'),
+    xpm: avg('xp_per_min'),
+    lh10: perMin('last_hits') * 10,
+    dmg_min: perMin('hero_damage'),
+    tower_min: perMin('tower_damage'),
+    wards: avg('purchase_ward_observer') + avg('purchase_ward_sentry')
+  } : { games: 0 };
+  setCache(key, result);
+  return result;
 }
 
 /** Busca títulos oficiais e histórico de campeonatos na Liquipedia */

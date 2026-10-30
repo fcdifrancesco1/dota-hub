@@ -31,6 +31,8 @@ function LiveBadge({ count, className = '' }) {
   );
 }
 
+const BOTTOM_TABS = ['/', '/ao-vivo', '/partidas', '/campeonatos', '/herois'];
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { liveCount, refreshData, loadingRefresh, lastUpdated } = useApp();
@@ -189,6 +191,27 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {/* ABAS FIXAS NO RODAPÉ (CELULAR): atalhos das seções mais usadas */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 glass-panel border-t border-line pb-[env(safe-area-inset-bottom)]" aria-label="Seções principais">
+        <div className="grid grid-cols-5">
+          {navLinks.filter((item) => BOTTOM_TABS.includes(item.to)).map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to));
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={`relative flex flex-col items-center gap-0.5 py-2 text-[10px] font-bold ${isActive ? 'text-blue-600 dark:text-amber-400' : 'text-gray-400'}`}
+              >
+                <Icon className="w-5 h-5" />
+                <span>{item.label}</span>
+                {item.badge > 0 && <span className="absolute top-0.5 left-1/2 ml-2 scale-90"><LiveBadge count={item.badge} /></span>}
+              </NavLink>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 }
