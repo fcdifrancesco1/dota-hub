@@ -1,4 +1,5 @@
 import { fetchLiquipediaApi } from './_lib/liquipediaClient.js';
+import { parsePlayerAchievements, parseTotalWinnings, summarizeAchievements } from './player-achievements.js';
 
 export function sortMatchesNewestFirst(matches) {
   if (!Array.isArray(matches)) return [];
@@ -220,6 +221,31 @@ export function toLiquipediaTeamPage(teamName) {
   return String(teamName).trim().replace(/\s+/g, '_');
 }
 
+/**
+ * Títulos, pódios e premiação do time (?achievements=1): tabela de <Time>/Results,
+ * que tem o mesmo formato da de jogadores, e o total da ficha principal.
+ */
+async function handleTeamAchievements(wikiPage, res, ttlMs) {
+  try {
+    const mainRes = await fetchLiquipediaApi(wikiPage, { ttlMs });
+    const title = mainRes?.raw?.parse?.title || wikiPage;
+    const resultsRes = await fetchLiquipediaApi(`${title}/Results`, { ttlMs });
+    // Na página do time a coluna de time é a do adversário: o time da conquista é o próprio
+    const achievements = parsePlayerAchievements(resultsRes?.html)
+      .map(({ teamName, teamLogo, ...a }) => a);
+    const { championships, totalChampionships, totalPodiums, tier1Titles } = summarizeAchievements(achievements);
+    res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate=86400');
+    return res.status(200).json({
+      team: title,
+      summary: { totalChampionships, totalPodiums, tier1Titles, totalPrizeUsd: parseTotalWinnings(mainRes?.html) },
+      titles: championships,
+      allAchievements: achievements
+    });
+  } catch (error) {
+    return res.status(200).json({ team: wikiPage, summary: {}, titles: [], allAchievements: [], error: error.message });
+  }
+}
+
 export default async function handler(req, res) {
   const teamQuery = req.query.team || req.query.name || '';
   if (!teamQuery) {
@@ -228,6 +254,8 @@ export default async function handler(req, res) {
 
   const wikiPage = toLiquipediaTeamPage(teamQuery);
   const TTL_2_HOURS = 2 * 60 * 60 * 1000;
+
+  if (req.query.achievements) return handleTeamAchievements(wikiPage, res, TTL_2_HOURS);
 
   try {
     // 1. Tentar primeiro na página Played_Matches (tem séries detalhadas)

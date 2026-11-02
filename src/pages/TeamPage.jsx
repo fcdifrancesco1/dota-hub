@@ -14,8 +14,9 @@ import {
 import TeamLogo from '../utils/teamLogos';
 import { useApp } from '../context/AppContext';
 import { getHeroImg, getHeroName } from '../services/api';
-import { fetchPlayerStats, fetchTeamPage, resolveTeamId } from '../services/teamPage';
+import { fetchPlayerStats, fetchTeamAchievements, fetchTeamPage, resolveTeamId } from '../services/teamPage';
 import { useOpenSeries } from '../utils/matchRoute';
+import AchievementsPanel, { prizeShort } from '../components/AchievementsPanel';
 
 const MEDALS = ['', 'Arauto', 'Guardião', 'Cruzado', 'Arconte', 'Lenda', 'Ancestral', 'Divino', 'Imortal'];
 
@@ -41,6 +42,8 @@ export default function TeamPage() {
 
   const [state, setState] = useState({ status: 'loading', data: null });
   const [playerStats, setPlayerStats] = useState({});
+  // Títulos e premiação da Liquipedia: undefined = carregando, null = não veio
+  const [achievements, setAchievements] = useState(undefined);
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
@@ -48,6 +51,7 @@ export default function TeamPage() {
     let cancelled = false;
     setState({ status: 'loading', data: null });
     setPlayerStats({});
+    setAchievements(undefined);
 
     (async () => {
       const teamId = await resolveTeamId(id);
@@ -60,6 +64,8 @@ export default function TeamPage() {
       if (cancelled) return;
       if (!data) { setState({ status: 'error', data: null }); return; }
       setState({ status: 'ok', data });
+
+      fetchTeamAchievements(data.team.name).then((a) => { if (!cancelled) setAchievements(a); });
 
       // Estatísticas de cada jogador chegam de forma independente
       data.roster.forEach((p) => {
@@ -149,6 +155,21 @@ export default function TeamPage() {
                 <span className="text-gray-400">Última partida: <strong className="text-white font-semibold">{fmtDate(team.lastMatchTime)}</strong></span>
                 <span className="text-gray-500">•</span>
                 <span className="text-gray-400">Total de partidas: <strong className="text-white font-semibold">{totalGames.toLocaleString('pt-BR')}</strong></span>
+                {achievements?.allAchievements?.length > 0 && (
+                  <>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-gray-400 inline-flex items-center gap-1">
+                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                      <strong className="text-amber-400 font-black">{achievements.summary.totalChampionships}</strong> títulos
+                    </span>
+                    {achievements.summary.totalPrizeUsd > 0 && (
+                      <>
+                        <span className="text-gray-500">•</span>
+                        <span className="text-gray-400">Premiação: <strong className="text-emerald-400 font-black">{prizeShort(achievements.summary.totalPrizeUsd)}</strong></span>
+                      </>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -282,6 +303,20 @@ export default function TeamPage() {
           </ul>
         )}
       </section>
+
+      {/* TÍTULOS, PREMIAÇÃO E GALERIA DE TROFÉUS (Liquipedia) */}
+      {achievements === undefined ? (
+        <div className="py-8 flex items-center justify-center gap-2 text-xs text-gray-400">
+          <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> Carregando títulos...
+        </div>
+      ) : achievements?.allAchievements?.length > 0 && (
+        <AchievementsPanel
+          titles={achievements.titles}
+          allAchievements={achievements.allAchievements}
+          summary={achievements.summary}
+          subject="time"
+        />
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
         <a

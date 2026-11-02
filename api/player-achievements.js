@@ -215,6 +215,23 @@ async function resolveWikiTitle(rawPlayer, teamName) {
 }
 
 /** Time atual na ficha da Liquipedia ("Team: OG"); null para quem está sem time. */
+/** "Approx. Total Winnings" da ficha, em US$ (0 se não houver). No time o rótulo vem dentro de <abbr>. */
+export function parseTotalWinnings(html) {
+  const m = String(html || '').match(/Approx\. Total Winnings(?:<\/abbr>)?:<\/div>\s*<div[^>]*>\s*\$([\d,]+)/i);
+  return m ? Number(m[1].replace(/,/g, '')) : 0;
+}
+
+/** Resumo das conquistas: títulos, pódios e títulos Tier 1 (ou Majors/TI/BLAST/Riyadh). */
+export function summarizeAchievements(achievements) {
+  const championships = achievements.filter(a => a.isChampion);
+  return {
+    championships,
+    totalChampionships: championships.length,
+    totalPodiums: achievements.filter(a => a.isPodium).length,
+    tier1Titles: championships.filter(a => /tier\s*1/i.test(a.tier) || /major|international|blast|riyadh/i.test(a.tournament)).length
+  };
+}
+
 export function parsePlayerTeam(html) {
   const cell = String(html || '').match(/infobox-description">Team:<\/div>\s*<div[^>]*>([\s\S]*?)<\/div>/i);
   const title = cell?.[1].match(/title="([^"]+)"/);
@@ -250,18 +267,15 @@ export default async function handler(req, res) {
     }
 
     // Métricas resumidas
-    const championships = achievements.filter(a => a.isChampion);
-    const podiums = achievements.filter(a => a.isPodium);
-    const tier1Titles = championships.filter(a => /tier\s*1/i.test(a.tier) || /major|international|blast|riyadh/i.test(a.tournament));
+    const { championships, totalChampionships, totalPodiums, tier1Titles } = summarizeAchievements(achievements);
 
     // Times distintos pelos quais conquistou títulos
     const teamsWithTitles = [...new Set(championships.map(c => c.teamName).filter(Boolean))];
 
     // Premiação do jogador: "Approx. Total Winnings" da ficha (a parte dele). A soma da
     // tabela de resultados é o prêmio do time inteiro, então só serve se a ficha não tiver o valor
-    const winnings = String(mainRes?.html || '').match(/Approx\. Total Winnings:<\/div>\s*<div[^>]*>\s*\$([\d,]+)/i);
-    let totalPrizeUsd = winnings ? Number(winnings[1].replace(/,/g, '')) : 0;
-    if (!winnings) {
+    let totalPrizeUsd = parseTotalWinnings(mainRes?.html);
+    if (!totalPrizeUsd) {
       achievements.forEach(a => {
         if (a.prize) {
           const val = Number(a.prize.replace(/[^0-9]/g, ''));
@@ -278,9 +292,9 @@ export default async function handler(req, res) {
       position,
       team,
       summary: {
-        totalChampionships: championships.length,
-        totalPodiums: podiums.length,
-        tier1Titles: tier1Titles.length,
+        totalChampionships,
+        totalPodiums,
+        tier1Titles,
         totalPrizeUsd,
         teamsWithTitles
       },

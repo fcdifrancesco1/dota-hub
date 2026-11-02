@@ -186,6 +186,17 @@ export async function fetchPlayerStats(accountId) {
   return result;
 }
 
+/** Títulos, pódios, premiação e campeonatos do time (Liquipedia, via /api/team-results). */
+export async function fetchTeamAchievements(teamName) {
+  const key = `team_achievements_v1_${teamName}`;
+  const cached = getCached(key, 60 * 60 * 1000);
+  if (cached) return cached;
+  const data = await getJson(`/api/team-results?achievements=1&team=${encodeURIComponent(teamName)}`, 20000).catch(() => null);
+  // Só guarda quando veio algo (evita fixar por 1h uma falha da Liquipedia)
+  if (data?.allAchievements?.length) setCache(key, data);
+  return data;
+}
+
 /** Time, elenco atual e últimas séries. As estatísticas dos jogadores vêm à parte (fetchPlayerStats). */
 export async function fetchTeamPage(teamId) {
   const key = `team_page_v3_${teamId}`;
