@@ -4,7 +4,6 @@ import { Sparkles, Flame, ChevronRight, Loader2 } from 'lucide-react';
 import { fetchHeroStats, fetchHeroPositions } from '../../services/api';
 
 // Cores da aura atrás do herói, pelo atributo principal
-const ATTR_COLORS = { str: '#DC2626', agi: '#059669', int: '#2563EB', all: '#9333EA' };
 const HOW_MANY = 4;
 const POSITIONS = [
   { n: 1, label: 'Carry' },
@@ -104,20 +103,20 @@ export default function AnimatedHeroCard() {
       {/* CABEÇALHO DO CARD COM SELETOR RÁPIDO */}
       <div className="flex items-center justify-between px-1 flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-500 animate-spin-slow" />
-          <span className="text-xs font-black uppercase tracking-wider text-white">Destaque do Meta</span>
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          <span className="text-xs font-semibold text-white">Destaque do meta</span>
         </div>
 
         {highlights && (
-          <div className="flex flex-wrap items-center gap-1 text-[11px] font-bold p-1 rounded-xl bg-surface-2/80">
+          <div className="flex flex-wrap items-center gap-1 text-xs font-medium p-1 rounded-xl bg-surface-2/80">
             {highlights.map(({ hero: h, position }) => (
               <button
                 key={h.id}
                 type="button"
                 onClick={() => handleSelectHero(h)}
                 title={position ? `Pos ${position.n} · ${position.label}` : undefined}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
-                  selectedId === h.id ? 'bg-blue-600 text-on-accent shadow-sm font-black' : 'text-gray-400 hover:text-white hover:bg-surface-3'
+                className={`px-2.5 py-1 rounded-lg transition-[color,background-color,border-color,opacity,transform] ${
+                  selectedId === h.id ? 'bg-blue-600 text-on-accent shadow-sm font-semibold' : 'text-gray-400 hover:text-white hover:bg-surface-3'
                 }`}
               >
                 {position && <span className="opacity-70 mr-1">{position.n}</span>}
@@ -141,10 +140,6 @@ export default function AnimatedHeroCard() {
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center relative z-20">
             {/* VÍDEO ANIMADO (VALVE WEBM RENDER) */}
             <div className="sm:col-span-4 relative w-full h-32 sm:h-36 md:h-40 flex items-center justify-center overflow-hidden">
-              <div
-                className="absolute w-28 h-28 rounded-full blur-3xl opacity-35 dark:opacity-25 pointer-events-none animate-pulse"
-                style={{ background: `radial-gradient(circle, ${ATTR_COLORS[selectedHero.attrCode] || '#2563EB'}, transparent 70%)` }}
-              />
               {!videoError && key ? (
                 <video
                   key={key}
@@ -153,7 +148,7 @@ export default function AnimatedHeroCard() {
                   muted
                   playsInline
                   onError={() => setVideoError(true)}
-                  className="w-full h-full object-contain filter drop-shadow-[0_10px_18px_rgba(0,0,0,0.22)] animate-hero-float"
+                  className="w-full h-full object-contain filter drop-shadow-[0_10px_18px_rgba(0,0,0,0.22)]"
                 >
                   <source src={`https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/${key}.webm`} type="video/webm" />
                 </video>
@@ -161,7 +156,7 @@ export default function AnimatedHeroCard() {
                 <img
                   src={selectedHero.img}
                   alt={selectedHero.name}
-                  className="w-full h-full object-contain filter drop-shadow-[0_10px_18px_rgba(0,0,0,0.22)] animate-hero-float"
+                  className="w-full h-full object-contain filter drop-shadow-[0_10px_18px_rgba(0,0,0,0.22)]"
                 />
               )}
             </div>
@@ -170,20 +165,20 @@ export default function AnimatedHeroCard() {
             <div className="sm:col-span-8 space-y-2.5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="inline-flex items-center gap-1 mb-1 text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  <div className="inline-flex items-center gap-1 mb-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
                     <Flame className="w-3 h-3" />
                     {selected.position
                       ? `Mais disputado na Pos ${selected.position.n} · ${selected.position.label}`
                       : 'Mais disputado no profissional'}
                   </div>
-                  <h4 className="text-xl font-black tracking-tight text-white truncate">{selectedHero.name}</h4>
-                  <span className="text-[11px] font-semibold text-gray-400">
+                  <h4 className="text-xl font-semibold tracking-tight text-white truncate">{selectedHero.name}</h4>
+                  <span className="text-xs font-semibold text-gray-400">
                     {[selectedHero.roles?.[0], selectedHero.primaryAttr].filter(Boolean).join(' • ')}
                   </span>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-lg font-black text-emerald-500 font-mono block">{selectedHero.proWinRate}%</span>
-                  <span className="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Vitórias (pro)</span>
+                  <span className="text-lg font-semibold text-emerald-500 font-mono block">{selectedHero.proWinRate}%</span>
+                  <span className="text-[11px] text-gray-400 font-medium">Vitórias (pro)</span>
                 </div>
               </div>
 
@@ -192,12 +187,12 @@ export default function AnimatedHeroCard() {
                 <strong className="text-white">{selectedHero.proBan}</strong> vezes nas partidas profissionais recentes.
               </p>
 
-              <div className="px-3 py-2 rounded-xl bg-surface-2/70 flex items-center justify-between gap-2 text-[11px]">
+              <div className="px-3 py-2 rounded-xl bg-surface-2/70 flex items-center justify-between gap-2 text-xs">
                 <span className="text-gray-400 font-medium shrink-0">Quem mais jogou (12 meses):</span>
                 {specialist === undefined ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
                 ) : specialist ? (
-                  <Link to={`/jogadores/${specialist.account_id}`} className="font-bold text-blue-600 dark:text-amber-500 truncate hover:underline">
+                  <Link to={`/jogadores/${specialist.account_id}`} className="font-medium text-blue-600 dark:text-amber-500 truncate hover:underline">
                     {specialist.name || `Jogador ${specialist.account_id}`} ({specialist.games} {specialist.games === 1 ? 'partida' : 'partidas'})
                   </Link>
                 ) : (
@@ -208,14 +203,14 @@ export default function AnimatedHeroCard() {
               <div className="flex flex-wrap items-center gap-2">
                 <Link
                   to={`/herois/${selectedHero.id}`}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all text-on-accent bg-blue-600 hover:bg-blue-700 shadow-md"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] text-on-accent bg-blue-600 hover:bg-blue-700 shadow-md"
                 >
                   <span>Ver {selectedHero.name}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
                 <Link
                   to="/herois"
-                  className="inline-flex items-center justify-center px-3 py-2 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:bg-surface-2 ring-1 ring-line/70 transition-all"
+                  className="inline-flex items-center justify-center px-3 py-2 rounded-xl text-xs font-medium text-gray-400 hover:text-white hover:bg-surface-2 ring-1 ring-line/70 transition-[color,background-color,border-color,opacity,transform]"
                 >
                   Todos os Heróis
                 </Link>

@@ -17,14 +17,14 @@ export default function LiveTickerStrip() {
         <div className="w-full flex items-center justify-between gap-4 text-xs text-gray-400">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="font-semibold text-white">Servidores DotaTV Conectados:</span>
+            <span className="font-semibold text-white">Servidores DotaTV conectados:</span>
             <span>Nenhuma partida profissional oficial ao vivo no momento. Confira a agenda abaixo.</span>
           </div>
           <Link
             to="/ao-vivo"
-            className="text-amber-500 hover:text-amber-400 font-bold uppercase tracking-wider text-[11px] flex items-center gap-1 transition-colors"
+            className="text-amber-500 hover:text-amber-400 font-medium text-xs flex items-center gap-1 transition-colors"
           >
-            <span>Ver Central Ao Vivo</span>
+            <span>Ver central ao vivo</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -41,15 +41,15 @@ export default function LiveTickerStrip() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
             </span>
-            <span className="text-xs font-black uppercase tracking-wider text-red-500">
-              Partidas Ao Vivo Agora ({total})
+            <span className="text-xs font-semibold text-red-500">
+              Partidas ao vivo agora ({total})
             </span>
           </div>
           <Link
             to="/ao-vivo"
-            className="text-xs font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 uppercase tracking-wider transition-colors"
+            className="text-xs font-medium text-amber-500 hover:text-amber-400 flex items-center gap-1 transition-colors"
           >
-            <span>Central Multitela</span>
+            <span>Central multitela</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -74,11 +74,11 @@ export default function LiveTickerStrip() {
                 className={`${STRIP_CARD} bg-surface/80 hover:bg-surface`}
               >
                 {/* Cabeçalho do Card */}
-                <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2 border-b border-line/60 pb-1.5">
+                <div className="flex items-center justify-between text-xs text-gray-400 mb-2 border-b border-line/60 pb-1.5">
                   <span className="font-semibold truncate max-w-[170px] text-amber-500">
-                    {game.league_name || 'Torneio Oficial'}
+                    {game.league_name || 'Torneio oficial'}
                   </span>
-                  <span className="font-mono text-white font-bold bg-surface-2 px-2 py-0.5 rounded">
+                  <span className="font-mono text-white font-medium bg-surface-2 px-2 py-0.5 rounded">
                     {durationMin}:{durationSec}
                   </span>
                 </div>
@@ -88,11 +88,11 @@ export default function LiveTickerStrip() {
                   {/* Radiant */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <TeamLogo teamName={radName} teamId={game.radiant_team?.team_id || game.radiant_team_id} logoUrl={game.radiant_logo} className="w-6 h-6 rounded shrink-0 shadow-sm" />
-                    <span className="text-xs font-bold text-emerald-500 leading-tight break-words line-clamp-2">{radName}</span>
+                    <span className="text-xs font-medium text-emerald-500 leading-tight break-words line-clamp-2">{radName}</span>
                   </div>
 
                   {/* Kills Placar */}
-                  <div className="flex items-center gap-1.5 font-mono font-black text-sm px-2.5 py-0.5 rounded-lg bg-surface-2 shrink-0">
+                  <div className="flex items-center gap-1.5 font-mono font-semibold text-sm px-2.5 py-0.5 rounded-lg bg-surface-2 shrink-0">
                     <span className="text-emerald-500">{radScore}</span>
                     <span className="text-gray-400">:</span>
                     <span className="text-red-500">{direScore}</span>
@@ -100,13 +100,13 @@ export default function LiveTickerStrip() {
 
                   {/* Dire */}
                   <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                    <span className="text-xs font-bold text-red-500 leading-tight break-words line-clamp-2 text-right">{direName}</span>
+                    <span className="text-xs font-medium text-red-500 leading-tight break-words line-clamp-2 text-right">{direName}</span>
                     <TeamLogo teamName={direName} teamId={game.dire_team?.team_id || game.dire_team_id} logoUrl={game.dire_logo} className="w-6 h-6 rounded shrink-0 shadow-sm" />
                   </div>
                 </div>
 
                 {/* Vantagem de Ouro / Indicador */}
-                <div className="mt-2.5 flex items-center justify-between text-[10px] text-gray-400 pt-1.5 border-t border-line/60">
+                <div className="mt-2.5 flex items-center justify-between text-[11px] text-gray-400 pt-1.5 border-t border-line/60">
                   <span className="flex items-center gap-1 font-medium">
                     <Zap className="w-3 h-3 text-amber-500" />
                     <span>
@@ -117,7 +117,7 @@ export default function LiveTickerStrip() {
                         : 'Ouro equilibrado'}
                     </span>
                   </span>
-                  <span className="text-amber-500 font-bold hover:underline">Ver partida →</span>
+                  <span className="text-amber-500 font-medium hover:underline">Ver partida →</span>
                 </div>
               </div>
             );

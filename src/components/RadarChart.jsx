@@ -28,7 +28,7 @@ export default function RadarChart({ axes, series, size = 260 }) {
         return (
           <g key={a.id}>
             <line x1={c} y1={c} x2={x} y2={y} stroke="currentColor" className="text-line" strokeWidth="1" />
-            <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-[10px] font-bold">
+            <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-[11px] font-medium">
               {a.label}
             </text>
           </g>

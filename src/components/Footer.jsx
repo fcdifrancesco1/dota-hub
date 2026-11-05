@@ -8,24 +8,23 @@ export default function Footer() {
 
   return (
     <footer className="mt-20 border-t border-line glass-panel text-gray-400 text-xs relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
       <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           
           {/* Coluna 1: Sobre & Marca */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shadow-md shadow-amber-500/10">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
                 <Flame className="w-4 h-4 text-amber-400" />
               </div>
-              <span className="font-serif font-black text-white text-base uppercase tracking-wider">
+              <span className="font-serif font-semibold text-white text-base">
                 {SITE_CONFIG.name}
               </span>
             </div>
             <p className="text-gray-400 text-xs leading-relaxed">
               {SITE_CONFIG.tagline}. Acompanhe partidas ao vivo, estatísticas de heróis, histórico de confrontos e chaveamento dos principais torneios mundiais.
             </p>
-            <div className="flex items-center gap-2 text-amber-500 font-mono text-[11px] pt-1">
+            <div className="flex items-center gap-2 text-amber-500 font-mono text-xs pt-1">
               <Clock className="w-3.5 h-3.5" />
               <span>Sincronizado: {lastUpdated ? `${lastUpdated} (Brasília)` : 'Recentemente'}</span>
             </div>
@@ -33,19 +32,19 @@ export default function Footer() {
 
           {/* Coluna 2: Navegação Rápida */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-3">Navegação</h4>
+            <h4 className="text-white font-medium text-xs mb-3">Navegação</h4>
             <ul className="space-y-2">
-              <li><a href="/ao-vivo" className="hover:text-amber-400 transition-colors">Partidas Ao Vivo</a></li>
+              <li><a href="/ao-vivo" className="hover:text-amber-400 transition-colors">Partidas ao vivo</a></li>
               <li><a href="/campeonatos" className="hover:text-amber-400 transition-colors">Torneios & Majors</a></li>
-              <li><a href="/times" className="hover:text-amber-400 transition-colors">Ranking de Times</a></li>
-              <li><a href="/partidas" className="hover:text-amber-400 transition-colors">Resultados & Replays</a></li>
-              <li><a href="/herois" className="hover:text-amber-400 transition-colors">Meta do Patch</a></li>
+              <li><a href="/times" className="hover:text-amber-400 transition-colors">Ranking de times</a></li>
+              <li><a href="/partidas" className="hover:text-amber-400 transition-colors">Resultados & replays</a></li>
+              <li><a href="/herois" className="hover:text-amber-400 transition-colors">Meta do patch</a></li>
             </ul>
           </div>
 
           {/* Coluna 3: Fontes de Dados Oficiais */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-3">Fontes de Dados</h4>
+            <h4 className="text-white font-medium text-xs mb-3">Fontes de dados</h4>
             <ul className="space-y-2">
               <li>
                 <a
@@ -76,7 +75,7 @@ export default function Footer() {
                   rel="noreferrer"
                   className="flex items-center gap-1.5 hover:text-white transition-colors"
                 >
-                  <span>Liquipedia Dota 2 Wiki</span>
+                  <span>Liquipedia Dota 2 wiki</span>
                   <ExternalLink className="w-3 h-3 text-gray-500" />
                 </a>
               </li>
@@ -87,7 +86,7 @@ export default function Footer() {
                   rel="noreferrer"
                   className="flex items-center gap-1.5 hover:text-white transition-colors"
                 >
-                  <span>Supabase Database & Auth</span>
+                  <span>Supabase database & auth</span>
                   <ExternalLink className="w-3 h-3 text-gray-500" />
                 </a>
               </li>
@@ -96,7 +95,7 @@ export default function Footer() {
         </div>
 
         {/* Linha Final de Copyright */}
-        <div className="pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-gray-500">
+        <div className="pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
           <div>
             © {new Date().getFullYear()} {SITE_CONFIG.name}. Todos os direitos reservados. Dota 2 é marca registrada da Valve Corporation.
           </div>

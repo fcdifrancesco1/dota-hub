@@ -49,7 +49,7 @@ export default function LiveMatchPage() {
 
   return (
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
-      <BackButton fallbackPath="/ao-vivo" fallbackLabel="Central Ao Vivo" />
+      <BackButton fallbackPath="/ao-vivo" fallbackLabel="Central ao vivo" />
 
       {game ? (
         <LiveMatchDetail
@@ -68,12 +68,12 @@ export default function LiveMatchPage() {
       ) : (
         <div className="rounded-2xl bg-surface border border-line p-10 text-center max-w-xl mx-auto">
           <Radio className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-          <h1 className="text-lg font-black text-white uppercase mb-2">Partida não está mais ao vivo</h1>
+          <h1 className="text-lg font-semibold text-white mb-2">Partida não está mais ao vivo</h1>
           <p className="text-xs text-gray-400 mb-5">
-            Esta partida pode ter terminado. Confira as partidas em andamento na Central Ao Vivo ou o resultado em Partidas.
+            Esta partida pode ter terminado. Confira as partidas em andamento na Central ao vivo ou o resultado em Partidas.
           </p>
-          <Link to="/ao-vivo" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-black uppercase">
-            Ir para Central Ao Vivo
+          <Link to="/ao-vivo" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-semibold">
+            Ir para a Central ao vivo
           </Link>
         </div>
       )}

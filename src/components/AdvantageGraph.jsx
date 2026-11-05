@@ -63,8 +63,8 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
     <div className="bg-dota-card/70 border border-dota-border/70 rounded-xl p-4 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dota-border/40 pb-2.5">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-white">Vantagem da Partida</span>
-          <span className="text-[11px] text-dota-dim">
+          <span className="text-xs font-medium text-white">Vantagem da partida</span>
+          <span className="text-xs text-dota-dim">
             {hoveredMinute !== null ? (
               <span>
                 Minuto <strong className="text-white">{hoveredMinute}m</strong>: {' '}
@@ -81,7 +81,7 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
         <div className="flex items-center gap-1.5 bg-dota-bg/80 p-1 rounded-lg border border-dota-border/50">
           <button
             onClick={() => setActiveType('gold')}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold transition-all ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
               activeType === 'gold'
                 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-sm'
                 : 'text-dota-dim hover:text-white'
@@ -91,7 +91,7 @@ export default function AdvantageGraph({ goldAdv = [], xpAdv = [], radiantName =
           </button>
           <button
             onClick={() => setActiveType('xp')}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold transition-all ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
               activeType === 'xp'
                 ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
                 : 'text-dota-dim hover:text-white'

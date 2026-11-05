@@ -58,10 +58,10 @@ export default function ComparePlayersPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen space-y-6">
       <BackButton fallbackPath="/times" fallbackLabel="Times" />
       <div>
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-amber-500">
+        <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-amber-500">
           <GitCompare className="w-4 h-4" /> Comparar jogadores
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">Frente a frente</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mt-1">Frente a frente</h1>
         <p className="text-xs text-gray-400 mt-1">
           Médias dos jogos oficiais dos últimos 90 dias. A nota (0 a 100) compara cada um com os profissionais da própria posição.
         </p>
@@ -89,7 +89,7 @@ export default function ComparePlayersPage() {
                       ? <img src={p.info.avatarfull} alt="" className="w-14 h-14 rounded-2xl border border-line object-cover" referrerPolicy="no-referrer" />
                       : <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-line flex items-center justify-center"><User className="w-6 h-6 text-gray-500" /></div>}
                     <div className="min-w-0 flex-1">
-                      <Link to={`/jogadores/${p.id}`} className="text-lg font-black text-white hover:text-amber-500 truncate block">{p.name}</Link>
+                      <Link to={`/jogadores/${p.id}`} className="text-lg font-semibold text-white hover:text-amber-500 truncate block">{p.name}</Link>
                       <span className="text-xs text-gray-400">
                         {p.info?.team_name || 'Sem time'}{p.row ? ` · Pos ${p.row.position} · ${p.row.games} jogos` : ''}
                       </span>
@@ -106,8 +106,8 @@ export default function ComparePlayersPage() {
 
           {both.some((p) => p.rating) && (
             <section className="glass-panel border border-line rounded-3xl p-6 shadow-xl">
-              <h2 className="text-base font-black text-white uppercase tracking-wider mb-2">Áreas do jogo</h2>
-              <div className="flex justify-center gap-4 text-xs font-bold mb-2">
+              <h2 className="text-base font-semibold text-white mb-2">Áreas do jogo</h2>
+              <div className="flex justify-center gap-4 text-xs font-medium mb-2">
                 {both.map((p, i) => (
                   <span key={p.id} className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded-sm" style={{ background: RADAR_COLORS[i] }} />{p.name}
@@ -129,7 +129,7 @@ export default function ComparePlayersPage() {
             <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-xl">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[10px] uppercase tracking-wider text-gray-400 bg-surface-2/60">
+                  <tr className="text-[11px] text-gray-400 bg-surface-2/60">
                     <th className="p-3 text-left" style={{ color: RADAR_COLORS[0] }}>{a.name}</th>
                     <th className="p-3 text-center">Média por jogo</th>
                     <th className="p-3 text-right" style={{ color: RADAR_COLORS[1] }}>{b.name}</th>
@@ -144,16 +144,16 @@ export default function ComparePlayersPage() {
                     const bWins = meta.lowerIsBetter ? vb < va : vb > va;
                     return (
                       <tr key={m}>
-                        <td className={`p-3 font-mono ${aWins ? 'font-black text-emerald-500' : 'text-white'}`}>{meta.fmt(va)}</td>
+                        <td className={`p-3 font-mono ${aWins ? 'font-semibold text-emerald-500' : 'text-white'}`}>{meta.fmt(va)}</td>
                         <td className="p-3 text-center text-xs text-gray-400">{meta.label}</td>
-                        <td className={`p-3 text-right font-mono ${bWins ? 'font-black text-emerald-500' : 'text-white'}`}>{meta.fmt(vb)}</td>
+                        <td className={`p-3 text-right font-mono ${bWins ? 'font-semibold text-emerald-500' : 'text-white'}`}>{meta.fmt(vb)}</td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
               {a.row.position !== b.row.position && (
-                <p className="text-[11px] text-gray-500 p-3 border-t border-line">
+                <p className="text-xs text-gray-500 p-3 border-t border-line">
                   Posições diferentes (Pos {a.row.position} x Pos {b.row.position}): compare pelas notas, que já levam a posição em conta.
                 </p>
               )}

@@ -24,7 +24,7 @@ export default function BackButton({ fallbackPath, fallbackLabel, className = 'm
     <button
       type="button"
       onClick={() => (canGoBack ? navigate(-1) : navigate(fallbackPath))}
-      className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 transition-colors ${className}`}
+      className={`inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-amber-400 transition-colors ${className}`}
     >
       <ArrowLeft className="w-4 h-4 shrink-0" />
       <span>{label ? `Voltar para ${label}` : 'Voltar'}</span>

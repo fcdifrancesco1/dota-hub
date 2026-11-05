@@ -66,7 +66,7 @@ function seriesFromMatch(match) {
   const dire = direNameOf(match);
   return {
     series_id: match.series_id || null,
-    stage: match.league?.name || 'Torneio Profissional',
+    stage: match.league?.name || 'Torneio profissional',
     leagueId: match.leagueid,
     timeA: radiant,
     timeB: dire,
@@ -203,19 +203,19 @@ export default function MatchDetailPage() {
         seriesError ? (
           <div className="rounded-2xl bg-surface border border-line p-10 text-center max-w-xl mx-auto">
             <AlertTriangle className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-            <h1 className="text-lg font-black text-white uppercase mb-2">Partida não encontrada</h1>
+            <h1 className="text-lg font-semibold text-white mb-2">Partida não encontrada</h1>
             <p className="text-xs text-gray-400 mb-5">
               Não foi possível carregar a partida #{id}. A OpenDota pode estar instável ou o replay ainda não foi processado.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link to="/partidas" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-on-accent text-xs font-black uppercase">
+              <Link to="/partidas" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-on-accent text-xs font-semibold">
                 Ver resultados
               </Link>
               <a
                 href={`https://www.opendota.com/matches/${id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-2 border border-line text-gray-300 text-xs font-bold"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-2 border border-line text-gray-300 text-xs font-medium"
               >
                 <ExternalLink className="w-3.5 h-3.5" /> Abrir no OpenDota
               </a>
@@ -244,7 +244,7 @@ export default function MatchDetailPage() {
                     key={g.match_id || idx}
                     type="button"
                     onClick={() => selectMap(idx)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all border cursor-pointer ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap transition-[color,background-color,border-color,opacity,transform] border cursor-pointer ${
                       active
                         ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black border-blue-600 dark:border-amber-500 shadow-md'
                         : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:bg-surface-3'
@@ -258,7 +258,7 @@ export default function MatchDetailPage() {
                       </span>
                     ) : null}
                     {winnerName && (
-                      <span className={`hidden sm:inline normal-case font-bold ${active ? 'opacity-90' : 'text-gray-400'}`}>
+                      <span className={`hidden sm:inline normal-case font-medium ${active ? 'opacity-90' : 'text-gray-400'}`}>
                         · {winnerName}
                       </span>
                     )}
@@ -269,7 +269,7 @@ export default function MatchDetailPage() {
                 <button
                   type="button"
                   onClick={selectOverview}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all border cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap transition-[color,background-color,border-color,opacity,transform] border cursor-pointer ${
                     showOverview
                       ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black border-blue-600 dark:border-amber-500 shadow-md'
                       : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:bg-surface-3'
@@ -329,13 +329,13 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
     >
       <TeamLogo teamName={name} teamId={teamId} className="w-12 h-12 sm:w-16 sm:h-16 shrink-0" />
       <div className="min-w-0 w-full sm:w-auto">
-        <h1 className={`text-sm sm:text-2xl font-black leading-tight break-words line-clamp-2 group-hover:text-amber-400 transition-colors ${
+        <h1 className={`text-sm sm:text-2xl font-semibold leading-tight break-words line-clamp-2 group-hover:text-amber-400 transition-colors ${
           won || (!finished && ahead) ? 'text-white' : 'text-gray-400'
         }`}>
           {name}
         </h1>
         {won && (
-          <span className="inline-block mt-1 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-[10px] font-black uppercase border border-emerald-500/30">
+          <span className="inline-block mt-1 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-[11px] font-semibold border border-emerald-500/30">
             Vencedor
           </span>
         )}
@@ -345,27 +345,26 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
 
   return (
     <section className="tilt-card glass-panel rounded-3xl border border-line p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-      <div className="holo-sheen" />
       <div className="flex flex-wrap items-center justify-center gap-2 mb-5 relative z-10">
-        <span className="text-[11px] font-black uppercase tracking-widest text-blue-600 dark:text-amber-400 bg-surface-2 border border-line px-3 py-1 rounded-full shadow-sm">
-          {series.stage || 'Torneio Profissional'}
+        <span className="text-xs font-semibold text-blue-600 dark:text-amber-400 bg-surface-2 border border-line px-3 py-1 rounded-full shadow-sm">
+          {series.stage || 'Torneio profissional'}
         </span>
         {series.formato && (
-          <span className="text-[11px] font-mono font-black text-purple-600 dark:text-purple-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
+          <span className="text-xs font-mono font-semibold text-purple-600 dark:text-purple-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
             {series.formato}
           </span>
         )}
         {dateLabel && (
-          <span className="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
+          <span className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
             {dateLabel}
           </span>
         )}
         {finished ? (
-          <span className="text-[11px] font-black uppercase text-gray-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full">
+          <span className="text-xs font-semibold text-gray-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full">
             Finalizado
           </span>
         ) : (
-          <span className="text-[11px] font-black uppercase text-red-500 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-full">
+          <span className="text-xs font-semibold text-red-500 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-full">
             Em andamento
           </span>
         )}
@@ -373,10 +372,10 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
 
       <div className="flex items-center gap-2 sm:gap-8 relative z-10">
         {team(series.timeA, series.preferredIdA, aWon, aAhead, 'left')}
-        <div className="shrink-0 px-4 sm:px-7 py-2.5 rounded-2xl bg-surface-2 border border-line font-mono text-2xl sm:text-4xl font-black whitespace-nowrap shadow-inner">
-          <span className={aAhead ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-gray-400'}>{series.scoreA}</span>
+        <div className="shrink-0 px-4 sm:px-7 py-2.5 rounded-2xl bg-surface-2 border border-line font-mono text-2xl sm:text-4xl font-semibold whitespace-nowrap shadow-inner">
+          <span className={aAhead ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-gray-400'}>{series.scoreA}</span>
           <span className="text-gray-400 mx-1.5 sm:mx-2">:</span>
-          <span className={bAhead ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-gray-400'}>{series.scoreB}</span>
+          <span className={bAhead ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-gray-400'}>{series.scoreB}</span>
         </div>
         {team(series.timeB, series.preferredIdB, bWon, bAhead, 'right')}
       </div>
@@ -422,7 +421,7 @@ function CareerRecords({ match }) {
   return (
     <div className="flex flex-wrap gap-2">
       {records.map((r) => (
-        <span key={r} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-600 text-xs font-bold">
+        <span key={r} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-600 text-xs font-medium">
           <Medal className="w-3.5 h-3.5" /> {r}
         </span>
       ))}
@@ -449,9 +448,9 @@ function MapDetail({ match, mapNumber, constants, onSelectHero, benchmarks }) {
         <div className="flex items-center gap-2">
           <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
           <span className="text-gray-400">Vencedor do Jogo {mapNumber}:</span>
-          <strong className={match.radiant_win ? 'text-emerald-500 font-black' : 'text-rose-500 font-black'}>{winner}</strong>
+          <strong className={match.radiant_win ? 'text-emerald-500 font-semibold' : 'text-rose-500 font-semibold'}>{winner}</strong>
         </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-[11px]">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-xs">
           <span className="flex items-center gap-1.5">
             <Swords className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
             Abates: <strong className="text-emerald-500">{match.radiant_score ?? '—'}</strong>
@@ -474,9 +473,9 @@ function MapDetail({ match, mapNumber, constants, onSelectHero, benchmarks }) {
         <div className={hasGraph ? 'xl:col-span-8' : 'xl:col-span-12'}>
           {hasGraph ? (
             <div className="glass-panel border border-line rounded-3xl p-6 shadow-xl h-full">
-              <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-white mb-4 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-blue-600 dark:text-amber-400" />
-                <span>Vantagem de Ouro e Experiência</span>
+                <span>Vantagem de ouro e experiência</span>
               </h3>
               <AdvantageGraph
                 goldAdv={match.radiant_gold_adv}
@@ -540,7 +539,7 @@ function DraftPanel({ picksBans, radiant, dire, constants }) {
     const bans = entries.filter((pb) => !pb.is_pick);
     return (
       <div className="space-y-2">
-        <div className={`text-[11px] font-black uppercase tracking-wider ${color}`}>{name}</div>
+        <div className={`text-xs font-semibold ${color}`}>{name}</div>
         <div className="flex flex-wrap items-center gap-2">
           {picks.map((pb) => (
             <HeroChip key={`p${pb.order}`} pb={pb} constants={constants} />
@@ -559,14 +558,14 @@ function DraftPanel({ picksBans, radiant, dire, constants }) {
 
   return (
     <section className="glass-panel border border-line rounded-3xl p-6 shadow-xl">
-      <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
+      <h3 className="text-xs font-semibold text-white mb-4 flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-blue-600 dark:text-amber-400" />
         <span>Draft</span>
-        <span className="text-[10px] font-normal normal-case text-gray-400">número = ordem da escolha</span>
+        <span className="text-[11px] font-normal normal-case text-gray-400">número = ordem da escolha</span>
       </h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {row(0, radiant, 'text-emerald-500 font-black')}
-        {row(1, dire, 'text-rose-500 font-black')}
+        {row(0, radiant, 'text-emerald-500 font-semibold')}
+        {row(1, dire, 'text-rose-500 font-semibold')}
       </div>
     </section>
   );
@@ -581,7 +580,7 @@ function HeroChip({ pb, constants, small = false }) {
       title={`${pb.is_pick ? 'Pick' : 'Ban'} #${(pb.order ?? 0) + 1}: ${name} (clique para ver o herói)`}
       className={`relative rounded-lg overflow-hidden border ${
         pb.is_pick ? 'border-line-strong hover:border-amber-400' : 'border-line opacity-80 grayscale-[60%] hover:grayscale-0'
-      } ${small ? 'w-12 h-7' : 'w-20 h-11 sm:w-24 sm:h-[54px]'} bg-surface-2 transition-all hover:scale-105 shadow-sm block`}
+      } ${small ? 'w-12 h-7' : 'w-20 h-11 sm:w-24 sm:h-[54px]'} bg-surface-2 transition-[color,background-color,border-color,opacity,transform] shadow-sm block`}
     >
       {img && <img src={img} alt={name} className="w-full h-full object-cover" />}
       {!pb.is_pick && (
@@ -589,7 +588,7 @@ function HeroChip({ pb, constants, small = false }) {
           <Ban className="w-3.5 h-3.5 text-red-400" />
         </div>
       )}
-      <span className="absolute top-0 left-0 px-1 text-[9px] font-mono font-black bg-black/70 text-white rounded-br">
+      <span className="absolute top-0 left-0 px-1 text-[11px] font-mono font-semibold bg-black/70 text-white rounded-br">
         {(pb.order ?? 0) + 1}
       </span>
     </Link>
@@ -611,9 +610,9 @@ function Highlights({ players, constants, mvp }) {
 
   return (
     <div className="glass-panel border border-line rounded-3xl p-6 shadow-xl h-full">
-      <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
+      <h3 className="text-xs font-semibold text-white mb-4 flex items-center gap-2">
         <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
-        <span>Destaques do Jogo</span>
+        <span>Destaques do jogo</span>
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
         {mvp && <MvpCard player={mvp.player} rating={mvp.rating} constants={constants} label="MVP do jogo" />}
@@ -625,14 +624,14 @@ function Highlights({ players, constants, mvp }) {
               className="w-12 h-7 object-cover rounded-lg border border-line shrink-0"
             />
             <div className="min-w-0 flex-1">
-              <div className="text-[10px] uppercase font-bold text-gray-400 flex items-center gap-1">
+              <div className="text-[11px] font-medium text-gray-400 flex items-center gap-1">
                 <Icon className={`w-3 h-3 ${color}`} /> {label}
               </div>
-              <div className="text-xs font-bold text-white truncate">
+              <div className="text-xs font-medium text-white truncate">
                 {player.name || player.personaname || getHeroName(constants, player.hero_id)}
               </div>
             </div>
-            <span className={`font-mono font-black text-sm ${color}`}>{fmtNumber(player[field])}</span>
+            <span className={`font-mono font-semibold text-sm ${color}`}>{fmtNumber(player[field])}</span>
           </div>
         ))}
       </div>
@@ -646,8 +645,8 @@ function MvpCard({ player, rating, constants, label }) {
     <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/40 rounded-2xl p-3 shadow-sm">
       {player.hero_id ? <img src={getHeroImg(constants, player.hero_id)} alt="" className="w-12 h-7 object-cover rounded-lg border border-line shrink-0" /> : null}
       <div className="min-w-0 flex-1">
-        <div className="text-[10px] uppercase font-bold text-amber-600 flex items-center gap-1"><Medal className="w-3 h-3" /> {label}</div>
-        <div className="text-xs font-bold text-white truncate">{player.name || player.personaname || 'Jogador'}</div>
+        <div className="text-[11px] font-medium text-amber-600 flex items-center gap-1"><Medal className="w-3 h-3" /> {label}</div>
+        <div className="text-xs font-medium text-white truncate">{player.name || player.personaname || 'Jogador'}</div>
       </div>
       <RatingBadge rating={rating} size="sm" />
     </div>
@@ -671,22 +670,22 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
       <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <TeamLogo teamName={teamName} teamId={teamId} logoUrl={teamLogo} className="w-7 h-7 shrink-0" />
-          <h3 className={`text-sm font-black uppercase tracking-wider leading-tight break-words line-clamp-2 ${accent}`}>{teamName}</h3>
-          <span className="text-[10px] font-bold uppercase text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">{isRadiant ? 'Radiant' : 'Dire'}</span>
+          <h3 className={`text-sm font-semibold leading-tight break-words line-clamp-2 ${accent}`}>{teamName}</h3>
+          <span className="text-[11px] font-medium text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">{isRadiant ? 'Radiant' : 'Dire'}</span>
           {won && (
-            <span className="text-[10px] bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-black uppercase">
+            <span className="text-[11px] bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-semibold">
               Vitória
             </span>
           )}
         </div>
-        <span className="text-xs font-mono text-gray-400 shrink-0">Abates: <strong className="text-white font-black">{kills ?? '—'}</strong></span>
+        <span className="text-xs font-mono text-gray-400 shrink-0">Abates: <strong className="text-white font-semibold">{kills ?? '—'}</strong></span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs min-w-[1080px]">
-          <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+          <thead className="bg-surface-2 text-gray-400 font-medium text-[11px]">
             <tr>
-              <th className="p-3 pl-4">Jogador / Herói</th>
+              <th className="p-3 pl-4">Jogador / herói</th>
               <th className="p-3 text-center" title="Nota de 0 a 100 contra os profissionais da mesma posição (90 dias)">Nota</th>
               <th className="p-3 text-center">Nível</th>
               <th className="p-3 text-center whitespace-nowrap">K / D / A</th>
@@ -710,7 +709,7 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
                       <Link
                         to={`/herois/${p.hero_id}`}
                         title={`Ver herói ${heroName}`}
-                        className="shrink-0 hover:scale-105 transition-transform"
+                        className="shrink-0 transition-transform"
                       >
                         <img
                           src={getHeroImg(constants, p.hero_id)}
@@ -723,19 +722,19 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
                         {p.account_id ? (
                           <Link
                             to={`/jogadores/${p.account_id}`}
-                            className="font-bold text-white hover:text-amber-400 transition-colors truncate max-w-[170px] block"
+                            className="font-medium text-white hover:text-amber-400 transition-colors truncate max-w-[170px] block"
                             title={`Ver perfil do jogador ${p.name || p.personaname}`}
                           >
                             {p.name || p.personaname || `Jogador ${idx + 1}`}
                           </Link>
                         ) : (
-                          <div className="font-bold text-white truncate max-w-[170px]">
+                          <div className="font-medium text-white truncate max-w-[170px]">
                             {p.name || p.personaname || `Jogador ${idx + 1}`}
                           </div>
                         )}
                         <Link
                           to={`/herois/${p.hero_id}`}
-                          className="text-[10px] text-gray-400 truncate hover:text-amber-400 transition-colors block"
+                          className="text-[11px] text-gray-400 truncate hover:text-amber-400 transition-colors block"
                         >
                           {heroName}
                         </Link>
@@ -745,26 +744,26 @@ function PlayerTable({ players, teamName, teamId, teamLogo, isRadiant, kills, wo
                   <td className="p-3" title={ratings?.get(p.player_slot)?.label}>
                     <div className="flex justify-center">{ratings?.get(p.player_slot) ? <RatingBadge rating={ratings.get(p.player_slot)} size="sm" /> : '—'}</div>
                   </td>
-                  <td className="p-3 text-center font-mono font-bold">{p.level ?? '—'}</td>
+                  <td className="p-3 text-center font-mono font-medium">{p.level ?? '—'}</td>
                   <td className="p-3 text-center font-mono whitespace-nowrap">
                     <span className="inline-grid grid-cols-[2ch_auto_2ch_auto_2ch] items-center gap-1">
-                      <span className="text-right font-bold text-white">{p.kills ?? 0}</span>
+                      <span className="text-right font-medium text-white">{p.kills ?? 0}</span>
                       <span className="text-gray-500">/</span>
-                      <span className="text-center font-bold text-rose-400">{p.deaths ?? 0}</span>
+                      <span className="text-center font-medium text-rose-400">{p.deaths ?? 0}</span>
                       <span className="text-gray-500">/</span>
-                      <span className="text-left font-bold text-cyan-400">{p.assists ?? 0}</span>
+                      <span className="text-left font-medium text-cyan-400">{p.assists ?? 0}</span>
                     </span>
                   </td>
-                  <td className="p-3 text-right font-mono font-bold text-amber-400">{fmtNumber(p.net_worth)}</td>
+                  <td className="p-3 text-right font-mono font-medium text-amber-400">{fmtNumber(p.net_worth)}</td>
                   <td className="p-3 text-right font-mono whitespace-nowrap">
                     <span className="text-white font-semibold">{p.last_hits ?? 0}</span>
                     <span className="text-gray-500 mx-1">/</span>
                     <span className="text-gray-400">{p.denies ?? 0}</span>
                   </td>
                   <td className="p-3 text-right font-mono whitespace-nowrap">
-                    <span className="text-amber-400 font-bold">{p.gold_per_min ?? '—'}</span>
+                    <span className="text-amber-400 font-medium">{p.gold_per_min ?? '—'}</span>
                     <span className="text-gray-500 mx-1">/</span>
-                    <span className="text-cyan-400 font-bold">{p.xp_per_min ?? '—'}</span>
+                    <span className="text-cyan-400 font-medium">{p.xp_per_min ?? '—'}</span>
                   </td>
                   <td className="p-3 text-right font-mono">{fmtNumber(p.hero_damage)}</td>
                   <td className="p-3 text-right font-mono">{fmtNumber(p.tower_damage)}</td>
@@ -907,7 +906,7 @@ function SeriesOverview({ series, games, matchData, constants, benchmarks }) {
           <BarChart3 className="w-4 h-4 text-blue-600 dark:text-amber-400" />
           <span className="text-gray-400">Totais da série em {mapsCount} {mapsCount === 1 ? 'mapa' : 'mapas'}</span>
         </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-[11px]">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-xs">
           <span className="flex items-center gap-1.5">
             <Swords className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
             Abates: <strong className="text-white">{A.kills}</strong>
@@ -926,21 +925,21 @@ function SeriesOverview({ series, games, matchData, constants, benchmarks }) {
 
       {highlights.length > 0 && (
         <div className="glass-panel border border-line rounded-3xl p-6 shadow-xl">
-          <h3 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-semibold text-white mb-4 flex items-center gap-2">
             <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
-            <span>Destaques da Série</span>
+            <span>Destaques da série</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
             {mvp?.rating && <MvpCard player={{ ...mvp, hero_id: mvp.heroes[0]?.hero_id }} rating={mvp.rating} constants={constants} label="MVP da série" />}
             {highlights.map(({ label, icon: Icon, field, color, fmt, player }) => (
               <div key={field} className="flex items-center gap-3 bg-surface-2 border border-line rounded-2xl p-3 shadow-sm">
                 <div className="min-w-0 flex-1">
-                  <div className="text-[10px] uppercase font-bold text-gray-400 flex items-center gap-1">
+                  <div className="text-[11px] font-medium text-gray-400 flex items-center gap-1">
                     <Icon className={`w-3 h-3 ${color}`} /> {label}
                   </div>
-                  <div className="text-xs font-bold text-white truncate">{player.name || 'Jogador'}</div>
+                  <div className="text-xs font-medium text-white truncate">{player.name || 'Jogador'}</div>
                 </div>
-                <span className={`font-mono font-black text-sm ${color}`}>{fmt(player[field])}</span>
+                <span className={`font-mono font-semibold text-sm ${color}`}>{fmt(player[field])}</span>
               </div>
             ))}
           </div>
@@ -960,22 +959,22 @@ function SeriesPlayerTable({ team, won, constants }) {
       <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <TeamLogo teamName={team.name} teamId={team.id} className="w-7 h-7 shrink-0" />
-          <h3 className="text-sm font-black uppercase tracking-wider leading-tight break-words line-clamp-2 text-white">{team.name}</h3>
-          <span className="text-[10px] font-bold uppercase text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">
+          <h3 className="text-sm font-semibold leading-tight break-words line-clamp-2 text-white">{team.name}</h3>
+          <span className="text-[11px] font-medium text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">
             {team.wins} {team.wins === 1 ? 'mapa vencido' : 'mapas vencidos'}
           </span>
           {won && (
-            <span className="text-[10px] bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-black uppercase">
+            <span className="text-[11px] bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg font-semibold">
               Vencedor
             </span>
           )}
         </div>
-        <span className="text-xs font-mono text-gray-400 shrink-0">Abates: <strong className="text-white font-black">{team.kills}</strong></span>
+        <span className="text-xs font-mono text-gray-400 shrink-0">Abates: <strong className="text-white font-semibold">{team.kills}</strong></span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs min-w-[1000px]">
-          <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+          <thead className="bg-surface-2 text-gray-400 font-medium text-[11px]">
             <tr>
               <th className="p-3 pl-4">Jogador</th>
               <th className="p-3 text-center" title="Nota de 0 a 100 na série contra os profissionais da mesma posição (90 dias)">Nota</th>
@@ -995,13 +994,13 @@ function SeriesPlayerTable({ team, won, constants }) {
               <tr key={p.key} className="hover:bg-surface-2/60 transition-colors">
                 <td className="p-3 pl-4">
                   {p.account_id ? (
-                    <Link to={`/jogadores/${p.account_id}`} className="font-bold text-white hover:text-amber-400 transition-colors truncate max-w-[170px] block">
+                    <Link to={`/jogadores/${p.account_id}`} className="font-medium text-white hover:text-amber-400 transition-colors truncate max-w-[170px] block">
                       {p.name || `Jogador ${p.account_id}`}
                     </Link>
                   ) : (
-                    <span className="font-bold text-white truncate max-w-[170px] block">{p.name || 'Jogador'}</span>
+                    <span className="font-medium text-white truncate max-w-[170px] block">{p.name || 'Jogador'}</span>
                   )}
-                  <span className="text-[10px] text-gray-400">{p.maps} {p.maps === 1 ? 'mapa' : 'mapas'}</span>
+                  <span className="text-[11px] text-gray-400">{p.maps} {p.maps === 1 ? 'mapa' : 'mapas'}</span>
                 </td>
                 <td className="p-3" title={p.rating?.label}>
                   <div className="flex justify-center">{p.rating ? <RatingBadge rating={p.rating} size="sm" /> : '—'}</div>
@@ -1021,24 +1020,24 @@ function SeriesPlayerTable({ team, won, constants }) {
                   </div>
                 </td>
                 <td className="p-3 text-center font-mono whitespace-nowrap">
-                  <span className="font-bold text-white">{p.kills}</span>
+                  <span className="font-medium text-white">{p.kills}</span>
                   <span className="text-gray-500 mx-1">/</span>
-                  <span className="font-bold text-rose-400">{p.deaths}</span>
+                  <span className="font-medium text-rose-400">{p.deaths}</span>
                   <span className="text-gray-500 mx-1">/</span>
-                  <span className="font-bold text-cyan-400">{p.assists}</span>
+                  <span className="font-medium text-cyan-400">{p.assists}</span>
                 </td>
-                <td className="p-3 text-center font-mono font-bold text-white">{p.kda.toFixed(2)}</td>
+                <td className="p-3 text-center font-mono font-medium text-white">{p.kda.toFixed(2)}</td>
                 <td className="p-3 text-right font-mono whitespace-nowrap">
                   <span className="text-white font-semibold">{fmtNumber(p.last_hits)}</span>
                   <span className="text-gray-500 mx-1">/</span>
                   <span className="text-gray-400">{p.denies}</span>
                 </td>
                 <td className="p-3 text-right font-mono whitespace-nowrap">
-                  <span className="text-amber-400 font-bold">{p.gpm}</span>
+                  <span className="text-amber-400 font-medium">{p.gpm}</span>
                   <span className="text-gray-500 mx-1">/</span>
-                  <span className="text-cyan-400 font-bold">{p.xpm}</span>
+                  <span className="text-cyan-400 font-medium">{p.xpm}</span>
                 </td>
-                <td className="p-3 text-right font-mono font-bold text-amber-400">{fmtNumber(p.net_worth)}</td>
+                <td className="p-3 text-right font-mono font-medium text-amber-400">{fmtNumber(p.net_worth)}</td>
                 <td className="p-3 text-right font-mono">{fmtNumber(p.hero_damage)}</td>
                 <td className="p-3 text-right font-mono">{fmtNumber(p.tower_damage)}</td>
                 <td className="p-3 pr-4 text-right font-mono">{fmtNumber(p.hero_healing)}</td>
@@ -1047,7 +1046,7 @@ function SeriesPlayerTable({ team, won, constants }) {
           </tbody>
         </table>
       </div>
-      <div className="px-4 sm:px-5 py-2.5 text-[10px] text-gray-400 border-t border-line">
+      <div className="px-4 sm:px-5 py-2.5 text-[11px] text-gray-400 border-t border-line">
         Abates, mortes, assistências, abates de creeps, dano e cura somados em todos os mapas. GPM, XPM e patrimônio são a média por mapa.
       </div>
     </section>
@@ -1069,7 +1068,7 @@ function ExternalLinks({ matchId }) {
           href={l.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-line hover:border-amber-500/40 text-gray-300 hover:text-white text-xs font-bold transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-line hover:border-amber-500/40 text-gray-300 hover:text-white text-xs font-medium transition-[color,background-color,border-color,opacity,transform]"
         >
           <ExternalLink className="w-4 h-4 text-amber-400" />
           <span>Ver no {l.label}</span>
@@ -1085,7 +1084,7 @@ function MapUnavailable({ matchId, map }) {
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wide">Estatísticas indisponíveis no momento</h4>
+          <h4 className="text-sm font-medium text-amber-400">Estatísticas indisponíveis no momento</h4>
           <p className="text-xs text-gray-300 leading-relaxed">
             A OpenDota não respondeu ou ainda não processou o replay deste jogo. Draft, itens e gráficos aparecem assim
             que os dados estiverem disponíveis.

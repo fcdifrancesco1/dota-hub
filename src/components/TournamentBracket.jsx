@@ -18,23 +18,23 @@ const ROUND_NAMES = [
   [/^Lower Bracket Quarterfinals?$/i, 'Quartas · Inferior'],
   [/^Lower Bracket Semifinals?$/i, 'Semifinal · Inferior'],
   [/^Lower Bracket Final$/i, 'Final · Inferior'],
-  [/^Grand Finals?$/i, 'Grande Final'],
-  [/^Quarterfinals?$/i, 'Quartas de Final'],
+  [/^Grand Finals?$/i, 'Grande final'],
+  [/^Quarterfinals?$/i, 'Quartas de final'],
   [/^Semifinals?$/i, 'Semifinal'],
   [/^Finals?$/i, 'Final'],
   [/^Third Place Match$/i, 'Disputa de 3º lugar'],
   [/^Round (\d+)$/i, 'Rodada $1'],
-  [/^Seeding Matches$/i, 'Partidas de Seeding'],
-  [/^Last Chance Matches$/i, 'Última Chance'],
+  [/^Seeding Matches$/i, 'Partidas de seeding'],
+  [/^Last Chance Matches$/i, 'Última chance'],
   [/^Tiebreakers?$/i, 'Desempate'],
   [/^To (.+)$/i, 'Classifica p/ $1']
 ];
 const SECTION_NAMES = [
-  [/^Group Stage$/i, 'Fase de Grupos'],
+  [/^Group Stage$/i, 'Fase de grupos'],
   [/^Playoffs$/i, 'Playoffs'],
   [/^Seeding Match(es)?$/i, 'Seeding'],
-  [/^Last Chance$/i, 'Última Chance'],
-  [/^Main Event$/i, 'Evento Principal']
+  [/^Last Chance$/i, 'Última chance'],
+  [/^Main Event$/i, 'Evento principal']
 ];
 const translateWith = (list) => (s) => {
   const text = String(s || '').trim();
@@ -42,7 +42,7 @@ const translateWith = (list) => (s) => {
   return text;
 };
 // Siglas usadas nos destinos ("To UBSF/UBQF")
-const ABBR = { UBQF: 'Quartas Sup.', UBSF: 'Semi Sup.', UBF: 'Final Sup.', LBQF: 'Quartas Inf.', LBSF: 'Semi Inf.', LBF: 'Final Inf.', GF: 'Grande Final', LB: 'Chave Inf.', UB: 'Chave Sup.' };
+const ABBR = { UBQF: 'Quartas sup.', UBSF: 'Semi sup.', UBF: 'Final sup.', LBQF: 'Quartas inf.', LBSF: 'Semi inf.', LBF: 'Final inf.', GF: 'Grande final', LB: 'Chave inf.', UB: 'Chave sup.' };
 const roundName = (s) => translateWith(ROUND_NAMES)(s).replace(/\b(UBQF|UBSF|UBF|LBQF|LBSF|LBF|GF|LB|UB)\b/g, (m) => ABBR[m]);
 const sectionName = translateWith(SECTION_NAMES);
 
@@ -74,14 +74,14 @@ function OpponentRow({ opp, decided }) {
       ) : (
         <span className="w-4 h-4 shrink-0" />
       )}
-      <span className={`flex-1 min-w-0 truncate text-[11px] ${
+      <span className={`flex-1 min-w-0 truncate text-xs ${
         name
-          ? `${opp.winner ? 'font-black text-white' : 'font-semibold'} ${loser ? 'text-gray-500' : 'text-gray-200'}`
+          ? `${opp.winner ? 'font-semibold text-white' : 'font-semibold'} ${loser ? 'text-gray-500' : 'text-gray-200'}`
           : 'italic text-gray-500'
       }`}>
         {name || placeholderText(opp?.placeholder)}
       </span>
-      <span className={`w-5 text-center font-mono text-[11px] font-black ${
+      <span className={`w-5 text-center font-mono text-xs font-semibold ${
         opp?.winner ? 'text-emerald-400' : loser ? 'text-gray-500' : 'text-gray-300'
       }`}>
         {opp?.score ?? ''}
@@ -108,7 +108,7 @@ function MatchCard({ match }) {
       style={{ width: CARD_W }}
       title={matchId ? 'Ver detalhes da série' : undefined}
     >
-      <div className="h-4 px-2 flex items-center justify-end text-[9px] font-mono font-bold text-gray-500 bg-surface-2 border-b border-line">
+      <div className="h-4 px-2 flex items-center justify-end text-[11px] font-mono font-medium text-gray-500 bg-surface-2 border-b border-line">
         {pending ? `${fmtWhen(match.timestamp)} BRT` : ''}
       </div>
       <OpponentRow opp={a} decided={decided} />
@@ -172,7 +172,7 @@ function BracketNode({ node }) {
                 className="flex items-center gap-2 px-2 bg-surface-2 border border-dashed border-line rounded-lg"
                 style={{ width: CARD_W, height: ROW_H }}
               >
-                <span className={`truncate text-[11px] ${q.name ? 'font-bold text-white' : 'italic text-gray-500'}`}>
+                <span className={`truncate text-xs ${q.name ? 'font-medium text-white' : 'italic text-gray-500'}`}>
                   {q.name || 'A definir'}
                 </span>
               </div>
@@ -191,7 +191,7 @@ function RoundHeader({ titles, className = '' }) {
       {titles.map((t, i) => (
         <div
           key={i}
-          className="shrink-0 flex items-center justify-center min-h-[34px] text-center text-[10px] leading-tight font-black uppercase tracking-wider text-gray-300 bg-surface-2 border border-line rounded-md px-2 py-1"
+          className="shrink-0 flex items-center justify-center min-h-[34px] text-center text-[11px] leading-tight font-semibold text-gray-300 bg-surface-2 border border-line rounded-md px-2 py-1"
           style={{ width: CARD_W }}
           title={t}
         >
@@ -210,7 +210,7 @@ export default function TournamentBracket({ brackets }) {
         const title = [sectionName(b.stage), b.title && sectionName(b.title)].filter(Boolean).join(' · ') || `Chaveamento ${idx + 1}`;
         return (
           <section key={idx}>
-            <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3">{title}</h2>
+            <h2 className="text-xs font-semibold text-white mb-3">{title}</h2>
             <div className="bg-surface border border-line rounded-2xl p-4 shadow-xl overflow-x-auto">
               <div className="inline-block min-w-full">
                 <div className="w-max">
@@ -224,7 +224,7 @@ export default function TournamentBracket({ brackets }) {
           </section>
         );
       })}
-      <p className="text-[11px] text-gray-500">
+      <p className="text-xs text-gray-500">
         Clique em uma partida já jogada para ver as estatísticas da série. Horários em Brasília (BRT).
       </p>
     </div>

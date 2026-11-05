@@ -33,36 +33,36 @@ export default function MatchesSidebar() {
   return (
     <aside className="w-80 bg-dota-surface border-l border-dota-border flex flex-col h-[calc(100vh-4rem)] sticky top-16">
       <div className="p-4 border-b border-dota-border flex items-center justify-between">
-        <div className="flex items-center gap-2 font-bold uppercase text-xs tracking-wider text-dota-cyan">
+        <div className="flex items-center gap-2 font-medium text-xs text-dota-cyan">
           <Calendar className="w-4 h-4" />
           Próximos Jogos
         </div>
-        <span className="text-[10px] bg-dota-card px-2 py-0.5 rounded text-dota-dim border border-dota-border">AO VIVO / AGENDA</span>
+        <span className="text-[11px] bg-dota-card px-2 py-0.5 rounded text-dota-dim border border-dota-border">Ao vivo / agenda</span>
       </div>
 
       <div className="overflow-y-auto flex-1 p-3 space-y-3">
         {MOCK_UPCOMING.map((m) => {
           const isExpanded = expandedMatchId === m.id;
           return (
-            <div key={m.id} className="bg-dota-card rounded-lg border border-dota-border overflow-hidden transition-all">
+            <div key={m.id} className="bg-dota-card rounded-lg border border-dota-border overflow-hidden transition-[color,background-color,border-color,opacity,transform]">
               <button
                 onClick={() => handleToggle(m)}
                 className="w-full p-3.5 flex items-center justify-between text-left hover:bg-dota-border/30 transition-colors"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-dota-text">{m.teamA}</span>
+                    <span className="font-medium text-sm text-dota-text">{m.teamA}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-dota-text">{m.teamB}</span>
+                    <span className="font-medium text-sm text-dota-text">{m.teamB}</span>
                   </div>
                 </div>
 
                 <div className="flex flex-col items-end gap-1">
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-dota-accent/20 text-dota-accent border border-dota-accent/30">
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-dota-accent/20 text-dota-accent border border-dota-accent/30">
                     {m.format}
                   </span>
-                  <span className="text-[11px] text-dota-dim font-mono">{m.time}</span>
+                  <span className="text-xs text-dota-dim font-mono">{m.time}</span>
                   {isExpanded ? <ChevronUp className="w-4 h-4 text-dota-dim mt-1" /> : <ChevronDown className="w-4 h-4 text-dota-dim mt-1" />}
                 </div>
               </button>
@@ -77,9 +77,9 @@ export default function MatchesSidebar() {
                   ) : (
                     <>
                       <div className="space-y-2">
-                        <div className="text-xs font-bold text-dota-accent border-b border-dota-border/60 pb-1">{m.teamA} (100 jogos)</div>
+                        <div className="text-xs font-medium text-dota-accent border-b border-dota-border/60 pb-1">{m.teamA} (100 jogos)</div>
                         {stats.dataA.map(p => (
-                          <div key={p.id} className="flex items-center justify-between text-[11px] text-dota-dim">
+                          <div key={p.id} className="flex items-center justify-between text-xs text-dota-dim">
                             <span>Pos {p.position} - <strong className="text-dota-text">{p.name}</strong></span>
                             <span className="font-mono text-dota-cyan">{Math.round(p.gpm / (p.games || 1))} GPM</span>
                           </div>
@@ -87,9 +87,9 @@ export default function MatchesSidebar() {
                       </div>
 
                       <div className="space-y-2">
-                        <div className="text-xs font-bold text-dota-accent border-b border-dota-border/60 pb-1">{m.teamB} (100 jogos)</div>
+                        <div className="text-xs font-medium text-dota-accent border-b border-dota-border/60 pb-1">{m.teamB} (100 jogos)</div>
                         {stats.dataB.map(p => (
-                          <div key={p.id} className="flex items-center justify-between text-[11px] text-dota-dim">
+                          <div key={p.id} className="flex items-center justify-between text-xs text-dota-dim">
                             <span>Pos {p.position} - <strong className="text-dota-text">{p.name}</strong></span>
                             <span className="font-mono text-dota-cyan">{Math.round(p.gpm / (p.games || 1))} GPM</span>
                           </div>

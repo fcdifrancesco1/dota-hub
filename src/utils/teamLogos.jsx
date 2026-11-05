@@ -495,7 +495,7 @@ export default function TeamLogo({
     const initials = getTeamInitials(teamName);
     return (
       <div
-        className={`${className} flex items-center justify-center rounded-lg bg-surface-2 border border-white/10 text-[9px] font-mono font-black text-amber-400 shrink-0 select-none shadow-sm`}
+        className={`${className} flex items-center justify-center rounded-lg bg-surface-2 border border-white/10 text-[11px] font-mono font-semibold text-amber-400 shrink-0 select-none shadow-sm`}
         title={teamName || "Equipe"}
       >
         {initials || <Shield className="w-3.5 h-3.5 text-gray-500" />}

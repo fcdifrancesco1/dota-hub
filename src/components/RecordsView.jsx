@@ -16,13 +16,13 @@ import {
 import { fetchDotaRecords, getHeroImg, getHeroName } from '../services/api';
 
 const RECORD_TYPES = [
-  { id: 'kills', label: 'Mais Abates (Kills)', icon: Crosshair, unit: 'kills' },
+  { id: 'kills', label: 'Mais abates (Kills)', icon: Crosshair, unit: 'kills' },
   { id: 'gold_per_min', label: 'Maior GPM', icon: Coins, unit: 'GPM' },
   { id: 'xp_per_min', label: 'Maior XPM', icon: Zap, unit: 'XPM' },
-  { id: 'duration', label: 'Partida Mais Longa', icon: Clock, unit: 'tempo' },
-  { id: 'last_hits', label: 'Mais Last Hits (CS)', icon: Swords, unit: 'LH' },
-  { id: 'hero_damage', label: 'Dano a Heróis', icon: Flame, unit: 'dano' },
-  { id: 'tower_damage', label: 'Dano a Torres', icon: Shield, unit: 'dano' }
+  { id: 'duration', label: 'Partida mais longa', icon: Clock, unit: 'tempo' },
+  { id: 'last_hits', label: 'Mais last hits (CS)', icon: Swords, unit: 'LH' },
+  { id: 'hero_damage', label: 'Dano a heróis', icon: Flame, unit: 'dano' },
+  { id: 'tower_damage', label: 'Dano a torres', icon: Shield, unit: 'dano' }
 ];
 
 export default function RecordsView({
@@ -58,11 +58,11 @@ export default function RecordsView({
       {/* HEADER DA ABA */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-amber-400">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-400">
             <Trophy className="w-4 h-4 text-amber-400" />
             Hall da Fama Oficial do Dota 2
           </div>
-          <h1 className="text-2xl font-black text-white tracking-wide mt-1">
+          <h1 className="text-2xl font-semibold text-white mt-1">
             Recordes Oficiais em Torneios Profissionais
           </h1>
           <p className="text-xs text-gray-400 mt-1">
@@ -71,7 +71,7 @@ export default function RecordsView({
         </div>
 
         {/* Badge de Partidas Profissionais */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs text-amber-400 font-bold">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs text-amber-400 font-medium">
           <CheckCircle2 className="w-4 h-4 text-amber-400" /> Apenas Jogos Profissionais
         </div>
       </div>
@@ -85,9 +85,9 @@ export default function RecordsView({
             <button
               key={cat.id}
               onClick={() => setSelectedType(cat.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
                 isSelected
-                  ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30'
+                  ? 'bg-amber-500 text-black'
                   : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
               }`}
             >
@@ -112,32 +112,32 @@ export default function RecordsView({
         <div className="space-y-4">
           {/* O RECORDISTA MUNDIAL #1 EM DESTAQUE */}
           {records[0] && (
-            <div className="bg-gradient-to-r from-amber-500/20 via-surface-2 to-surface-2 border border-amber-500/50 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+            <div className="bg-amber-500/10 border border-amber-500/50 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-black text-2xl shadow-lg shadow-amber-500/40 shrink-0">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-semibold text-2xl shrink-0">
                   #1
                 </div>
                 {records[0].hero_id && (
                   <img
                     src={getHeroImg(constants, records[0].hero_id)}
                     alt=""
-                    className="w-16 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-md cursor-pointer hover:scale-105 transition-transform shrink-0"
+                    className="w-16 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-md cursor-pointer transition-transform shrink-0"
                     onClick={() => onSelectHero && onSelectHero({ id: records[0].hero_id, name: getHeroName(constants, records[0].hero_id) })}
-                    title="Ver Detalhes do Herói"
+                    title="Ver detalhes do herói"
                   />
                 )}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400">
+                    <span className="text-[11px] font-semibold text-amber-400">
                       Recordista Profissional #1
                     </span>
                     {records[0].tournament && (
-                      <span className="text-[9px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono">
+                      <span className="text-[11px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono">
                         {records[0].tournament}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-xl font-black text-white mt-0.5">
+                  <h3 className="text-xl font-semibold text-white mt-0.5">
                     {records[0].player_name ? records[0].player_name : getHeroName(constants, records[0].hero_id)}
                   </h3>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400 mt-1">
@@ -152,14 +152,14 @@ export default function RecordsView({
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-gray-400 mt-1">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono text-gray-400 mt-1">
                     <span>Match ID:</span>
                     <a
                       href={`https://www.opendota.com/matches/${records[0].match_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-cyan-400 hover:text-cyan-300 font-bold inline-flex items-center gap-1 transition-colors hover:underline"
-                      title="Ver Partida na OpenDota"
+                      className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 transition-colors hover:underline"
+                      title="Ver partida na OpenDota"
                     >
                       {records[0].match_id}
                       <ExternalLink className="w-3 h-3" />
@@ -174,10 +174,10 @@ export default function RecordsView({
               </div>
 
               <div className="text-right shrink-0">
-                <div className="font-mono text-3xl font-black text-amber-400">
+                <div className="font-mono text-3xl font-semibold text-amber-400">
                   {formatScore(records[0].score, selectedType)}
                 </div>
-                <span className="text-[10px] uppercase font-mono text-gray-400 block tracking-wider">
+                <span className="text-[11px] font-mono text-gray-400 block">
                   {currentCategory.unit}
                 </span>
               </div>
@@ -185,15 +185,15 @@ export default function RecordsView({
           )}
 
           {/* TABELA DO TOP 2 AO FINAL */}
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface/80 backdrop-blur-xl">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+              <thead className="bg-surface-2/90 text-gray-400 font-mono text-[11px] border-b border-white/10">
                 <tr>
                   <th className="p-3.5 pl-5 w-16 text-center">Posição</th>
-                  <th className="p-3.5">Jogador & Equipe</th>
+                  <th className="p-3.5">Jogador & equipe</th>
                   <th className="p-3.5">Herói</th>
                   <th className="p-3.5">Torneio</th>
-                  <th className="p-3.5 text-right font-bold">Valor Recorde</th>
+                  <th className="p-3.5 text-right font-medium">Valor recorde</th>
                   <th className="p-3.5 text-right">Data</th>
                   <th className="p-3.5 pr-5 text-right">Match ID</th>
                 </tr>
@@ -206,16 +206,16 @@ export default function RecordsView({
 
                   return (
                     <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
-                      <td className="p-3.5 pl-5 text-center font-mono font-bold text-gray-400">
+                      <td className="p-3.5 pl-5 text-center font-mono font-medium text-gray-400">
                         #{idx + 2}
                       </td>
 
                       <td className="p-3.5">
-                        <div className="font-bold text-white text-sm">
+                        <div className="font-medium text-white text-sm">
                           {r.player_name || heroName}
                         </div>
                         {r.team_name && (
-                          <div className="text-[11px] text-gray-400">
+                          <div className="text-xs text-gray-400">
                             {r.team_name} {r.vs_team ? `vs ${r.vs_team}` : ''}
                           </div>
                         )}
@@ -229,11 +229,11 @@ export default function RecordsView({
                               alt={heroName}
                               className="w-9 h-6 object-cover rounded border border-white/10 cursor-pointer hover:border-amber-400 transition-colors"
                               onClick={() => onSelectHero && onSelectHero({ id: r.hero_id, name: heroName })}
-                              title="Ver Detalhes do Herói"
+                              title="Ver detalhes do herói"
                               onError={(e) => { e.target.style.display = 'none'; }}
                             />
                           ) : (
-                            <div className="w-9 h-6 rounded bg-white/5 border border-white/10 flex items-center justify-center font-mono text-[9px] text-gray-400">
+                            <div className="w-9 h-6 rounded bg-white/5 border border-white/10 flex items-center justify-center font-mono text-[11px] text-gray-400">
                               Dota
                             </div>
                           )}
@@ -248,13 +248,13 @@ export default function RecordsView({
 
                       <td className="p-3.5">
                         <span className="text-gray-300 font-medium">
-                          {r.tournament || "Circuito Pro"}
+                          {r.tournament || "Circuito pro"}
                         </span>
                       </td>
 
-                      <td className="p-3.5 text-right font-mono font-black text-amber-400 text-sm">
+                      <td className="p-3.5 text-right font-mono font-semibold text-amber-400 text-sm">
                         {formatScore(r.score, selectedType)}
-                        <span className="text-[10px] text-gray-500 font-normal ml-1">{currentCategory.unit}</span>
+                        <span className="text-[11px] text-gray-500 font-normal ml-1">{currentCategory.unit}</span>
                       </td>
 
                       <td className="p-3.5 text-right font-mono text-gray-400">
@@ -267,7 +267,7 @@ export default function RecordsView({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 transition-colors"
-                          title="Ver Partida na OpenDota"
+                          title="Ver partida na OpenDota"
                         >
                           {r.match_id}
                           <ExternalLink className="w-3 h-3" />

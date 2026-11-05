@@ -23,13 +23,13 @@ export default function UpcomingSidebar({
   });
 
   return (
-    <aside className="w-full lg:w-[340px] bg-surface/80 backdrop-blur-xl border-l border-white/10 flex flex-col h-full overflow-hidden">
+    <aside className="w-full lg:w-[340px] bg-surface border-l border-white/10 flex flex-col h-full overflow-hidden">
       <div className="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
-        <div className="flex items-center gap-2 font-extrabold uppercase text-xs tracking-wider text-cyan-400">
+        <div className="flex items-center gap-2 font-semibold text-xs text-cyan-400">
           <Calendar className="w-4 h-4 text-cyan-400" />
           Próximos Confrontos
         </div>
-        <span className="text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+        <span className="text-[11px] font-mono font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">
           {filtered.length} AGENDADOS
         </span>
       </div>
@@ -62,14 +62,14 @@ export default function UpcomingSidebar({
             return (
               <div
                 key={idx}
-                className="bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-cyan-500/50 rounded-xl overflow-hidden transition-all duration-200 shadow-sm"
+                className="bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-cyan-500/50 rounded-xl overflow-hidden transition-[color,background-color,border-color,opacity,transform] duration-200 shadow-sm"
               >
                 {/* Nome do Torneio */}
-                <div className="px-3 py-1.5 bg-black/40 border-b border-white/5 flex items-center justify-between text-[10px]">
-                  <span className="font-bold text-amber-400 truncate max-w-[190px] uppercase">
-                    {m.torneio || "Torneio Profissional"}
+                <div className="px-3 py-1.5 bg-black/40 border-b border-white/5 flex items-center justify-between text-[11px]">
+                  <span className="font-medium text-amber-400 truncate max-w-[190px]">
+                    {m.torneio || "Torneio profissional"}
                   </span>
-                  <span className="font-mono text-cyan-400 font-bold bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px]">
+                  <span className="font-mono text-cyan-400 font-medium bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[11px]">
                     {m.formato || "BO3"}
                   </span>
                 </div>
@@ -82,22 +82,22 @@ export default function UpcomingSidebar({
                   <div className="space-y-2 flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-4 h-4 shrink-0" />
-                      <span className="text-xs font-bold text-white truncate">{m.timeA}</span>
+                      <span className="text-xs font-medium text-white truncate">{m.timeA}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-4 h-4 shrink-0" />
-                      <span className="text-xs font-bold text-white truncate">{m.timeB}</span>
+                      <span className="text-xs font-medium text-white truncate">{m.timeB}</span>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end gap-1 shrink-0 pl-2 border-l border-white/5">
-                    <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-gray-300">
+                    <div className="flex items-center gap-1 text-xs font-mono font-medium text-gray-300">
                       <Clock className="w-3 h-3 text-cyan-400" />
-                      {timeStr} <span className="text-[9px] text-gray-500">BRT</span>
+                      {timeStr} <span className="text-[11px] text-gray-500">BRT</span>
                     </div>
                     {dateStr && (
-                      <span className="text-[10px] text-white font-bold font-mono">{dateStr}</span>
+                      <span className="text-[11px] text-white font-medium font-mono">{dateStr}</span>
                     )}
                     {isExpanded ? (
                       <ChevronUp className="w-3.5 h-3.5 text-gray-400 mt-0.5" />
@@ -110,8 +110,8 @@ export default function UpcomingSidebar({
                 {/* Bloco Expandido: Ações rápidas & Streams */}
                 {isExpanded && (
                   <div className="p-3 bg-black/40 border-t border-white/5 space-y-2 text-xs">
-                    <div className="flex items-center justify-between text-[11px] text-gray-400">
-                      <span>Formato da Série:</span>
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span>Formato da série:</span>
                       <strong className="text-white font-mono">{m.formato || "BO3 (Melhor de 3)"}</strong>
                     </div>
 
@@ -121,7 +121,7 @@ export default function UpcomingSidebar({
                           e.stopPropagation();
                           if (onOpenTeamProfile) onOpenTeamProfile(m.teamAId || null, m.timeA);
                         }}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/40 text-[10px] font-bold text-cyan-300 text-center truncate transition-all cursor-pointer active:scale-95 shadow-sm"
+                        className="p-2 rounded-lg bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/40 text-[11px] font-medium text-cyan-300 text-center truncate transition-[color,background-color,border-color,opacity,transform] cursor-pointer active:scale-[0.97] shadow-sm"
                       >
                         Perfil {m.timeA}
                       </button>
@@ -130,7 +130,7 @@ export default function UpcomingSidebar({
                           e.stopPropagation();
                           if (onOpenTeamProfile) onOpenTeamProfile(m.teamBId || null, m.timeB);
                         }}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/40 text-[10px] font-bold text-rose-300 text-center truncate transition-all cursor-pointer active:scale-95 shadow-sm"
+                        className="p-2 rounded-lg bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/40 text-[11px] font-medium text-rose-300 text-center truncate transition-[color,background-color,border-color,opacity,transform] cursor-pointer active:scale-[0.97] shadow-sm"
                       >
                         Perfil {m.timeB}
                       </button>

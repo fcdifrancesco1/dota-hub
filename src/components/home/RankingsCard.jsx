@@ -24,7 +24,7 @@ function RankBadge({ rank }) {
   const style = medalStyle(rank);
   return (
     <span
-      className={`w-6 h-6 shrink-0 rounded-lg flex items-center justify-center text-[11px] font-black font-mono ${style ? 'border' : 'bg-surface-2 text-gray-400'}`}
+      className={`w-6 h-6 shrink-0 rounded-lg flex items-center justify-center text-xs font-semibold font-mono ${style ? 'border' : 'bg-surface-2 text-gray-400'}`}
       style={style || undefined}
     >
       {rank}
@@ -87,8 +87,8 @@ export default function RankingsCard() {
     >
       <div className="p-4 pb-3 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-xs font-black uppercase tracking-wider text-white">Rankings</h2>
-          <span className="text-[10px] text-gray-400">{paused ? 'Pausado' : 'Troca a cada 30 s'}</span>
+          <h2 className="text-xs font-semibold text-white">Rankings</h2>
+          <span className="text-[11px] text-gray-400">{paused ? 'Pausado' : 'Troca a cada 30 s'}</span>
         </div>
         <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-surface-2/80" role="tablist">
           {VIEWS.map(({ id, label, icon: Icon }) => (
@@ -98,7 +98,7 @@ export default function RankingsCard() {
               role="tab"
               aria-selected={view === id}
               onClick={() => choose(id)}
-              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
+              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 view === id ? 'bg-blue-600 text-on-accent shadow-sm' : 'text-gray-400 hover:text-white hover:bg-surface-3'
               }`}
             >
@@ -134,16 +134,16 @@ export default function RankingsCard() {
                     >
                       <RankBadge rank={t.rank} />
                       <TeamLogo teamName={t.name} teamId={t.teamId} logoUrl={t.logo} className="w-6 h-6 shrink-0" />
-                      <span className="text-xs font-bold text-white truncate flex-1">{t.name}</span>
-                      {t.points != null && <span className="text-[10px] font-mono font-bold text-gray-400">{t.points} pts</span>}
+                      <span className="text-xs font-medium text-white truncate flex-1">{t.name}</span>
+                      {t.points != null && <span className="text-[11px] font-mono font-medium text-gray-400">{t.points} pts</span>}
                     </Link>
                   </li>
                 ))}
               </ol>
-              <Link to="/times" className="mt-2 flex items-center justify-center gap-1 text-[11px] font-bold text-blue-600 dark:text-amber-500 hover:underline py-1.5">
+              <Link to="/times" className="mt-2 flex items-center justify-center gap-1 text-xs font-medium text-blue-600 dark:text-amber-500 hover:underline py-1.5">
                 Ranking completo <ChevronRight className="w-3.5 h-3.5" />
               </Link>
-              <p className="text-[10px] text-gray-500 text-center">Fonte: Liquipedia</p>
+              <p className="text-[11px] text-gray-500 text-center">Fonte: Liquipedia</p>
             </>
           )
         ) : (
@@ -154,7 +154,7 @@ export default function RankingsCard() {
                   key={d.id}
                   type="button"
                   onClick={() => { setDivision(d.id); setCycle((c) => c + 1); }}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors ${
+                  className={`px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors ${
                     division === d.id ? 'bg-surface-3 text-white border-line' : 'text-gray-400 border-transparent hover:text-white'
                   }`}
                 >
@@ -172,15 +172,15 @@ export default function RankingsCard() {
                   {playerList.slice(0, LIMIT).map((p) => (
                     <li key={`${p.rank}-${p.name}`} className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl">
                       <RankBadge rank={p.rank} />
-                      <span className="text-xs font-bold text-white truncate flex-1">
+                      <span className="text-xs font-medium text-white truncate flex-1">
                         {p.team_tag && <span className="text-gray-400 font-semibold">{p.team_tag}.</span>}
                         {p.name}
                       </span>
-                      {p.country && <span className="text-[10px] font-mono font-bold uppercase text-gray-400">{p.country}</span>}
+                      {p.country && <span className="text-[11px] font-mono font-medium text-gray-400">{p.country}</span>}
                     </li>
                   ))}
                 </ol>
-                <p className="mt-2 text-[10px] text-gray-500 text-center">Fonte: ranking oficial da Valve (Imortais)</p>
+                <p className="mt-2 text-[11px] text-gray-500 text-center">Fonte: Ranking oficial da Valve (Imortais)</p>
               </>
             )}
           </>

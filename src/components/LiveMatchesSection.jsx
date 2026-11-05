@@ -17,9 +17,9 @@ export default function LiveMatchesSection({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500" />
           </span>
-          <h2 className="text-xs font-black uppercase tracking-widest text-amber-400">Partidas Ao Vivo</h2>
+          <h2 className="text-xs font-semibold text-amber-400">Partidas ao vivo</h2>
           {liveGames.length > 0 && (
-            <span className="text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 px-2.5 py-0.5 rounded-full animate-pulse">
+            <span className="text-[11px] font-mono font-medium bg-rose-500/20 text-rose-400 border border-rose-500/40 px-2.5 py-0.5 rounded-full animate-pulse">
               {liveGames.length} EM ANDAMENTO
             </span>
           )}
@@ -32,9 +32,9 @@ export default function LiveMatchesSection({
           <SkeletonCard rows={2} />
         </div>
       ) : liveGames.length === 0 ? (
-        <div className="bg-surface/70 border border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2 backdrop-blur-xl">
+        <div className="bg-surface/70 border border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-2">
           <Radio className="w-8 h-8 text-amber-500/40 animate-pulse" />
-          <span className="text-sm font-bold text-white">
+          <span className="text-sm font-medium text-white">
             {tournamentFilter && tournamentFilter !== 'all'
               ? `Nenhuma partida ao vivo para "${tournamentFilter}"`
               : "Nenhuma partida oficial ao vivo no momento"}
@@ -78,14 +78,13 @@ export default function LiveMatchesSection({
               <div
                 key={idx}
                 onClick={() => onSelectLiveGame && onSelectLiveGame(g)}
-                className="group bg-surface-2/90 hover:bg-surface-3 border border-rose-500/30 hover:border-rose-400 rounded-2xl p-5 sm:p-6 cursor-pointer transition-all duration-200 shadow-md hover:shadow-xl hover:shadow-rose-500/10 hover:-translate-y-1 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between gap-4"
+                className="group bg-surface-2/90 hover:bg-surface-3 border border-rose-500/30 hover:border-rose-400 rounded-2xl p-5 sm:p-6 cursor-pointer transition-[color,background-color,border-color,opacity,transform] duration-200 shadow-md relative overflow-hidden flex flex-col justify-between gap-4"
               >
                 {/* Indicador de glow sutil ao vivo */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl pointer-events-none" />
 
                 {/* Topo do Card */}
                 <div className="flex items-center justify-between text-xs border-b border-white/10 pb-3">
-                  <span className="flex items-center gap-2 font-black uppercase tracking-wider text-rose-400 text-[10px] sm:text-[11px]">
+                  <span className="flex items-center gap-2 font-semibold text-rose-400 text-[11px] sm:text-xs">
                     <span className="relative flex h-2 w-2 shrink-0">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
@@ -93,10 +92,10 @@ export default function LiveMatchesSection({
                     AO VIVO {mins ? `· ${mins} MIN` : '· EM ANDAMENTO'}
                   </span>
                   <div className="flex items-center gap-2 min-w-0 justify-end">
-                    <span className="text-gray-400 truncate max-w-[130px] sm:max-w-[170px] font-semibold text-[10px] sm:text-[11px]" title={leagueName}>
+                    <span className="text-gray-400 truncate max-w-[130px] sm:max-w-[170px] font-semibold text-[11px] sm:text-xs" title={leagueName}>
                       {leagueName}
                     </span>
-                    <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold shrink-0">
+                    <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[11px] sm:text-[11px] font-medium shrink-0">
                       {formatStr}
                     </span>
                   </div>
@@ -113,10 +112,10 @@ export default function LiveMatchesSection({
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/40 border border-white/10 p-0.5"
                     />
                     <div className="min-w-0">
-                      <span className="text-xs sm:text-sm font-black text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={rName}>
+                      <span className="text-xs sm:text-sm font-semibold text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={rName}>
                         {rName}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">
+                      <span className="text-[11px] sm:text-[11px] text-emerald-400 font-medium block">
                         Time A
                       </span>
                     </div>
@@ -125,21 +124,21 @@ export default function LiveMatchesSection({
                   {/* Placar Central do Jogo (Abates) */}
                   <div className="flex flex-col items-center justify-center shrink-0 px-2 sm:px-4">
                     {hasRealScore ? (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl bg-black/80 border border-rose-500/40 shadow-md shadow-rose-500/10">
-                        <span className="font-mono text-base sm:text-xl font-black text-emerald-400">
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-xl bg-black/80 border border-rose-500/40">
+                        <span className="font-mono text-base sm:text-xl font-semibold text-emerald-400">
                           {rScore}
                         </span>
-                        <span className="text-gray-500 text-xs sm:text-sm font-bold">:</span>
-                        <span className="font-mono text-base sm:text-xl font-black text-rose-400">
+                        <span className="text-gray-500 text-xs sm:text-sm font-medium">:</span>
+                        <span className="font-mono text-base sm:text-xl font-semibold text-rose-400">
                           {dScore}
                         </span>
                       </div>
                     ) : (
-                      <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 text-[10px] font-mono text-gray-400">
+                      <div className="px-2.5 py-1 rounded-lg bg-black/60 border border-white/10 text-[11px] font-mono text-gray-400">
                         VS
                       </div>
                     )}
-                    <span className="text-[8px] sm:text-[9px] text-gray-500 font-mono mt-1 uppercase tracking-wider">
+                    <span className="text-[11px] sm:text-[11px] text-gray-500 font-mono mt-1">
                       {hasRealScore ? 'Abates' : 'Confronto'}
                     </span>
                   </div>
@@ -147,10 +146,10 @@ export default function LiveMatchesSection({
                   {/* Time B (Direita) */}
                   <div className="flex items-center gap-2.5 min-w-0 justify-end text-right">
                     <div className="min-w-0">
-                      <span className="text-xs sm:text-sm font-black text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={dName}>
+                      <span className="text-xs sm:text-sm font-semibold text-white truncate block tracking-tight group-hover:text-amber-400 transition-colors" title={dName}>
                         {dName}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] text-rose-400 font-bold uppercase tracking-wider block">
+                      <span className="text-[11px] sm:text-[11px] text-rose-400 font-medium block">
                         Time B
                       </span>
                     </div>
@@ -171,17 +170,17 @@ export default function LiveMatchesSection({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-black text-xs transition-all shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-semibold text-xs transition-[color,background-color,border-color,opacity,transform] shadow-sm"
                     >
                       <Tv className="w-3.5 h-3.5" /> Assistir Stream Oficial
                     </a>
                   ) : (
-                    <span className="text-gray-400 text-[10px] sm:text-[11px] flex items-center gap-1.5 font-medium">
+                    <span className="text-gray-400 text-[11px] sm:text-xs flex items-center gap-1.5 font-medium">
                       <Radio className="w-3.5 h-3.5 text-rose-400 animate-pulse" /> Transmissão ao vivo
                     </span>
                   )}
 
-                  <span className="text-gray-400 group-hover:text-amber-400 transition-colors flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
+                  <span className="text-gray-400 group-hover:text-amber-400 transition-colors flex items-center gap-1.5 text-[11px] sm:text-xs font-medium">
                     Ver partida <Eye className="w-3.5 h-3.5 text-cyan-400" />
                   </span>
                 </div>

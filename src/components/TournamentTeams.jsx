@@ -25,7 +25,7 @@ function MemberRow({ member, isCoach }) {
   return (
     <li className="flex items-center gap-2.5 py-1.5">
       <span
-        className={`w-7 shrink-0 text-center text-[10px] font-black font-mono rounded py-0.5 ${
+        className={`w-7 shrink-0 text-center text-[11px] font-semibold font-mono rounded py-0.5 ${
           isCoach ? 'bg-white/10 text-gray-300' : 'bg-amber-500/15 text-amber-400'
         }`}
         title={isCoach ? 'Técnico' : POSITIONS[member.position] || member.role || ''}
@@ -41,8 +41,8 @@ function MemberRow({ member, isCoach }) {
           className="w-4 h-3 object-cover rounded-sm shrink-0"
         />
       )}
-      <span className="text-xs font-bold text-white truncate">{member.name}</span>
-      <span className="ml-auto text-[10px] text-gray-500 whitespace-nowrap">
+      <span className="text-xs font-medium text-white truncate">{member.name}</span>
+      <span className="ml-auto text-[11px] text-gray-500 whitespace-nowrap">
         {isCoach ? 'Técnico' : POSITIONS[member.position] || member.role || ''}
       </span>
     </li>
@@ -70,11 +70,11 @@ export default function TournamentTeams({ teams }) {
             >
               <TeamLogo teamName={team.name} logoUrl={team.logo?.dark} className="w-10 h-10 shrink-0" />
               <div className="min-w-0">
-                <div className="text-sm font-black text-white group-hover:text-amber-400 transition-colors leading-tight break-words">
+                <div className="text-sm font-semibold text-white group-hover:text-amber-400 transition-colors leading-tight break-words">
                   {team.name}
                 </div>
                 {labelPt(team.label) && (
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mt-0.5">{labelPt(team.label)}</div>
+                  <div className="text-[11px] font-medium text-gray-500 mt-0.5">{labelPt(team.label)}</div>
                 )}
               </div>
             </button>

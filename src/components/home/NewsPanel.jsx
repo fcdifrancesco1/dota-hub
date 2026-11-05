@@ -62,8 +62,8 @@ export default function NewsPanel() {
             key={id}
             type="button"
             onClick={() => setTab(id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all ${
-              tab === id ? 'bg-blue-600 text-on-accent shadow-md shadow-blue-500/25' : 'text-gray-400 hover:text-white hover:bg-surface-2'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] ${
+              tab === id ? 'bg-blue-600 text-on-accent' : 'text-gray-400 hover:text-white hover:bg-surface-2'
             }`}
           >
             <Icon className="w-3.5 h-3.5" /> {label}
@@ -105,11 +105,11 @@ export default function NewsPanel() {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 text-[10px] mb-0.5">
-                      <span className={`px-1.5 py-px rounded border font-bold ${SOURCE_STYLE[n.source] || 'bg-white/5 text-gray-400 border-line'}`}>{n.source}</span>
+                    <div className="flex items-center gap-1.5 text-[11px] mb-0.5">
+                      <span className={`px-1.5 py-px rounded border font-medium ${SOURCE_STYLE[n.source] || 'bg-white/5 text-gray-400 border-line'}`}>{n.source}</span>
                       <span className="text-gray-500">{timeAgo(n.date)}</span>
                     </div>
-                    <div className="text-xs font-bold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">
+                    <div className="text-xs font-medium text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">
                       {n.title}
                     </div>
                   </div>
@@ -124,7 +124,7 @@ export default function NewsPanel() {
         <ul className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-1 2xl:divide-y 2xl:divide-line/50">
           {transfers.map((t, idx) => (
             <li key={`${t.date}-${idx}`} className="py-2.5 border-b border-line/50 2xl:border-b-0">
-              <div className="flex items-center justify-between gap-2 text-[10px] text-gray-500 mb-1">
+              <div className="flex items-center justify-between gap-2 text-[11px] text-gray-500 mb-1">
                 <span>{fmtDate(t.date)}</span>
                 {t.ref && (
                   <a href={t.ref} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-0.5 hover:text-amber-400" title="Fonte do anúncio">
@@ -132,11 +132,11 @@ export default function NewsPanel() {
                   </a>
                 )}
               </div>
-              <div className="text-xs font-bold text-white leading-snug">
+              <div className="text-xs font-medium text-white leading-snug">
                 {t.players.map((p) => p.name).join(', ')}
-                {t.to.role && <span className="ml-1 text-[10px] font-semibold text-gray-400">({t.to.role})</span>}
+                {t.to.role && <span className="ml-1 text-[11px] font-semibold text-gray-400">({t.to.role})</span>}
               </div>
-              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-gray-300 min-w-0">
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-300 min-w-0">
                 <TeamTag side={t.from} />
                 <span className="text-gray-500 shrink-0">→</span>
                 <TeamTag side={t.to} />
@@ -146,7 +146,7 @@ export default function NewsPanel() {
         </ul>
       )}
 
-      <p className="mt-4 text-[10px] text-gray-500 text-center">
+      <p className="mt-4 text-[11px] text-gray-500 text-center">
         {tab === 'news' ? 'Fontes: Valve (Steam) e blog do Dotabuff. Clique para ler a matéria completa.' : 'Fonte: Liquipedia.'}
       </p>
     </aside>

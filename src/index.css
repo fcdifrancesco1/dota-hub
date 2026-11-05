@@ -74,83 +74,38 @@ body {
   font-variant-numeric: tabular-nums;
 }
 [data-theme="light"] body {
-  background:
-    radial-gradient(ellipse 90% 60% at 20% -10%, rgba(37, 99, 235, 0.05), transparent),
-    radial-gradient(ellipse 80% 50% at 80% -10%, rgba(225, 29, 72, 0.04), transparent),
-    #FBF7F0;
+  background: #FBF7F0;
 }
 
-/* Aurora Glass & Modern Motion Utilities */
+/* Painéis: superfície sólida com linha fina (sem vidro desfocado nem brilho) */
 .glass-panel {
-  background: rgba(13, 17, 28, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #14161c;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 [data-theme="light"] .glass-panel {
-  background: rgba(255, 255, 255, 0.88);
+  background: #FFFDF9;
   border: 1px solid rgba(24, 32, 43, 0.08);
-  box-shadow: 0 10px 30px -5px rgba(24, 32, 43, 0.06), 0 4px 12px -2px rgba(24, 32, 43, 0.03);
+  box-shadow: 0 1px 2px rgba(24, 32, 43, 0.05);
 }
 
+/* Cards clicáveis: no hover só a borda escurece um pouco, sem pular nem brilhar */
 .tilt-card {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.25s ease;
-}
-.tilt-card:hover {
-  transform: translateY(-4px);
+  transition: border-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 [data-theme="light"] .tilt-card:hover {
-  box-shadow: 0 20px 40px -10px rgba(10, 37, 64, 0.12), 0 8px 16px -4px rgba(10, 37, 64, 0.06);
-  border-color: rgba(37, 99, 235, 0.3);
+  border-color: rgba(24, 32, 43, 0.2);
 }
 [data-theme="dark"] .tilt-card:hover {
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(217, 119, 6, 0.15);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.holo-sheen {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 65%);
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.tilt-card:hover .holo-sheen {
-  opacity: 1;
-}
-
-@keyframes heroFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-.animate-hero-float {
-  animation: heroFloat 4.5s infinite ease-in-out;
-}
-
-.aurora-glow-rad {
-  background: radial-gradient(circle, rgba(10, 143, 98, 0.18) 0%, rgba(10, 143, 98, 0) 70%);
-}
-.aurora-glow-dire {
-  background: radial-gradient(circle, rgba(200, 16, 46, 0.18) 0%, rgba(200, 16, 46, 0) 70%);
-}
-.aurora-glow-cobalt {
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0) 70%);
-}
-
 /* Home: uma superfície única, sem cards separados. As seções se dividem por
-   linhas finas que somem nas pontas e por fundos levemente tingidos. */
+   linhas finas que somem nas pontas. */
 .home-shell {
-  background: rgba(255, 255, 255, 0.74);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  border: 1px solid rgba(24, 32, 43, 0.06);
-  border-radius: 28px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 40px 80px -48px rgba(15, 23, 42, 0.22),
-    0 12px 28px -18px rgba(15, 23, 42, 0.10);
+  background: #FFFDF9;
+  border: 1px solid rgba(24, 32, 43, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(24, 32, 43, 0.06);
 }
 .home-divider {
   height: 1px;
@@ -163,12 +118,9 @@ body {
   margin: 2rem -0.75rem;
   background: linear-gradient(90deg, transparent, rgba(24, 32, 43, 0.10) 12%, rgba(24, 32, 43, 0.10) 88%, transparent);
 }
-/* Fundo do destaque principal: um brilho azul bem leve, sem moldura */
+/* Fundo do destaque principal: um degrau de superfície, sem moldura */
 .home-hero-bg {
-  background:
-    radial-gradient(ellipse 70% 90% at 0% 0%, rgba(37, 99, 235, 0.07), transparent 70%),
-    radial-gradient(ellipse 60% 80% at 100% 100%, rgba(10, 143, 98, 0.06), transparent 70%),
-    linear-gradient(180deg, rgba(244, 246, 249, 0.7), rgba(244, 246, 249, 0.2));
+  background: #F6F2EA;
 }
 /* Cards da faixa ao vivo: flutuam sobre o fundo, sem borda */
 .home-float {
@@ -258,12 +210,6 @@ textarea:focus-visible {
   outline-offset: 1px;
 }
 
-/* O que aparece no hover também aparece no foco pelo teclado */
-.tilt-card:focus-visible,
-.tilt-card:has(:focus-visible) {
-  transform: translateY(-4px);
-}
-
 /* Quem pediu ao sistema para reduzir movimento: sem animações e transições longas */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -273,11 +219,6 @@ textarea:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  .tilt-card:hover,
-  .tilt-card:focus-visible,
-  .tilt-card:has(:focus-visible) {
-    transform: none;
   }
 }
 

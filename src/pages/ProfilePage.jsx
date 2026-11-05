@@ -36,7 +36,7 @@ function SteamButton() {
   return (
     <a
       href={steamLoginUrl()}
-      className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-[#171a21] hover:bg-[#2a475e] text-on-accent text-sm font-bold shadow-lg transition-colors"
+      className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-[#171a21] hover:bg-[#2a475e] text-on-accent text-sm font-medium shadow-lg transition-colors"
     >
       <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden="true">
         <path d="M11.98 0C5.67 0 .5 4.86 0 11.04l6.44 2.66a3.4 3.4 0 0 1 1.92-.59h.19l2.87-4.15v-.06a4.53 4.53 0 1 1 4.53 4.53h-.1l-4.08 2.92v.16a3.4 3.4 0 0 1-6.75.6L.4 15.16A12 12 0 1 0 11.98 0Zm-4.45 18.2-1.48-.61a2.55 2.55 0 1 0 1.4-3.5l1.53.63a1.88 1.88 0 1 1-1.45 3.48Zm11.4-9.3a3.02 3.02 0 1 0-6.04 0 3.02 3.02 0 0 0 6.04 0Zm-5.28 0a2.27 2.27 0 1 1 4.53 0 2.27 2.27 0 0 1-4.53 0Z" />
@@ -185,7 +185,7 @@ export default function ProfilePage() {
           <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/15 flex items-center justify-center mb-4">
             <User className="w-7 h-7 text-amber-400" />
           </div>
-          <h1 className="text-2xl font-black text-white">Seu perfil de Dota 2</h1>
+          <h1 className="text-2xl font-semibold text-white">Seu perfil de Dota 2</h1>
           <p className="text-sm text-gray-400 mt-2 max-w-lg mx-auto">
             Vincule sua conta Steam para ver suas estatísticas de partidas <strong className="text-gray-200">Normais</strong>{' '}
             e de <strong className="text-gray-200">Turbo</strong>: medalha,
@@ -193,7 +193,7 @@ export default function ProfilePage() {
           </p>
           <div className="mt-6"><SteamButton /></div>
           {linkError && <p className="mt-4 text-xs text-rose-400">{linkError}. Tente novamente.</p>}
-          <p className="mt-6 text-[11px] text-gray-500 max-w-lg mx-auto">
+          <p className="mt-6 text-xs text-gray-500 max-w-lg mx-auto">
             O login acontece na página oficial da Steam; o DotaHub não vê sua senha, só recebe o ID público da conta.
             As partidas vêm da OpenDota e só aparecem se a opção “Expor dados públicos de partidas” estiver ativa no Dota 2.
           </p>
@@ -224,7 +224,7 @@ export default function ProfilePage() {
         <div className="bg-surface border border-line rounded-xl p-6 text-center text-xs text-gray-400">
           {content.error ? 'Não foi possível carregar agora.' : 'Nada encontrado para este modo.'}{' '}
           {content.error && (
-            <button type="button" onClick={() => setExtra((p) => { const n = { ...p }; delete n[currentKey]; return n; })} className="font-bold text-amber-400">
+            <button type="button" onClick={() => setExtra((p) => { const n = { ...p }; delete n[currentKey]; return n; })} className="font-medium text-amber-400">
               Tentar novamente
             </button>
           )}
@@ -236,7 +236,7 @@ export default function ProfilePage() {
     if (view === 'recordes') {
       return (
         <div className="space-y-3">
-          <p className="text-[11px] text-gray-500">Sua melhor partida em cada estatística, em {scope}. Clique para abrir a partida.</p>
+          <p className="text-xs text-gray-500">Sua melhor partida em cada estatística, em {scope}. Clique para abrir a partida.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
             {RECORD_FIELDS.map(({ field, label: name, format }) => {
               const r = content.find((x) => x.field === field);
@@ -246,15 +246,15 @@ export default function ProfilePage() {
                   key={field}
                   type="button"
                   onClick={() => openMatch(r.matchId)}
-                  className="text-left bg-surface border border-line hover:border-amber-500/40 rounded-xl p-3.5 shadow-lg transition-all group"
+                  className="text-left bg-surface border border-line hover:border-amber-500/40 rounded-xl p-3.5 shadow-lg transition-[color,background-color,border-color,opacity,transform] group"
                 >
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{name}</div>
-                  <div className="mt-1 text-2xl font-black font-mono text-amber-400">{format(r.value)}</div>
+                  <div className="text-[11px] font-medium text-gray-500">{name}</div>
+                  <div className="mt-1 text-2xl font-semibold font-mono text-amber-400">{format(r.value)}</div>
                   <div className="mt-2 flex items-center gap-2 min-w-0">
                     <img src={getHeroImg(constants, r.heroId)} alt="" className="w-10 h-6 rounded object-cover border border-line shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-[11px] font-bold text-white truncate group-hover:text-amber-400">{getHeroName(constants, r.heroId)}</div>
-                      <div className="text-[10px] text-gray-500">
+                      <div className="text-xs font-medium text-white truncate group-hover:text-amber-400">{getHeroName(constants, r.heroId)}</div>
+                      <div className="text-[11px] text-gray-500">
                         {fmtWhen(r.startTime)} · <span className={r.won ? 'text-emerald-400' : 'text-rose-400'}>{r.won ? 'Vitória' : 'Derrota'}</span>
                       </div>
                     </div>
@@ -270,13 +270,13 @@ export default function ProfilePage() {
     if (view === 'totais') {
       return (
         <div className="space-y-3">
-          <p className="text-[11px] text-gray-500">Soma de {scope}, com a média por partida.</p>
+          <p className="text-xs text-gray-500">Soma de {scope}, com a média por partida.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
             {content.map((t) => (
               <div key={t.field} className="bg-surface border border-line rounded-xl p-3.5 shadow-lg">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t.label}</div>
-                <div className="mt-1 text-xl font-black font-mono text-amber-400">{t.time ? fmtHours(t.sum) : fmtBig(t.sum)}</div>
-                <div className="text-[10px] text-gray-500 mt-0.5">
+                <div className="text-[11px] font-medium text-gray-500">{t.label}</div>
+                <div className="mt-1 text-xl font-semibold font-mono text-amber-400">{t.time ? fmtHours(t.sum) : fmtBig(t.sum)}</div>
+                <div className="text-[11px] text-gray-500 mt-0.5">
                   {t.time ? `média ${fmtDuration(Math.round(t.average))} por partida` : `média ${fmtAvg(t.average)} por partida`}
                   {' · '}{t.n.toLocaleString('pt-BR')} partidas
                 </div>
@@ -290,10 +290,10 @@ export default function ProfilePage() {
     if (view === 'parceiros') {
       return (
         <div className="space-y-3">
-          <p className="text-[11px] text-gray-500">Jogadores com quem você mais jogou junto, em {scope}. Clique para ver o perfil na OpenDota.</p>
+          <p className="text-xs text-gray-500">Jogadores com quem você mais jogou junto, em {scope}. Clique para ver o perfil na OpenDota.</p>
           <div className="bg-surface border border-line rounded-2xl overflow-x-auto shadow-lg">
             <table className="w-full text-left text-xs min-w-[560px]">
-              <thead className="text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b border-line">
+              <thead className="text-[11px] font-medium text-gray-400 border-b border-line">
                 <tr>
                   <th className="p-3 pl-4">Jogador</th>
                   <th className="p-3 text-center">Juntos</th>
@@ -312,11 +312,11 @@ export default function ProfilePage() {
                           {p.avatar
                             ? <img src={p.avatar} alt="" referrerPolicy="no-referrer" className="w-7 h-7 rounded-md border border-line shrink-0" />
                             : <div className="w-7 h-7 rounded-md bg-surface-2 border border-line shrink-0" />}
-                          <span className="font-bold text-white truncate max-w-[220px] group-hover:text-amber-400">{p.name}</span>
+                          <span className="font-medium text-white truncate max-w-[220px] group-hover:text-amber-400">{p.name}</span>
                         </a>
                       </td>
-                      <td className="p-3 text-center font-mono font-bold">{p.withGames.toLocaleString('pt-BR')}</td>
-                      <td className="p-3 text-center font-mono font-bold">
+                      <td className="p-3 text-center font-mono font-medium">{p.withGames.toLocaleString('pt-BR')}</td>
+                      <td className="p-3 text-center font-mono font-medium">
                         <span className={wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{wr.toFixed(0)}%</span>
                       </td>
                       <td className="p-3 text-center font-mono">
@@ -341,14 +341,14 @@ export default function ProfilePage() {
       const words = [...content].sort((a, b) => a[0].localeCompare(b[0]));
       return (
         <div className="space-y-3">
-          <p className="text-[11px] text-gray-500">Palavras que você mais escreveu no chat das partidas, em {scope}. Quanto maior, mais vezes.</p>
+          <p className="text-xs text-gray-500">Palavras que você mais escreveu no chat das partidas, em {scope}. Quanto maior, mais vezes.</p>
           <div className="bg-surface border border-line rounded-2xl p-6 shadow-lg flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             {words.map(([word, n]) => (
               <span
                 key={word}
                 title={`${n.toLocaleString('pt-BR')} vezes`}
                 style={{ fontSize: `${size(n)}px` }}
-                className={`font-black leading-none break-all ${n >= max * 0.5 ? 'text-amber-400' : n >= max * 0.2 ? 'text-white' : 'text-gray-400'}`}
+                className={`font-semibold leading-none break-all ${n >= max * 0.5 ? 'text-amber-400' : n >= max * 0.2 ? 'text-white' : 'text-gray-400'}`}
               >
                 {word}
               </span>
@@ -361,7 +361,7 @@ export default function ProfilePage() {
     // Classificações
     return (
       <div className="space-y-3">
-        <p className="text-[11px] text-gray-500">
+        <p className="text-xs text-gray-500">
           Seu desempenho com cada herói comparado com todos os jogadores daquele herói (cálculo da OpenDota, todas as partidas).
           Ex.: 95% = melhor que 95% dos jogadores.
         </p>
@@ -373,8 +373,8 @@ export default function ProfilePage() {
                 <img src={getHeroImg(constants, r.heroId)} alt="" className="w-14 h-8 rounded object-cover border border-line shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-white truncate">{getHeroName(constants, r.heroId)}</span>
-                    <span className="text-xs font-black font-mono text-amber-400 shrink-0">
+                    <span className="text-xs font-medium text-white truncate">{getHeroName(constants, r.heroId)}</span>
+                    <span className="text-xs font-semibold font-mono text-amber-400 shrink-0">
                       {pct >= 99.95 ? 'Top 0,1%' : `${pct.toFixed(1).replace('.', ',')}%`}
                     </span>
                   </div>
@@ -394,17 +394,16 @@ export default function ProfilePage() {
     <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen space-y-6">
       {/* CABEÇALHO */}
       <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
         <div className="relative z-10 flex items-center gap-5 min-w-0">
           {profile?.avatarfull
             ? <img src={profile.avatarfull} alt="" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border border-line shrink-0 shadow-lg" />
             : <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-surface-2 border border-line flex items-center justify-center shrink-0 shadow-lg"><User className="w-8 h-8 text-gray-500" /></div>}
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-3xl font-black text-white break-words tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-semibold text-white break-words tracking-tight">
               {profile?.personaname || (summary ? 'Conta sem nome' : 'Carregando...')}
             </h1>
             <div className="text-xs text-gray-400 mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span>ID da conta: <span className="font-mono text-gray-300 font-bold">{accountId}</span></span>
+              <span>ID da conta: <span className="font-mono text-gray-300 font-medium">{accountId}</span></span>
               {profile?.profileurl && (
                 <a href={profile.profileurl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-amber-400 transition-colors">
                   Perfil Steam <ExternalLink className="w-3 h-3" />
@@ -425,8 +424,8 @@ export default function ProfilePage() {
                 {medal.star && <img src={medal.star} alt="" className="absolute inset-0 w-full h-full" />}
               </div>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Medalha</div>
-                <div className="text-sm font-black text-white">{medal.name}</div>
+                <div className="text-[11px] font-medium text-gray-400">Medalha</div>
+                <div className="text-sm font-semibold text-white">{medal.name}</div>
               </div>
             </div>
           )}
@@ -435,7 +434,7 @@ export default function ProfilePage() {
               type="button"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-2 border border-line text-xs font-bold text-gray-300 hover:text-amber-400 hover:border-amber-500/30 transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-2 border border-line text-xs font-medium text-gray-300 hover:text-amber-400 hover:border-amber-500/30 transition-[color,background-color,border-color,opacity,transform] disabled:opacity-50"
               title="Pede para a OpenDota buscar suas partidas mais recentes"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
@@ -443,7 +442,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={handleUnlink}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-2 border border-line text-xs font-bold text-gray-400 hover:text-rose-400 hover:border-rose-500/30 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-2 border border-line text-xs font-medium text-gray-400 hover:text-rose-400 hover:border-rose-500/30 transition-[color,background-color,border-color,opacity,transform]"
             >
               <LogOut className="w-3.5 h-3.5" /> Desvincular
             </button>
@@ -454,7 +453,7 @@ export default function ProfilePage() {
       {summaryError && (
         <div className="bg-surface border border-line rounded-xl p-6 text-center text-xs text-gray-400">
           Não foi possível carregar o perfil na OpenDota agora.{' '}
-          <button type="button" onClick={() => setReloadKey((k) => k + 1)} className="font-bold text-amber-400 hover:text-amber-300">Tentar novamente</button>
+          <button type="button" onClick={() => setReloadKey((k) => k + 1)} className="font-medium text-amber-400 hover:text-amber-300">Tentar novamente</button>
         </div>
       )}
 
@@ -471,18 +470,18 @@ export default function ProfilePage() {
               key={id}
               type="button"
               onClick={() => setMode(id)}
-              className={`tilt-card text-left rounded-3xl border p-5 transition-all ${
-                active ? 'glass-panel border-amber-500 shadow-xl shadow-amber-500/10' : 'bg-surface-2/60 border-line hover:border-amber-500/30'
+              className={`tilt-card text-left rounded-3xl border p-5 transition-[color,background-color,border-color,opacity,transform] ${
+                active ? 'glass-panel border-amber-500' : 'bg-surface-2/60 border-line hover:border-amber-500/30'
               }`}
             >
-              <div className={`text-xs font-black uppercase tracking-wider ${active ? 'text-amber-400' : 'text-gray-400'}`}>{cfg.label}</div>
-              <div className="text-[11px] text-gray-400">{cfg.hint}</div>
+              <div className={`text-xs font-semibold ${active ? 'text-amber-400' : 'text-gray-400'}`}>{cfg.label}</div>
+              <div className="text-xs text-gray-400">{cfg.hint}</div>
               {wl ? (
                 <div className="mt-2 flex items-baseline gap-3">
-                  <span className="text-3xl font-black text-white font-mono">{(wl.win + wl.lose).toLocaleString('pt-BR')}</span>
+                  <span className="text-3xl font-semibold text-white font-mono">{(wl.win + wl.lose).toLocaleString('pt-BR')}</span>
                   <span className="text-xs text-gray-400">partidas</span>
                   {wr !== null && (
-                    <span className={`ml-auto text-base font-black font-mono ${wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{wr.toFixed(1)}%</span>
+                    <span className={`ml-auto text-base font-semibold font-mono ${wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{wr.toFixed(1)}%</span>
                   )}
                 </div>
               ) : (
@@ -501,8 +500,8 @@ export default function ProfilePage() {
             key={id}
             type="button"
             onClick={() => setView(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
-              view === id ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:text-white hover:bg-surface-2'
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-[color,background-color,border-color,opacity,transform] ${
+              view === id ? 'bg-amber-500 text-on-accent' : 'text-gray-400 hover:text-white hover:bg-surface-2'
             }`}
           >
             <Icon className="w-3.5 h-3.5" /> {label}
@@ -520,7 +519,7 @@ export default function ProfilePage() {
       ) : data.error ? (
         <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
           Não foi possível carregar as partidas agora.{' '}
-          <button type="button" onClick={() => setModeData((p) => { const n = { ...p }; delete n[mode]; return n; })} className="font-bold text-amber-400">Tentar novamente</button>
+          <button type="button" onClick={() => setModeData((p) => { const n = { ...p }; delete n[mode]; return n; })} className="font-medium text-amber-400">Tentar novamente</button>
         </div>
       ) : data.matches.length === 0 ? (
         <div className="glass-panel border border-line rounded-2xl p-8 text-center text-xs text-gray-400">
@@ -531,7 +530,7 @@ export default function ProfilePage() {
           {/* MÉDIAS + HERÓIS */}
           <div className="space-y-6">
             <section className="glass-panel rounded-3xl p-6 shadow-xl border border-line">
-              <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
+              <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
                 <Swords className="w-4 h-4 text-amber-400" /> Últimas {data.matches.length} partidas
               </h2>
               <div className="grid grid-cols-3 gap-3 text-center">
@@ -544,15 +543,15 @@ export default function ProfilePage() {
                   ['Last hits', data.averages.lastHits, 'text-white']
                 ].map(([label, value, color]) => (
                   <div key={label} className="bg-surface-2/80 rounded-2xl p-3 border border-line">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</div>
-                    <div className={`mt-0.5 text-sm font-black font-mono ${color}`}>{value}</div>
+                    <div className="text-[11px] font-medium text-gray-400">{label}</div>
+                    <div className={`mt-0.5 text-sm font-semibold font-mono ${color}`}>{value}</div>
                   </div>
                 ))}
               </div>
             </section>
 
             <section className="glass-panel rounded-3xl p-6 shadow-xl border border-line">
-              <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
+              <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-400" /> Heróis mais jogados
               </h2>
               <p className="text-xs text-gray-400 -mt-2 mb-4">Todo o histórico de {MODES[mode].label} registrado na OpenDota.</p>
@@ -563,14 +562,14 @@ export default function ProfilePage() {
                     <li key={h.heroId} className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-surface-2/60 transition-colors">
                       <img src={getHeroImg(constants, h.heroId)} alt="" className="w-12 h-7 rounded-lg object-cover border border-line shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs font-bold text-white truncate">{getHeroName(constants, h.heroId)}</div>
+                        <div className="text-xs font-medium text-white truncate">{getHeroName(constants, h.heroId)}</div>
                         {h.lastPlayed && (
-                          <div className="text-[10px] text-gray-400">Último jogo: {fmtWhen(h.lastPlayed)}</div>
+                          <div className="text-[11px] text-gray-400">Último jogo: {fmtWhen(h.lastPlayed)}</div>
                         )}
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="text-xs font-black font-mono text-white">{h.games}</div>
-                        <div className={`text-[10px] font-bold font-mono ${wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{wr.toFixed(0)}%</div>
+                        <div className="text-xs font-semibold font-mono text-white">{h.games}</div>
+                        <div className={`text-[11px] font-medium font-mono ${wr >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>{wr.toFixed(0)}%</div>
                       </div>
                     </li>
                   );
@@ -581,7 +580,7 @@ export default function ProfilePage() {
 
           {/* ÚLTIMAS PARTIDAS */}
           <section className="xl:col-span-2 glass-panel rounded-3xl p-6 shadow-xl border border-line">
-            <h2 className="text-xs font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2">
+            <h2 className="text-xs font-semibold text-white mb-4 flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-400" /> Partidas recentes
             </h2>
             <div className="space-y-2">
@@ -590,15 +589,15 @@ export default function ProfilePage() {
                   key={m.match_id}
                   type="button"
                   onClick={() => openMatch(m.match_id)}
-                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-surface-2/60 hover:bg-surface-2 border border-line hover:border-amber-500/40 text-left transition-all group"
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-surface-2/60 hover:bg-surface-2 border border-line hover:border-amber-500/40 text-left transition-[color,background-color,border-color,opacity,transform] group"
                 >
                   <span className={`w-1.5 self-stretch rounded-full shrink-0 ${m.won ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                   <img src={getHeroImg(constants, m.hero_id)} alt="" className="w-12 h-7 rounded-lg object-cover border border-line shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <div className="text-xs font-bold text-white truncate">{getHeroName(constants, m.hero_id)}</div>
-                    <div className="text-[10px] text-gray-400">{GAME_MODES[m.game_mode] || 'Partida'} · {fmtWhen(m.start_time)}<span className="sm:hidden"> · {m.kills}/{m.deaths}/{m.assists}</span></div>
+                    <div className="text-xs font-medium text-white truncate">{getHeroName(constants, m.hero_id)}</div>
+                    <div className="text-[11px] text-gray-400">{GAME_MODES[m.game_mode] || 'Partida'} · {fmtWhen(m.start_time)}<span className="sm:hidden"> · {m.kills}/{m.deaths}/{m.assists}</span></div>
                   </div>
-                  <span className={`text-[10px] font-black uppercase w-16 text-center shrink-0 ${m.won ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <span className={`text-[11px] font-semibold w-16 text-center shrink-0 ${m.won ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {m.won ? 'Vitória' : 'Derrota'}
                   </span>
                   <span className="hidden sm:inline text-xs font-mono text-gray-300 w-24 text-center shrink-0">

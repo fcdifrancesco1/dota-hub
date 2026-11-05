@@ -67,7 +67,7 @@ export default function HeroDetailModal({
         {/* BOTÃO FECHAR */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2.5 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line text-gray-400 hover:text-white transition-all z-20 cursor-pointer shadow-sm"
+          className="absolute top-4 right-4 p-2.5 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line text-gray-400 hover:text-white transition-[color,background-color,border-color,opacity,transform] z-20 cursor-pointer shadow-sm"
         >
           <X className="w-5 h-5" />
         </button>
@@ -84,24 +84,24 @@ export default function HeroDetailModal({
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl sm:text-2xl font-black text-white">{heroName}</h2>
-                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase font-mono bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-sm">
+                <h2 className="text-xl sm:text-2xl font-semibold text-white">{heroName}</h2>
+                <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold font-mono bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-sm">
                   Tier {hero.tier || 'A'}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold font-mono bg-surface-2 text-blue-600 dark:text-cyan-300 border border-line">
+                <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-medium font-mono bg-surface-2 text-blue-600 dark:text-cyan-300 border border-line">
                   {hero.primaryAttr || 'Atributo'}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-bold font-mono bg-surface-2 text-gray-400 border border-line">
-                  {hero.attackType || 'Corpo a Corpo'}
+                <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-medium font-mono bg-surface-2 text-gray-400 border border-line">
+                  {hero.attackType || 'Corpo a corpo'}
                 </span>
               </div>
 
               <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-gray-400 mt-1.5">
                 {hero.proWinRate !== undefined && (
-                  <span>Win Rate Pro: <strong className="text-emerald-500 font-bold">{hero.proWinRate}%</strong></span>
+                  <span>Win rate pro: <strong className="text-emerald-500 font-medium">{hero.proWinRate}%</strong></span>
                 )}
                 {hero.proPick !== undefined && (
-                  <span>Picks Pro: <strong className="text-blue-600 dark:text-amber-400 font-bold">{hero.proPick}</strong></span>
+                  <span>Picks pro: <strong className="text-blue-600 dark:text-amber-400 font-medium">{hero.proPick}</strong></span>
                 )}
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function HeroDetailModal({
           <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-line overflow-x-auto">
             <button
               onClick={() => setActiveTab('skills')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                 activeTab === 'skills'
                   ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
                   : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
@@ -121,7 +121,7 @@ export default function HeroDetailModal({
             </button>
             <button
               onClick={() => setActiveTab('talents')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                 activeTab === 'talents'
                   ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
                   : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
@@ -131,7 +131,7 @@ export default function HeroDetailModal({
             </button>
             <button
               onClick={() => setActiveTab('benchmarks')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                 activeTab === 'benchmarks'
                   ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
                   : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
@@ -141,7 +141,7 @@ export default function HeroDetailModal({
             </button>
             <button
               onClick={() => setActiveTab('matchups')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                 activeTab === 'matchups'
                   ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
                   : 'bg-surface-2 text-gray-400 hover:text-white border border-line'
@@ -170,7 +170,7 @@ export default function HeroDetailModal({
                 <div className="space-y-4">
                   {/* Seletor de Habilidades */}
                   <div className="space-y-2">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 block">
+                    <span className="text-[11px] font-semibold text-amber-400 block">
                       Habilidades Principais do Herói
                     </span>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -180,7 +180,7 @@ export default function HeroDetailModal({
                           <button
                             key={idx}
                             onClick={() => setSelectedAbility(ab)}
-                            className={`flex items-center gap-2 p-1.5 pr-3 rounded-xl border transition-all cursor-pointer ${
+                            className={`flex items-center gap-2 p-1.5 pr-3 rounded-xl border transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                               isSelected
                                 ? 'bg-blue-600 text-on-accent dark:bg-amber-500/20 dark:border-amber-400 dark:text-white shadow-md'
                                 : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:bg-surface-3'
@@ -192,7 +192,7 @@ export default function HeroDetailModal({
                               className="w-8 h-8 rounded-lg object-cover border border-line"
                               onError={(e) => { e.target.style.display = 'none'; }}
                             />
-                            <span className="text-xs font-bold truncate max-w-[120px]">{ab.dname}</span>
+                            <span className="text-xs font-medium truncate max-w-[120px]">{ab.dname}</span>
                           </button>
                         );
                       })}
@@ -210,11 +210,11 @@ export default function HeroDetailModal({
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-base font-black text-white">{selectedAbility.dname}</h3>
-                          <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-gray-400 mt-1">
+                          <h3 className="text-base font-semibold text-white">{selectedAbility.dname}</h3>
+                          <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-gray-400 mt-1">
                             {selectedAbility.behavior && <span>Tipo: <strong className="text-white">{selectedAbility.behavior}</strong></span>}
-                            {selectedAbility.dmg_type && <span>Dano: <strong className="text-rose-500 font-bold">{selectedAbility.dmg_type}</strong></span>}
-                            {selectedAbility.bkbpierce && <span>Atravessa BKB: <strong className="text-amber-500 font-bold">{selectedAbility.bkbpierce}</strong></span>}
+                            {selectedAbility.dmg_type && <span>Dano: <strong className="text-rose-500 font-medium">{selectedAbility.dmg_type}</strong></span>}
+                            {selectedAbility.bkbpierce && <span>Atravessa BKB: <strong className="text-amber-500 font-medium">{selectedAbility.bkbpierce}</strong></span>}
                           </div>
                         </div>
                       </div>
@@ -229,13 +229,13 @@ export default function HeroDetailModal({
                         {selectedAbility.cd && (
                           <div className="flex items-center gap-1.5 text-gray-400 bg-surface-3 px-3 py-1.5 rounded-xl border border-line">
                             <Clock className="w-3.5 h-3.5 text-blue-500 dark:text-cyan-400" />
-                            <span>Tempo de Recarga: <strong className="text-white">{selectedAbility.cd}s</strong></span>
+                            <span>Tempo de recarga: <strong className="text-white">{selectedAbility.cd}s</strong></span>
                           </div>
                         )}
                         {selectedAbility.mc && (
                           <div className="flex items-center gap-1.5 text-gray-400 bg-surface-3 px-3 py-1.5 rounded-xl border border-line">
                             <Droplet className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                            <span>Custo de Mana: <strong className="text-white">{selectedAbility.mc}</strong></span>
+                            <span>Custo de mana: <strong className="text-white">{selectedAbility.mc}</strong></span>
                           </div>
                         )}
                       </div>
@@ -253,13 +253,13 @@ export default function HeroDetailModal({
                           className="w-9 h-9 object-contain rounded-xl bg-surface-3 p-1 border border-line"
                         />
                         <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-cyan-400 block">
+                          <span className="text-[11px] font-semibold text-blue-600 dark:text-cyan-400 block">
                             Aghanim&apos;s Scepter (Cetro)
                           </span>
                           <strong className="text-xs text-white">{details.aghs?.scepter_skill_name}</strong>
                         </div>
                       </div>
-                      <p className="text-[11px] text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
+                      <p className="text-xs text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
                         {details.aghs?.scepter_desc}
                       </p>
                     </div>
@@ -273,13 +273,13 @@ export default function HeroDetailModal({
                           className="w-9 h-9 object-contain rounded-xl bg-surface-3 p-1 border border-line"
                         />
                         <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">
+                          <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 block">
                             Aghanim&apos;s Shard (Fragmento)
                           </span>
                           <strong className="text-xs text-white">{details.aghs?.shard_skill_name}</strong>
                         </div>
                       </div>
-                      <p className="text-[11px] text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
+                      <p className="text-xs text-white leading-relaxed bg-surface-3 p-3 rounded-xl border border-line">
                         {details.aghs?.shard_desc}
                       </p>
                     </div>
@@ -303,7 +303,7 @@ export default function HeroDetailModal({
                         <div className="flex-1 text-right text-white font-medium truncate sm:whitespace-normal">
                           {t.left}
                         </div>
-                        <div className="w-12 h-12 rounded-full bg-blue-500/15 border-2 border-blue-500 dark:bg-amber-500/20 dark:border-amber-400 text-blue-600 dark:text-amber-300 font-black text-sm flex items-center justify-center shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-blue-500/15 border-2 border-blue-500 dark:bg-amber-500/20 dark:border-amber-400 text-blue-600 dark:text-amber-300 font-semibold text-sm flex items-center justify-center shrink-0 shadow-md">
                           {t.level}
                         </div>
                         <div className="flex-1 text-left text-white font-medium truncate sm:whitespace-normal">
@@ -325,18 +325,18 @@ export default function HeroDetailModal({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
                     {/* GPM */}
                     <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
-                      <span className="text-[11px] font-extrabold uppercase text-amber-500">Ouro Por Minuto (GPM)</span>
+                      <span className="text-xs font-semibold text-amber-500">Ouro por minuto (GPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
+                          <span className="text-[11px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.gpm.p50}</strong>
                         </div>
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-gray-400 block">Bom (p75)</span>
+                          <span className="text-[11px] text-gray-400 block">Bom (p75)</span>
                           <strong className="text-blue-500 dark:text-cyan-400 text-sm">{details.benchmarks.gpm.p75}</strong>
                         </div>
                         <div className="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/30">
-                          <span className="text-[10px] text-amber-500 block">Elite (p90)</span>
+                          <span className="text-[11px] text-amber-500 block">Elite (p90)</span>
                           <strong className="text-amber-500 text-sm">{details.benchmarks.gpm.p90}</strong>
                         </div>
                       </div>
@@ -344,18 +344,18 @@ export default function HeroDetailModal({
 
                     {/* XPM */}
                     <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
-                      <span className="text-[11px] font-extrabold uppercase text-blue-600 dark:text-cyan-400">XP Por Minuto (XPM)</span>
+                      <span className="text-xs font-semibold text-blue-600 dark:text-cyan-400">XP por minuto (XPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
+                          <span className="text-[11px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.xpm.p50}</strong>
                         </div>
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-gray-400 block">Bom (p75)</span>
+                          <span className="text-[11px] text-gray-400 block">Bom (p75)</span>
                           <strong className="text-blue-500 dark:text-cyan-400 text-sm">{details.benchmarks.xpm.p75}</strong>
                         </div>
                         <div className="bg-blue-500/10 dark:bg-cyan-500/10 p-2.5 rounded-xl border border-blue-500/30 dark:border-cyan-500/30">
-                          <span className="text-[10px] text-blue-600 dark:text-cyan-400 block">Elite (p90)</span>
+                          <span className="text-[11px] text-blue-600 dark:text-cyan-400 block">Elite (p90)</span>
                           <strong className="text-blue-600 dark:text-cyan-400 text-sm">{details.benchmarks.xpm.p90}</strong>
                         </div>
                       </div>
@@ -363,18 +363,18 @@ export default function HeroDetailModal({
 
                     {/* KILLS PER MIN */}
                     <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
-                      <span className="text-[11px] font-extrabold uppercase text-rose-500">Abates Por Minuto (KPM)</span>
+                      <span className="text-xs font-semibold text-rose-500">Abates por minuto (KPM)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
+                          <span className="text-[11px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.kpm.p50}</strong>
                         </div>
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-rose-500 block">Bom (p75)</span>
+                          <span className="text-[11px] text-rose-500 block">Bom (p75)</span>
                           <strong className="text-rose-500 text-sm">{details.benchmarks.kpm.p75}</strong>
                         </div>
                         <div className="bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/30">
-                          <span className="text-[10px] text-rose-500 block">Elite (p90)</span>
+                          <span className="text-[11px] text-rose-500 block">Elite (p90)</span>
                           <strong className="text-rose-500 text-sm">{details.benchmarks.kpm.p90}</strong>
                         </div>
                       </div>
@@ -382,18 +382,18 @@ export default function HeroDetailModal({
 
                     {/* LAST HITS PER MIN */}
                     <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-2 shadow-sm">
-                      <span className="text-[11px] font-extrabold uppercase text-emerald-500">Last Hits Por Minuto (CS)</span>
+                      <span className="text-xs font-semibold text-emerald-500">Last hits por minuto (CS)</span>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-gray-400 block">Médio (p50)</span>
+                          <span className="text-[11px] text-gray-400 block">Médio (p50)</span>
                           <strong className="text-white text-sm">{details.benchmarks.lpm.p50}</strong>
                         </div>
                         <div className="bg-surface-3 p-2.5 rounded-xl border border-line">
-                          <span className="text-[10px] text-emerald-500 block">Bom (p75)</span>
+                          <span className="text-[11px] text-emerald-500 block">Bom (p75)</span>
                           <strong className="text-emerald-500 text-sm">{details.benchmarks.lpm.p75}</strong>
                         </div>
                         <div className="bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/30">
-                          <span className="text-[10px] text-emerald-500 block">Elite (p90)</span>
+                          <span className="text-[11px] text-emerald-500 block">Elite (p90)</span>
                           <strong className="text-emerald-500 text-sm">{details.benchmarks.lpm.p90}</strong>
                         </div>
                       </div>
@@ -407,7 +407,7 @@ export default function HeroDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Melhores Vantagens (Heróis que ele vence com folga) */}
                   <div className="space-y-2.5">
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Melhores Matchups (Maior Vantagem)
                     </span>
                     <div className="space-y-2">
@@ -422,11 +422,11 @@ export default function HeroDetailModal({
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <img src={mImg} alt="" className="w-9 h-6 rounded object-cover border border-emerald-500/40" />
-                              <span className="text-xs font-bold text-white truncate">{mName}</span>
+                              <span className="text-xs font-medium text-white truncate">{mName}</span>
                             </div>
                             <div className="text-right font-mono">
                               <strong className="text-emerald-400 text-xs">{m.winRate}% WR</strong>
-                              <span className="text-[9px] text-gray-500 block">({m.games_played} jogos)</span>
+                              <span className="text-[11px] text-gray-500 block">({m.games_played} jogos)</span>
                             </div>
                           </div>
                         );
@@ -436,7 +436,7 @@ export default function HeroDetailModal({
 
                   {/* Maiores Counters (Heróis que causam problemas para ele) */}
                   <div className="space-y-2.5">
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-rose-400 flex items-center gap-1.5">
                       <Swords className="w-4 h-4 text-rose-400" /> Maiores Counters (Pior Desvantagem)
                     </span>
                     <div className="space-y-2">
@@ -451,11 +451,11 @@ export default function HeroDetailModal({
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <img src={mImg} alt="" className="w-9 h-6 rounded object-cover border border-rose-500/40" />
-                              <span className="text-xs font-bold text-white truncate">{mName}</span>
+                              <span className="text-xs font-medium text-white truncate">{mName}</span>
                             </div>
                             <div className="text-right font-mono">
                               <strong className="text-rose-400 text-xs">{m.winRate}% WR</strong>
-                              <span className="text-[9px] text-gray-500 block">({m.games_played} jogos)</span>
+                              <span className="text-[11px] text-gray-500 block">({m.games_played} jogos)</span>
                             </div>
                           </div>
                         );

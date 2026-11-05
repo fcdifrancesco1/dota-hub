@@ -85,7 +85,7 @@ export default function TeamPage() {
     <button
       type="button"
       onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
-      className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 transition-colors mb-5"
+      className="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-amber-400 transition-colors mb-5"
     >
       <ArrowLeft className="w-4 h-4" />
       <span>Voltar</span>
@@ -110,7 +110,7 @@ export default function TeamPage() {
         {back}
         <div className="rounded-2xl bg-surface border border-line p-10 text-center max-w-xl mx-auto">
           <AlertTriangle className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-          <h1 className="text-lg font-black text-white uppercase mb-2">
+          <h1 className="text-lg font-semibold text-white mb-2">
             {state.status === 'notfound' ? 'Time não encontrado' : 'Não foi possível carregar o time'}
           </h1>
           <p className="text-xs text-gray-400 mb-5">
@@ -118,7 +118,7 @@ export default function TeamPage() {
               ? 'Não encontramos este time na base da OpenDota.'
               : 'A OpenDota não respondeu agora. Tente novamente em instantes.'}
           </p>
-          <Link to="/" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-on-accent text-xs font-black uppercase">
+          <Link to="/" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-on-accent text-xs font-semibold">
             Ir para o início
           </Link>
         </div>
@@ -136,7 +136,6 @@ export default function TeamPage() {
 
       {/* CABEÇALHO DO TIME */}
       <section className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden -mt-5">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5 flex-1 min-w-0">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-2/80 border border-line p-3 flex items-center justify-center shrink-0 shadow-lg shadow-black/20">
@@ -144,9 +143,9 @@ export default function TeamPage() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight truncate">{team.name}</h1>
+                <h1 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight truncate">{team.name}</h1>
                 {team.tag && (
-                  <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 font-black text-xs uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 font-semibold text-xs">
                     {team.tag}
                   </span>
                 )}
@@ -160,12 +159,12 @@ export default function TeamPage() {
                     <span className="text-gray-500">•</span>
                     <span className="text-gray-400 inline-flex items-center gap-1">
                       <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                      <strong className="text-amber-400 font-black">{achievements.summary.totalChampionships}</strong> títulos
+                      <strong className="text-amber-400 font-semibold">{achievements.summary.totalChampionships}</strong> títulos
                     </span>
                     {achievements.summary.totalPrizeUsd > 0 && (
                       <>
                         <span className="text-gray-500">•</span>
-                        <span className="text-gray-400">Premiação: <strong className="text-emerald-400 font-black">{prizeShort(achievements.summary.totalPrizeUsd)}</strong></span>
+                        <span className="text-gray-400">Premiação: <strong className="text-emerald-400 font-semibold">{prizeShort(achievements.summary.totalPrizeUsd)}</strong></span>
                       </>
                     )}
                   </>
@@ -186,9 +185,9 @@ export default function TeamPage() {
       {/* ELENCO E ESTATÍSTICAS */}
       <section className="glass-panel rounded-3xl overflow-hidden shadow-xl">
         <div className="p-5 sm:p-6 border-b border-line flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
             <Users className="w-5 h-5 text-amber-400" />
-            <span>Elenco e Estatísticas</span>
+            <span>Elenco e estatísticas</span>
           </h2>
           <span className="text-xs text-gray-400">
             Médias das últimas 20 partidas profissionais de cada jogador
@@ -200,7 +199,7 @@ export default function TeamPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs min-w-[980px]">
-              <thead className="bg-surface-2/80 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-surface-2/80 text-gray-400 font-medium text-[11px]">
                 <tr>
                   <th className="p-3.5 pl-6">Jogador</th>
                   <th className="p-3.5 text-center whitespace-nowrap">Pelo time</th>
@@ -226,15 +225,15 @@ export default function TeamPage() {
       {/* ÚLTIMAS 10 SÉRIES */}
       <section className="glass-panel rounded-3xl overflow-hidden shadow-xl">
         <div className="p-5 sm:p-6 border-b border-line flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-400" />
             <span>Últimas {series.length} Séries</span>
           </h2>
           {series.length > 0 && (
-            <span className="text-xs font-bold text-gray-400">
-              <span className="text-emerald-400 font-black">{seriesWins} vitórias</span>
+            <span className="text-xs font-medium text-gray-400">
+              <span className="text-emerald-400 font-semibold">{seriesWins} vitórias</span>
               <span className="mx-2 text-gray-500">•</span>
-              <span className="text-rose-400 font-black">{series.length - seriesWins} derrotas</span>
+              <span className="text-rose-400 font-semibold">{series.length - seriesWins} derrotas</span>
             </span>
           )}
         </div>
@@ -254,7 +253,7 @@ export default function TeamPage() {
                     className="w-full text-left px-5 py-4 flex flex-col md:flex-row md:items-center gap-3 md:gap-5 hover:bg-surface-2/70 transition-colors group"
                   >
                     <div className="flex items-center gap-3 md:w-64 shrink-0">
-                      <span className={`w-16 text-center py-1 rounded-lg text-[10px] font-black uppercase border ${
+                      <span className={`w-16 text-center py-1 rounded-lg text-[11px] font-semibold border ${
                         draw
                           ? 'bg-surface-2 border-line text-gray-400'
                           : won
@@ -264,20 +263,20 @@ export default function TeamPage() {
                         {draw ? 'Empate' : won ? 'Vitória' : 'Derrota'}
                       </span>
                       <div className="min-w-0">
-                        <div className="text-[11px] font-bold text-gray-300 truncate">{s.stage}</div>
-                        <div className="text-[10px] text-gray-500">{s.dateStr}</div>
+                        <div className="text-xs font-medium text-gray-300 truncate">{s.stage}</div>
+                        <div className="text-[11px] text-gray-500">{s.dateStr}</div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="font-mono font-black text-base px-3 py-1 rounded-lg bg-surface-2 border border-line shrink-0">
+                      <span className="font-mono font-semibold text-base px-3 py-1 rounded-lg bg-surface-2 border border-line shrink-0">
                         <span className={won ? 'text-emerald-400' : 'text-gray-300'}>{s.scoreA}</span>
                         <span className="text-gray-500 mx-1">:</span>
                         <span className={!won && !draw ? 'text-rose-400' : 'text-gray-300'}>{s.scoreB}</span>
                       </span>
                       <span className="text-xs text-gray-500">vs</span>
                       <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} logoUrl={s.logoB} className="w-7 h-7 shrink-0" />
-                      <span className="text-sm font-bold text-white truncate">{s.timeB}</span>
+                      <span className="text-sm font-medium text-white truncate">{s.timeB}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -285,7 +284,7 @@ export default function TeamPage() {
                         <span
                           key={g.match_id}
                           title={`Jogo ${g.mapNumber}: ${g.teamWon ? 'vitória' : 'derrota'}`}
-                          className={`w-6 h-6 rounded-md text-[10px] font-black flex items-center justify-center border ${
+                          className={`w-6 h-6 rounded-md text-[11px] font-semibold flex items-center justify-center border ${
                             g.teamWon
                               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                               : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
@@ -294,7 +293,7 @@ export default function TeamPage() {
                           {g.teamWon ? 'V' : 'D'}
                         </span>
                       ))}
-                      <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all ml-1" />
+                      <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-[color,background-color,border-color,opacity,transform] ml-1" />
                     </div>
                   </button>
                 </li>
@@ -323,7 +322,7 @@ export default function TeamPage() {
           href={`https://www.opendota.com/teams/${team.id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-line hover:border-amber-500/40 text-gray-300 hover:text-white text-xs font-bold transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-line hover:border-amber-500/40 text-gray-300 hover:text-white text-xs font-medium transition-[color,background-color,border-color,opacity,transform]"
         >
           <ExternalLink className="w-4 h-4 text-amber-400" />
           <span>Ver no OpenDota</span>
@@ -335,9 +334,9 @@ export default function TeamPage() {
 
 function StatBox({ label, value, tone = 'text-white' }) {
   return (
-    <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[110px] hover:border-amber-500/30 transition-all">
-      <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">{label}</div>
-      <div className={`text-xl font-black font-mono mt-0.5 ${tone}`}>{value}</div>
+    <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[110px] hover:border-amber-500/30 transition-[color,background-color,border-color,opacity,transform]">
+      <div className="text-[11px] font-medium text-gray-400">{label}</div>
+      <div className={`text-xl font-semibold font-mono mt-0.5 ${tone}`}>{value}</div>
     </div>
   );
 }
@@ -356,19 +355,19 @@ function PlayerRow({ player, info, constants }) {
           className="flex items-center gap-3 group cursor-pointer"
           title={`Ver perfil completo e estatísticas de ${player.name}`}
         >
-          <div className="w-10 h-10 rounded-2xl bg-surface-2 border border-line overflow-hidden flex items-center justify-center shrink-0 group-hover:border-amber-400 group-hover:scale-105 transition-all shadow-sm">
+          <div className="w-10 h-10 rounded-2xl bg-surface-2 border border-line overflow-hidden flex items-center justify-center shrink-0 group-hover:border-amber-400 transition-[color,background-color,border-color,opacity,transform] shadow-sm">
             {info?.avatar ? (
               <img src={info.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
-              <span className="text-xs font-black text-gray-400">{player.name.slice(0, 2).toUpperCase()}</span>
+              <span className="text-xs font-semibold text-gray-400">{player.name.slice(0, 2).toUpperCase()}</span>
             )}
           </div>
           <div className="min-w-0">
-            <div className="font-bold text-white group-hover:text-amber-400 transition-colors truncate max-w-[160px] flex items-center gap-1.5">
+            <div className="font-medium text-white group-hover:text-amber-400 transition-colors truncate max-w-[160px] flex items-center gap-1.5">
               <span>{player.name}</span>
-              <span className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 text-[10px] text-amber-400 transition-opacity">→</span>
+              <span className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 text-[11px] text-amber-400 transition-opacity">→</span>
             </div>
-            <div className="text-[10px] text-gray-400 flex items-center gap-1">
+            <div className="text-[11px] text-gray-400 flex items-center gap-1">
               {medal ? (<><Shield className="w-3 h-3 text-amber-400" /> {medal}</>) : ' '}
             </div>
           </div>
@@ -377,38 +376,38 @@ function PlayerRow({ player, info, constants }) {
       <td className="p-3.5 text-center font-mono whitespace-nowrap">
         {player.gamesWithTeam > 0 ? (
           <>
-            <span className="text-white font-bold">{player.gamesWithTeam}</span>
+            <span className="text-white font-medium">{player.gamesWithTeam}</span>
             <span className="text-gray-500"> jogos · </span>
-            <span className="text-amber-400 font-bold">{pct(player.winsWithTeam, player.gamesWithTeam)}%</span>
+            <span className="text-amber-400 font-medium">{pct(player.winsWithTeam, player.gamesWithTeam)}%</span>
           </>
         ) : (
-          <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase font-sans">
+          <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] font-semibold font-sans">
             {player.isNewcomer ? 'Recém-chegado' : 'Sem jogos'}
           </span>
         )}
       </td>
       <td className="p-3.5 text-center font-mono">{stats ? stats.matches : dash}</td>
-      <td className="p-3.5 text-center font-mono font-bold">
+      <td className="p-3.5 text-center font-mono font-medium">
         {stats ? <span className={stats.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{stats.winRate}%</span> : dash}
       </td>
       <td className="p-3.5 text-center font-mono whitespace-nowrap">
         {stats ? (
           <>
-            <span className="text-white font-bold">{stats.avgKills.toFixed(1)}</span>
+            <span className="text-white font-medium">{stats.avgKills.toFixed(1)}</span>
             <span className="text-gray-500"> / </span>
-            <span className="text-rose-400 font-bold">{stats.avgDeaths.toFixed(1)}</span>
+            <span className="text-rose-400 font-medium">{stats.avgDeaths.toFixed(1)}</span>
             <span className="text-gray-500"> / </span>
-            <span className="text-cyan-400 font-bold">{stats.avgAssists.toFixed(1)}</span>
+            <span className="text-cyan-400 font-medium">{stats.avgAssists.toFixed(1)}</span>
           </>
         ) : dash}
       </td>
-      <td className="p-3.5 text-center font-mono font-black text-amber-400">{stats ? stats.kda.toFixed(2) : dash}</td>
+      <td className="p-3.5 text-center font-mono font-semibold text-amber-400">{stats ? stats.kda.toFixed(2) : dash}</td>
       <td className="p-3.5 text-center font-mono whitespace-nowrap">
         {stats ? (
           <>
-            <span className="text-amber-400 font-bold">{stats.gpm}</span>
+            <span className="text-amber-400 font-medium">{stats.gpm}</span>
             <span className="text-gray-500"> / </span>
-            <span className="text-cyan-400 font-bold">{stats.xpm}</span>
+            <span className="text-cyan-400 font-medium">{stats.xpm}</span>
           </>
         ) : dash}
       </td>
@@ -421,17 +420,17 @@ function PlayerRow({ player, info, constants }) {
                 key={h.hero_id}
                 to={`/herois/${h.hero_id}`}
                 title={`${getHeroName(constants, h.hero_id)}: ${h.games} jogos, ${h.wins} vitórias (clique para ver detalhes)`}
-                className="relative w-12 h-7 rounded-lg overflow-hidden border border-line bg-surface-2 hover:border-amber-400 hover:scale-105 transition-all shadow-sm"
+                className="relative w-12 h-7 rounded-lg overflow-hidden border border-line bg-surface-2 hover:border-amber-400 transition-[color,background-color,border-color,opacity,transform] shadow-sm"
               >
                 <img src={getHeroImg(constants, h.hero_id)} alt="" className="w-full h-full object-cover" />
-                <span className="absolute bottom-0 right-0 px-1 text-[9px] font-mono font-black bg-black/75 text-white rounded-tl">
+                <span className="absolute bottom-0 right-0 px-1 text-[11px] font-mono font-semibold bg-black/75 text-white rounded-tl">
                   {h.games}
                 </span>
               </Link>
             ))}
           </div>
         ) : (
-          <span className="text-gray-500 text-[11px]">{loading ? '' : 'Sem partidas recentes'}</span>
+          <span className="text-gray-500 text-xs">{loading ? '' : 'Sem partidas recentes'}</span>
         )}
       </td>
     </tr>

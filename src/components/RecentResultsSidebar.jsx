@@ -21,13 +21,13 @@ export default function RecentResultsSidebar({
   });
 
   return (
-    <aside className="w-full lg:w-[320px] bg-surface/80 backdrop-blur-xl border-r border-white/10 flex flex-col h-full overflow-hidden">
+    <aside className="w-full lg:w-[320px] bg-surface border-r border-white/10 flex flex-col h-full overflow-hidden">
       <div className="p-3.5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
-        <div className="flex items-center gap-2 font-extrabold uppercase text-xs tracking-wider text-amber-400">
+        <div className="flex items-center gap-2 font-semibold text-xs text-amber-400">
           <History className="w-4 h-4 text-amber-400" />
           Resultados Recentes
         </div>
-        <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full">
+        <span className="text-[11px] font-mono font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full">
           {filtered.length} SÉRIES
         </span>
       </div>
@@ -55,15 +55,15 @@ export default function RecentResultsSidebar({
               <div
                 key={idx}
                 onClick={() => onSelectSeries(s)}
-                className="group relative bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-amber-500/50 rounded-xl p-3 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-lg hover:shadow-amber-500/5 hover:-translate-y-0.5"
+                className="group relative bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-amber-500/50 rounded-xl p-3 cursor-pointer transition-[color,background-color,border-color,opacity,transform] duration-200 shadow-sm"
               >
                 {/* Cabeçalho do Card */}
-                <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2 mb-2 text-[10px]">
-                  <span className="font-bold text-amber-400/90 truncate uppercase tracking-wider flex-1 min-w-0 pr-1" title={s.stage || "Torneio Profissional"}>
-                    {s.stage || "Torneio Profissional"}
+                <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2 mb-2 text-[11px]">
+                  <span className="font-medium text-amber-400/90 truncate flex-1 min-w-0 pr-1" title={s.stage || "Torneio profissional"}>
+                    {s.stage || "Torneio profissional"}
                   </span>
-                  <span className="font-mono text-gray-400 font-semibold bg-black/50 px-2 py-0.5 rounded border border-white/5 inline-flex flex-row flex-nowrap items-center gap-1 shrink-0 whitespace-nowrap text-[9px]">
-                    {s.formato && <span className="text-purple-300 font-bold whitespace-nowrap">{s.formato} • </span>}
+                  <span className="font-mono text-gray-400 font-semibold bg-black/50 px-2 py-0.5 rounded border border-white/5 inline-flex flex-row flex-nowrap items-center gap-1 shrink-0 whitespace-nowrap text-[11px]">
+                    {s.formato && <span className="text-purple-300 font-medium whitespace-nowrap">{s.formato} • </span>}
                     <span className="whitespace-nowrap">{s.dur}</span>
                     {s.dateStr && <span className="text-cyan-400/90 font-medium whitespace-nowrap"> • {s.dateStr}</span>}
                   </span>
@@ -73,12 +73,12 @@ export default function RecentResultsSidebar({
                 <div className="flex items-center justify-between gap-2 py-1">
                   <div className="flex items-center gap-2 truncate flex-1 min-w-0">
                     <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} className="w-5 h-5 shrink-0" />
-                    <span className={`text-xs font-bold truncate ${aWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
+                    <span className={`text-xs font-medium truncate ${aWon ? 'text-white font-semibold' : 'text-gray-400'}`}>
                       {s.timeA}
                     </span>
                   </div>
                   <span
-                    className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${
+                    className={`font-mono text-xs font-semibold min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${
                       aWon
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : s.scoreA === s.scoreB
@@ -94,12 +94,12 @@ export default function RecentResultsSidebar({
                 <div className="flex items-center justify-between gap-2 py-1">
                   <div className="flex items-center gap-2 truncate flex-1 min-w-0">
                     <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} className="w-5 h-5 shrink-0" />
-                    <span className={`text-xs font-bold truncate ${bWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
+                    <span className={`text-xs font-medium truncate ${bWon ? 'text-white font-semibold' : 'text-gray-400'}`}>
                       {s.timeB}
                     </span>
                   </div>
                   <span
-                    className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${
+                    className={`font-mono text-xs font-semibold min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${
                       bWon
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : s.scoreA === s.scoreB
@@ -111,8 +111,8 @@ export default function RecentResultsSidebar({
                   </span>
                 </div>
 
-                <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400 group-hover:text-amber-400 transition-colors">
-                  <span>Ver Replay & Draft</span>
+                <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 group-hover:text-amber-400 transition-colors">
+                  <span>Ver replay & draft</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>

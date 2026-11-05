@@ -385,7 +385,7 @@ export default function TournamentDetailPage() {
     ...(standings.length ? [{ id: 'standings', label: 'Classificação', icon: ListOrdered }] : []),
     ...(brackets.length ? [{ id: 'bracket', label: 'Chaveamento', icon: GitBranch }] : []),
     { id: 'players', label: 'Jogadores', icon: UserCheck, disabled: !t.leagueId },
-    { id: 'heroes', label: 'Heróis do Torneio', icon: Sparkles, disabled: !t.leagueId },
+    { id: 'heroes', label: 'Heróis do torneio', icon: Sparkles, disabled: !t.leagueId },
     { id: 'info', label: 'Informações', icon: Info }
   ];
 
@@ -395,7 +395,6 @@ export default function TournamentDetailPage() {
 
       {/* CABEÇALHO DO CAMPEONATO */}
       <div className="tilt-card glass-panel relative overflow-hidden rounded-3xl border border-line p-6 sm:p-8 mb-8 shadow-2xl">
-        <div className="holo-sheen" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="w-28 h-20 sm:w-40 sm:h-24 rounded-2xl bg-surface-2 border border-line flex items-center justify-center p-3 shrink-0 shadow-inner">
@@ -407,18 +406,18 @@ export default function TournamentDetailPage() {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-sm">
+                <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-sm">
                   {tierLabel(t)}
                 </span>
-                <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase ${
+                <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium ${
                   t.status === 'ongoing' ? 'bg-red-600 text-on-accent shadow-sm' : 'bg-surface-2 text-gray-400 border border-line'
                 }`}>
                   {statusLabel(t)}
                 </span>
-                {t.organizer && <span className="text-[11px] text-gray-400">por <strong className="text-white">{t.organizer}</strong></span>}
+                {t.organizer && <span className="text-xs text-gray-400">por <strong className="text-white">{t.organizer}</strong></span>}
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black text-white font-serif uppercase tracking-tight">{t.name}</h1>
+              <h1 className="text-2xl sm:text-4xl font-semibold text-white font-serif tracking-tight">{t.name}</h1>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-400 mt-3">
                 {dates && (
@@ -445,7 +444,7 @@ export default function TournamentDetailPage() {
                     <span>Campeão: <strong className="text-blue-600 dark:text-amber-400">{t.winner.name}</strong>{t.runnerUp && <span className="text-gray-400"> · vice {t.runnerUp.name}</span>}</span>
                   </span>
                 )}
-                <span className="flex items-center gap-1.5 text-emerald-500 font-bold font-mono">
+                <span className="flex items-center gap-1.5 text-emerald-500 font-medium font-mono">
                   <DollarSign className="w-3.5 h-3.5" />
                   <span>{prize ? `Premiação: ${prize}` : 'Premiação não divulgada'}</span>
                 </span>
@@ -458,7 +457,7 @@ export default function TournamentDetailPage() {
               href={t.liquipediaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="self-start md:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/50 text-xs font-bold text-gray-400 hover:text-white transition-all whitespace-nowrap shadow-sm"
+              className="self-start md:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/50 text-xs font-medium text-gray-400 hover:text-white transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap shadow-sm"
             >
               Ver na Liquipedia
               <ExternalLink className="w-3.5 h-3.5" />
@@ -478,9 +477,9 @@ export default function TournamentDetailPage() {
               onClick={() => !tab.disabled && setActiveTab(tab.id)}
               disabled={tab.disabled}
               title={tab.disabled ? 'Este campeonato ainda não tem ID de liga da Valve' : undefined}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap disabled:opacity-40 cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap disabled:opacity-40 cursor-pointer ${
                 isActive
-                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md'
+                  ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-semibold shadow-md'
                   : 'bg-surface/80 border border-line text-gray-400 hover:text-white hover:bg-surface'
               }`}
             >
@@ -507,24 +506,24 @@ export default function TournamentDetailPage() {
         <div className="space-y-8">
           {scheduled.length > 0 && (
             <section>
-              <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
+              <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-cyan-400" /> Próximas partidas
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {scheduled.map((m, idx) => (
                   <div key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`} className="tilt-card glass-panel border border-line rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between text-[10px] text-gray-400 mb-2">
+                    <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
                       <span className="truncate text-blue-600 dark:text-amber-400 font-semibold">{m.tourneyName}</span>
-                      <span className="font-mono font-bold text-white">{m.startTime || 'A definir'} · {m.formato}</span>
+                      <span className="font-mono font-medium text-white">{m.startTime || 'A definir'} · {m.formato}</span>
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-6 h-6" />
-                        <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
+                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
                       </div>
-                      <span className="text-[10px] font-black text-gray-400 px-2">VS</span>
+                      <span className="text-[11px] font-semibold text-gray-400 px-2">VS</span>
                       <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
-                        <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
+                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
                         <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-6 h-6" />
                       </div>
                     </div>
@@ -535,7 +534,7 @@ export default function TournamentDetailPage() {
           )}
 
           <section>
-            <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
+            <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
               <Swords className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Séries concluídas
             </h2>
             {series.length === 0 ? (
@@ -555,19 +554,19 @@ export default function TournamentDetailPage() {
                     <button
                       key={s.series_id || idx}
                       onClick={() => openSeries(s, t.name)}
-                      className="w-full tilt-card glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-2xl p-3.5 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-4 transition-all group text-left shadow-sm"
+                      className="w-full tilt-card glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-2xl p-3.5 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-4 transition-[color,background-color,border-color,opacity,transform] group text-left shadow-sm"
                     >
-                      <span className="text-[10px] font-mono text-gray-400 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>
+                      <span className="text-[11px] font-mono text-gray-400 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>
                       <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${aWon ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>{s.timeA}</span>
+                        <span className={`text-xs font-medium leading-tight break-words line-clamp-2 ${aWon ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>{s.timeA}</span>
                         <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} logoUrl={s.logoA} className="w-6 h-6 shrink-0" />
                       </div>
-                      <span className="font-mono font-black text-sm px-2.5 sm:px-3.5 py-1 rounded-xl bg-surface-2 border border-line text-white shrink-0 whitespace-nowrap shadow-inner">
+                      <span className="font-mono font-semibold text-sm px-2.5 sm:px-3.5 py-1 rounded-xl bg-surface-2 border border-line text-white shrink-0 whitespace-nowrap shadow-inner">
                         {s.scoreA} : {s.scoreB}
                       </span>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} logoUrl={s.logoB} className="w-6 h-6 shrink-0" />
-                        <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${bWon ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>{s.timeB}</span>
+                        <span className={`text-xs font-medium leading-tight break-words line-clamp-2 ${bWon ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>{s.timeB}</span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-amber-400 shrink-0" />
                     </button>
@@ -627,7 +626,7 @@ export default function TournamentDetailPage() {
             ['ID da liga (Valve)', t.leagueId]
           ].filter(([, v]) => v).map(([label, value]) => (
             <div key={label} className="border-b border-white/5 pb-3">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-0.5">{label}</div>
+              <div className="text-[11px] font-medium text-gray-500 mb-0.5">{label}</div>
               <div className="text-gray-200 font-semibold">{value}</div>
             </div>
           ))}
@@ -648,11 +647,11 @@ function HeroCard({ h, constants }) {
   return (
     <div className="bg-surface border border-line rounded-xl p-3 text-center">
       <img src={getHeroImg(constants, h.hero_id)} alt="" className="w-full h-14 object-cover rounded-lg mb-2" />
-      <div className="text-xs font-black text-white leading-tight break-words line-clamp-2">{getHeroName(constants, h.hero_id)}</div>
-      <div className="mt-1.5 grid grid-cols-3 gap-1 text-[10px] font-mono">
-        <div><div className="text-gray-500">Picks</div><div className="text-white font-bold">{h.picks}</div></div>
-        <div><div className="text-gray-500">Bans</div><div className="text-rose-400 font-bold">{h.bans}</div></div>
-        <div><div className="text-gray-500">Vit.</div><div className="text-emerald-400 font-bold">{h.picks ? `${Math.round(h.winRate)}%` : '—'}</div></div>
+      <div className="text-xs font-semibold text-white leading-tight break-words line-clamp-2">{getHeroName(constants, h.hero_id)}</div>
+      <div className="mt-1.5 grid grid-cols-3 gap-1 text-[11px] font-mono">
+        <div><div className="text-gray-500">Picks</div><div className="text-white font-medium">{h.picks}</div></div>
+        <div><div className="text-gray-500">Bans</div><div className="text-rose-400 font-medium">{h.bans}</div></div>
+        <div><div className="text-gray-500">Vit.</div><div className="text-emerald-400 font-medium">{h.picks ? `${Math.round(h.winRate)}%` : '—'}</div></div>
       </div>
     </div>
   );
@@ -689,8 +688,8 @@ function TournamentHeroes({ heroStats, constants }) {
               key={s.id}
               type="button"
               onClick={() => setSortId(s.id)}
-              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                sortId === s.id ? 'bg-amber-500 text-on-accent font-black' : 'text-gray-400 hover:text-white'
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
+                sortId === s.id ? 'bg-amber-500 text-on-accent font-semibold' : 'text-gray-400 hover:text-white'
               }`}
             >
               {s.label}
@@ -705,7 +704,7 @@ function TournamentHeroes({ heroStats, constants }) {
 
       {groups.filter(([, list]) => list.length > 0).map(([title, list]) => (
         <section key={title}>
-          <h3 className="text-xs font-black uppercase tracking-wider text-white mb-3">
+          <h3 className="text-xs font-semibold text-white mb-3">
             {title} ({list.length})
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

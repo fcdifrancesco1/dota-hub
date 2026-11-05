@@ -48,15 +48,15 @@ export default function RecentResultsHome() {
         <div className="flex items-center justify-between gap-3 px-3 mb-2">
           <div className="flex items-center gap-2 min-w-0">
             <Trophy className="w-4 h-4 text-amber-500" />
-            <h3 className="text-sm font-black uppercase tracking-wider text-white whitespace-nowrap">
+            <h3 className="text-sm font-semibold text-white whitespace-nowrap">
               Resultados Recentes
             </h3>
           </div>
           <Link
             to="/partidas"
-            className="text-xs font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 uppercase tracking-wider whitespace-nowrap shrink-0 transition-colors"
+            className="text-xs font-medium text-amber-500 hover:text-amber-400 flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors"
           >
-            <span>Ver Histórico</span>
+            <span>Ver histórico</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -99,17 +99,17 @@ export default function RecentResultsHome() {
                     !isDone(series) ? 'bg-red-500/[0.06]' : ''
                   } ${onClick ? 'cursor-pointer hover:bg-surface-2/80' : ''}`}
                 >
-                  <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
+                  <div className="flex items-center justify-between text-[11px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[200px] text-amber-500">
                       {tourney}
                     </span>
                     {wikiStatus ? (
-                      <span className={`flex items-center gap-1 font-bold ${isDone(series) ? 'text-gray-400' : 'text-red-500'}`}>
+                      <span className={`flex items-center gap-1 font-medium ${isDone(series) ? 'text-gray-400' : 'text-red-500'}`}>
                         {!isDone(series) && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
                         {wikiStatus}
                       </span>
                     ) : (
-                      <span className="text-gray-400 group-hover:text-amber-500 font-bold transition-colors">
+                      <span className="text-gray-400 group-hover:text-amber-500 font-medium transition-colors">
                         Ver detalhes →
                       </span>
                     )}
@@ -119,13 +119,13 @@ export default function RecentResultsHome() {
                     {/* Time A */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <TeamLogo teamName={teamAName} teamId={series.team1_id || series.preferredIdA} logoUrl={series.team1_logo || series.logoA} className="w-5 h-5 shadow-sm" />
-                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-white font-black' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-medium leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-white font-semibold' : 'text-gray-400'}`}>
                         {teamAName}
                       </span>
                     </div>
 
                     {/* Placar */}
-                    <div className="flex items-center gap-1 font-mono font-black text-xs px-2.5 py-0.5 rounded-lg bg-surface-2">
+                    <div className="flex items-center gap-1 font-mono font-semibold text-xs px-2.5 py-0.5 rounded-lg bg-surface-2">
                       <span className={isWinnerA ? 'text-emerald-500' : 'text-gray-400'}>{scoreA}</span>
                       <span className="text-gray-400">-</span>
                       <span className={isWinnerB ? 'text-emerald-500' : 'text-gray-400'}>{scoreB}</span>
@@ -133,7 +133,7 @@ export default function RecentResultsHome() {
 
                     {/* Time B */}
                     <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-white font-black' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-medium leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-white font-semibold' : 'text-gray-400'}`}>
                         {teamBName}
                       </span>
                       <TeamLogo teamName={teamBName} teamId={series.team2_id || series.preferredIdB} logoUrl={series.team2_logo || series.logoB} className="w-5 h-5 shadow-sm" />
@@ -146,7 +146,7 @@ export default function RecentResultsHome() {
         )}
       </div>
 
-      <div className="mt-3 px-3 text-[11px] text-gray-500">
+      <div className="mt-3 px-3 text-xs text-gray-500">
         Clique em qualquer série para conferir o draft completo e a tabela de jogadores.
       </div>
 

@@ -99,13 +99,13 @@ export default function MatchPreviewModal({ match, onClose }) {
         {/* CABEÇALHO */}
         <div className="flex items-start justify-between gap-3 p-4 sm:p-5 border-b border-line">
           <div className="min-w-0">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400/90 truncate">
+            <div className="text-[11px] font-medium text-amber-400/90 truncate">
               {match.tourneyName || 'Torneio'} · {match.formato}
             </div>
-            <div className="mt-1 flex items-center gap-2 text-sm sm:text-lg font-black text-white">
+            <div className="mt-1 flex items-center gap-2 text-sm sm:text-lg font-semibold text-white">
               <TeamLogo teamName={match.timeA} logoUrl={match.logoA} className="w-6 h-6 shrink-0" />
               <span className="break-words">{match.timeA}</span>
-              <span className="text-[10px] text-gray-500 font-black px-1">VS</span>
+              <span className="text-[11px] text-gray-500 font-semibold px-1">VS</span>
               <span className="break-words">{match.timeB}</span>
               <TeamLogo teamName={match.timeB} logoUrl={match.logoB} className="w-6 h-6 shrink-0" />
             </div>
@@ -129,7 +129,7 @@ export default function MatchPreviewModal({ match, onClose }) {
             </div>
           ) : (
             <>
-              <p className="text-[11px] text-gray-400">
+              <p className="text-xs text-gray-400">
                 {data.tournament
                   ? <>Médias por partida no <strong className="text-gray-200">{data.tournament.name}</strong> até agora. {DASH} = ainda não jogou no campeonato.</>
                   : 'Campeonato não identificado; sem estatísticas do torneio.'}
@@ -141,7 +141,7 @@ export default function MatchPreviewModal({ match, onClose }) {
                   <button
                     type="button"
                     onClick={() => setAttempt((n) => n + 1)}
-                    className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 font-bold uppercase tracking-wider text-[10px]"
+                    className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 font-medium text-[11px]"
                   >
                     Tentar novamente
                   </button>
@@ -150,7 +150,7 @@ export default function MatchPreviewModal({ match, onClose }) {
 
               {sides.map((side) => (
                 <section key={side.name}>
-                  <h3 className="flex items-center gap-2 mb-2 text-xs font-black uppercase tracking-wider text-white">
+                  <h3 className="flex items-center gap-2 mb-2 text-xs font-semibold text-white">
                     <TeamLogo teamName={side.name} teamId={side.teamId} logoUrl={side.logo} className="w-5 h-5" />
                     {side.teamId
                       ? <Link to={teamPath(side.teamId, side.name)} onClick={onClose} className="hover:text-amber-400">{side.name}</Link>
@@ -163,7 +163,7 @@ export default function MatchPreviewModal({ match, onClose }) {
                   ) : (
                     <div className="bg-surface-2 border border-line rounded-xl overflow-x-auto">
                       <table className="w-full text-left text-xs min-w-[600px]">
-                        <thead className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        <thead className="text-[11px] font-medium text-gray-400">
                           <tr className="border-b border-line">
                             <th className="p-2.5 pl-3">Jogador</th>
                             <th className="p-2.5 text-center">Jogos</th>
@@ -177,12 +177,12 @@ export default function MatchPreviewModal({ match, onClose }) {
                         <tbody className="divide-y divide-line text-gray-300">
                           {side.players.map(({ accountId, name, stats: s }) => (
                             <tr key={accountId}>
-                              <td className="p-2.5 pl-3 font-bold text-white whitespace-nowrap">{name}</td>
+                              <td className="p-2.5 pl-3 font-medium text-white whitespace-nowrap">{name}</td>
                               <td className="p-2.5 text-center font-mono">{s ? s.games : DASH}</td>
-                              <td className="p-2.5 text-center font-mono font-bold">
+                              <td className="p-2.5 text-center font-mono font-medium">
                                 {s ? <span className={s.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{Math.round(s.winRate)}%</span> : DASH}
                               </td>
-                              <td className="p-2.5 text-center font-mono font-black text-amber-400">{s ? s.kda.toFixed(2) : DASH}</td>
+                              <td className="p-2.5 text-center font-mono font-semibold text-amber-400">{s ? s.kda.toFixed(2) : DASH}</td>
                               <td className="p-2.5 text-center font-mono whitespace-nowrap">
                                 {s ? `${s.kills.toFixed(1)} / ${s.deaths.toFixed(1)} / ${s.assists.toFixed(1)}` : DASH}
                               </td>
@@ -215,7 +215,7 @@ export default function MatchPreviewModal({ match, onClose }) {
                 <Link
                   to={tournamentPath(data.tournament)}
                   onClick={onClose}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-400 hover:text-amber-300"
                 >
                   <Trophy className="w-3.5 h-3.5" /> Ver todos os jogadores do campeonato <ChevronRight className="w-3.5 h-3.5" />
                 </Link>

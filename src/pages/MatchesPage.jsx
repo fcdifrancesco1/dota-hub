@@ -71,9 +71,9 @@ export default function MatchesPage() {
       {/* HEADER DA PÁGINA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-line">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white uppercase font-serif tracking-tight flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-white font-serif tracking-tight flex items-center gap-2.5">
             <Swords className="w-7 h-7 text-amber-500" />
-            <span>Partidas & Séries Profissionais</span>
+            <span>Partidas & séries profissionais</span>
           </h1>
           <p className="text-gray-400 text-xs sm:text-sm mt-1">
             Histórico completo de confrontos, replays, estatísticas individuais e agenda de partidas futuras.
@@ -84,16 +84,16 @@ export default function MatchesPage() {
         <div className="flex bg-surface-2 p-1 rounded-2xl border border-line shadow-sm">
           <button
             onClick={() => switchMode('finished')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
-              filterMode === 'finished' ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md' : 'text-gray-400 hover:text-white'
+            className={`px-4 py-2 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
+              filterMode === 'finished' ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-semibold shadow-md' : 'text-gray-400 hover:text-white'
             }`}
           >
             Séries Concluídas
           </button>
           <button
             onClick={() => switchMode('upcoming')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
-              filterMode === 'upcoming' ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-black shadow-md' : 'text-gray-400 hover:text-white'
+            className={`px-4 py-2 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
+              filterMode === 'upcoming' ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black font-semibold shadow-md' : 'text-gray-400 hover:text-white'
             }`}
           >
             Agenda Futura
@@ -105,13 +105,13 @@ export default function MatchesPage() {
       <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Filtro Torneio */}
         <div>
-          <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Filtrar por Campeonato</label>
+          <label className="block text-[11px] font-medium text-gray-400 mb-1">Filtrar por campeonato</label>
           <select
             value={selectedTournament}
             onChange={(e) => setSelectedTournament(e.target.value)}
             className="w-full bg-surface-2 border border-line rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dark:focus:border-amber-500/50 shadow-sm"
           >
-            <option value="all">Todos os Campeonatos</option>
+            <option value="all">Todos os campeonatos</option>
             {tournamentsList.map((t, idx) => (
               <option key={idx} value={t}>{t}</option>
             ))}
@@ -120,13 +120,13 @@ export default function MatchesPage() {
 
         {/* Filtro Time */}
         <div>
-          <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Filtrar por Time</label>
+          <label className="block text-[11px] font-medium text-gray-400 mb-1">Filtrar por time</label>
           <select
             value={selectedTeam}
             onChange={(e) => setSelectedTeam(e.target.value)}
             className="w-full bg-surface-2 border border-line rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dark:focus:border-amber-500/50 shadow-sm"
           >
-            <option value="all">Todos os Times</option>
+            <option value="all">Todos os times</option>
             {teamsList.map((tm, idx) => (
               <option key={idx} value={tm}>{tm}</option>
             ))}
@@ -135,7 +135,7 @@ export default function MatchesPage() {
 
         {/* Busca por Texto */}
         <div>
-          <label className="block text-[10px] font-bold uppercase text-gray-400 mb-1">Busca Rápida</label>
+          <label className="block text-[11px] font-medium text-gray-400 mb-1">Busca rápida</label>
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -152,7 +152,7 @@ export default function MatchesPage() {
       {/* SÉRIES EM ANDAMENTO / RECÉM-ENCERRADAS (placar da Liquipedia até a OpenDota registrar) */}
       {filterMode === 'finished' && (ongoingSeries || []).length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xs font-black uppercase tracking-wider text-white mb-3 flex items-center gap-2">
+          <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
             <Radio className="w-4 h-4 text-red-500" />
             <span>Em andamento e recém-encerradas</span>
           </h2>
@@ -183,7 +183,7 @@ export default function MatchesPage() {
             const tB = s.team2_name || s.timeB || 'Team 2';
             const scoreA = s.score_team1 ?? s.scoreA ?? 0;
             const scoreB = s.score_team2 ?? s.scoreB ?? 0;
-            const tourney = s.league_name || s.tourneyName || s.stage || 'Torneio Oficial';
+            const tourney = s.league_name || s.tourneyName || s.stage || 'Torneio oficial';
             // Série da OpenDota ainda incompleta (ex.: 1x0 numa MD3): sem vencedor
             const inProgress = !isUpcoming && isSeriesOngoing(s);
             const isWinnerA = !isUpcoming && !inProgress && scoreA > scoreB;
@@ -194,9 +194,9 @@ export default function MatchesPage() {
             const cardContent = (
               <>
                 <div>
-                  <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-line pb-2">
+                  <div className="flex items-center justify-between text-xs text-gray-400 mb-3 border-b border-line pb-2">
                     <span className="font-semibold truncate max-w-[200px] text-blue-600 dark:text-amber-400">{tourney}</span>
-                    <span className="font-mono text-gray-400 font-bold bg-surface-2 border border-line px-2 py-0.5 rounded-lg">
+                    <span className="font-mono text-gray-400 font-medium bg-surface-2 border border-line px-2 py-0.5 rounded-lg">
                       {formatLabel}
                     </span>
                   </div>
@@ -204,17 +204,17 @@ export default function MatchesPage() {
                   <div className="flex items-center justify-between gap-3 py-2">
                     <div className="flex items-center gap-2.5 flex-1 min-w-0">
                       <TeamLogo teamName={tA} teamId={s.team1_id || s.preferredIdA} logoUrl={s.team1_logo || s.logoA} className="w-7 h-7" />
-                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>
+                      <span className={`text-xs font-medium leading-tight break-words line-clamp-2 ${isWinnerA ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>
                         {tA}
                       </span>
                     </div>
 
-                    <div className="font-mono font-black text-xs px-3 py-1 bg-surface-2 rounded-xl border border-line text-white shadow-inner">
+                    <div className="font-mono font-semibold text-xs px-3 py-1 bg-surface-2 rounded-xl border border-line text-white shadow-inner">
                       {isUpcoming ? 'VS' : `${scoreA} - ${scoreB}`}
                     </div>
 
                     <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
-                      <span className={`text-xs font-bold leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-blue-600 dark:text-amber-400 font-black' : 'text-white'}`}>
+                      <span className={`text-xs font-medium leading-tight break-words line-clamp-2 text-right ${isWinnerB ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>
                         {tB}
                       </span>
                       <TeamLogo teamName={tB} teamId={s.team2_id || s.preferredIdB} logoUrl={s.team2_logo || s.logoB} className="w-7 h-7" />
@@ -222,26 +222,26 @@ export default function MatchesPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-[11px]">
+                <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs">
                   {isUpcoming ? (
                     <>
-                      <span className="flex items-center gap-1.5 text-white font-mono font-bold">
+                      <span className="flex items-center gap-1.5 text-white font-mono font-medium">
                         <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                         {s.startTime || 'Horário a definir'}
                       </span>
-                      <span className="text-blue-600 dark:text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                      <span className="text-blue-600 dark:text-amber-400 font-medium group-hover:translate-x-1 transition-transform flex items-center gap-1">
                         <span>{hasStarted ? 'Em andamento · Jogadores' : 'Jogadores no torneio'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </span>
                     </>
                   ) : (
                     <>
-                      <span className={inProgress ? 'text-red-500 font-bold flex items-center gap-1.5' : 'text-gray-400'}>
+                      <span className={inProgress ? 'text-red-500 font-medium flex items-center gap-1.5' : 'text-gray-400'}>
                         {inProgress && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
                         {inProgress ? 'Em andamento' : s.startTime ? new Date(s.startTime * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Recentemente'}
                       </span>
-                      <span className="text-blue-600 dark:text-amber-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                        <span>Ver Replay & Draft</span>
+                      <span className="text-blue-600 dark:text-amber-400 font-medium group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                        <span>Ver replay & draft</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </span>
                     </>
@@ -250,7 +250,7 @@ export default function MatchesPage() {
               </>
             );
 
-            const cardClass = "tilt-card glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-3xl p-5 transition-all shadow-xl group flex flex-col justify-between";
+            const cardClass = "tilt-card glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-3xl p-5 transition-[color,background-color,border-color,opacity,transform] shadow-xl group flex flex-col justify-between";
 
             // Partidas futuras não têm replay: o card abre as estatísticas dos jogadores no torneio
             if (isUpcoming) {
@@ -288,32 +288,32 @@ function OngoingCard({ match: m, liveGame, onOpenLive, onOpenPreview }) {
 
   const body = (
     <>
-      <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3 border-b border-line pb-2">
+      <div className="flex items-center justify-between text-xs text-gray-400 mb-3 border-b border-line pb-2">
         <span className="font-semibold truncate max-w-[200px] text-blue-600 dark:text-amber-400">{m.tourneyName}</span>
-        <span className="font-mono text-gray-400 font-bold bg-surface-2 border border-line px-2 py-0.5 rounded-lg">{m.formato}</span>
+        <span className="font-mono text-gray-400 font-medium bg-surface-2 border border-line px-2 py-0.5 rounded-lg">{m.formato}</span>
       </div>
       <div className="flex items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-7 h-7" />
-          <span className={`text-xs leading-tight break-words line-clamp-2 ${leadA ? 'text-white font-black' : 'text-gray-400 font-bold'}`}>{m.timeA}</span>
+          <span className={`text-xs leading-tight break-words line-clamp-2 ${leadA ? 'text-white font-semibold' : 'text-gray-400 font-medium'}`}>{m.timeA}</span>
         </div>
-        <div className="font-mono font-black text-xs px-3 py-1 bg-surface-2 rounded-xl border border-line text-white shadow-inner">
+        <div className="font-mono font-semibold text-xs px-3 py-1 bg-surface-2 rounded-xl border border-line text-white shadow-inner">
           {scoreA} - {scoreB}
         </div>
         <div className="flex items-center gap-2.5 flex-1 justify-end min-w-0">
-          <span className={`text-xs leading-tight break-words line-clamp-2 text-right ${leadB ? 'text-white font-black' : 'text-gray-400 font-bold'}`}>{m.timeB}</span>
+          <span className={`text-xs leading-tight break-words line-clamp-2 text-right ${leadB ? 'text-white font-semibold' : 'text-gray-400 font-medium'}`}>{m.timeB}</span>
           <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-7 h-7" />
         </div>
       </div>
-      <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-[11px]">
-        <span className={`flex items-center gap-1.5 font-bold ${done ? 'text-gray-400' : 'text-red-500'}`}>
+      <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs">
+        <span className={`flex items-center gap-1.5 font-medium ${done ? 'text-gray-400' : 'text-red-500'}`}>
           {!done && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
           {status}
         </span>
         {liveGame ? (
-          <span className="text-blue-600 dark:text-amber-400 font-bold flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
+          <span className="text-blue-600 dark:text-amber-400 font-medium flex items-center gap-1">Ver partida ao vivo <ChevronRight className="w-3.5 h-3.5" /></span>
         ) : (
-          <span className="text-blue-600 dark:text-amber-400 font-bold flex items-center gap-1">
+          <span className="text-blue-600 dark:text-amber-400 font-medium flex items-center gap-1">
             {!walkover && scoreA + scoreB > 0 ? 'Ver mapas jogados' : done ? 'Jogadores no torneio' : 'Intervalo · Jogadores'} <ChevronRight className="w-3.5 h-3.5" />
           </span>
         )}

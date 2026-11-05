@@ -163,7 +163,7 @@ export default function AdminPage() {
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-3">
               <Lock className="w-7 h-7 text-amber-400" />
             </div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tight">
+            <h1 className="text-xl font-semibold text-white tracking-tight">
               Acesso Administrativo
             </h1>
             <p className="text-xs text-gray-400 mt-1">
@@ -180,7 +180,7 @@ export default function AdminPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-300 uppercase mb-1">E-mail</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">E-mail</label>
               <input
                 type="email"
                 required
@@ -192,7 +192,7 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-300 uppercase mb-1">Senha</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Senha</label>
               <input
                 type="password"
                 required
@@ -205,7 +205,7 @@ export default function AdminPage() {
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-amber-500/20 transition-all"
+              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-on-accent font-semibold text-xs transition-[color,background-color,border-color,opacity,transform]"
             >
               Entrar no Painel
             </button>
@@ -222,7 +222,7 @@ export default function AdminPage() {
       
       {/* TOAST DE FEEDBACK */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-emerald-950 border border-emerald-500 text-emerald-200 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce text-xs font-bold">
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-950 border border-emerald-500 text-emerald-200 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 text-xs font-medium">
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           <span>{toast}</span>
         </div>
@@ -235,10 +235,10 @@ export default function AdminPage() {
             <Shield className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-white uppercase font-serif tracking-tight">
+            <h1 className="text-2xl font-semibold text-white font-serif tracking-tight">
               Painel Administrativo DotaHub
             </h1>
-            <span className="text-xs text-emerald-400 font-bold">
+            <span className="text-xs text-emerald-400 font-medium">
               Autenticado como: {user?.email} (Acesso Total)
             </span>
           </div>
@@ -246,20 +246,20 @@ export default function AdminPage() {
 
         <button
           onClick={() => signOut()}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line text-xs font-bold text-gray-300 hover:text-white transition-all w-fit"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line text-xs font-medium text-gray-300 hover:text-white transition-[color,background-color,border-color,opacity,transform] w-fit"
         >
           <LogOut className="w-4 h-4" />
-          <span>Sair da Conta</span>
+          <span>Sair da conta</span>
         </button>
       </div>
 
       {/* ABAS DO PAINEL */}
       <div className="flex items-center gap-2 border-b border-line pb-3 mb-8 overflow-x-auto">
         {[
-          { id: 'sync', label: 'Sincronização & Cron', icon: RefreshCw },
-          { id: 'schedule', label: 'Cadastrar Agenda', icon: Calendar },
+          { id: 'sync', label: 'Sincronização & cron', icon: RefreshCw },
+          { id: 'schedule', label: 'Cadastrar agenda', icon: Calendar },
           { id: 'streams', label: 'Streams & VODs', icon: Tv },
-          { id: 'settings', label: 'Configurações do Site', icon: Settings }
+          { id: 'settings', label: 'Configurações do site', icon: Settings }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -267,8 +267,8 @@ export default function AdminPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                isActive ? 'bg-amber-500 text-on-accent font-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:text-white hover:bg-surface-2'
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap ${
+                isActive ? 'bg-amber-500 text-on-accent font-semibold' : 'text-gray-400 hover:text-white hover:bg-surface-2'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -282,7 +282,7 @@ export default function AdminPage() {
       {activeTab === 'sync' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h3 className="text-base font-black uppercase text-white mb-2">Disparadores Manuais</h3>
+            <h3 className="text-base font-semibold text-white mb-2">Disparadores manuais</h3>
             <p className="text-xs text-gray-400 mb-6 leading-relaxed">
               Acione as rotas serverless sob demanda para importar dados da OpenDota e da Steam Web API para o Supabase.
             </p>
@@ -291,7 +291,7 @@ export default function AdminPage() {
               <button
                 onClick={() => handleSyncSource('opendota')}
                 disabled={syncLoading}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 hover:bg-surface-3 border border-amber-500/30 text-xs font-bold text-amber-400 uppercase tracking-wider transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 hover:bg-surface-3 border border-amber-500/30 text-xs font-medium text-amber-400 transition-[color,background-color,border-color,opacity,transform] disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${syncLoading ? 'animate-spin' : ''}`} />
                 <span>Sincronizar OpenDota ProMatches</span>
@@ -300,10 +300,10 @@ export default function AdminPage() {
               <button
                 onClick={() => handleSyncSource('steam')}
                 disabled={syncLoading}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 hover:bg-surface-3 border border-blue-500/30 text-xs font-bold text-blue-400 uppercase tracking-wider transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 hover:bg-surface-3 border border-blue-500/30 text-xs font-medium text-blue-400 transition-[color,background-color,border-color,opacity,transform] disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${syncLoading ? 'animate-spin' : ''}`} />
-                <span>Sincronizar Steam GOTV Live</span>
+                <span>Sincronizar Steam GOTV live</span>
               </button>
             </div>
 
@@ -313,7 +313,7 @@ export default function AdminPage() {
               }`}>
                 {syncStatus.ok ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
                 <div>
-                  <span className="font-bold block uppercase">{syncStatus.source}:</span>
+                  <span className="font-medium block">{syncStatus.source}:</span>
                   <span>{syncStatus.message}</span>
                 </div>
               </div>
@@ -322,16 +322,16 @@ export default function AdminPage() {
 
           {/* HISTÓRICO DE LOGS DE SINCRONIZAÇÃO */}
           <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h3 className="text-base font-black uppercase text-white mb-4">Registro Recente de Sincronizações</h3>
+            <h3 className="text-base font-semibold text-white mb-4">Registro recente de sincronizações</h3>
             <div className="space-y-3">
               {syncLogs.map((log, idx) => (
                 <div key={idx} className="p-3.5 bg-surface-2 border border-line rounded-xl flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-bold text-white block">{log.source}</span>
-                    <span className="text-[11px] text-gray-400">{log.time}</span>
+                    <span className="font-medium text-white block">{log.source}</span>
+                    <span className="text-xs text-gray-400">{log.time}</span>
                   </div>
                   <div className="text-right">
-                    <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                       {log.status} ({log.items} itens)
                     </span>
                   </div>
@@ -347,15 +347,15 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* FORMULÁRIO DE ADIÇÃO */}
           <div className="lg:col-span-5 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h3 className="text-base font-black uppercase text-white mb-4 flex items-center gap-2">
+            <h3 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
               <Plus className="w-4 h-4 text-amber-400" />
-              <span>Cadastrar Próxima Partida</span>
+              <span>Cadastrar próxima partida</span>
             </h3>
 
             <form onSubmit={handleAddSchedule} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Time A (Radiante)</label>
+                  <label className="block text-[11px] font-medium text-gray-400 mb-1">Time A (Radiante)</label>
                   <input
                     type="text"
                     required
@@ -366,7 +366,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Time B (Dire)</label>
+                  <label className="block text-[11px] font-medium text-gray-400 mb-1">Time B (Dire)</label>
                   <input
                     type="text"
                     required
@@ -379,7 +379,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Campeonato</label>
+                <label className="block text-[11px] font-medium text-gray-400 mb-1">Campeonato</label>
                 <input
                   type="text"
                   required
@@ -392,7 +392,7 @@ export default function AdminPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Horário (Brasília)</label>
+                  <label className="block text-[11px] font-medium text-gray-400 mb-1">Horário (Brasília)</label>
                   <input
                     type="text"
                     placeholder="ex: 15:30"
@@ -402,7 +402,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Formato</label>
+                  <label className="block text-[11px] font-medium text-gray-400 mb-1">Formato</label>
                   <select
                     value={newFormat}
                     onChange={(e) => setNewFormat(e.target.value)}
@@ -417,7 +417,7 @@ export default function AdminPage() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-md shadow-amber-500/20 hover:bg-amber-400 transition-all"
+                className="w-full py-2.5 rounded-xl bg-amber-500 text-on-accent font-semibold text-xs hover:bg-amber-400 transition-[color,background-color,border-color,opacity,transform]"
               >
                 Adicionar à Agenda
               </button>
@@ -426,16 +426,16 @@ export default function AdminPage() {
 
           {/* LISTA DA AGENDA CADASTRADA */}
           <div className="lg:col-span-7 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h3 className="text-base font-black uppercase text-white mb-4">Agenda Cadastrada ({scheduleList.length})</h3>
+            <h3 className="text-base font-semibold text-white mb-4">Agenda Cadastrada ({scheduleList.length})</h3>
             <div className="space-y-3">
               {scheduleList.map((item) => (
                 <div key={item.id} className="p-3.5 bg-surface-2 border border-line rounded-xl flex items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-white text-xs">{item.team1} vs {item.team2}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-surface text-amber-400 font-bold border border-line">{item.format}</span>
+                      <span className="font-medium text-white text-xs">{item.team1} vs {item.team2}</span>
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-surface text-amber-400 font-medium border border-line">{item.format}</span>
                     </div>
-                    <span className="text-[11px] text-gray-400 block">{item.league} • às {item.time} BRT</span>
+                    <span className="text-xs text-gray-400 block">{item.league} • às {item.time} BRT</span>
                   </div>
 
                   <button
@@ -455,10 +455,10 @@ export default function AdminPage() {
       {activeTab === 'streams' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h3 className="text-base font-black uppercase text-white mb-4">Adicionar Canal de Stream</h3>
+            <h3 className="text-base font-semibold text-white mb-4">Adicionar canal de stream</h3>
             <form onSubmit={handleAddStream} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nome do Canal</label>
+                <label className="block text-[11px] font-medium text-gray-400 mb-1">Nome do canal</label>
                 <input
                   type="text"
                   required
@@ -470,7 +470,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Usuário Twitch</label>
+                <label className="block text-[11px] font-medium text-gray-400 mb-1">Usuário Twitch</label>
                 <input
                   type="text"
                   required
@@ -482,7 +482,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Idioma</label>
+                <label className="block text-[11px] font-medium text-gray-400 mb-1">Idioma</label>
                 <select
                   value={newStreamLang}
                   onChange={(e) => setNewStreamLang(e.target.value)}
@@ -496,7 +496,7 @@ export default function AdminPage() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-md transition-all"
+                className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-on-accent font-semibold text-xs shadow-md transition-[color,background-color,border-color,opacity,transform]"
               >
                 Cadastrar Canal
               </button>
@@ -504,15 +504,15 @@ export default function AdminPage() {
           </div>
 
           <div className="lg:col-span-7 glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h3 className="text-base font-black uppercase text-white mb-4">Canais de Transmissão Ativos</h3>
+            <h3 className="text-base font-semibold text-white mb-4">Canais de transmissão ativos</h3>
             <div className="space-y-3">
               {streamsList.map((st) => (
                 <div key={st.id} className="p-3.5 bg-surface-2 border border-line rounded-xl flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-bold text-white block">{st.name}</span>
-                    <span className="text-[11px] text-gray-400 font-mono">twitch.tv/{st.channel} ({st.lang})</span>
+                    <span className="font-medium text-white block">{st.name}</span>
+                    <span className="text-xs text-gray-400 font-mono">twitch.tv/{st.channel} ({st.lang})</span>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     Ativo
                   </span>
                 </div>
@@ -525,14 +525,14 @@ export default function AdminPage() {
       {/* ABA 4: CONFIGURAÇÕES DO SITE */}
       {activeTab === 'settings' && (
         <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl max-w-2xl mx-auto">
-          <h3 className="text-base font-black uppercase text-white mb-6 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-white mb-6 flex items-center gap-2">
             <Settings className="w-5 h-5 text-amber-400" />
-            <span>Configurações Globais da Aplicação</span>
+            <span>Configurações globais da aplicação</span>
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Nome do Site</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Nome do site</label>
               <input
                 type="text"
                 defaultValue={SITE_CONFIG.name}
@@ -542,7 +542,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => showToast('Configurações salvas!')}
-              className="px-6 py-2.5 rounded-xl bg-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-md hover:bg-amber-400 transition-all"
+              className="px-6 py-2.5 rounded-xl bg-amber-500 text-on-accent font-semibold text-xs shadow-md hover:bg-amber-400 transition-[color,background-color,border-color,opacity,transform]"
             >
               Salvar Alterações
             </button>

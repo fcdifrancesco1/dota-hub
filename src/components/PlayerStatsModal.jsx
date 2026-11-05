@@ -21,8 +21,8 @@ export default function PlayerStatsModal({ team, stats, loading, onClose }) {
             <TeamLogo teamName={team.name} teamId={team.team_id} logoUrl={team.logo_url} className="w-10 h-10" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-white">{team.name}</h3>
-            <span className="text-xs text-amber-400 font-mono font-bold">Médias das Últimas 100 Partidas Oficiais</span>
+            <h3 className="text-xl font-semibold text-white">{team.name}</h3>
+            <span className="text-xs text-amber-400 font-mono font-medium">Médias das últimas 100 partidas oficiais</span>
           </div>
         </div>
 
@@ -33,7 +33,7 @@ export default function PlayerStatsModal({ team, stats, loading, onClose }) {
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-line bg-surface-2/40">
             <table className="w-full text-left text-xs min-w-[500px]">
-              <thead className="bg-surface-2 text-gray-400 font-mono text-[10px] uppercase border-b border-line">
+              <thead className="bg-surface-2 text-gray-400 font-mono text-[11px] border-b border-line">
                 <tr>
                   <th className="p-3.5 pl-4 whitespace-nowrap">Posição</th>
                   <th className="p-3.5 whitespace-nowrap">Jogador</th>
@@ -51,25 +51,25 @@ export default function PlayerStatsModal({ team, stats, loading, onClose }) {
                   const accountId = p.account_id || p.id;
                   return (
                     <tr key={p.id} className="hover:bg-surface-2/70 transition-colors">
-                      <td className="p-3.5 pl-4 font-mono text-amber-400 font-bold whitespace-nowrap">Pos {p.position}</td>
+                      <td className="p-3.5 pl-4 font-mono text-amber-400 font-medium whitespace-nowrap">Pos {p.position}</td>
                       <td className="p-3.5 whitespace-nowrap">
                         {accountId ? (
                           <Link
                             to={`/jogadores/${accountId}`}
                             onClick={onClose}
-                            className="font-bold text-white hover:text-amber-400 flex items-center gap-1 group transition-colors"
+                            className="font-medium text-white hover:text-amber-400 flex items-center gap-1 group transition-colors"
                           >
                             <span>{p.name}</span>
                             <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity" />
                           </Link>
                         ) : (
-                          <span className="font-bold text-white">{p.name}</span>
+                          <span className="font-medium text-white">{p.name}</span>
                         )}
                       </td>
                       <td className="p-3.5 text-center font-mono text-gray-400 whitespace-nowrap">{p.games}</td>
                       <td className="p-3.5 text-center font-mono whitespace-nowrap">{k}/{d}/{a}</td>
-                      <td className="p-3.5 text-right font-mono text-amber-400 font-bold whitespace-nowrap">{Math.round(p.gpm / (p.games || 1))}</td>
-                      <td className="p-3.5 pr-4 text-right font-mono text-cyan-400 font-bold whitespace-nowrap">{Math.round(p.xpm / (p.games || 1))}</td>
+                      <td className="p-3.5 text-right font-mono text-amber-400 font-medium whitespace-nowrap">{Math.round(p.gpm / (p.games || 1))}</td>
+                      <td className="p-3.5 pr-4 text-right font-mono text-cyan-400 font-medium whitespace-nowrap">{Math.round(p.xpm / (p.games || 1))}</td>
                     </tr>
                   );
                 })}

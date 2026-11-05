@@ -36,15 +36,15 @@ export default function Upcoming24h() {
         <div className="flex items-center justify-between gap-3 px-3 mb-2">
           <div className="flex items-center gap-2 min-w-0">
             <Calendar className="w-4 h-4 text-amber-500" />
-            <h3 className="text-sm font-black uppercase tracking-wider text-white whitespace-nowrap">
+            <h3 className="text-sm font-semibold text-white whitespace-nowrap">
               Próximas 24h <span className="hidden sm:inline">(Brasília)</span>
             </h3>
           </div>
           <Link
             to="/partidas?aba=agenda"
-            className="text-xs font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 uppercase tracking-wider whitespace-nowrap shrink-0 transition-colors"
+            className="text-xs font-medium text-amber-500 hover:text-amber-400 flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors"
           >
-            <span>Ver Agenda</span>
+            <span>Ver agenda</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -78,15 +78,15 @@ export default function Upcoming24h() {
                   title="Ver estatísticas dos jogadores no torneio"
                   className="block w-full text-left hover:bg-surface-2/80 rounded-xl px-3 py-3 transition-colors group cursor-pointer"
                 >
-                  <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1.5">
+                  <div className="flex items-center justify-between text-[11px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[180px] text-amber-500">
                       {m.tourneyName || 'Torneio'}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="font-mono text-amber-500 bg-surface-2 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                      <span className="font-mono text-amber-500 bg-surface-2 px-1.5 py-0.5 rounded text-[11px] font-medium">
                         {m.formato}
                       </span>
-                      <span className="font-mono text-white bg-surface-2 px-1.5 py-0.5 rounded font-bold">
+                      <span className="font-mono text-white bg-surface-2 px-1.5 py-0.5 rounded font-medium">
                         {dayLabel ? `${dayLabel} ` : ''}{formattedTime} BRT
                       </span>
                     </span>
@@ -96,14 +96,14 @@ export default function Upcoming24h() {
                     {/* Time 1 */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-5 h-5 shrink-0" />
-                      <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
+                      <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
                     </div>
 
-                    <span className="text-[10px] font-black text-gray-400 uppercase px-1">vs</span>
+                    <span className="text-[11px] font-semibold text-gray-400 px-1">vs</span>
 
                     {/* Time 2 */}
                     <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                      <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
+                      <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
                       <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-5 h-5 shrink-0" />
                     </div>
                   </div>
@@ -114,7 +114,7 @@ export default function Upcoming24h() {
         )}
       </div>
 
-      <div className="mt-3 px-3 text-[11px] text-gray-500">
+      <div className="mt-3 px-3 text-xs text-gray-500">
         Toque em uma partida para ver as estatísticas dos jogadores no torneio.
       </div>
 

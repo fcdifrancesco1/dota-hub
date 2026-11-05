@@ -59,13 +59,13 @@ export default function TournamentPlayers({ data, constants }) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {highlights.map(({ label, icon: Icon, player, value, color }) => (
             <div key={label} className="bg-surface border border-line rounded-xl p-3 sm:p-4 shadow-lg">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 mb-2">
                 <Icon className={`w-3.5 h-3.5 ${color}`} /> {label}
               </div>
-              <div className={`text-xl font-black font-mono ${color}`}>{value(player)}</div>
+              <div className={`text-xl font-semibold font-mono ${color}`}>{value(player)}</div>
               <div className="mt-1 flex items-center gap-1.5 min-w-0">
                 <TeamLogo teamName={player.teamName} teamId={player.teamId} logoUrl={player.teamLogo} className="w-4 h-4 shrink-0" />
-                <span className="text-xs font-bold text-white leading-tight break-words line-clamp-2">{player.name}</span>
+                <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{player.name}</span>
               </div>
             </div>
           ))}
@@ -81,7 +81,7 @@ export default function TournamentPlayers({ data, constants }) {
         <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
           {[['avg', 'Por jogo'], ['total', 'Total']].map(([id, label]) => (
             <button key={id} type="button" onClick={() => setMode(id)}
-              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${mode === id ? 'bg-amber-500 text-on-accent font-black' : 'text-gray-400 hover:text-white'}`}>
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${mode === id ? 'bg-amber-500 text-on-accent font-semibold' : 'text-gray-400 hover:text-white'}`}>
               {label}
             </button>
           ))}
@@ -101,7 +101,7 @@ export default function TournamentPlayers({ data, constants }) {
       <div className="bg-surface border border-line rounded-2xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[920px]">
-            <thead className="bg-surface-2 text-gray-400 font-bold uppercase tracking-wider text-[10px]">
+            <thead className="bg-surface-2 text-gray-400 font-medium text-[11px]">
               <tr>
                 <th className="p-3 pl-4">Jogador</th>
                 {COLUMNS.map((c) => (
@@ -110,7 +110,7 @@ export default function TournamentPlayers({ data, constants }) {
                       type="button"
                       onClick={() => setSortBy(c.id)}
                       title={`${c.title} — ordenar`}
-                      className={`inline-flex items-center gap-1 uppercase ${sortBy === c.id ? 'text-amber-400' : 'hover:text-white'}`}
+                      className={`inline-flex items-center gap-1 ${sortBy === c.id ? 'text-amber-400' : 'hover:text-white'}`}
                     >
                       {c.label}
                       {sortBy === c.id && <ArrowDown className="w-3 h-3" />}
@@ -125,7 +125,7 @@ export default function TournamentPlayers({ data, constants }) {
                 <tr key={p.accountId} className="hover:bg-surface-2/60 transition-colors">
                   <td className="p-3 pl-4">
                     <div className="flex items-center gap-2.5">
-                      <span className="w-5 text-right font-mono text-[10px] text-gray-500">{idx + 1}</span>
+                      <span className="w-5 text-right font-mono text-[11px] text-gray-500">{idx + 1}</span>
                       <button
                         type="button"
                         onClick={() => p.teamId && openTeam(p.teamId, p.teamName)}
@@ -137,31 +137,31 @@ export default function TournamentPlayers({ data, constants }) {
                       <div className="min-w-0">
                         <Link
                           to={`/jogadores/${p.accountId}`}
-                          className="font-bold text-white hover:text-amber-400 transition-colors truncate max-w-[150px] block"
+                          className="font-medium text-white hover:text-amber-400 transition-colors truncate max-w-[150px] block"
                           title={`Ver estatísticas e perfil de ${p.name}`}
                         >
                           {p.name}
                         </Link>
-                        <div className="text-[10px] text-gray-500 truncate max-w-[150px]">{p.teamName || '—'}</div>
+                        <div className="text-[11px] text-gray-500 truncate max-w-[150px]">{p.teamName || '—'}</div>
                       </div>
                     </div>
                   </td>
                   <td className="p-3 text-center font-mono">{p.games}</td>
-                  <td className="p-3 text-center font-mono font-bold">
+                  <td className="p-3 text-center font-mono font-medium">
                     <span className={p.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}>{Math.round(p.winRate)}%</span>
                   </td>
-                  <td className="p-3 text-center font-mono font-black text-amber-400">{p.kda.toFixed(2)}</td>
+                  <td className="p-3 text-center font-mono font-semibold text-amber-400">{p.kda.toFixed(2)}</td>
                   <td className="p-3 text-center font-mono whitespace-nowrap">
-                    <span className="text-white font-bold">{num(p, 'kills')}</span>
+                    <span className="text-white font-medium">{num(p, 'kills')}</span>
                     <span className="text-gray-500"> / </span>
-                    <span className="text-rose-400 font-bold">{num(p, 'deaths')}</span>
+                    <span className="text-rose-400 font-medium">{num(p, 'deaths')}</span>
                     <span className="text-gray-500"> / </span>
-                    <span className="text-cyan-400 font-bold">{num(p, 'assists')}</span>
+                    <span className="text-cyan-400 font-medium">{num(p, 'assists')}</span>
                   </td>
                   <td className="p-3 text-center font-mono whitespace-nowrap">
-                    <span className="text-amber-400 font-bold">{p.gpm}</span>
+                    <span className="text-amber-400 font-medium">{p.gpm}</span>
                     <span className="text-gray-500"> / </span>
-                    <span className="text-cyan-400 font-bold">{p.xpm}</span>
+                    <span className="text-cyan-400 font-medium">{p.xpm}</span>
                   </td>
                   <td className="p-3 text-center font-mono">{num(p, 'lastHits')}</td>
                   <td className="p-3 text-center font-mono">{num(p, 'heroDamage')}</td>
@@ -176,12 +176,12 @@ export default function TournamentPlayers({ data, constants }) {
                           className="relative w-10 h-6 rounded overflow-hidden border border-line bg-surface-2 hover:border-amber-400 transition-colors"
                         >
                           <img src={getHeroImg(constants, h.heroId)} alt="" className="w-full h-full object-cover" />
-                          <span className="absolute bottom-0 right-0 px-0.5 text-[8px] font-mono font-black bg-black/70 text-white rounded-tl">
+                          <span className="absolute bottom-0 right-0 px-0.5 text-[11px] font-mono font-semibold bg-black/70 text-white rounded-tl">
                             {h.count}
                           </span>
                         </Link>
                       ))}
-                      {p.heroCount > 3 && <span className="text-[10px] text-gray-500 ml-0.5">+{p.heroCount - 3}</span>}
+                      {p.heroCount > 3 && <span className="text-[11px] text-gray-500 ml-0.5">+{p.heroCount - 3}</span>}
                     </div>
                   </td>
                 </tr>
@@ -190,7 +190,7 @@ export default function TournamentPlayers({ data, constants }) {
           </table>
         </div>
       </div>
-      <p className="text-[11px] text-gray-500">
+      <p className="text-xs text-gray-500">
         {mode === 'total' ? 'Abates, mortes, assistências, last hits, dano e cura somados no campeonato; GPM, XPM e KDA seguem como média.' : 'Médias por partida.'} Dados da OpenDota. Clique no título de uma coluna para ordenar; no logo, para ver o time.
       </p>
     </div>

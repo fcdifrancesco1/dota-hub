@@ -135,7 +135,9 @@ export default {
         sans: SITE_FONT,
         mono: SITE_FONT,
         serif: ['"Segoe UI Variable Display"', ...SITE_FONT]
-      }
+      },
+      // Uma curva só para todas as transições (sai rápido, assenta suave)
+      transitionTimingFunction: { DEFAULT: 'cubic-bezier(0.22, 1, 0.36, 1)' }
     },
   },
   plugins: [

@@ -28,7 +28,7 @@ import { teamPath } from '../utils/teamRoute';
 const MEDALS = ['', 'Arauto', 'Guardião', 'Cruzado', 'Arconte', 'Lenda', 'Ancestral', 'Divino', 'Imortal'];
 
 function medalLabel(rankTier, leaderboardRank) {
-  if (!rankTier && !leaderboardRank) return 'Sem Classificação';
+  if (!rankTier && !leaderboardRank) return 'Sem classificação';
   if (leaderboardRank) return `Imortal #${leaderboardRank}`;
   const tierIdx = Math.floor((rankTier || 0) / 10);
   const medal = MEDALS[tierIdx] || 'Imortal';
@@ -106,7 +106,7 @@ export default function PlayerDetailPage() {
     <button
       type="button"
       onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/times'))}
-      className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-amber-400 transition-colors mb-5"
+      className="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-amber-400 transition-colors mb-5"
     >
       <ArrowLeft className="w-4 h-4" />
       <span>Voltar</span>
@@ -131,13 +131,13 @@ export default function PlayerDetailPage() {
         {backButton}
         <div className="glass-panel border border-line rounded-3xl p-12 text-center max-w-xl mx-auto shadow-2xl">
           <AlertTriangle className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-          <h1 className="text-xl font-black text-white uppercase mb-2">Jogador não encontrado</h1>
+          <h1 className="text-xl font-semibold text-white mb-2">Jogador não encontrado</h1>
           <p className="text-xs text-gray-400 mb-6">
             Não conseguimos localizar o histórico deste jogador na base oficial da OpenDota. Verifique o ID ou tente novamente mais tarde.
           </p>
           <Link
             to="/times"
-            className="inline-flex px-5 py-2.5 rounded-xl bg-amber-500 text-on-accent text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/20"
+            className="inline-flex px-5 py-2.5 rounded-xl bg-amber-500 text-on-accent text-xs font-semibold"
           >
             Ver Ranking de Times
           </Link>
@@ -176,7 +176,6 @@ export default function PlayerDetailPage() {
 
       {/* CABEÇALHO DO JOGADOR */}
       <section className="glass-panel rounded-3xl p-6 sm:p-8 border border-line shadow-2xl relative overflow-hidden -mt-5">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Avatar e Identidade */}
@@ -195,7 +194,7 @@ export default function PlayerDetailPage() {
                 )}
               </div>
               {player.leaderboardRank && (
-                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-lg bg-amber-500 text-on-accent text-[10px] font-mono font-black shadow-md">
+                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-lg bg-amber-500 text-on-accent text-[11px] font-mono font-semibold shadow-md">
                   #{player.leaderboardRank}
                 </span>
               )}
@@ -203,13 +202,13 @@ export default function PlayerDetailPage() {
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight truncate">
+                <h1 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight truncate">
                   {player.name}
                 </h1>
                 {player.team && (
                   <Link
                     to={teamPath(player.team.teamId, player.team.name)}
-                    className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:border-amber-400 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:border-amber-400 font-semibold text-xs flex items-center gap-1.5 transition-colors"
                     title={`Ver página do time ${player.team.name}`}
                   >
                     <TeamLogo teamName={player.team.name} teamId={player.team.teamId} className="w-5 h-5" />
@@ -234,14 +233,14 @@ export default function PlayerDetailPage() {
               )}
 
               <div className="flex flex-wrap items-center gap-3 mt-2 text-xs">
-                <span className="text-gray-400 flex items-center gap-1.5 font-bold">
+                <span className="text-gray-400 flex items-center gap-1.5 font-medium">
                   <Medal className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-white">{medal}</span>
                 </span>
                 {roleLabel(player) && (
                   <>
                     <span className="text-gray-500">•</span>
-                    <span className="text-amber-400 font-bold">{roleLabel(player)}</span>
+                    <span className="text-amber-400 font-medium">{roleLabel(player)}</span>
                   </>
                 )}
                 {player.profileUrl && (
@@ -274,20 +273,20 @@ export default function PlayerDetailPage() {
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3">
                   {careerCounters.map(([label, value]) => (
                     <div key={label} className="leading-tight">
-                      <span className="block text-base font-black font-mono text-white">{value}</span>
-                      <span className="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">{label}</span>
+                      <span className="block text-base font-semibold font-mono text-white">{value}</span>
+                      <span className="block text-[11px] font-medium text-gray-400">{label}</span>
                     </div>
                   ))}
                   {recentMatches.length > 0 && (
                     <div className="leading-tight" title="Últimas partidas, da mais recente para a mais antiga">
                       <span className="flex gap-1">
                         {recentMatches.slice(0, 10).map((m) => (
-                          <span key={m.matchId} className={`w-4 h-4 rounded text-[9px] font-black flex items-center justify-center text-on-accent ${m.won ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                          <span key={m.matchId} className={`w-4 h-4 rounded text-[11px] font-semibold flex items-center justify-center text-on-accent ${m.won ? 'bg-emerald-500' : 'bg-rose-500'}`}>
                             {m.won ? 'V' : 'D'}
                           </span>
                         ))}
                       </span>
-                      <span className="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mt-1">Últimas partidas</span>
+                      <span className="block text-[11px] font-medium text-gray-400 mt-1">Últimas partidas</span>
                     </div>
                   )}
                 </div>
@@ -298,29 +297,29 @@ export default function PlayerDetailPage() {
           {/* Cards de Métricas Principais */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
             <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[105px] border border-line">
-              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Partidas</span>
-              <span className="text-xl font-black font-mono text-white mt-0.5 block">
+              <span className="text-[11px] font-medium text-gray-400 block">Partidas</span>
+              <span className="text-xl font-semibold font-mono text-white mt-0.5 block">
                 {stats.totalMatches.toLocaleString('pt-BR')}
               </span>
             </div>
 
             <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[105px] border border-line">
-              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Aproveitamento</span>
-              <span className={`text-xl font-black font-mono mt-0.5 block ${stats.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <span className="text-[11px] font-medium text-gray-400 block">Aproveitamento</span>
+              <span className={`text-xl font-semibold font-mono mt-0.5 block ${stats.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {stats.winRate}%
               </span>
             </div>
 
             <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[105px] border border-line">
-              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">KDA Médio</span>
-              <span className="text-xl font-black font-mono text-cyan-400 mt-0.5 block">
+              <span className="text-[11px] font-medium text-gray-400 block">KDA médio</span>
+              <span className="text-xl font-semibold font-mono text-cyan-400 mt-0.5 block">
                 {stats.kda.toFixed(2)}
               </span>
             </div>
 
             <div className="glass-panel rounded-2xl px-4 py-3 text-center min-w-[105px] border border-line">
-              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">GPM / XPM</span>
-              <span className="text-base font-black font-mono text-amber-400 mt-1 block">
+              <span className="text-[11px] font-medium text-gray-400 block">GPM / XPM</span>
+              <span className="text-base font-semibold font-mono text-amber-400 mt-1 block">
                 {stats.avgGpm} <span className="text-gray-400 font-normal text-xs">/</span> {stats.avgXpm}
               </span>
             </div>
@@ -335,9 +334,9 @@ export default function PlayerDetailPage() {
       <div className="flex items-center gap-2 border-b border-line pb-3 overflow-x-auto">
         {[
           { id: 'performance', label: 'Desempenho', icon: Activity },
-          { id: 'heroes', label: 'Heróis de Assinatura', icon: Swords },
-          { id: 'matches', label: 'Partidas Recentes', icon: Clock },
-          { id: 'badges', label: 'Títulos & Conquistas', icon: Trophy }
+          { id: 'heroes', label: 'Heróis de assinatura', icon: Swords },
+          { id: 'matches', label: 'Partidas recentes', icon: Clock },
+          { id: 'badges', label: 'Títulos & conquistas', icon: Trophy }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -345,16 +344,16 @@ export default function PlayerDetailPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? 'bg-amber-500 text-on-accent font-black shadow-lg shadow-amber-500/20'
+                  ? 'bg-amber-500 text-on-accent font-semibold'
                   : 'text-gray-400 hover:text-white hover:bg-surface-2 border border-transparent'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
               {tab.id === 'badges' && titles?.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/30 text-amber-300 font-mono font-black ml-1">
+                <span className="px-1.5 py-0.2 rounded-full text-[11px] bg-black/30 text-amber-300 font-mono font-semibold ml-1">
                   {titles.length}
                 </span>
               )}
@@ -372,15 +371,15 @@ export default function PlayerDetailPage() {
         <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-2xl">
           <div className="p-6 border-b border-line flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <h2 className="text-base font-semibold text-white flex items-center gap-2">
                 <Swords className="w-5 h-5 text-amber-400" />
-                <span>Heróis Mais Jogados na Carreira</span>
+                <span>Heróis mais jogados na carreira</span>
               </h2>
               <span className="text-xs text-gray-400 mt-1 block">
                 Clique em qualquer herói para abrir a página completa de habilidades e atributos
               </span>
             </div>
-            <span className="text-xs font-mono font-bold text-gray-400 bg-surface-2 px-3 py-1 rounded-lg border border-line">
+            <span className="text-xs font-mono font-medium text-gray-400 bg-surface-2 px-3 py-1 rounded-lg border border-line">
               {topHeroes.length} heróis principais
             </span>
           </div>
@@ -392,13 +391,13 @@ export default function PlayerDetailPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse min-w-[700px]">
-                <thead className="bg-surface-2/80 text-gray-400 font-mono text-[10px] uppercase border-b border-line">
+                <thead className="bg-surface-2/80 text-gray-400 font-mono text-[11px] border-b border-line">
                   <tr>
                     <th className="p-4 pl-6">Herói</th>
                     <th className="p-4 text-center">Partidas</th>
                     <th className="p-4 text-center">Vitórias</th>
                     <th className="p-4 text-center">Aproveitamento</th>
-                    <th className="p-4 text-center">Último Jogo</th>
+                    <th className="p-4 text-center">Último jogo</th>
                     <th className="p-4 pr-6 text-right">Ação</th>
                   </tr>
                 </thead>
@@ -417,30 +416,30 @@ export default function PlayerDetailPage() {
                             <img
                               src={hImg}
                               alt={hName}
-                              className="w-12 h-7 rounded-lg object-cover border border-line shadow-sm group-hover:scale-105 transition-transform"
+                              className="w-12 h-7 rounded-lg object-cover border border-line shadow-sm transition-transform"
                             />
                             <div>
-                              <span className="font-bold text-white text-sm group-hover:text-amber-400 transition-colors block">
+                              <span className="font-medium text-white text-sm group-hover:text-amber-400 transition-colors block">
                                 {hName}
                               </span>
-                              <span className="text-[10px] font-mono text-gray-400">
+                              <span className="text-[11px] font-mono text-gray-400">
                                 ID #{h.heroId}
                               </span>
                             </div>
                           </div>
                         </td>
 
-                        <td className="p-4 text-center font-mono font-bold text-white">
+                        <td className="p-4 text-center font-mono font-medium text-white">
                           {h.games.toLocaleString('pt-BR')}
                         </td>
 
-                        <td className="p-4 text-center font-mono text-emerald-400 font-bold">
+                        <td className="p-4 text-center font-mono text-emerald-400 font-medium">
                           {h.wins.toLocaleString('pt-BR')}
                         </td>
 
                         <td className="p-4 text-center">
                           <div className="inline-flex flex-col items-center">
-                            <span className={`font-mono font-black text-xs ${h.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`font-mono font-semibold text-xs ${h.winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {h.winRate}%
                             </span>
                             <div className="w-20 h-1.5 bg-surface-2 rounded-full overflow-hidden mt-1 border border-line">
@@ -457,7 +456,7 @@ export default function PlayerDetailPage() {
                         </td>
 
                         <td className="p-4 pr-6 text-right">
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-400 group-hover:translate-x-1 transition-transform">
                             <span>Ver herói</span>
                             <ChevronRight className="w-4 h-4" />
                           </span>
@@ -477,9 +476,9 @@ export default function PlayerDetailPage() {
         <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-2xl">
           <div className="p-6 border-b border-line flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <h2 className="text-base font-semibold text-white flex items-center gap-2">
                 <Clock className="w-5 h-5 text-amber-400" />
-                <span>Últimas 25 Partidas Registradas</span>
+                <span>Últimas 25 partidas registradas</span>
               </h2>
               <span className="text-xs text-gray-400 mt-1 block">
                 Histórico de partidas com heróis, placares de abates e links diretos para a análise do jogo
@@ -514,11 +513,11 @@ export default function PlayerDetailPage() {
                       />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-xs sm:text-sm group-hover:text-amber-400 transition-colors truncate">
+                          <span className="font-medium text-white text-xs sm:text-sm group-hover:text-amber-400 transition-colors truncate">
                             {hName}
                           </span>
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-black uppercase font-mono border ${
+                            className={`px-2 py-0.5 rounded text-[11px] font-semibold font-mono border ${
                               m.won
                                 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
                                 : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
@@ -527,7 +526,7 @@ export default function PlayerDetailPage() {
                             {m.won ? 'Vitória' : 'Derrota'}
                           </span>
                         </div>
-                        <div className="text-[11px] text-gray-500 font-mono mt-0.5">
+                        <div className="text-xs text-gray-500 font-mono mt-0.5">
                           Partida #{m.matchId} · {fmtDate(m.startTime)}
                         </div>
                       </div>
@@ -535,18 +534,18 @@ export default function PlayerDetailPage() {
 
                     <div className="flex items-center gap-4 sm:gap-8 shrink-0 text-right">
                       <div className="font-mono text-xs sm:text-sm">
-                        <span className="text-white font-bold">{m.kills}</span>
+                        <span className="text-white font-medium">{m.kills}</span>
                         <span className="text-gray-500 mx-1">/</span>
-                        <span className="text-rose-400 font-bold">{m.deaths}</span>
+                        <span className="text-rose-400 font-medium">{m.deaths}</span>
                         <span className="text-gray-500 mx-1">/</span>
-                        <span className="text-cyan-400 font-bold">{m.assists}</span>
+                        <span className="text-cyan-400 font-medium">{m.assists}</span>
                       </div>
 
                       <div className="hidden sm:block text-xs font-mono text-gray-400">
                         {fmtDuration(m.duration)}
                       </div>
 
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-amber-400 group-hover:translate-x-1 transition-[color,background-color,border-color,opacity,transform]" />
                     </div>
                   </div>
                 );

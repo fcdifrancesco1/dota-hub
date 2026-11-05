@@ -49,7 +49,7 @@ export default function HomeStatsCards() {
 
   const cards = [
     {
-      title: 'Mapas Jogados',
+      title: 'Mapas jogados',
       value: stats.totalMatches,
       subtitle: stats.matchesToday ? `${stats.matchesToday} hoje` : 'No campeonato',
       icon: Swords,
@@ -58,7 +58,7 @@ export default function HomeStatsCards() {
       iconColor: 'text-amber-400'
     },
     {
-      title: 'Duração Média',
+      title: 'Duração média',
       value: fmtDuration(stats.avgDurationSec),
       subtitle: 'Tempo de mapa',
       icon: Clock,
@@ -67,7 +67,7 @@ export default function HomeStatsCards() {
       iconColor: 'text-blue-400'
     },
     {
-      title: 'Mais Escolhido',
+      title: 'Mais escolhido',
       ...heroCard(mostPicked),
       subtitle: mostPicked ? `${mostPicked.picks} picks (${Math.round(mostPicked.winRate)}% de vitórias)` : '',
       icon: Sparkles,
@@ -76,7 +76,7 @@ export default function HomeStatsCards() {
       iconColor: 'text-emerald-400'
     },
     {
-      title: 'Mais Banido',
+      title: 'Mais banido',
       ...heroCard(mostBanned?.bans ? mostBanned : null),
       subtitle: mostBanned?.bans ? `${mostBanned.bans} bans` : '',
       icon: Ban,
@@ -85,7 +85,7 @@ export default function HomeStatsCards() {
       iconColor: 'text-red-400'
     },
     {
-      title: 'Maior Winrate',
+      title: 'Maior winrate',
       ...heroCard(bestWinrate),
       subtitle: bestWinrate
         ? `${Math.round(bestWinrate.winRate)}% (${bestWinrate.picks} jogos)`
@@ -100,18 +100,18 @@ export default function HomeStatsCards() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h2 className="text-sm font-black uppercase tracking-wider text-white flex flex-wrap items-center gap-2">
+        <h2 className="text-sm font-semibold text-white flex flex-wrap items-center gap-2">
           <span className="w-1.5 h-4 bg-amber-500 rounded-full"></span>
           <span>Estatísticas do {tournament.name}</span>
           {tierLetter(tournament.tier) && (
-            <span className="px-2 py-0.5 rounded bg-surface-2 text-amber-500 text-[10px] font-black">
+            <span className="px-2 py-0.5 rounded bg-surface-2 text-amber-500 text-[11px] font-semibold">
               {tierLetter(tournament.tier)}
             </span>
           )}
         </h2>
         <Link
           to={tournamentPath(tournament)}
-          className="text-xs font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 uppercase tracking-wider transition-colors"
+          className="text-xs font-medium text-amber-500 hover:text-amber-400 flex items-center gap-1 transition-colors"
         >
           <span>Ver campeonato</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -127,7 +127,7 @@ export default function HomeStatsCards() {
               className="rounded-2xl bg-surface-2/60 hover:bg-surface-2 p-3 sm:p-4 transition-colors group"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-gray-400 leading-tight">
+                <span className="text-[11px] sm:text-xs font-medium text-gray-400 leading-tight">
                   {card.title}
                 </span>
                 <div className={`p-1.5 rounded-lg bg-surface ${card.iconColor}`}>
@@ -145,10 +145,10 @@ export default function HomeStatsCards() {
                   />
                 )}
                 <div className="min-w-0">
-                  <div className="text-base sm:text-xl font-black text-white leading-tight break-words line-clamp-2">
+                  <div className="text-base sm:text-xl font-semibold text-white leading-tight break-words line-clamp-2">
                     {card.value}
                   </div>
-                  <div className="text-[10px] text-gray-400 font-medium mt-1 leading-snug">
+                  <div className="text-[11px] text-gray-400 font-medium mt-1 leading-snug">
                     {card.subtitle}
                   </div>
                 </div>

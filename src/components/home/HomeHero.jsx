@@ -77,16 +77,13 @@ export default function HomeHero() {
   return (
     <div className="relative overflow-clip rounded-[22px] home-hero-bg p-6 sm:p-8">
       {/* Aurora Ambient Glows */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 -mb-20 w-80 h-80 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-0 -ml-20 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Lado Esquerdo: Informações do Torneio em Destaque */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-blue-700 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-blue-700 text-xs font-medium">
             <Trophy className="w-3.5 h-3.5" />
-            <span>{featuredTournament ? `Torneio em Destaque${featuredTier ? ` • ${featuredTier}` : ''}` : 'Dota 2 Competitivo'}</span>
+            <span>{featuredTournament ? `Torneio em destaque${featuredTier ? ` • ${featuredTier}` : ''}` : 'Dota 2 Competitivo'}</span>
           </div>
 
           {featuredLogo && !logoFailed ? (
@@ -101,7 +98,7 @@ export default function HomeHero() {
               />
             </h1>
           ) : (
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white uppercase tracking-tight font-serif leading-tight">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight font-serif leading-tight">
               {featuredTournament ? featuredTournament.name : 'Cenário profissional de Dota 2'}
             </h1>
           )}
@@ -111,7 +108,7 @@ export default function HomeHero() {
               <>
                 Acompanhe em tempo real as potências mundiais de Dota 2 disputando o título
                 {featuredPrize ? (
-                  <> e a premiação de <span className="text-amber-500 font-bold">{featuredPrize}</span>.</>
+                  <> e a premiação de <span className="text-amber-500 font-medium">{featuredPrize}</span>.</>
                 ) : '.'}
               </>
             ) : (
@@ -124,27 +121,27 @@ export default function HomeHero() {
             {hasLive ? (
               <button
                 onClick={() => openLiveMatch(liveGames[0])}
-                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-red-900/30 hover:scale-105 transition-all"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-red-600 hover:bg-red-700 text-on-accent font-semibold text-xs transition-[color,background-color,border-color,opacity,transform]"
               >
-                <Radio className="w-4 h-4 animate-pulse text-on-accent" />
-                <span>Assistir Ao Vivo Agora</span>
+                <Radio className="w-4 h-4 text-on-accent" />
+                <span>Assistir ao vivo agora</span>
               </button>
             ) : (
               <Link
                 to="/ao-vivo"
-                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-on-accent font-black uppercase tracking-wider text-xs shadow-lg shadow-blue-600/30 hover:scale-105 transition-all"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-on-accent font-semibold text-xs transition-[color,background-color,border-color,opacity,transform]"
               >
                 <Radio className="w-4 h-4 text-on-accent" />
-                <span>Central Ao Vivo</span>
+                <span>Central ao vivo</span>
               </Link>
             )}
 
             <Link
               to={linkedTournament ? tournamentPath(linkedTournament) : '/campeonatos'}
               title={linkedTournament ? linkedTournament.name : undefined}
-              className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-surface/80 hover:bg-surface text-white font-bold uppercase tracking-wider text-xs transition-all ring-1 ring-line/70"
+              className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-surface/80 hover:bg-surface text-white font-medium text-xs transition-[color,background-color,border-color,opacity,transform] ring-1 ring-line/70"
             >
-              <span>{linkedTournament ? 'Ver Campeonato' : 'Ver Campeonatos'}</span>
+              <span>{linkedTournament ? 'Ver campeonato' : 'Ver campeonatos'}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -159,17 +156,17 @@ export default function HomeHero() {
             onClick: () => setShowPreview(true),
             onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPreview(true); } }
           } : {})}
-          className={`lg:col-span-5 min-w-0 bg-surface/70 backdrop-blur rounded-[20px] p-5 sm:p-6 ring-1 ring-line/50 transition-all ${
-            nextMatch ? 'cursor-pointer hover:bg-surface/90 hover:ring-blue-500/40 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500' : ''
+          className={`lg:col-span-5 min-w-0 bg-surface rounded-[20px] p-5 sm:p-6 ring-1 ring-line/50 transition-[color,background-color,border-color,opacity,transform] ${
+            nextMatch ? 'cursor-pointer hover:bg-surface/90 hover:ring-blue-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500' : ''
           }`}
         >
           <div className="flex items-center justify-between pb-3 border-b border-line/60 text-xs">
-            <span className="text-gray-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-gray-400 font-semibold flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-500" />
-              <span>Próxima Grande Partida</span>
+              <span>Próxima grande partida</span>
             </span>
             {nextMatch && (
-              <span className="text-amber-500 font-mono font-bold text-[11px] bg-surface-2 px-2 py-0.5 rounded-md">
+              <span className="text-amber-500 font-mono font-medium text-xs bg-surface-2 px-2 py-0.5 rounded-md">
                 {nextMatch.formato || 'BO3'}
               </span>
             )}
@@ -181,10 +178,10 @@ export default function HomeHero() {
             </div>
           ) : (
           <>
-          <div className="pt-3 flex items-center justify-center gap-2 text-[11px] font-semibold text-amber-500">
+          <div className="pt-3 flex items-center justify-center gap-2 text-xs font-semibold text-amber-500">
             <span className="truncate">{nextMatch.tourneyName}</span>
             {tierLetter(headline?.tournament?.tier) && (
-              <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-2 text-[9px] font-black uppercase">
+              <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-2 text-[11px] font-semibold">
                 {tierLetter(headline.tournament.tier)}
               </span>
             )}
@@ -197,14 +194,14 @@ export default function HomeHero() {
               <div className="w-14 h-14 rounded-2xl bg-surface-2 p-2 flex items-center justify-center mb-2">
                 <TeamLogo teamName={nextMatch.timeA} logoUrl={nextMatch.logoA} className="w-10 h-10" />
               </div>
-              <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
+              <span className="w-full text-sm font-semibold text-white leading-tight break-words line-clamp-2">
                 {nextMatch.timeA}
               </span>
             </div>
 
             {/* VS */}
             <div className="flex flex-col items-center shrink-0">
-              <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-surface-2 px-3 py-1 rounded-full">
+              <span className="text-xs font-semibold text-amber-500 bg-surface-2 px-3 py-1 rounded-full">
                 VS
               </span>
             </div>
@@ -214,7 +211,7 @@ export default function HomeHero() {
               <div className="w-14 h-14 rounded-2xl bg-surface-2 p-2 flex items-center justify-center mb-2">
                 <TeamLogo teamName={nextMatch.timeB} logoUrl={nextMatch.logoB} className="w-10 h-10" />
               </div>
-              <span className="w-full text-sm font-black text-white leading-tight break-words line-clamp-2">
+              <span className="w-full text-sm font-semibold text-white leading-tight break-words line-clamp-2">
                 {nextMatch.timeB}
               </span>
             </div>
@@ -223,39 +220,39 @@ export default function HomeHero() {
           {/* Relógio / Contagem Regressiva */}
           <div className="pt-3 border-t border-line/60">
             {!timeLeft ? (
-              <div className="text-[11px] text-gray-400 text-center font-semibold py-2">Horário a definir</div>
+              <div className="text-xs text-gray-400 text-center font-semibold py-2">Horário a definir</div>
             ) : (timeLeft.hours + timeLeft.minutes + timeLeft.seconds) === 0 ? (
-              <div className="text-[11px] text-red-500 text-center font-black uppercase tracking-wider py-2">Em andamento / começando</div>
+              <div className="text-xs text-red-500 text-center font-semibold py-2">Em andamento / começando</div>
             ) : (
             <>
-            <div className="text-[10px] text-gray-400 uppercase tracking-wider text-center mb-2 font-semibold">
+            <div className="text-[11px] text-gray-400 text-center mb-2 font-semibold">
               Inicia em ({nextMatch.startTime}):
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-surface-2 rounded-xl py-2">
-                <span className="block font-mono text-xl font-black text-white">
+                <span className="block font-mono text-xl font-semibold text-white">
                   {String(timeLeft.hours).padStart(2, '0')}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Horas</span>
+                <span className="text-[11px] text-gray-400 font-medium">Horas</span>
               </div>
               <div className="bg-surface-2 rounded-xl py-2">
-                <span className="block font-mono text-xl font-black text-amber-500">
+                <span className="block font-mono text-xl font-semibold text-amber-500">
                   {String(timeLeft.minutes).padStart(2, '0')}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Minutos</span>
+                <span className="text-[11px] text-gray-400 font-medium">Minutos</span>
               </div>
               <div className="bg-surface-2 rounded-xl py-2">
-                <span className="block font-mono text-xl font-black text-red-500">
+                <span className="block font-mono text-xl font-semibold text-red-500">
                   {String(timeLeft.seconds).padStart(2, '0')}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Segundos</span>
+                <span className="text-[11px] text-gray-400 font-medium">Segundos</span>
               </div>
             </div>
             </>
             )}
           </div>
 
-          <div className="pt-3 mt-3 border-t border-line/60 text-center text-[11px] font-bold text-blue-600">
+          <div className="pt-3 mt-3 border-t border-line/60 text-center text-xs font-medium text-blue-600">
             Ver médias dos jogadores no campeonato →
           </div>
           </>

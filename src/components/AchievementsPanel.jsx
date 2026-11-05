@@ -60,14 +60,14 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
   <div className="space-y-8">
     {/* PAINEL DE RESUMO DE TÍTULOS E PREMIAÇÃO */}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="tilt-card glass-panel rounded-3xl p-5 border border-amber-500/40 shadow-xl bg-gradient-to-br from-amber-500/10 to-transparent">
+      <div className="tilt-card glass-panel rounded-3xl p-5 border border-amber-500/40 bg-amber-500/5">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-2xl border" style={medalStyle(1)}>
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Títulos de Campeão</span>
-            <span className="text-2xl font-black font-mono text-amber-400 block mt-0.5">
+            <span className="text-[11px] font-medium text-gray-400 block">Títulos de campeão</span>
+            <span className="text-2xl font-semibold font-mono text-amber-400 block mt-0.5">
               {titles.length || (achievementsSummary?.totalChampionships || 0)}
             </span>
           </div>
@@ -80,8 +80,8 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
             <Medal className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Pódios (Top 3)</span>
-            <span className="text-2xl font-black font-mono text-white block mt-0.5">
+            <span className="text-[11px] font-medium text-gray-400 block">Pódios (Top 3)</span>
+            <span className="text-2xl font-semibold font-mono text-white block mt-0.5">
               {achievementsSummary?.totalPodiums || allAchievements.filter(a => a.isPodium).length}
             </span>
           </div>
@@ -94,8 +94,8 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Tier 1 & Majors</span>
-            <span className="text-2xl font-black font-mono text-white block mt-0.5">
+            <span className="text-[11px] font-medium text-gray-400 block">Tier 1 & Majors</span>
+            <span className="text-2xl font-semibold font-mono text-white block mt-0.5">
               {achievementsSummary?.tier1Titles || titles.filter(a => /tier\s*1/i.test(a.tier)).length}
             </span>
           </div>
@@ -108,8 +108,8 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
             <DollarSign className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Premiação Acumulada</span>
-            <span className="text-xl sm:text-2xl font-black font-mono text-emerald-400 block mt-0.5">
+            <span className="text-[11px] font-medium text-gray-400 block">Premiação acumulada</span>
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-emerald-400 block mt-0.5">
               {achievementsSummary?.totalPrizeUsd ? `$${achievementsSummary.totalPrizeUsd.toLocaleString('en-US')}` : '—'}
             </span>
           </div>
@@ -121,9 +121,9 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
     <section className="glass-panel border border-line rounded-3xl overflow-hidden shadow-2xl">
       <div className="p-6 border-b border-line flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+          <h2 className="text-base font-semibold text-white flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-400" />
-            <span>Títulos e Campeonatos</span>
+            <span>Títulos e campeonatos</span>
           </h2>
           <span className="text-xs text-gray-400 mt-1 block">
             {subject === 'time' ? 'Histórico oficial de campeonatos do time' : 'Histórico oficial de conquistas obtidas pelo jogador nos times em que atuou'} (Dados Liquipedia)
@@ -133,17 +133,17 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
         {/* Filtros de Conquistas */}
         <div className="flex items-center gap-2 flex-wrap">
           {[
-            { id: 'champions', label: '🏆 Campeão (1º Lugar)' },
-            { id: 'podiums', label: '🏅 Pódios (Top 3)' },
-            { id: 'tier1', label: '⭐ Tier 1 & Majors' },
-            { id: 'all', label: '📜 Todos os Torneios' }
+            { id: 'champions', label: 'Campeão' },
+            { id: 'podiums', label: 'Pódios' },
+            { id: 'tier1', label: 'Tier 1' },
+            { id: 'all', label: 'Todos' }
           ].map((btn) => (
             <button
               key={btn.id}
               onClick={() => setTitleFilter(btn.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
                 titleFilter === btn.id
-                  ? 'bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/25'
+                  ? 'bg-amber-500 text-on-accent font-semibold'
                   : 'bg-surface-2 border border-line text-gray-400 hover:text-white'
               }`}
             >
@@ -156,7 +156,7 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
       {displayedAchievements.length === 0 ? (
         <div className="p-16 text-center">
           <Trophy className="w-12 h-12 text-gray-500 mx-auto mb-3 opacity-50" />
-          <h3 className="text-base font-black text-white uppercase">Nenhum título listado neste filtro</h3>
+          <h3 className="text-base font-semibold text-white">Nenhum título listado neste filtro</h3>
           <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
             {subject === 'time' ? 'Este time' : 'Este jogador'} ainda não possui conquistas oficiais registradas sob o critério selecionado na base da Liquipedia.
           </p>
@@ -176,7 +176,7 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
                 onClick={open}
                 onKeyDown={(e) => { if (link && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open(); } }}
                 title={link ? `Abrir ${item.tournament}` : undefined}
-                className={`p-5 rounded-2xl border flex flex-col justify-between gap-4 hover:bg-surface-2/50 transition-colors ${is1st ? 'border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-transparent' : 'border-line bg-surface/60'} ${link ? 'cursor-pointer' : ''}`}
+                className={`p-5 rounded-2xl border flex flex-col justify-between gap-4 hover:bg-surface-2/50 transition-colors ${is1st ? 'border-amber-500/40 bg-amber-500/5' : 'border-line bg-surface/60'} ${link ? 'cursor-pointer' : ''}`}
               >
                 {/* Lado Esquerdo: Colocação, Torneio e Tier */}
                 <div className="flex items-start gap-4 min-w-0">
@@ -197,7 +197,7 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
                       )}
                     </div>
                     <span
-                      className={`px-1.5 py-px rounded-md border text-[10px] font-mono font-black leading-tight whitespace-nowrap ${
+                      className={`px-1.5 py-px rounded-md border text-[11px] font-mono font-semibold leading-tight whitespace-nowrap ${
                         medalStyle(item.placement) ? '' : 'bg-surface-2 text-gray-400 border-line'
                       }`}
                       style={medalStyle(item.placement) || undefined}
@@ -208,14 +208,14 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
 
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-black text-white text-sm sm:text-base tracking-tight">
+                      <h3 className="font-semibold text-white text-sm sm:text-base tracking-tight">
                         {item.tournament}
                       </h3>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-surface-3 border border-line text-blue-500 dark:text-cyan-400">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-surface-3 border border-line text-blue-500 dark:text-cyan-400">
                         {item.tier}
                       </span>
                       {is1st && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-amber-500/20 border border-amber-500/40 text-amber-400">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 border border-amber-500/40 text-amber-400">
                           Campeão
                         </span>
                       )}
@@ -224,18 +224,18 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
                     {/* Time pelo qual conquistou (na página do time é sempre o próprio) */}
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                       {subject !== 'time' && (<>
-                      <span className="text-[11px] text-gray-400 font-medium">Equipe:</span>
+                      <span className="text-xs text-gray-400 font-medium">Equipe:</span>
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-2 border border-line">
                         {item.teamLogo ? (
                           <img src={liquipediaImage(item.teamLogo)} alt={item.teamName} referrerPolicy="no-referrer" className="w-4 h-4 object-contain" />
                         ) : (
                           <TeamLogo teamName={item.teamName} className="w-4 h-4" />
                         )}
-                        <span className="text-xs font-black text-white">{item.teamName}</span>
+                        <span className="text-xs font-semibold text-white">{item.teamName}</span>
                       </div>
                       <span className="text-gray-500 text-xs">•</span>
                       </>)}
-                      <span className="text-[11px] text-gray-400 font-mono">
+                      <span className="text-xs text-gray-400 font-mono">
                         {formatTournamentDate(item.date)}
                       </span>
                     </div>
@@ -246,22 +246,22 @@ export default function AchievementsPanel({ titles = [], allAchievements = [], s
                 <div className="flex items-center justify-between gap-4 pt-3 border-t border-line/60">
                   {item.opponent && (
                     <div className="text-left min-w-0">
-                      <span className="text-[10px] uppercase font-bold text-gray-500 block">Final / Adversário</span>
+                      <span className="text-[11px] font-medium text-gray-500 block">Final / adversário</span>
                       <div className="flex items-center gap-2 mt-0.5">
                         {item.score && (
-                          <span className="font-mono font-black text-white text-xs px-2 py-0.5 rounded bg-surface-2 border border-line">
+                          <span className="font-mono font-semibold text-white text-xs px-2 py-0.5 rounded bg-surface-2 border border-line">
                             {item.score}
                           </span>
                         )}
-                        <span className="text-xs font-bold text-gray-300">vs {item.opponent}</span>
+                        <span className="text-xs font-medium text-gray-300">vs {item.opponent}</span>
                       </div>
                     </div>
                   )}
 
                   {item.prize && (
                     <div className="text-right min-w-[90px]">
-                      <span className="text-[10px] uppercase font-bold text-emerald-500 block">Prêmio</span>
-                      <span className="font-mono font-black text-emerald-400 text-sm block mt-0.5">
+                      <span className="text-[11px] font-medium text-emerald-500 block">Prêmio</span>
+                      <span className="font-mono font-semibold text-emerald-400 text-sm block mt-0.5">
                         {item.prize}
                       </span>
                     </div>

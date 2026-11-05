@@ -127,28 +127,28 @@ export default function TournamentsView({
               setSelectedTournament(null);
               setActiveSubTab('series');
             }}
-            className="flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider cursor-pointer"
+            className="flex items-center gap-2 text-xs font-medium text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" /> Voltar para lista de torneios
           </button>
 
           {/* Banner do Torneio Selecionado */}
-          <div className="bg-gradient-to-r from-surface-2/90 via-surface/90 to-surface/90 border border-white/10 rounded-2xl p-6 shadow-xl backdrop-blur-xl">
+          <div className="bg-surface-2 border border-white/10 rounded-2xl p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {selectedTournament.status === 'em_andamento' ? (
-                    <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full animate-pulse">
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Torneio em Andamento
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-full">
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-full">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Torneio Finalizado
                     </span>
                   )}
 
                   {selectedTournament.champion && (
-                    <span className="flex items-center gap-1 text-[10px] font-extrabold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
+                    <span className="flex items-center gap-1 text-[11px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
                       <Crown className="w-3.5 h-3.5" /> Campeão: {selectedTournament.champion}
                     </span>
                   )}
@@ -161,7 +161,7 @@ export default function TournamentsView({
                         setSelectedTournament(updated);
                         selectedTournament.status = 'finalizado';
                       }}
-                      className="flex items-center gap-1.5 text-[10px] font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1 rounded-full transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 text-[11px] font-medium text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1 rounded-full transition-colors cursor-pointer"
                       title="Gravar este torneio no acervo de finalizados a partir de hoje"
                     >
                       <Trophy className="w-3 h-3 text-amber-400" /> Marcar como Finalizado
@@ -169,7 +169,7 @@ export default function TournamentsView({
                   )}
                 </div>
 
-                <h1 className="text-2xl font-black text-white mt-2.5">
+                <h1 className="text-2xl font-semibold text-white mt-2.5">
                   {selectedTournament.name}
                 </h1>
 
@@ -186,7 +186,7 @@ export default function TournamentsView({
                     </span>
                   )}
                   {selectedTournament.prizePool && (
-                    <span className="text-emerald-400 font-bold">
+                    <span className="text-emerald-400 font-medium">
                       · {selectedTournament.prizePool}
                     </span>
                   )}
@@ -198,9 +198,9 @@ export default function TournamentsView({
             <div className="flex items-center gap-2 mt-6 pt-5 border-t border-white/10">
               <button
                 onClick={() => setActiveSubTab('series')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                   activeSubTab === 'series'
-                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                    ? 'bg-amber-500 text-black'
                     : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -209,9 +209,9 @@ export default function TournamentsView({
 
               <button
                 onClick={() => setActiveSubTab('heroes')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                   activeSubTab === 'heroes'
-                    ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                    ? 'bg-amber-500 text-black'
                     : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -224,7 +224,7 @@ export default function TournamentsView({
           {activeSubTab === 'series' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-400">
+                <h2 className="text-xs font-semibold text-gray-400">
                   Séries e Partidas ({selectedTournament.seriesList?.length || 0})
                 </h2>
               </div>
@@ -238,37 +238,37 @@ export default function TournamentsView({
                     <div
                       key={idx}
                       onClick={() => onSelectSeries && onSelectSeries(s)}
-                      className="group bg-surface-2/80 hover:bg-surface-3 border border-white/10 hover:border-amber-500/60 rounded-xl p-4 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-lg hover:shadow-amber-500/5 hover:-translate-y-1"
+                      className="group bg-surface-2/80 hover:bg-surface-3 border border-white/10 hover:border-amber-500/60 rounded-xl p-4 cursor-pointer transition-[color,background-color,border-color,opacity,transform] duration-200 shadow-sm"
                     >
-                      <div className="flex items-center justify-between gap-2 text-[10px] text-gray-400 border-b border-white/5 pb-2 mb-2.5">
-                        <span className="font-bold text-amber-400 uppercase tracking-wider truncate flex-1 min-w-0 pr-1">
-                          {s.stage || 'Série Profissional'}
+                      <div className="flex items-center justify-between gap-2 text-[11px] text-gray-400 border-b border-white/5 pb-2 mb-2.5">
+                        <span className="font-medium text-amber-400 truncate flex-1 min-w-0 pr-1">
+                          {s.stage || 'Série profissional'}
                         </span>
-                        <span className="font-mono bg-black/40 px-2 py-0.5 rounded border border-white/5 shrink-0 whitespace-nowrap text-[9px]">
+                        <span className="font-mono bg-black/40 px-2 py-0.5 rounded border border-white/5 shrink-0 whitespace-nowrap text-[11px]">
                           {s.dur}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between gap-2 py-1">
-                        <span className={`text-xs font-bold truncate flex-1 min-w-0 ${aWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
+                        <span className={`text-xs font-medium truncate flex-1 min-w-0 ${aWon ? 'text-white font-semibold' : 'text-gray-400'}`}>
                           {s.timeA}
                         </span>
-                        <span className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${aWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
+                        <span className={`font-mono text-xs font-semibold min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${aWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
                           {s.scoreA}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between gap-2 py-1">
-                        <span className={`text-xs font-bold truncate flex-1 min-w-0 ${bWon ? 'text-white font-extrabold' : 'text-gray-400'}`}>
+                        <span className={`text-xs font-medium truncate flex-1 min-w-0 ${bWon ? 'text-white font-semibold' : 'text-gray-400'}`}>
                           {s.timeB}
                         </span>
-                        <span className={`font-mono text-xs font-black min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${bWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
+                        <span className={`font-mono text-xs font-semibold min-w-[26px] h-6 px-1.5 flex items-center justify-center rounded shrink-0 ${bWon ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400/80'}`}>
                           {s.scoreB}
                         </span>
                       </div>
 
-                      <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400 group-hover:text-amber-400 transition-colors">
-                        <span>Ver Estatísticas e Replay</span>
+                      <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 group-hover:text-amber-400 transition-colors">
+                        <span>Ver estatísticas e replay</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </div>
                     </div>
@@ -291,7 +291,7 @@ export default function TournamentsView({
               ) : heroesData.length === 0 ? (
                 <div className="bg-surface-2/60 border border-white/10 rounded-2xl p-8 text-center space-y-3">
                   <BarChart3 className="w-10 h-10 text-gray-500 mx-auto" />
-                  <h3 className="text-sm font-bold text-white">Estatísticas detalhadas em processamento</h3>
+                  <h3 className="text-sm font-medium text-white">Estatísticas detalhadas em processamento</h3>
                   <p className="text-xs text-gray-400 max-w-md mx-auto">
                     Os dados completos de picks e bans deste torneio estão sendo sincronizados da OpenDota. Você pode visualizar os confrontos na aba acima.
                   </p>
@@ -301,53 +301,53 @@ export default function TournamentsView({
                   {/* CARDS DE RESUMO DO TORNEIO (LIQUIPEDIA STYLE) */}
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div className="bg-surface-2/90 border border-white/10 rounded-xl p-3.5 text-center">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      <span className="text-[11px] font-medium text-gray-400 block">
                         Jogos Disputados
                       </span>
-                      <span className="text-2xl font-black text-white font-mono mt-1 block">
+                      <span className="text-2xl font-semibold text-white font-mono mt-1 block">
                         {totalMatchesCount}
                       </span>
-                      <span className="text-[10px] text-cyan-400 font-mono">Partidas Oficiais</span>
+                      <span className="text-[11px] text-cyan-400 font-mono">Partidas oficiais</span>
                     </div>
 
                     <div className="bg-surface-2/90 border border-white/10 rounded-xl p-3.5 text-center">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      <span className="text-[11px] font-medium text-gray-400 block">
                         Heróis Escolhidos
                       </span>
-                      <span className="text-2xl font-black text-emerald-400 font-mono mt-1 block">
+                      <span className="text-2xl font-semibold text-emerald-400 font-mono mt-1 block">
                         {pickedHeroesCount}
                       </span>
-                      <span className="text-[10px] text-gray-400 font-mono">Picks realizados</span>
+                      <span className="text-[11px] text-gray-400 font-mono">Picks realizados</span>
                     </div>
 
                     <div className="bg-surface-2/90 border border-white/10 rounded-xl p-3.5 text-center">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      <span className="text-[11px] font-medium text-gray-400 block">
                         Heróis Banidos
                       </span>
-                      <span className="text-2xl font-black text-rose-400 font-mono mt-1 block">
+                      <span className="text-2xl font-semibold text-rose-400 font-mono mt-1 block">
                         {bannedHeroesCount}
                       </span>
-                      <span className="text-[10px] text-gray-400 font-mono">Bans efetuados</span>
+                      <span className="text-[11px] text-gray-400 font-mono">Bans efetuados</span>
                     </div>
 
                     <div className="bg-surface-2/90 border border-white/10 rounded-xl p-3.5 text-center">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      <span className="text-[11px] font-medium text-gray-400 block">
                         Disputados (P+B)
                       </span>
-                      <span className="text-2xl font-black text-amber-400 font-mono mt-1 block">
+                      <span className="text-2xl font-semibold text-amber-400 font-mono mt-1 block">
                         {contestedCount}
                       </span>
-                      <span className="text-[10px] text-amber-400/80 font-mono">{contestedPercent}% do elenco</span>
+                      <span className="text-[11px] text-amber-400/80 font-mono">{contestedPercent}% do elenco</span>
                     </div>
 
                     <div className="bg-surface-2/90 border border-white/10 rounded-xl p-3.5 text-center col-span-2 sm:col-span-1">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      <span className="text-[11px] font-medium text-gray-400 block">
                         Não Escolhidos
                       </span>
-                      <span className="text-2xl font-black text-gray-400 font-mono mt-1 block">
+                      <span className="text-2xl font-semibold text-gray-400 font-mono mt-1 block">
                         {uncontestedCount}
                       </span>
-                      <span className="text-[10px] text-gray-500 font-mono">0 Picks e 0 Bans</span>
+                      <span className="text-[11px] text-gray-500 font-mono">0 Picks e 0 Bans</span>
                     </div>
                   </div>
 
@@ -356,9 +356,9 @@ export default function TournamentsView({
                     <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
                       <button
                         onClick={() => setHeroFilterTab('picked')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
                           heroFilterTab === 'picked'
-                            ? 'bg-emerald-500 text-black font-extrabold shadow'
+                            ? 'bg-emerald-500 text-black font-semibold shadow'
                             : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                       >
@@ -367,9 +367,9 @@ export default function TournamentsView({
 
                       <button
                         onClick={() => setHeroFilterTab('banned')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
                           heroFilterTab === 'banned'
-                            ? 'bg-rose-500 text-black font-extrabold shadow'
+                            ? 'bg-rose-500 text-black font-semibold shadow'
                             : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                       >
@@ -378,9 +378,9 @@ export default function TournamentsView({
 
                       <button
                         onClick={() => setHeroFilterTab('contested')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
                           heroFilterTab === 'contested'
-                            ? 'bg-amber-500 text-black font-extrabold shadow'
+                            ? 'bg-amber-500 text-black font-semibold shadow'
                             : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                       >
@@ -389,9 +389,9 @@ export default function TournamentsView({
 
                       <button
                         onClick={() => setHeroFilterTab('winrate')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
                           heroFilterTab === 'winrate'
-                            ? 'bg-cyan-500 text-black font-extrabold shadow'
+                            ? 'bg-cyan-500 text-black font-semibold shadow'
                             : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                       >
@@ -400,9 +400,9 @@ export default function TournamentsView({
 
                       <button
                         onClick={() => setHeroFilterTab('uncontested')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] whitespace-nowrap cursor-pointer ${
                           heroFilterTab === 'uncontested'
-                            ? 'bg-purple-500 text-black font-extrabold shadow'
+                            ? 'bg-purple-500 text-black font-semibold shadow'
                             : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                       >
@@ -418,7 +418,7 @@ export default function TournamentsView({
                           value={heroSearch}
                           onChange={(e) => setHeroSearch(e.target.value)}
                           placeholder="Buscar herói no torneio..."
-                          className="w-full bg-surface-2/90 border border-white/10 focus:border-amber-400/60 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-gray-500 outline-none transition-all"
+                          className="w-full bg-surface-2/90 border border-white/10 focus:border-amber-400/60 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-gray-500 outline-none transition-[color,background-color,border-color,opacity,transform]"
                         />
                       </div>
                     )}
@@ -426,17 +426,17 @@ export default function TournamentsView({
 
                   {/* VISUALIZAÇÃO 1: TABELA DE HERÓIS ESCOLHIDOS / BANIDOS / DISPUTADOS */}
                   {heroFilterTab !== 'uncontested' && (
-                    <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface/80 backdrop-blur-xl">
+                    <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface">
                       <table className="w-full text-left text-xs border-collapse">
-                        <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+                        <thead className="bg-surface-2/90 text-gray-400 font-mono text-[11px] border-b border-white/10">
                           <tr>
                             <th className="p-3.5 pl-5 w-16 text-center">#</th>
                             <th className="p-3.5">Herói</th>
-                            <th className="p-3.5 text-center font-bold">Picks</th>
-                            <th className="p-3.5 text-center font-bold">Bans</th>
+                            <th className="p-3.5 text-center font-medium">Picks</th>
+                            <th className="p-3.5 text-center font-medium">Bans</th>
                             <th className="p-3.5 text-center">V - D</th>
-                            <th className="p-3.5 text-right font-bold">Win Rate %</th>
-                            <th className="p-3.5 pr-5 text-right font-bold">Taxa Disputa</th>
+                            <th className="p-3.5 text-right font-medium">Win rate %</th>
+                            <th className="p-3.5 pr-5 text-right font-medium">Taxa disputa</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5 font-medium">
@@ -454,7 +454,7 @@ export default function TournamentsView({
 
                               return (
                                 <tr key={h.hero_id} className="hover:bg-white/[0.03] transition-colors">
-                                  <td className="p-3.5 pl-5 text-center font-mono font-bold text-gray-400">
+                                  <td className="p-3.5 pl-5 text-center font-mono font-medium text-gray-400">
                                     #{idx + 1}
                                   </td>
 
@@ -465,11 +465,11 @@ export default function TournamentsView({
                                         alt={heroName}
                                         className="w-10 h-6 object-cover rounded border border-white/10 cursor-pointer hover:border-amber-400 transition-colors"
                                         onClick={() => onSelectHero && onSelectHero({ id: h.hero_id, name: heroName })}
-                                        title="Ver Detalhes do Herói"
+                                        title="Ver detalhes do herói"
                                         onError={(e) => { e.target.style.display = 'none'; }}
                                       />
                                       <span
-                                        className="text-white font-bold cursor-pointer hover:text-amber-400 transition-colors"
+                                        className="text-white font-medium cursor-pointer hover:text-amber-400 transition-colors"
                                         onClick={() => onSelectHero && onSelectHero({ id: h.hero_id, name: heroName })}
                                       >
                                         {heroName}
@@ -477,29 +477,29 @@ export default function TournamentsView({
                                     </div>
                                   </td>
 
-                                  <td className="p-3.5 text-center font-mono font-bold text-emerald-400">
+                                  <td className="p-3.5 text-center font-mono font-medium text-emerald-400">
                                     {h.picks}
-                                    <span className="text-[10px] text-gray-500 font-normal ml-1">
+                                    <span className="text-[11px] text-gray-500 font-normal ml-1">
                                       ({Math.round(h.pickRate)}%)
                                     </span>
                                   </td>
 
-                                  <td className="p-3.5 text-center font-mono font-bold text-rose-400">
+                                  <td className="p-3.5 text-center font-mono font-medium text-rose-400">
                                     {h.bans}
-                                    <span className="text-[10px] text-gray-500 font-normal ml-1">
+                                    <span className="text-[11px] text-gray-500 font-normal ml-1">
                                       ({Math.round(h.banRate)}%)
                                     </span>
                                   </td>
 
                                   <td className="p-3.5 text-center font-mono text-gray-300">
-                                    <span className="text-emerald-400 font-bold">{h.wins}</span>
+                                    <span className="text-emerald-400 font-medium">{h.wins}</span>
                                     <span className="text-gray-500 mx-1">-</span>
-                                    <span className="text-rose-400 font-bold">{h.losses}</span>
+                                    <span className="text-rose-400 font-medium">{h.losses}</span>
                                   </td>
 
-                                  <td className="p-3.5 text-right font-mono font-black">
+                                  <td className="p-3.5 text-right font-mono font-semibold">
                                     <span
-                                      className={`px-2 py-0.5 rounded text-[11px] ${
+                                      className={`px-2 py-0.5 rounded text-xs ${
                                         wr >= 60
                                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                           : wr >= 48
@@ -511,9 +511,9 @@ export default function TournamentsView({
                                     </span>
                                   </td>
 
-                                  <td className="p-3.5 pr-5 text-right font-mono font-bold text-amber-400">
+                                  <td className="p-3.5 pr-5 text-right font-mono font-medium text-amber-400">
                                     {Math.round(h.contestRate)}%
-                                    <span className="text-[10px] text-gray-500 font-normal ml-1">
+                                    <span className="text-[11px] text-gray-500 font-normal ml-1">
                                       ({h.picks + h.bans})
                                     </span>
                                   </td>
@@ -532,7 +532,7 @@ export default function TournamentsView({
                       <div className="bg-surface-2/60 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
                         <Ban className="w-5 h-5 text-purple-400 shrink-0" />
                         <div className="text-xs text-gray-300">
-                          <strong className="text-white">Nem Escolhidos e Nem Banidos:</strong> Estes heróis não foram disputados em nenhuma partida oficial deste torneio (0 picks e 0 bans).
+                          <strong className="text-white">Nem escolhidos e nem banidos:</strong> Estes heróis não foram disputados em nenhuma partida oficial deste torneio (0 picks e 0 bans).
                         </div>
                       </div>
 
@@ -545,21 +545,21 @@ export default function TournamentsView({
                             <div
                               key={h.id}
                               onClick={() => onSelectHero && onSelectHero({ id: h.id, name: heroName })}
-                              className="group bg-surface-2/80 hover:bg-surface-3 border border-white/10 hover:border-purple-500/50 rounded-xl p-2.5 text-center cursor-pointer transition-all duration-200 hover:-translate-y-1 shadow-sm"
+                              className="group bg-surface-2/80 hover:bg-surface-3 border border-white/10 hover:border-purple-500/50 rounded-xl p-2.5 text-center cursor-pointer transition-[color,background-color,border-color,opacity,transform] duration-200 shadow-sm"
                             >
                               <div className="relative mx-auto w-14 h-9 rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-400 transition-colors">
                                 <img
                                   src={heroImg}
                                   alt={heroName}
-                                  className="w-full h-full object-cover filter grayscale contrast-125 opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-all duration-300"
+                                  className="w-full h-full object-cover filter grayscale contrast-125 opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-[color,background-color,border-color,opacity,transform] duration-300"
                                   onError={(e) => { e.target.style.display = 'none'; }}
                                 />
                                 <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-colors"></div>
                               </div>
-                              <span className="text-[11px] font-bold text-gray-400 group-hover:text-white transition-colors block mt-2 truncate">
+                              <span className="text-xs font-medium text-gray-400 group-hover:text-white transition-colors block mt-2 truncate">
                                 {heroName}
                               </span>
-                              <span className="text-[9px] font-mono text-purple-400/80 block mt-0.5">
+                              <span className="text-[11px] font-mono text-purple-400/80 block mt-0.5">
                                 0 P / 0 B
                               </span>
                             </div>
@@ -578,10 +578,10 @@ export default function TournamentsView({
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
             <div>
-              <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-amber-400">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amber-400">
                 <Trophy className="w-4 h-4 text-amber-400" /> Torneios Oficiais do Dota 2
               </div>
-              <h1 className="text-2xl font-black text-white tracking-wide mt-1">
+              <h1 className="text-2xl font-semibold text-white mt-1">
                 Ligas e Campeonatos Oficiais
               </h1>
               <p className="text-xs text-gray-400 mt-1">
@@ -593,21 +593,21 @@ export default function TournamentsView({
             <div className="flex items-center gap-2 bg-surface-2/90 p-1 rounded-xl border border-white/10">
               <button
                 onClick={() => setStatusFilter('ongoing')}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                   statusFilter === 'ongoing'
-                    ? 'bg-emerald-500 text-black shadow font-extrabold'
+                    ? 'bg-emerald-500 text-black shadow font-semibold'
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                 Em Andamento ({ongoingTournaments.length})
               </button>
 
               <button
                 onClick={() => setStatusFilter('finalized')}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                   statusFilter === 'finalized'
-                    ? 'bg-amber-500 text-black shadow font-extrabold'
+                    ? 'bg-amber-500 text-black shadow font-semibold'
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
@@ -626,7 +626,7 @@ export default function TournamentsView({
                   <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-400">
                     <Trophy className="w-6 h-6" />
                   </div>
-                  <h3 className="text-sm font-bold text-white">Nenhum torneio finalizado gravado ainda</h3>
+                  <h3 className="text-sm font-medium text-white">Nenhum torneio finalizado gravado ainda</h3>
                   <p className="text-xs text-gray-400 leading-relaxed">
                     A partir de hoje, assim que um campeonato for concluído ele ficará arquivado permanentemente aqui, mantendo todas as séries, partidas e estatísticas de heróis.
                   </p>
@@ -647,29 +647,29 @@ export default function TournamentsView({
                       setSelectedTournament(t);
                       setActiveSubTab('series');
                     }}
-                    className="group bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-amber-500/60 rounded-2xl p-5 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 hover:-translate-y-1 flex flex-col justify-between gap-4 backdrop-blur-xl"
+                    className="group bg-surface-2/70 hover:bg-surface-3/90 border border-white/10 hover:border-amber-500/60 rounded-2xl p-5 cursor-pointer transition-[color,background-color,border-color,opacity,transform] duration-200 shadow-sm flex flex-col justify-between gap-4"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-2 text-[10px]">
+                      <div className="flex items-center justify-between gap-2 mb-2 text-[11px]">
                         {isOngoing ? (
-                          <span className="font-extrabold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                          <span className="font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                             Em Andamento
                           </span>
                         ) : (
-                          <span className="font-extrabold text-cyan-400 uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" /> Finalizado
                           </span>
                         )}
                         <span className="font-mono text-gray-400">{t.recentDate}</span>
                       </div>
 
-                      <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-2 mt-1">
+                      <h3 className="text-base font-medium text-white group-hover:text-amber-300 transition-colors line-clamp-2 mt-1">
                         {t.name}
                       </h3>
 
                       {t.champion && (
-                        <div className="flex items-center gap-1.5 text-xs text-amber-400 font-bold mt-2">
+                        <div className="flex items-center gap-1.5 text-xs text-amber-400 font-medium mt-2">
                           <Crown className="w-3.5 h-3.5 text-amber-400" />
                           <span>Campeão: {t.champion}</span>
                         </div>
@@ -677,8 +677,8 @@ export default function TournamentsView({
                     </div>
 
                     <div className="border-t border-white/10 pt-3 flex items-center justify-between text-xs">
-                      <span className="text-gray-400">Séries Disputadas:</span>
-                      <strong className="text-cyan-400 font-mono font-black">
+                      <span className="text-gray-400">Séries disputadas:</span>
+                      <strong className="text-cyan-400 font-mono font-semibold">
                         {t.seriesList?.length || 0}
                       </strong>
                     </div>

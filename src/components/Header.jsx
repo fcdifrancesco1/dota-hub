@@ -22,7 +22,7 @@ function LiveBadge({ count, className = '' }) {
     <span className={`relative inline-flex items-center justify-center ${className}`} aria-label={`${count} ao vivo`}>
       <span className="absolute inset-0 rounded-full animate-ping opacity-40" style={{ backgroundColor: '#EF4444' }} />
       <span
-        className="relative min-w-[20px] h-5 px-1.5 rounded-full text-[11px] leading-none font-black tabular-nums flex items-center justify-center shadow-sm"
+        className="relative min-w-[20px] h-5 px-1.5 rounded-full text-xs leading-none font-semibold tabular-nums flex items-center justify-center shadow-sm"
         style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
       >
         {count}
@@ -40,7 +40,7 @@ export default function Header() {
 
   const navLinks = [
     { to: '/', label: 'Início', icon: Flame },
-    { to: '/ao-vivo', label: 'Ao Vivo', icon: Radio, badge: liveCount },
+    { to: '/ao-vivo', label: 'Ao vivo', icon: Radio, badge: liveCount },
     { to: '/campeonatos', label: 'Campeonatos', icon: Trophy },
     { to: '/partidas', label: 'Partidas', icon: Swords },
     { to: '/times', label: 'Times', icon: Shield },
@@ -51,7 +51,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 glass-panel border-b border-line transition-all">
+      <header className="sticky top-0 z-50 glass-panel border-b border-line transition-[color,background-color,border-color,opacity,transform]">
         <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* LOGO & BRAND: volta para o hub HanG0V3R (a página inicial do Dota fica em "Início") */}
@@ -65,9 +65,9 @@ export default function Header() {
               alt=""
               width="44"
               height="44"
-              className="w-11 h-11 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] group-hover:scale-105 transition-transform"
+              className="w-11 h-11 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition-transform"
             />
-            <span className="text-base sm:text-lg font-black tracking-wider text-white uppercase leading-tight font-serif">
+            <span className="text-base sm:text-lg font-semibold text-white leading-tight font-serif">
               Dota
             </span>
           </a>
@@ -83,9 +83,9 @@ export default function Header() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-[color,background-color,border-color,opacity,transform] ${
                     isActive
-                      ? 'bg-blue-600 text-on-accent shadow-md shadow-blue-500/25 font-black'
+                      ? 'bg-blue-600 text-on-accent font-semibold'
                       : 'text-gray-400 hover:text-white hover:bg-surface-3'
                   }`}
                 >
@@ -106,7 +106,7 @@ export default function Header() {
               onClick={refreshData}
               disabled={loadingRefresh}
               title={`Atualizado às ${lastUpdated || 'recentemente'}. Clique para atualizar.`}
-              className="p-2 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white transition-all disabled:opacity-50 shadow-sm"
+              className="p-2 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white transition-[color,background-color,border-color,opacity,transform] disabled:opacity-50 shadow-sm"
             >
               <RefreshCw className={`w-4 h-4 ${loadingRefresh ? 'animate-spin text-blue-600 dark:text-amber-400' : ''}`} />
             </button>
@@ -141,7 +141,7 @@ export default function Header() {
                   <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
                     <Flame className="w-4 h-4 text-blue-600 dark:text-amber-400" />
                   </div>
-                  <span className="font-serif font-black text-white uppercase tracking-wider text-sm">
+                  <span className="font-serif font-semibold text-white text-sm">
                     Dota
                   </span>
                 </div>
@@ -165,9 +165,9 @@ export default function Header() {
                       key={item.to}
                       to={item.to}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
                         isActive
-                          ? 'bg-blue-600 text-on-accent font-black shadow-md shadow-blue-500/25'
+                          ? 'bg-blue-600 text-on-accent font-semibold'
                           : 'text-gray-400 hover:text-white hover:bg-surface-2'
                       }`}
                     >
@@ -184,7 +184,7 @@ export default function Header() {
 
             {/* Drawer Footer */}
             <div className="pt-6 border-t border-line flex flex-col gap-3">
-              <div className="text-[11px] text-gray-400 text-center">
+              <div className="text-xs text-gray-400 text-center">
                 Última sincronização: {lastUpdated || '--:--'}
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function Header() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={`relative flex flex-col items-center gap-0.5 py-2 text-[10px] font-bold ${isActive ? 'text-blue-600 dark:text-amber-400' : 'text-gray-400'}`}
+                className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${isActive ? 'text-blue-600 dark:text-amber-400' : 'text-gray-400'}`}
               >
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>

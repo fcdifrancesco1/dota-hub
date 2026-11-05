@@ -91,7 +91,7 @@ export default function TeamsPage() {
   const renderMovement = (change) => {
     if (!change || change === '-') {
       return (
-        <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-gray-400">
+        <span className="inline-flex items-center gap-1 text-xs font-mono font-medium text-gray-400">
           <Minus className="w-3 h-3 text-gray-400" />
           <span>-</span>
         </span>
@@ -99,14 +99,14 @@ export default function TeamsPage() {
     }
     if (change.startsWith('+')) {
       return (
-        <span className="inline-flex items-center gap-0.5 text-[11px] font-mono font-black text-emerald-500">
+        <span className="inline-flex items-center gap-0.5 text-xs font-mono font-semibold text-emerald-500">
           <ArrowUp className="w-3 h-3 text-emerald-500 stroke-[3]" />
           <span>{change}</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-0.5 text-[11px] font-mono font-black text-rose-500">
+      <span className="inline-flex items-center gap-0.5 text-xs font-mono font-semibold text-rose-500">
         <ArrowDown className="w-3 h-3 text-rose-500 stroke-[3]" />
         <span>{change}</span>
       </span>
@@ -118,11 +118,11 @@ export default function TeamsPage() {
       {/* CABEÇALHO */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-500">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-500">
             <Trophy className="w-4 h-4 text-amber-500" />
-            <span>Circuito Mundial Competitivo · Liquipedia & SAP</span>
+            <span>Circuito mundial competitivo · Liquipedia & SAP</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight mt-1">
+          <h1 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight mt-1">
             Ranking Oficial de Equipes
           </h1>
           <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-3xl leading-relaxed">
@@ -135,8 +135,8 @@ export default function TeamsPage() {
           <div className="bg-surface-2/80 border border-line rounded-2xl px-4 py-2.5 flex items-center gap-3">
             <Shield className="w-5 h-5 text-amber-400" />
             <div>
-              <span className="text-[10px] font-bold uppercase text-gray-400 block leading-tight">Total Ativo</span>
-              <span className="font-mono font-black text-white text-sm">{teams.length} equipes</span>
+              <span className="text-[11px] font-medium text-gray-400 block leading-tight">Total ativo</span>
+              <span className="font-mono font-semibold text-white text-sm">{teams.length} equipes</span>
             </div>
           </div>
         </div>
@@ -149,38 +149,37 @@ export default function TeamsPage() {
           {top2 && (
             <div
               onClick={() => handleTeamClick(top2)}
-              className="tilt-card glass-panel rounded-3xl p-6 border border-slate-300/30 dark:border-slate-500/30 hover:border-slate-300/60 shadow-xl cursor-pointer transition-all flex flex-col justify-between group order-2 md:order-1 relative overflow-hidden"
+              className="tilt-card glass-panel rounded-3xl p-6 border border-slate-300/30 dark:border-slate-500/30 hover:border-slate-300/60 shadow-xl cursor-pointer transition-[color,background-color,border-color,opacity,transform] flex flex-col justify-between group order-2 md:order-1 relative overflow-hidden"
             >
-              <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-slate-400/10 blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-black text-sm" style={medalStyle(2)} aria-label="2º lugar">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-semibold text-sm" style={medalStyle(2)} aria-label="2º lugar">
                     <span>2</span>
                   </span>
                   <div className="flex items-center gap-2">
                     {renderMovement(top2.change)}
-                    <span className="text-xs font-mono font-bold text-gray-400">
+                    <span className="text-xs font-mono font-medium text-gray-400">
                       Pontos: <strong className="text-white text-sm">{top2.points}</strong>
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 my-2">
-                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center shrink-0 shadow-md transition-transform">
                     <TeamLogo teamName={top2.name} teamId={top2.teamId} logoUrl={top2.logo} className="w-12 h-12" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-lg font-black text-white truncate group-hover:text-amber-400 transition-colors">
+                    <h3 className="text-lg font-semibold text-white truncate group-hover:text-amber-400 transition-colors">
                       {top2.name}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       {top2.tag && (
-                        <span className="text-[11px] font-mono font-bold text-gray-400 uppercase">
+                        <span className="text-xs font-mono font-medium text-gray-400">
                           [{top2.tag}]
                         </span>
                       )}
                       {top2.region && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-surface-3 border border-line text-blue-500 dark:text-cyan-400 font-bold uppercase">
+                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-surface-3 border border-line text-blue-500 dark:text-cyan-400 font-medium">
                           {top2.region}
                         </span>
                       )}
@@ -193,7 +192,7 @@ export default function TeamsPage() {
                 <span className="text-gray-400 font-medium font-mono">
                   {top2.points} Pontos SAP
                 </span>
-                <span className="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span className="text-amber-400 font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   <span>Ver perfil</span>
                   <ChevronRight className="w-4 h-4" />
                 </span>
@@ -204,41 +203,40 @@ export default function TeamsPage() {
           {/* #1 CAMPEÃO / LÍDER MUNDIAL */}
           <div
             onClick={() => handleTeamClick(top1)}
-            className="tilt-card glass-panel rounded-3xl p-6 sm:p-7 border border-amber-500/50 hover:border-amber-400 shadow-2xl cursor-pointer transition-all flex flex-col justify-between group order-1 md:order-2 relative overflow-hidden bg-gradient-to-b from-amber-500/10 to-transparent"
+            className="tilt-card glass-panel rounded-3xl p-6 sm:p-7 border border-amber-500/50 hover:border-amber-400 shadow-2xl cursor-pointer transition-[color,background-color,border-color,opacity,transform] flex flex-col justify-between group order-1 md:order-2 relative overflow-hidden bg-gradient-to-b from-amber-500/10 to-transparent"
           >
-            <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-black text-sm" style={medalStyle(1)} aria-label="1º lugar">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-semibold text-sm" style={medalStyle(1)} aria-label="1º lugar">
                   <span>1</span>
                 </span>
                 <div className="flex items-center gap-2">
                   {renderMovement(top1.change)}
-                  <span className="text-xs font-mono font-bold text-amber-500">
+                  <span className="text-xs font-mono font-medium text-amber-500">
                     Pontos: <strong className="text-white text-base">{top1.points}</strong>
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-5 my-3">
-                <div className="w-20 h-20 rounded-2xl bg-surface-2 border-2 border-amber-500/50 p-2.5 flex items-center justify-center shrink-0 shadow-xl group-hover:scale-105 transition-transform">
+                <div className="w-20 h-20 rounded-2xl bg-surface-2 border-2 border-amber-500/50 p-2.5 flex items-center justify-center shrink-0 shadow-xl transition-transform">
                   <TeamLogo teamName={top1.name} teamId={top1.teamId} logoUrl={top1.logo} className="w-14 h-14" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 block">
+                  <span className="text-[11px] font-semibold text-amber-500 block">
                     Melhor Equipe do Mundo
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-black text-white truncate group-hover:text-amber-400 transition-colors">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-white truncate group-hover:text-amber-400 transition-colors">
                     {top1.name}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                     {top1.tag && (
-                      <span className="text-xs font-mono font-bold text-gray-400 uppercase">
+                      <span className="text-xs font-mono font-medium text-gray-400">
                         [{top1.tag}]
                       </span>
                     )}
                     {top1.region && (
-                      <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-400 font-black uppercase">
+                      <span className="text-[11px] px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-400 font-semibold">
                         {top1.region}
                       </span>
                     )}
@@ -248,11 +246,11 @@ export default function TeamsPage() {
             </div>
 
             <div className="pt-4 border-t border-line mt-4 flex items-center justify-between text-xs">
-              <span className="text-amber-500 font-bold font-mono">
+              <span className="text-amber-500 font-medium font-mono">
                 {top1.points} Pontos SAP
               </span>
-              <span className="text-amber-400 font-black flex items-center gap-1 group-hover:translate-x-1 transition-transform uppercase tracking-wider text-[11px]">
-                <span>Ver Elenco & Estatísticas</span>
+              <span className="text-amber-400 font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform text-xs">
+                <span>Ver elenco & estatísticas</span>
                 <ChevronRight className="w-4 h-4" />
               </span>
             </div>
@@ -262,38 +260,37 @@ export default function TeamsPage() {
           {top3 && (
             <div
               onClick={() => handleTeamClick(top3)}
-              className="tilt-card glass-panel rounded-3xl p-6 border border-amber-700/30 dark:border-amber-600/30 hover:border-amber-600/60 shadow-xl cursor-pointer transition-all flex flex-col justify-between group order-3 relative overflow-hidden"
+              className="tilt-card glass-panel rounded-3xl p-6 border border-amber-700/30 dark:border-amber-600/30 hover:border-amber-600/60 shadow-xl cursor-pointer transition-[color,background-color,border-color,opacity,transform] flex flex-col justify-between group order-3 relative overflow-hidden"
             >
-              <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-amber-700/10 blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-black text-sm" style={medalStyle(3)} aria-label="3º lugar">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border font-mono font-semibold text-sm" style={medalStyle(3)} aria-label="3º lugar">
                     <span>3</span>
                   </span>
                   <div className="flex items-center gap-2">
                     {renderMovement(top3.change)}
-                    <span className="text-xs font-mono font-bold text-gray-400">
+                    <span className="text-xs font-mono font-medium text-gray-400">
                       Pontos: <strong className="text-white text-sm">{top3.points}</strong>
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 my-2">
-                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line p-2 flex items-center justify-center shrink-0 shadow-md transition-transform">
                     <TeamLogo teamName={top3.name} teamId={top3.teamId} logoUrl={top3.logo} className="w-12 h-12" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-lg font-black text-white truncate group-hover:text-amber-400 transition-colors">
+                    <h3 className="text-lg font-semibold text-white truncate group-hover:text-amber-400 transition-colors">
                       {top3.name}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       {top3.tag && (
-                        <span className="text-[11px] font-mono font-bold text-gray-400 uppercase">
+                        <span className="text-xs font-mono font-medium text-gray-400">
                           [{top3.tag}]
                         </span>
                       )}
                       {top3.region && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-surface-3 border border-line text-blue-500 dark:text-cyan-400 font-bold uppercase">
+                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-surface-3 border border-line text-blue-500 dark:text-cyan-400 font-medium">
                           {top3.region}
                         </span>
                       )}
@@ -306,7 +303,7 @@ export default function TeamsPage() {
                 <span className="text-gray-400 font-medium font-mono">
                   {top3.points} Pontos SAP
                 </span>
-                <span className="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span className="text-amber-400 font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   <span>Ver perfil</span>
                   <ChevronRight className="w-4 h-4" />
                 </span>
@@ -322,9 +319,9 @@ export default function TeamsPage() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setRegionFilter('all')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
               regionFilter === 'all'
-                ? 'bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/20'
+                ? 'bg-amber-500 text-on-accent font-semibold'
                 : 'bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30'
             }`}
           >
@@ -334,9 +331,9 @@ export default function TeamsPage() {
             <button
               key={reg}
               onClick={() => setRegionFilter(reg)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
                 regionFilter.toLowerCase() === reg.toLowerCase()
-                  ? 'bg-amber-500 text-on-accent font-black shadow-md shadow-amber-500/20'
+                  ? 'bg-amber-500 text-on-accent font-semibold'
                   : 'bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30'
               }`}
             >
@@ -362,19 +359,19 @@ export default function TeamsPage() {
       {loading ? (
         <div className="glass-panel border border-line rounded-3xl p-24 text-center shadow-xl flex flex-col items-center justify-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-          <span className="text-xs font-bold text-gray-400">Carregando classificação mundial oficial da Liquipedia...</span>
+          <span className="text-xs font-medium text-gray-400">Carregando classificação mundial oficial da Liquipedia...</span>
         </div>
       ) : filteredTeams.length === 0 ? (
         <div className="glass-panel border border-line rounded-3xl p-16 text-center shadow-xl">
           <Shield className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-          <h3 className="text-base font-black text-white uppercase">Nenhum time encontrado</h3>
+          <h3 className="text-base font-semibold text-white">Nenhum time encontrado</h3>
           <p className="text-xs text-gray-400 mt-1">Tente ajustar os termos de busca ou mudar a região selecionada.</p>
         </div>
       ) : (
         <div className="glass-panel border border-line rounded-3xl overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse min-w-[700px]">
-              <thead className="bg-surface-2/80 text-gray-400 font-mono text-[10px] uppercase border-b border-line">
+              <thead className="bg-surface-2/80 text-gray-400 font-mono text-[11px] border-b border-line">
                 <tr>
                   <th className="p-4 pl-6 text-center w-16">Rank</th>
                   <th className="p-4 text-center w-16">+/-</th>
@@ -409,7 +406,7 @@ export default function TeamsPage() {
                       {/* Posição no Ranking */}
                       <td className="p-4 pl-6 text-center font-mono">
                         <span
-                          className={`inline-flex items-center justify-center w-7 h-7 rounded-xl font-black text-xs ${
+                          className={`inline-flex items-center justify-center w-7 h-7 rounded-xl font-semibold text-xs ${
                             isTop1 || isTop2 || isTop3 ? 'border' : 'text-gray-400 bg-surface-2'
                           }`}
                           style={medalStyle(t.rank) || undefined}
@@ -426,15 +423,15 @@ export default function TeamsPage() {
                       {/* Time */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line p-1.5 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                          <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line p-1.5 flex items-center justify-center shrink-0 shadow-sm transition-transform">
                             <TeamLogo teamName={t.name} teamId={t.teamId} logoUrl={t.logo} className="w-7 h-7" />
                           </div>
                           <div>
-                            <span className="font-bold text-white text-sm group-hover:text-amber-400 transition-colors block">
+                            <span className="font-medium text-white text-sm group-hover:text-amber-400 transition-colors block">
                               {t.name}
                             </span>
                             {t.tag && (
-                              <span className="text-[10px] font-mono text-gray-400">
+                              <span className="text-[11px] font-mono text-gray-400">
                                 [{t.tag}]
                               </span>
                             )}
@@ -452,14 +449,14 @@ export default function TeamsPage() {
 
                       {/* Pontuação */}
                       <td className="p-4 text-right font-mono">
-                        <span className="px-3 py-1 rounded-xl bg-surface-2 border border-line text-white font-black text-sm">
+                        <span className="px-3 py-1 rounded-xl bg-surface-2 border border-line text-white font-semibold text-sm">
                           {t.points}
                         </span>
                       </td>
 
                       {/* Ação */}
                       <td className="p-4 pr-6 text-right">
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-400 group-hover:text-amber-400 transition-colors">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 group-hover:text-amber-400 transition-colors">
                           <span>Ver time</span>
                           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </span>

@@ -199,7 +199,7 @@ export default function LiveMatchDetail({
   const scoreB = pick(matchData, ['dire_score']) ?? game.gameScoreB ?? null;
   const hasScore = scoreA !== null && scoreB !== null;
 
-  const leagueName = matchData?.league_name || game.torneio || "Torneio Profissional";
+  const leagueName = matchData?.league_name || game.torneio || "Torneio profissional";
   const formatStr = game.formato || "BO3";
 
   // Jogadores reais (apenas o que a API retorna)
@@ -285,8 +285,8 @@ export default function LiveMatchDetail({
 
     const phases = hasOrder ? [
       { num: 1, title: 'Fase 1: Abertura', subtitle: '7 Bans · 4 Picks', items: phase1 },
-      { num: 2, title: 'Fase 2: Mid Draft', subtitle: '4 Bans · 4 Picks', items: phase2 },
-      { num: 3, title: 'Fase 3: Decisão & Last Pick', subtitle: '3 Bans · 2 Picks', items: phase3 }
+      { num: 2, title: 'Fase 2: Mid draft', subtitle: '4 Bans · 4 Picks', items: phase2 },
+      { num: 3, title: 'Fase 3: Decisão & last pick', subtitle: '3 Bans · 2 Picks', items: phase3 }
     ] : [
       { num: 1, title: 'Picks', subtitle: 'ordem do draft não informada pela Valve', items: picksBans.filter((d) => d.is_pick).sort(byTeam) },
       { num: 2, title: 'Bans', subtitle: '', items: picksBans.filter((d) => !d.is_pick).sort(byTeam) }
@@ -304,19 +304,19 @@ export default function LiveMatchDetail({
         <Link
           key={`${item.order || idx}-${item.hero_id}`}
           to={`/herois/${item.hero_id}`}
-          className={`flex flex-col items-center p-1.5 rounded-xl border transition-all cursor-pointer group shrink-0 ${
+          className={`flex flex-col items-center p-1.5 rounded-xl border transition-[color,background-color,border-color,opacity,transform] cursor-pointer group shrink-0 ${
             isPick
               ? isRadiant
-                ? 'bg-emerald-950/30 border-emerald-500/40 hover:border-emerald-400 hover:scale-105 shadow-sm shadow-emerald-500/10'
-                : 'bg-rose-950/30 border-rose-500/40 hover:border-rose-400 hover:scale-105 shadow-sm shadow-rose-500/10'
-              : 'bg-surface border-line hover:border-rose-500/40 hover:scale-105 opacity-80 hover:opacity-100'
+                ? 'bg-emerald-950/30 border-emerald-500/40 hover:border-emerald-400'
+                : 'bg-rose-950/30 border-rose-500/40 hover:border-rose-400'
+              : 'bg-surface border-line hover:border-rose-500/40 opacity-80 hover:opacity-100'
           }`}
           title={`${hasOrder ? `${orderNum}. ` : ''}${isPick ? 'PICK' : 'BAN'}: ${hName} (${teamName})`}
         >
           <div className="flex items-center justify-between w-full gap-1 mb-1 px-0.5">
-            <span className="text-[8px] font-mono font-black text-gray-400">{hasOrder ? `#${orderNum}` : ''}</span>
+            <span className="text-[11px] font-mono font-semibold text-gray-400">{hasOrder ? `#${orderNum}` : ''}</span>
             <span
-              className={`text-[8px] font-mono font-black px-1 rounded uppercase ${
+              className={`text-[11px] font-mono font-semibold px-1 rounded ${
                 isPick
                   ? isRadiant
                     ? 'bg-emerald-500/30 text-emerald-300'
@@ -333,13 +333,13 @@ export default function LiveMatchDetail({
               <img
                 src={hImg}
                 alt={hName}
-                className={`w-full h-full object-cover transition-all ${
+                className={`w-full h-full object-cover transition-[color,background-color,border-color,opacity,transform] ${
                   !isPick ? 'grayscale contrast-125 opacity-60 group-hover:grayscale-0' : ''
                 }`}
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             ) : (
-              <span className="text-[9px] text-gray-500 font-mono">?</span>
+              <span className="text-[11px] text-gray-500 font-mono">?</span>
             )}
 
             {!isPick && (
@@ -349,11 +349,11 @@ export default function LiveMatchDetail({
             )}
           </div>
 
-          <span className="text-[9px] font-bold text-gray-200 leading-tight break-words line-clamp-2 w-[64px] mt-1 text-center group-hover:text-amber-400 transition-colors">
+          <span className="text-[11px] font-medium text-gray-200 leading-tight break-words line-clamp-2 w-[64px] mt-1 text-center group-hover:text-amber-400 transition-colors">
             {hName}
           </span>
           <span
-            className={`text-[8px] font-mono leading-tight break-words line-clamp-2 w-[64px] text-center ${
+            className={`text-[11px] font-mono leading-tight break-words line-clamp-2 w-[64px] text-center ${
               isRadiant ? 'text-emerald-400/90' : 'text-rose-400/90'
             }`}
           >
@@ -368,11 +368,11 @@ export default function LiveMatchDetail({
         <div className="flex items-center justify-between border-b border-white/5 pb-2.5 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Swords className="w-4 h-4 text-amber-400" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-white">
+            <h3 className="text-xs font-semibold text-white">
               Ordem do Draft (Captain&apos;s Mode: Picks & Bans)
             </h3>
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-mono">
+          <div className="flex items-center gap-2 text-[11px] font-mono">
             <span className="flex items-center gap-1 text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400" /> {teamAName} (Radiant)
             </span>
@@ -388,8 +388,8 @@ export default function LiveMatchDetail({
             if (!ph.items || ph.items.length === 0) return null;
             return (
               <div key={ph.num} className="bg-black/30 border border-white/5 rounded-xl p-2.5 space-y-2">
-                <div className="flex items-center justify-between px-1 text-[10px] font-mono">
-                  <span className="font-extrabold text-amber-400 uppercase tracking-wider">{ph.title}</span>
+                <div className="flex items-center justify-between px-1 text-[11px] font-mono">
+                  <span className="font-semibold text-amber-400">{ph.title}</span>
                   <span className="text-gray-500">{ph.subtitle}</span>
                 </div>
                 <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1">
@@ -414,20 +414,20 @@ export default function LiveMatchDetail({
     return (
       <div className={`bg-surface border ${isRadiant ? 'border-emerald-500/20' : 'border-rose-500/20'} rounded-xl p-2.5 space-y-2`}>
         <div className="flex items-center justify-between border-b border-white/5 pb-1">
-          <span className={`font-bold font-mono text-xs ${isRadiant ? 'text-emerald-400' : 'text-rose-400'} leading-tight break-words line-clamp-2 min-w-0`}>
+          <span className={`font-medium font-mono text-xs ${isRadiant ? 'text-emerald-400' : 'text-rose-400'} leading-tight break-words line-clamp-2 min-w-0`}>
             {teamName} ({isRadiant ? 'Radiant' : 'Dire'})
           </span>
-          <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded ${
+          <span className={`text-[11px] font-mono font-medium px-2 py-0.5 rounded ${
             isRadiant ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
           }`}>
             {aliveCount}/18 em pé
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1 sm:gap-1.5 text-[8px] sm:text-[9px] font-mono">
+        <div className="grid grid-cols-4 gap-1 sm:gap-1.5 text-[11px] sm:text-[11px] font-mono">
           {columns.map((col) => (
             <div key={col.key} className="flex flex-col gap-1">
-              <div className="text-center text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider text-gray-400 bg-white/5 py-0.5 rounded">
+              <div className="text-center text-[11px] sm:text-[11px] font-semibold text-gray-400 bg-white/5 py-0.5 rounded">
                 {col.label}
               </div>
               <div className="flex flex-col gap-1">
@@ -437,23 +437,23 @@ export default function LiveMatchDetail({
                     <div
                       key={itIdx}
                       title={`${col.label} - ${item.name}: ${unknown ? 'Status desconhecido' : item.alive ? 'Em pé (Intacta)' : 'Derrubada (Destruída)'}`}
-                      className={`flex items-center justify-between px-1 sm:px-1.5 py-0.5 sm:py-1 rounded border transition-all ${
+                      className={`flex items-center justify-between px-1 sm:px-1.5 py-0.5 sm:py-1 rounded border transition-[color,background-color,border-color,opacity,transform] ${
                         unknown
                           ? 'bg-white/[0.02] text-gray-600 border-white/5'
                           : item.alive
                             ? isRadiant
-                              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 font-bold shadow-sm shadow-emerald-500/10'
-                              : 'bg-rose-500/15 text-rose-300 border-rose-500/40 font-bold shadow-sm shadow-rose-500/10'
+                              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 font-medium'
+                              : 'bg-rose-500/15 text-rose-300 border-rose-500/40 font-medium'
                             : 'bg-rose-950/30 text-gray-500 border-white/5 line-through opacity-45'
                       }`}
                     >
                       <span className="truncate">{item.name}</span>
                       {unknown ? (
-                        <span className="text-[7px] sm:text-[8px] text-gray-600 shrink-0">?</span>
+                        <span className="text-[7px] sm:text-[11px] text-gray-600 shrink-0">?</span>
                       ) : item.alive ? (
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isRadiant ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                       ) : (
-                        <span className="text-[7px] sm:text-[8px] text-rose-500 font-bold shrink-0">✕</span>
+                        <span className="text-[7px] sm:text-[11px] text-rose-500 font-medium shrink-0">✕</span>
                       )}
                     </div>
                   );
@@ -477,29 +477,29 @@ export default function LiveMatchDetail({
             className="w-5 h-5 rounded shrink-0"
           />
           <span className={`w-3 h-3 rounded-full ${isRadiant ? 'bg-emerald-400' : 'bg-rose-500'} animate-pulse`} />
-          <h3 className={`text-sm font-black uppercase tracking-wider ${isRadiant ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <h3 className={`text-sm font-semibold ${isRadiant ? 'text-emerald-400' : 'text-rose-400'}`}>
             {teamName} ({isRadiant ? 'Radiant' : 'Dire'})
           </h3>
         </div>
         <div className="flex items-center gap-3 text-xs font-mono">
-          <span className="text-gray-400">Total de Abates:</span>
-          <strong className="text-white text-base font-black">{score ?? '—'}</strong>
+          <span className="text-gray-400">Total de abates:</span>
+          <strong className="text-white text-base font-semibold">{score ?? '—'}</strong>
         </div>
       </div>
 
       {/* TABELA PARA TELAS MÉDIAS E GRANDES (DESKTOP) */}
       <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10 bg-surface/80">
         <table className="w-full text-left text-xs border-collapse min-w-[1000px]">
-          <thead className="bg-surface-2/90 text-gray-400 font-mono text-[10px] uppercase border-b border-white/10">
+          <thead className="bg-surface-2/90 text-gray-400 font-mono text-[11px] border-b border-white/10">
             <tr>
-              <th className="p-3 pl-4 whitespace-nowrap min-w-[170px]">Jogador / Herói</th>
+              <th className="p-3 pl-4 whitespace-nowrap min-w-[170px]">Jogador / herói</th>
               <th className="p-3 text-center whitespace-nowrap min-w-[60px]">Nível</th>
               <th className="p-3 text-center min-w-[110px] whitespace-nowrap">K / D / A</th>
-              <th className="p-3 text-right whitespace-nowrap min-w-[130px]">Patrimônio Líquido</th>
+              <th className="p-3 text-right whitespace-nowrap min-w-[130px]">Patrimônio líquido</th>
               <th className="p-3 text-right whitespace-nowrap min-w-[110px]">CS (LH / DN)</th>
-              <th className="p-3 text-center min-w-[130px] whitespace-nowrap">Buybacks Usados</th>
+              <th className="p-3 text-center min-w-[130px] whitespace-nowrap">Buybacks usados</th>
               <th className="p-3 text-right min-w-[110px] whitespace-nowrap">GPM / XPM</th>
-              <th className="p-3 pr-4 whitespace-nowrap min-w-[190px]">Inventário Atual</th>
+              <th className="p-3 pr-4 whitespace-nowrap min-w-[190px]">Inventário atual</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 font-medium">
@@ -517,14 +517,14 @@ export default function LiveMatchDetail({
                         <Link
                           to={`/herois/${p.hero_id}`}
                           title={`Ver enciclopédia de ${hName}`}
-                          className="shrink-0 hover:scale-105 transition-transform"
+                          className="shrink-0 transition-transform"
                         >
                           <img
                             src={hImg}
                             alt={hName}
                             className={`w-9 h-6 object-cover rounded border ${
                               isRadiant ? 'border-emerald-400' : 'border-rose-400'
-                            } hover:ring-2 hover:ring-amber-400/50 transition-all shadow-sm`}
+                            } hover:ring-2 hover:ring-amber-400/50 transition-[color,background-color,border-color,opacity,transform] shadow-sm`}
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         </Link>
@@ -533,17 +533,17 @@ export default function LiveMatchDetail({
                         {p.accountId ? (
                           <Link
                             to={`/jogadores/${p.accountId}`}
-                            className="text-white font-bold truncate max-w-[150px] sm:max-w-[200px] block hover:text-amber-400 transition-colors"
+                            className="text-white font-medium truncate max-w-[150px] sm:max-w-[200px] block hover:text-amber-400 transition-colors"
                             title={`Ver estatísticas do jogador ${p.name}`}
                           >
                             {p.name}
                           </Link>
                         ) : (
-                          <span className="text-white font-bold truncate max-w-[150px] sm:max-w-[200px] block">{p.name}</span>
+                          <span className="text-white font-medium truncate max-w-[150px] sm:max-w-[200px] block">{p.name}</span>
                         )}
                         <Link
                           to={`/herois/${p.hero_id}`}
-                          className="text-[10px] text-gray-400 truncate hover:text-amber-400 transition-colors block"
+                          className="text-[11px] text-gray-400 truncate hover:text-amber-400 transition-colors block"
                         >
                           {hName}
                         </Link>
@@ -552,8 +552,8 @@ export default function LiveMatchDetail({
                   </td>
 
                   {/* Nível */}
-                  <td className="p-3 text-center font-mono font-bold whitespace-nowrap">
-                    <span className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] text-gray-300">
+                  <td className="p-3 text-center font-mono font-medium whitespace-nowrap">
+                    <span className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[11px] text-gray-300">
                       {p.level ?? '—'}
                     </span>
                   </td>
@@ -561,16 +561,16 @@ export default function LiveMatchDetail({
                   {/* KDA */}
                   <td className="p-3 text-center font-mono whitespace-nowrap">
                     <div className="inline-flex items-center justify-center gap-1 font-mono text-xs">
-                      <span className="font-bold text-white min-w-[18px] text-right">{p.kills ?? '—'}</span>
+                      <span className="font-medium text-white min-w-[18px] text-right">{p.kills ?? '—'}</span>
                       <span className="text-gray-500 font-normal">/</span>
-                      <span className="font-bold text-rose-400 min-w-[18px] text-center">{p.deaths ?? '—'}</span>
+                      <span className="font-medium text-rose-400 min-w-[18px] text-center">{p.deaths ?? '—'}</span>
                       <span className="text-gray-500 font-normal">/</span>
-                      <span className="font-bold text-cyan-400 min-w-[18px] text-left">{p.assists ?? '—'}</span>
+                      <span className="font-medium text-cyan-400 min-w-[18px] text-left">{p.assists ?? '—'}</span>
                     </div>
                   </td>
 
                   {/* Net Worth */}
-                  <td className="p-3 text-right font-mono font-black text-amber-400 whitespace-nowrap">
+                  <td className="p-3 text-right font-mono font-semibold text-amber-400 whitespace-nowrap">
                     {p.net_worth != null ? p.net_worth.toLocaleString() : '—'}
                   </td>
 
@@ -582,14 +582,14 @@ export default function LiveMatchDetail({
                   </td>
 
                   {/* Buybacks usados (dado real, sem estimar disponibilidade de ouro) */}
-                  <td className="p-3 text-center font-mono text-[10px] whitespace-nowrap">
+                  <td className="p-3 text-center font-mono text-[11px] whitespace-nowrap">
                     {p.buybackCount != null ? (
                       p.buybackCount > 0 ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/50 font-extrabold">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/50 font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" /> {p.buybackCount}x usado
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10 font-bold">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10 font-medium">
                           <XCircle className="w-3.5 h-3.5" /> Nenhum
                         </span>
                       )
@@ -599,10 +599,10 @@ export default function LiveMatchDetail({
                   </td>
 
                   {/* GPM / XPM */}
-                  <td className="p-3 text-right font-mono text-[11px] whitespace-nowrap">
-                    <span className="text-amber-400 font-bold">{p.gpm ?? '—'}</span>
+                  <td className="p-3 text-right font-mono text-xs whitespace-nowrap">
+                    <span className="text-amber-400 font-medium">{p.gpm ?? '—'}</span>
                     <span className="text-gray-500 mx-1">/</span>
-                    <span className="text-cyan-400 font-bold">{p.xpm ?? '—'}</span>
+                    <span className="text-cyan-400 font-medium">{p.xpm ?? '—'}</span>
                   </td>
 
                   {/* Itens */}
@@ -628,7 +628,7 @@ export default function LiveMatchDetail({
                       </div>
 
                       {neutralImg && (
-                        <div title="Item Neutro" className="w-5 h-4 rounded bg-amber-500/20 border border-amber-400/60 flex items-center justify-center overflow-hidden">
+                        <div title="Item neutro" className="w-5 h-4 rounded bg-amber-500/20 border border-amber-400/60 flex items-center justify-center overflow-hidden">
                           <img src={neutralImg} alt="" className="w-full h-full object-cover" />
                         </div>
                       )}
@@ -652,7 +652,7 @@ export default function LiveMatchDetail({
           return (
             <div
               key={i}
-              className={`p-2.5 rounded-xl border bg-surface/90 transition-all ${
+              className={`p-2.5 rounded-xl border bg-surface/90 transition-[color,background-color,border-color,opacity,transform] ${
                 isRadiant ? 'border-emerald-500/25' : 'border-rose-500/25'
               }`}
             >
@@ -674,45 +674,45 @@ export default function LiveMatchDetail({
                         alt={hName}
                         className={`w-11 h-7 object-cover rounded border ${
                           isRadiant ? 'border-emerald-400' : 'border-rose-400'
-                        } group-hover:ring-2 group-hover:ring-amber-400/50 transition-all`}
+                        } group-hover:ring-2 group-hover:ring-amber-400/50 transition-[color,background-color,border-color,opacity,transform]`}
                         onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     ) : (
-                      <div className="w-11 h-7 rounded bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-gray-500 font-mono">
+                      <div className="w-11 h-7 rounded bg-white/5 border border-white/10 flex items-center justify-center text-[11px] text-gray-500 font-mono">
                         ?
                       </div>
                     )}
                     {p.level != null && (
-                      <span className="absolute -bottom-1 -right-1 bg-black/90 border border-white/20 text-[9px] font-mono font-bold text-amber-300 px-1 rounded leading-tight">
+                      <span className="absolute -bottom-1 -right-1 bg-black/90 border border-white/20 text-[11px] font-mono font-medium text-amber-300 px-1 rounded leading-tight">
                         L{p.level}
                       </span>
                     )}
                   </div>
                   <div className="min-w-0">
-                    <span className="text-white font-bold text-xs leading-tight break-words line-clamp-2 block">{p.name}</span>
-                    <span className="text-[10px] text-gray-400 leading-tight break-words line-clamp-2 block group-hover:text-amber-400 transition-colors">{hName}</span>
+                    <span className="text-white font-medium text-xs leading-tight break-words line-clamp-2 block">{p.name}</span>
+                    <span className="text-[11px] text-gray-400 leading-tight break-words line-clamp-2 block group-hover:text-amber-400 transition-colors">{hName}</span>
                   </div>
                 </button>
 
                 {/* K / D / A */}
                 <div className="flex flex-col items-end shrink-0">
                   <div className="inline-flex items-center gap-1 font-mono text-xs px-2 py-0.5 rounded bg-black/60 border border-white/10">
-                    <span className="font-bold text-white min-w-[14px] text-right">{p.kills ?? '—'}</span>
+                    <span className="font-medium text-white min-w-[14px] text-right">{p.kills ?? '—'}</span>
                     <span className="text-gray-500">/</span>
-                    <span className="font-bold text-rose-400 min-w-[14px] text-center">{p.deaths ?? '—'}</span>
+                    <span className="font-medium text-rose-400 min-w-[14px] text-center">{p.deaths ?? '—'}</span>
                     <span className="text-gray-500">/</span>
-                    <span className="font-bold text-cyan-400 min-w-[14px] text-left">{p.assists ?? '—'}</span>
+                    <span className="font-medium text-cyan-400 min-w-[14px] text-left">{p.assists ?? '—'}</span>
                   </div>
-                  <span className="text-[8px] font-mono text-gray-500 uppercase mt-0.5">K / D / A</span>
+                  <span className="text-[11px] font-mono text-gray-500 mt-0.5">K / D / A</span>
                 </div>
               </div>
 
               {/* Estatísticas secundárias: Patrimônio Líquido, CS, GPM/XPM */}
               {hasStats && (
-                <div className="grid grid-cols-3 gap-1 pt-2 mt-2 border-t border-white/5 text-[10px] font-mono text-center">
+                <div className="grid grid-cols-3 gap-1 pt-2 mt-2 border-t border-white/5 text-[11px] font-mono text-center">
                   <div className="bg-white/[0.02] p-1 rounded">
-                    <div className="text-gray-500 text-[8px] uppercase">Patrimônio</div>
-                    <div className="text-amber-400 font-bold truncate">
+                    <div className="text-gray-500 text-[11px]">Patrimônio</div>
+                    <div className="text-amber-400 font-medium truncate">
                       {p.net_worth != null
                         ? p.net_worth >= 1000
                           ? `${(p.net_worth / 1000).toFixed(1)}k`
@@ -721,13 +721,13 @@ export default function LiveMatchDetail({
                     </div>
                   </div>
                   <div className="bg-white/[0.02] p-1 rounded">
-                    <div className="text-gray-500 text-[8px] uppercase">CS (LH/DN)</div>
+                    <div className="text-gray-500 text-[11px]">CS (LH/DN)</div>
                     <div className="text-gray-300 font-semibold truncate">
                       {p.last_hits ?? '—'} <span className="text-gray-600">/</span> {p.denies ?? '—'}
                     </div>
                   </div>
                   <div className="bg-white/[0.02] p-1 rounded">
-                    <div className="text-gray-500 text-[8px] uppercase">GPM / XPM</div>
+                    <div className="text-gray-500 text-[11px]">GPM / XPM</div>
                     <div className="text-gray-300 font-semibold truncate">
                       <span className="text-amber-300">{p.gpm ?? '—'}</span>{' '}
                       <span className="text-gray-600">/</span>{' '}
@@ -740,7 +740,7 @@ export default function LiveMatchDetail({
               {/* Itens do Inventário se disponíveis */}
               {p.items && p.items.length > 0 && (
                 <div className="flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-white/5">
-                  <span className="text-[8px] font-mono text-gray-500 uppercase shrink-0">Itens:</span>
+                  <span className="text-[11px] font-mono text-gray-500 shrink-0">Itens:</span>
                   <div className="flex items-center gap-1 overflow-x-auto">
                     {Array.from({ length: 6 }).map((_, itIdx) => {
                       const itId = p.items[itIdx];
@@ -760,7 +760,7 @@ export default function LiveMatchDetail({
                     })}
                     {neutralImg && (
                       <div
-                        title="Item Neutro"
+                        title="Item neutro"
                         className="w-5 h-4 rounded bg-amber-500/20 border border-amber-400/60 flex items-center justify-center overflow-hidden shrink-0 ml-1"
                       >
                         <img src={neutralImg} alt="" className="w-full h-full object-cover" />
@@ -789,8 +789,8 @@ export default function LiveMatchDetail({
         title={`Ver perfil de ${name}`}
       >
         <div className="min-w-0 max-w-full order-2 lg:order-1">
-          <span className="block text-sm sm:text-xl lg:text-3xl font-black text-white leading-tight break-words line-clamp-2 group-hover:text-amber-400 transition-colors">{name}</span>
-          <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest ${isRadiant ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <span className="block text-sm sm:text-xl lg:text-3xl font-semibold text-white leading-tight break-words line-clamp-2 group-hover:text-amber-400 transition-colors">{name}</span>
+          <span className={`text-[11px] sm:text-xs font-medium ${isRadiant ? 'text-emerald-400' : 'text-rose-400'}`}>
             {isRadiant ? 'Radiant' : 'Dire'}
           </span>
         </div>
@@ -800,7 +800,7 @@ export default function LiveMatchDetail({
             ? (matchData?.radiant_team?.team_id || game.team_id_radiant || game.radiant_team_id)
             : (matchData?.dire_team?.team_id || game.team_id_dire || game.dire_team_id)}
           logoUrl={isRadiant ? (matchData?.logoA || logoA) : (matchData?.logoB || logoB)}
-          className="order-1 lg:order-2 w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-black/40 border border-white/10 p-2 shrink-0 group-hover:scale-105 transition-transform"
+          className="order-1 lg:order-2 w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-black/40 border border-white/10 p-2 shrink-0 transition-transform"
         />
       </button>
     );
@@ -810,14 +810,13 @@ export default function LiveMatchDetail({
     <div className="space-y-6">
       {/* CABEÇALHO: STATUS, PLACAR E MAPAS DA SÉRIE */}
       <section className="relative overflow-hidden rounded-3xl border border-rose-500/30 glass-panel p-5 sm:p-8 shadow-2xl">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[480px] h-[240px] rounded-full bg-rose-600/10 blur-3xl pointer-events-none" />
 
-        <div className="relative flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-[11px]">
-          <span className="flex items-center gap-1.5 font-extrabold uppercase tracking-widest text-rose-400 bg-rose-500/20 border border-rose-500/30 px-3 py-1 rounded-full">
+        <div className="relative flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap text-[11px] sm:text-xs">
+          <span className="flex items-center gap-1.5 font-semibold text-rose-400 bg-rose-500/20 border border-rose-500/30 px-3 py-1 rounded-full">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-            Ao Vivo {timeFormatted ? `· ${timeFormatted}` : ''}
+            Ao vivo {timeFormatted ? `· ${timeFormatted}` : ''}
           </span>
-          <span className="text-gray-300 font-bold uppercase tracking-wider bg-surface-2 border border-line px-2.5 py-1 rounded-full">
+          <span className="text-gray-300 font-medium bg-surface-2 border border-line px-2.5 py-1 rounded-full">
             {leagueName} ({formatStr})
           </span>
           {matchData?.spectators > 0 && (
@@ -840,7 +839,7 @@ export default function LiveMatchDetail({
             type="button"
             onClick={() => syncMatchData(true)}
             title="Atualizar dados agora"
-            className="text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center gap-1 transition-all"
+            className="text-emerald-400/90 hover:text-emerald-300 font-mono bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center gap-1 transition-[color,background-color,border-color,opacity,transform]"
           >
             <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} /> {syncing ? 'Sincronizando...' : `Atualizado às ${lastSync}`}
           </button>
@@ -852,20 +851,20 @@ export default function LiveMatchDetail({
 
           <div className="flex flex-col items-center shrink-0">
             {hasScore ? (
-              <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-7 py-2 sm:py-3 rounded-2xl bg-surface-2/90 border border-rose-500/40 font-mono text-3xl sm:text-6xl font-black shadow-lg shadow-rose-500/10">
+              <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-7 py-2 sm:py-3 rounded-2xl bg-surface-2/90 border border-rose-500/40 font-mono text-3xl sm:text-6xl font-semibold">
                 <span className="text-emerald-400">{scoreA}</span>
                 <span className="text-gray-400 text-2xl sm:text-4xl">:</span>
                 <span className="text-rose-400">{scoreB}</span>
               </div>
             ) : (
-              <div className="px-4 py-2 rounded-xl bg-surface-2 border border-line font-mono text-sm font-bold text-gray-400">
+              <div className="px-4 py-2 rounded-xl bg-surface-2 border border-line font-mono text-sm font-medium text-gray-400">
                 Aguardando dados
               </div>
             )}
-            <span className="text-[9px] sm:text-[10px] text-gray-400 font-mono mt-1.5 uppercase tracking-wider">Placar de abates</span>
+            <span className="text-[11px] sm:text-[11px] text-gray-400 font-mono mt-1.5">Placar de abates</span>
 
             {matchData?.radiant_lead !== undefined && matchData?.radiant_lead !== null && matchData?.radiant_lead !== 0 && (
-              <div className={`mt-2 text-[10px] sm:text-xs font-mono font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border ${
+              <div className={`mt-2 text-[11px] sm:text-xs font-mono font-medium px-3 py-1 rounded-full flex items-center gap-1.5 border ${
                 matchData.radiant_lead > 0
                   ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
                   : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
@@ -885,7 +884,7 @@ export default function LiveMatchDetail({
               href={game.streamUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-extrabold text-xs transition-all shadow-md"
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-semibold text-xs transition-[color,background-color,border-color,opacity,transform] shadow-md"
             >
               <Tv className="w-4 h-4" /> Assistir transmissão ao vivo
             </a>
@@ -899,23 +898,23 @@ export default function LiveMatchDetail({
               <button
                 key={idx}
                 onClick={() => handleSelectMap(m.match_id, idx)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono uppercase transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono transition-[color,background-color,border-color,opacity,transform] ${
                   activeMapIndex === idx
-                    ? 'bg-amber-500 text-on-accent shadow-lg shadow-amber-500/25 font-black'
+                    ? 'bg-amber-500 text-on-accent font-semibold'
                     : 'bg-surface-2 text-gray-300 hover:text-white border border-line hover:border-amber-500/30'
                 }`}
               >
                 <Swords className="w-3.5 h-3.5" />
-                <span className="font-extrabold">Jogo {m.mapNumber}</span>
+                <span className="font-semibold">Jogo {m.mapNumber}</span>
                 {m.radiant_score !== undefined && m.dire_score !== undefined && (
-                  <span className="font-black">({m.radiant_score} : {m.dire_score})</span>
+                  <span className="font-semibold">({m.radiant_score} : {m.dire_score})</span>
                 )}
                 {m.is_live ? (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500/30 text-rose-300 text-[9px] font-black border border-rose-500/50">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500/30 text-rose-300 text-[11px] font-semibold border border-rose-500/50">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" /> AO VIVO
                   </span>
                 ) : m.is_finished ? (
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold border ${
+                  <span className={`text-[11px] px-1.5 py-0.5 rounded font-medium border ${
                     activeMapIndex === idx
                       ? 'bg-black/20 text-on-accent border-black/30'
                       : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
@@ -937,7 +936,7 @@ export default function LiveMatchDetail({
       ) : !matchData ? (
         <div className="py-16 flex flex-col items-center justify-center gap-3 text-center text-gray-400 rounded-2xl border border-line bg-surface">
           <Radio className="w-10 h-10 text-amber-500/40" />
-          <span className="text-sm font-bold text-white">Ainda não há estatísticas oficiais publicadas para esta partida</span>
+          <span className="text-sm font-medium text-white">Ainda não há estatísticas oficiais publicadas para esta partida</span>
           <span className="text-xs text-gray-500 max-w-md">
             Assim que a OpenDota ou a Valve publicarem placar, torres e jogadores, eles aparecem aqui automaticamente (nova checagem a cada 20s).
           </span>
@@ -977,16 +976,16 @@ export default function LiveMatchDetail({
               {(radiantStructures.hasData || direStructures.hasData) ? (
                 <div className="bg-surface-2/80 border border-white/10 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-amber-400">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
                       <Castle className="w-4 h-4 text-amber-400" /> Torres & Barracas
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-mono">
-                      <span className="text-emerald-400 font-bold">{radiantAliveCount}/18</span>
+                    <div className="flex items-center gap-2 text-[11px] font-mono">
+                      <span className="text-emerald-400 font-medium">{radiantAliveCount}/18</span>
                       <span className="text-gray-500">·</span>
-                      <span className="text-rose-400 font-bold">{direAliveCount}/18</span>
+                      <span className="text-rose-400 font-medium">{direAliveCount}/18</span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2 text-[10px]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2 text-[11px]">
                     {renderStructureColumns(radiantStructures, teamAName, true, radiantAliveCount)}
                     {renderStructureColumns(direStructures, teamBName, false, direAliveCount)}
                   </div>

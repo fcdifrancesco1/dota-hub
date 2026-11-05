@@ -53,7 +53,7 @@ export default function HeroMetaView({ onSelectHero }) {
   const positionFilter = /^pos\d$/.test(selectedRole);
 
   const rolesList = [
-    { id: 'all', label: 'Todas as Funções' },
+    { id: 'all', label: 'Todas as funções' },
     { id: 'pos1', label: 'Carry (Pos 1)' },
     { id: 'pos2', label: 'Midlane (Pos 2)' },
     { id: 'pos3', label: 'Offlane (Pos 3)' },
@@ -65,7 +65,7 @@ export default function HeroMetaView({ onSelectHero }) {
   ];
 
   const attrList = [
-    { id: 'all', label: 'Todos Atributos' },
+    { id: 'all', label: 'Todos atributos' },
     { id: 'Força', label: 'Força' },
     { id: 'Agilidade', label: 'Agilidade' },
     { id: 'Inteligência', label: 'Inteligência' },
@@ -113,11 +113,11 @@ export default function HeroMetaView({ onSelectHero }) {
       {/* HEADER DA ABA */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-amber-500">
+          <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-amber-500">
             <BarChart3 className="w-4 h-4" />
             Meta &amp; Tier List Competitiva
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mt-1">
             Estatísticas do Patch Atual
           </h1>
           <p className="text-xs text-gray-400 mt-1">
@@ -131,14 +131,14 @@ export default function HeroMetaView({ onSelectHero }) {
         {topWinRate && (
           <div
             onClick={() => goToHero(topWinRate.id)}
-            className="tilt-card glass-panel border border-line hover:border-emerald-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
+            className="tilt-card glass-panel border border-line hover:border-emerald-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer transition-[color,background-color,border-color,opacity,transform] group"
             title={`Clique para ver detalhes de ${topWinRate.name}`}
           >
-            <img src={topWinRate.img} alt={topWinRate.name} className="w-12 h-12 rounded-xl object-cover border border-emerald-500/40 shadow-sm group-hover:ring-2 group-hover:ring-emerald-400/50 transition-all" />
+            <img src={topWinRate.img} alt={topWinRate.name} className="w-12 h-12 rounded-xl object-cover border border-emerald-500/40 shadow-sm group-hover:ring-2 group-hover:ring-emerald-400/50 transition-[color,background-color,border-color,opacity,transform]" />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-emerald-500 block">Maior Winrate Pro</span>
-              <strong className="text-sm font-black text-white truncate block group-hover:text-emerald-400 transition-colors">{topWinRate.name}</strong>
-              <span className="text-xs font-mono text-emerald-500 font-bold">{topWinRate.proWinRate}% WR</span>
+              <span className="text-[11px] font-medium text-emerald-500 block">Maior winrate pro</span>
+              <strong className="text-sm font-semibold text-white truncate block group-hover:text-emerald-400 transition-colors">{topWinRate.name}</strong>
+              <span className="text-xs font-mono text-emerald-500 font-medium">{topWinRate.proWinRate}% WR</span>
             </div>
           </div>
         )}
@@ -146,14 +146,14 @@ export default function HeroMetaView({ onSelectHero }) {
         {mostPicked && (
           <div
             onClick={() => goToHero(mostPicked.id)}
-            className="tilt-card glass-panel border border-line hover:border-blue-500/50 dark:hover:border-amber-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
+            className="tilt-card glass-panel border border-line hover:border-blue-500/50 dark:hover:border-amber-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer transition-[color,background-color,border-color,opacity,transform] group"
             title={`Clique para ver detalhes de ${mostPicked.name}`}
           >
-            <img src={mostPicked.img} alt={mostPicked.name} className="w-12 h-12 rounded-xl object-cover border border-blue-500/40 shadow-sm group-hover:ring-2 group-hover:ring-amber-400/50 transition-all" />
+            <img src={mostPicked.img} alt={mostPicked.name} className="w-12 h-12 rounded-xl object-cover border border-blue-500/40 shadow-sm group-hover:ring-2 group-hover:ring-amber-400/50 transition-[color,background-color,border-color,opacity,transform]" />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-amber-500 block">Mais Escolhido Pro</span>
-              <strong className="text-sm font-black text-white truncate block group-hover:text-amber-400 transition-colors">{mostPicked.name}</strong>
-              <span className="text-xs font-mono text-blue-600 dark:text-amber-400 font-bold">{mostPicked.proPick} Picks</span>
+              <span className="text-[11px] font-medium text-blue-600 dark:text-amber-500 block">Mais escolhido pro</span>
+              <strong className="text-sm font-semibold text-white truncate block group-hover:text-amber-400 transition-colors">{mostPicked.name}</strong>
+              <span className="text-xs font-mono text-blue-600 dark:text-amber-400 font-medium">{mostPicked.proPick} Picks</span>
             </div>
           </div>
         )}
@@ -161,14 +161,14 @@ export default function HeroMetaView({ onSelectHero }) {
         {mostBanned && (
           <div
             onClick={() => goToHero(mostBanned.id)}
-            className="tilt-card glass-panel border border-line hover:border-rose-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer hover:scale-[1.02] transition-all group"
+            className="tilt-card glass-panel border border-line hover:border-rose-500/50 rounded-2xl p-4 flex items-center gap-3.5 shadow-md cursor-pointer transition-[color,background-color,border-color,opacity,transform] group"
             title={`Clique para ver detalhes de ${mostBanned.name}`}
           >
-            <img src={mostBanned.img} alt={mostBanned.name} className="w-12 h-12 rounded-xl object-cover border border-rose-500/40 shadow-sm group-hover:ring-2 group-hover:ring-rose-400/50 transition-all" />
+            <img src={mostBanned.img} alt={mostBanned.name} className="w-12 h-12 rounded-xl object-cover border border-rose-500/40 shadow-sm group-hover:ring-2 group-hover:ring-rose-400/50 transition-[color,background-color,border-color,opacity,transform]" />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-rose-500 block">Mais Banido Pro</span>
-              <strong className="text-sm font-black text-white truncate block group-hover:text-rose-400 transition-colors">{mostBanned.name}</strong>
-              <span className="text-xs font-mono text-rose-500 font-bold">{mostBanned.proBan} Bans</span>
+              <span className="text-[11px] font-medium text-rose-500 block">Mais banido pro</span>
+              <strong className="text-sm font-semibold text-white truncate block group-hover:text-rose-400 transition-colors">{mostBanned.name}</strong>
+              <span className="text-xs font-mono text-rose-500 font-medium">{mostBanned.proBan} Bans</span>
             </div>
           </div>
         )}
@@ -183,7 +183,7 @@ export default function HeroMetaView({ onSelectHero }) {
             <button
               key={r.id}
               onClick={() => setSelectedRole(r.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                 selectedRole === r.id
                   ? 'bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black shadow-md'
                   : 'bg-surface-2 text-gray-400 hover:text-white hover:bg-surface-3 border border-line'
@@ -213,7 +213,7 @@ export default function HeroMetaView({ onSelectHero }) {
             <button
               key={a.id}
               onClick={() => setSelectedAttr(a.id)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
                 selectedAttr === a.id
                   ? 'bg-blue-600 text-on-accent dark:bg-white/20 dark:text-white shadow-sm'
                   : 'text-gray-400 hover:text-white'
@@ -229,7 +229,7 @@ export default function HeroMetaView({ onSelectHero }) {
       <div className="flex items-center justify-between text-xs text-blue-600 dark:text-amber-300 font-mono bg-blue-500/10 dark:bg-amber-500/10 border border-blue-500/30 dark:border-amber-500/30 px-4 py-2.5 rounded-2xl shadow-sm">
         <span className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-blue-600 dark:text-amber-400 shrink-0" />
-          <span>Clique em qualquer herói para abrir a <strong>Enciclopédia Completa</strong>: Habilidades em PT-BR, Upgrades de Cetro/Shard, Talentos e Counters!</span>
+          <span>Clique em qualquer herói para abrir a <strong>Enciclopédia completa</strong>: Habilidades em PT-BR, Upgrades de Cetro/Shard, Talentos e Counters!</span>
         </span>
       </div>
 
@@ -238,24 +238,24 @@ export default function HeroMetaView({ onSelectHero }) {
         <SkeletonTable rows={10} cols={6} />
       ) : positionFilter && !positions ? (
         <div className="rounded-2xl border border-line glass-panel p-10 text-center">
-          <p className="text-sm font-bold text-white">As posições dos heróis não estão disponíveis agora.</p>
+          <p className="text-sm font-medium text-white">As posições dos heróis não estão disponíveis agora.</p>
           <p className="text-xs text-gray-400 mt-1.5">Elas são calculadas com as partidas profissionais da OpenDota, que não está respondendo. Tente de novo em alguns minutos.</p>
           <button
             type="button"
             onClick={() => setAttempt((n) => n + 1)}
-            className="mt-4 px-4 py-2 rounded-xl bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black text-xs font-black uppercase tracking-wider hover:opacity-90 shadow-md"
+            className="mt-4 px-4 py-2 rounded-xl bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black text-xs font-semibold hover:opacity-90 shadow-md"
           >
             Tentar novamente
           </button>
         </div>
       ) : heroes.length === 0 ? (
         <div className="rounded-2xl border border-line glass-panel p-10 text-center">
-          <p className="text-sm font-bold text-white">Não foi possível carregar as estatísticas dos heróis agora.</p>
+          <p className="text-sm font-medium text-white">Não foi possível carregar as estatísticas dos heróis agora.</p>
           <p className="text-xs text-gray-400 mt-1.5">A OpenDota, fonte desses dados, não está respondendo. Tente de novo em alguns minutos.</p>
           <button
             type="button"
             onClick={() => setAttempt((n) => n + 1)}
-            className="mt-4 px-4 py-2 rounded-xl bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black text-xs font-black uppercase tracking-wider hover:opacity-90 shadow-md"
+            className="mt-4 px-4 py-2 rounded-xl bg-blue-600 text-on-accent dark:bg-amber-500 dark:text-black text-xs font-semibold hover:opacity-90 shadow-md"
           >
             Tentar novamente
           </button>
@@ -263,7 +263,7 @@ export default function HeroMetaView({ onSelectHero }) {
       ) : (
         <div className="overflow-x-auto rounded-3xl border border-line glass-panel shadow-xl">
           <table className="w-full text-left text-xs border-collapse min-w-[840px]">
-            <thead className="bg-surface-2 text-gray-400 font-mono text-[10px] uppercase border-b border-line">
+            <thead className="bg-surface-2 text-gray-400 font-mono text-[11px] border-b border-line">
               <tr>
                 <th
                   onClick={() => {
@@ -277,7 +277,7 @@ export default function HeroMetaView({ onSelectHero }) {
                   </div>
                 </th>
                 <th className="p-3.5 whitespace-nowrap">Herói</th>
-                <th className="p-3.5 whitespace-nowrap">Atributo / Função</th>
+                <th className="p-3.5 whitespace-nowrap">Atributo / função</th>
                 <th
                   onClick={() => {
                     if (sortBy === 'proWinRate') setSortAsc(!sortAsc);
@@ -321,7 +321,7 @@ export default function HeroMetaView({ onSelectHero }) {
                   >
                     {/* Badge do Tier */}
                     <td className="p-3.5 pl-5 whitespace-nowrap">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-xl font-black text-xs font-mono border ${tierStyles[h.tier] || tierStyles['B']}`}>
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-xl font-semibold text-xs font-mono border ${tierStyles[h.tier] || tierStyles['B']}`}>
                         {h.tier}
                       </span>
                     </td>
@@ -338,9 +338,9 @@ export default function HeroMetaView({ onSelectHero }) {
                         <div>
                           <div className="flex items-center gap-1.5">
                             <strong className="text-white text-xs block group-hover:text-blue-600 dark:group-hover:text-amber-400 transition-colors">{h.name}</strong>
-                            <span className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 text-[10px] text-blue-600 dark:text-amber-400 font-mono transition-opacity">→</span>
+                            <span className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 text-[11px] text-blue-600 dark:text-amber-400 font-mono transition-opacity">→</span>
                           </div>
-                          <span className="text-[10px] text-gray-400">{h.attackType}</span>
+                          <span className="text-[11px] text-gray-400">{h.attackType}</span>
                         </div>
                       </div>
                     </td>
@@ -348,7 +348,7 @@ export default function HeroMetaView({ onSelectHero }) {
                     {/* Atributo e Funções */}
                     <td className="p-3.5 whitespace-nowrap">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">
+                        <span className="text-[11px] font-medium text-gray-400 bg-surface-2 px-2 py-0.5 rounded-lg border border-line">
                           {h.primaryAttr}
                         </span>
                         {heroPositions(h).length > 0 ? (
@@ -356,7 +356,7 @@ export default function HeroMetaView({ onSelectHero }) {
                             {heroPositions(h).map((x) => (
                               <span
                                 key={x.n}
-                                className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
+                                className={`text-[11px] font-mono font-medium px-1.5 py-0.5 rounded-md ${
                                   selectedRole === `pos${x.n}` ? 'bg-blue-500/20 text-blue-600 dark:text-amber-400' : 'bg-surface-2 text-gray-400 border border-line'
                                 }`}
                               >
@@ -365,7 +365,7 @@ export default function HeroMetaView({ onSelectHero }) {
                             ))}
                           </div>
                         ) : (
-                          <div className="text-[10px] text-gray-400 truncate max-w-[220px]">
+                          <div className="text-[11px] text-gray-400 truncate max-w-[220px]">
                             {h.roles.slice(0, 3).join(', ')}
                           </div>
                         )}
@@ -374,16 +374,16 @@ export default function HeroMetaView({ onSelectHero }) {
 
                     {/* Winrate Pro */}
                     <td className="p-3.5 text-center font-mono whitespace-nowrap">
-                      <span className={`font-black text-xs ${h.proWinRate >= 52 ? 'text-emerald-500' : h.proWinRate >= 48 ? 'text-amber-500' : 'text-rose-500'}`}>
+                      <span className={`font-semibold text-xs ${h.proWinRate >= 52 ? 'text-emerald-500' : h.proWinRate >= 48 ? 'text-amber-500' : 'text-rose-500'}`}>
                         {h.proPick > 0 ? `${h.proWinRate}%` : '—'}
                       </span>
                     </td>
 
                     {/* Picks / Bans */}
                     <td className="p-3.5 text-center font-mono text-gray-400 whitespace-nowrap">
-                      <span className="text-white font-bold">{h.proPick}</span>
+                      <span className="text-white font-medium">{h.proPick}</span>
                       <span className="text-gray-400 mx-1">/</span>
-                      <span className="text-rose-500 font-bold">{h.proBan}</span>
+                      <span className="text-rose-500 font-medium">{h.proBan}</span>
                     </td>
 
                   </tr>

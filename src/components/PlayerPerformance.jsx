@@ -26,11 +26,11 @@ export function RatingBadge({ rating, size = 'lg' }) {
           <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" className={color} strokeWidth="3"
             strokeDasharray={`${rating.overall} 100`} strokeLinecap="round" />
         </svg>
-        <span className={`absolute inset-0 flex items-center justify-center font-mono font-black ${color} ${big ? 'text-3xl' : 'text-sm'}`}>
+        <span className={`absolute inset-0 flex items-center justify-center font-mono font-semibold ${color} ${big ? 'text-3xl' : 'text-sm'}`}>
           {rating.overall}
         </span>
       </div>
-      {big && <span className={`mt-1 text-xs font-black uppercase tracking-wider ${color}`}>{rating.label}</span>}
+      {big && <span className={`mt-1 text-xs font-semibold ${color}`}>{rating.label}</span>}
     </div>
   );
 }
@@ -41,7 +41,7 @@ export function TopBadge({ pct }) {
   const tone = pct >= 75 ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30'
     : pct >= 40 ? 'bg-surface-2 text-gray-400 border-line'
     : 'bg-rose-500/10 text-rose-500 border-rose-500/30';
-  return <span className={`px-1.5 py-px rounded-md border text-[10px] font-black whitespace-nowrap ${tone}`}>{topLabel(pct)}</span>;
+  return <span className={`px-1.5 py-px rounded-md border text-[11px] font-semibold whitespace-nowrap ${tone}`}>{topLabel(pct)}</span>;
 }
 
 /**
@@ -64,8 +64,8 @@ export default function PlayerPerformance({ accountId, position, benchmarks }) {
   const pos = position || row?.position || null;
   const rating = row ? performanceRating(benchmarks, pos, row) : null;
 
-  const toggle = (active) => `px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-    active ? 'bg-amber-500 text-on-accent font-black shadow-sm' : 'text-gray-400 hover:text-white'
+  const toggle = (active) => `px-3 py-1.5 rounded-lg text-xs font-medium transition-[color,background-color,border-color,opacity,transform] cursor-pointer ${
+    active ? 'bg-amber-500 text-on-accent font-semibold shadow-sm' : 'text-gray-400 hover:text-white'
   }`;
 
   return (
@@ -74,14 +74,14 @@ export default function PlayerPerformance({ accountId, position, benchmarks }) {
       <section className="glass-panel border border-line rounded-3xl p-6 shadow-xl">
         <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-base font-black text-white uppercase tracking-wider">Nota de desempenho</h2>
+            <h2 className="text-base font-semibold text-white">Nota de desempenho</h2>
             <p className="text-xs text-gray-400 mt-1">
               Comparado com os profissionais da mesma posição nos jogos oficiais dos últimos 90 dias (0 a 100).
             </p>
           </div>
           <Link
             to={`/jogadores/comparar?a=${accountId}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-line text-xs font-bold text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-line text-xs font-medium text-gray-400 hover:text-white transition-colors"
           >
             <GitCompare className="w-3.5 h-3.5" /> Comparar com outro jogador
           </Link>
@@ -96,7 +96,7 @@ export default function PlayerPerformance({ accountId, position, benchmarks }) {
             <ul className="space-y-2.5">
               {rating.areas.map((a) => (
                 <li key={a.id}>
-                  <div className="flex justify-between text-xs font-bold">
+                  <div className="flex justify-between text-xs font-medium">
                     <span className="text-gray-400">{a.label}</span>
                     <span className="font-mono text-white">{a.score}</span>
                   </div>
@@ -105,7 +105,7 @@ export default function PlayerPerformance({ accountId, position, benchmarks }) {
                   </div>
                 </li>
               ))}
-              <li className="text-[11px] text-gray-500 pt-1">Base: {row.games} jogos oficiais na Pos {pos}.</li>
+              <li className="text-xs text-gray-500 pt-1">Base: {row.games} jogos oficiais na Pos {pos}.</li>
             </ul>
           </div>
         ) : (
@@ -118,7 +118,7 @@ export default function PlayerPerformance({ accountId, position, benchmarks }) {
       {/* MÉDIAS POR PERÍODO */}
       <section className="glass-panel border border-line rounded-3xl p-6 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <h2 className="text-base font-black text-white uppercase tracking-wider">Médias por jogo</h2>
+          <h2 className="text-base font-semibold text-white">Médias por jogo</h2>
           <div className="flex flex-wrap gap-2">
             <div className="flex bg-surface-2 p-1 rounded-xl border border-line">
               {PERIODS.map((p) => (
@@ -153,12 +153,12 @@ export default function PlayerPerformance({ accountId, position, benchmarks }) {
                 return (
                   <div key={m} className="rounded-2xl bg-surface-2/60 border border-line p-3.5">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">{meta.label}</span>
+                      <span className="text-[11px] font-medium text-gray-400">{meta.label}</span>
                       <TopBadge pct={pct} />
                     </div>
-                    <div className="text-xl font-black font-mono text-white mt-1">{meta.fmt(value)}</div>
+                    <div className="text-xl font-semibold font-mono text-white mt-1">{meta.fmt(value)}</div>
                     {diff != null && Math.abs(diff) > 0.05 && (
-                      <div className={`text-[11px] font-bold mt-0.5 ${better ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      <div className={`text-xs font-medium mt-0.5 ${better ? 'text-emerald-500' : 'text-rose-500'}`}>
                         {diff > 0 ? '▲' : '▼'} {meta.fmt(Math.abs(diff))} vs média
                       </div>
                     )}
