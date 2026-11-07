@@ -1,11 +1,11 @@
 import React, { createContext, useContext } from 'react';
 
-// O site só tem o tema claro (o index.html já marca data-theme="light").
+// O site usa o tema escuro, no estilo do cliente do Dota 2 (o index.html marca data-theme="dark").
 // O contexto continua existindo para os componentes que leem `theme`.
-const ThemeContext = createContext({ theme: 'light' });
+const ThemeContext = createContext({ theme: 'dark' });
 
 export function ThemeProvider({ children }) {
-  return <ThemeContext.Provider value={{ theme: 'light' }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme: 'dark' }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

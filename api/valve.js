@@ -1,10 +1,19 @@
+// Feeds públicos da Valve (dota2.com/datafeed), em português, repassados por aqui porque
+// o site da Valve não libera CORS: ficha do herói, lista de heróis, lista e ficha de itens
+const DATAFEEDS = {
+  herodata: (q) => `herodata?hero_id=${encodeURIComponent(q.hero_id || '8')}`,
+  herolist: () => 'herolist',
+  itemlist: () => 'itemlist',
+  itemdata: (q) => `itemdata?item_id=${encodeURIComponent(q.item_id || '1')}`
+};
+
 export default async function handler(req, res) {
   const type = req.query.type || (req.query.hero_id ? 'herodata' : 'leaderboard');
 
-  if (type === 'herodata' || req.query.hero_id) {
-    const heroId = req.query.hero_id || '8';
+  if (DATAFEEDS[type] || req.query.hero_id) {
+    const feed = (DATAFEEDS[type] || DATAFEEDS.herodata)(req.query);
     const language = req.query.language || 'brazilian';
-    const url = `https://www.dota2.com/datafeed/herodata?language=${encodeURIComponent(language)}&hero_id=${encodeURIComponent(heroId)}`;
+    const url = `https://www.dota2.com/datafeed/${feed}${feed.includes('?') ? '&' : '?'}language=${encodeURIComponent(language)}`;
 
     try {
       const response = await fetch(url, {

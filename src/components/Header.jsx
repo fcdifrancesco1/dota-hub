@@ -11,7 +11,8 @@ import {
   Lock,
   Menu,
   X,
-  RefreshCw
+  RefreshCw,
+  Package
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -45,14 +46,15 @@ export default function Header() {
     { to: '/partidas', label: 'Partidas', icon: Swords },
     { to: '/times', label: 'Times', icon: Shield },
     { to: '/herois', label: 'Heróis', icon: Sparkles },
+    { to: '/itens', label: 'Itens', icon: Package },
     { to: '/perfil', label: 'Perfil', icon: User },
     { to: '/admin', label: 'Admin', icon: Lock }
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-50 glass-panel border-b border-line transition-[color,background-color,border-color,opacity,transform]">
-        <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-50 border-b border-black/60 shadow-[0_1px_0_rgba(255,255,255,0.04)]" style={{ background: 'linear-gradient(180deg, #1E232B, #14181E)' }}>
+        <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
           
           {/* LOGO & BRAND: volta para o hub HanG0V3R (a página inicial do Dota fica em "Início") */}
           <a
@@ -67,15 +69,14 @@ export default function Header() {
               height="44"
               className="w-11 h-11 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition-transform"
             />
-            <span className="text-base sm:text-lg font-semibold text-white leading-tight font-serif">
+            <span className="dota-tab !text-white text-sm sm:text-base">
               Dota
             </span>
           </a>
 
           {/* DESKTOP NAVIGATION */}
-          <nav className="hidden xl:flex items-center gap-1 bg-surface-2 px-2 py-1.5 rounded-2xl border border-line">
+          <nav className="hidden xl:flex items-stretch self-stretch">
             {navLinks.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.to || 
                 (item.to !== '/' && location.pathname.startsWith(item.to));
 
@@ -83,13 +84,10 @@ export default function Header() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-[color,background-color,border-color,opacity,transform] ${
-                    isActive
-                      ? 'bg-blue-600 text-on-accent font-semibold'
-                      : 'text-gray-400 hover:text-white hover:bg-surface-3'
+                  className={`dota-tab relative flex items-center gap-2 px-4 text-[13px] whitespace-nowrap border-l border-white/[0.06] first:border-l-0 ${
+                    isActive ? 'is-active bg-white/[0.06] shadow-[inset_0_-2px_0_#C9A24A]' : ''
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-on-accent' : 'text-blue-600 dark:text-amber-400'}`} />
                   <span>{item.label}</span>
 
                   {/* Badge Ao Vivo */}
@@ -167,12 +165,12 @@ export default function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
                         isActive
-                          ? 'bg-blue-600 text-on-accent font-semibold'
+                          ? 'bg-white/10 text-white font-semibold'
                           : 'text-gray-400 hover:text-white hover:bg-surface-2'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-on-accent' : 'text-blue-600 dark:text-amber-400'}`} />
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-gray-500'}`} />
                         <span>{item.label}</span>
                       </div>
                       {item.badge > 0 && <LiveBadge count={item.badge} />}

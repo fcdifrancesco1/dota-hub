@@ -17,6 +17,7 @@ const MatchesPage = lazy(() => import('./pages/MatchesPage'));
 const MatchDetailPage = lazy(() => import('./pages/MatchDetailPage'));
 const HeroesPage = lazy(() => import('./pages/HeroesPage'));
 const HeroDetailPage = lazy(() => import('./pages/HeroDetailPage'));
+const ItemsPage = lazy(() => import('./pages/ItemsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const TeamPage = lazy(() => import('./pages/TeamPage'));
@@ -72,6 +73,7 @@ function AppContent() {
             <Route path="/players/:id" element={<PlayerDetailPage />} />
             <Route path="/herois" element={<HeroesPage />} />
             <Route path="/herois/:id" element={<HeroDetailPage />} />
+            <Route path="/itens" element={<ItemsPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPage />} />
             {/* Fallback route */}

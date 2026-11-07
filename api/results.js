@@ -335,6 +335,7 @@ async function handleSitemap(res) {
     ['/campeonatos', 'daily', '0.9'],
     ['/times', 'daily', '0.8'],
     ['/herois', 'daily', '0.8'],
+    ['/itens', 'weekly', '0.7'],
     ...Object.keys(heroes || {}).map((hid) => [`/herois/${hid}`, 'weekly', '0.6']),
     ...(Array.isArray(teams) ? teams : []).slice(0, 100).map((t) => [`/times/${t.team_id}`, 'weekly', '0.6'])
   ];

@@ -99,7 +99,7 @@ export default function RankingsCard() {
               aria-selected={view === id}
               onClick={() => choose(id)}
               className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                view === id ? 'bg-blue-600 text-on-accent shadow-sm' : 'text-gray-400 hover:text-white hover:bg-surface-3'
+                view === id ? 'bg-amber-500 text-black shadow-sm' : 'text-gray-400 hover:text-white hover:bg-surface-3'
               }`}
             >
               <Icon className="w-3.5 h-3.5" /> {label}

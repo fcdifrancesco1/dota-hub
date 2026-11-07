@@ -2229,7 +2229,7 @@ function resolveTalentPT(valveTalent, valveAbilities, openDotaDname) {
 
 export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
   if (!heroId) return null;
-  const cacheKey = `hero_full_details_ptbr_v3_${heroId}`;
+  const cacheKey = `hero_full_details_ptbr_v4_${heroId}`;
   const cached = getCached(cacheKey, 60 * 60 * 1000);
   if (cached) return cached;
 
@@ -2424,8 +2424,27 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
       damage: extractPercentile('hero_damage_per_min')
     };
 
+    // Ficha do herói no nível 1 (a mesma da tela do herói no cliente)
+    const sheet = valveHero ? {
+      complexity: valveHero.complexity,
+      str: [valveHero.str_base, valveHero.str_gain],
+      agi: [valveHero.agi_base, valveHero.agi_gain],
+      int: [valveHero.int_base, valveHero.int_gain],
+      damage: [valveHero.damage_min, valveHero.damage_max],
+      armor: valveHero.armor,
+      attackRate: valveHero.attack_rate,
+      attackRange: valveHero.attack_range,
+      moveSpeed: valveHero.movement_speed,
+      magicResist: valveHero.magic_resistance,
+      health: [valveHero.max_health, valveHero.health_regen],
+      mana: [valveHero.max_mana, valveHero.mana_regen],
+      hype: cleanValveAbilityText(valveHero.hype_loc),
+      npe: valveHero.npe_desc_loc || ''
+    } : null;
+
     const result = {
       hero_id: heroId,
+      sheet,
       abilities: abilitiesList,
       aghs: {
         has_scepter: aghsData.has_scepter ?? true,

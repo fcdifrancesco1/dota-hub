@@ -63,7 +63,7 @@ export default function NewsPanel() {
             type="button"
             onClick={() => setTab(id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] ${
-              tab === id ? 'bg-blue-600 text-on-accent' : 'text-gray-400 hover:text-white hover:bg-surface-2'
+              tab === id ? 'bg-amber-500 text-black' : 'text-gray-400 hover:text-white hover:bg-surface-2'
             }`}
           >
             <Icon className="w-3.5 h-3.5" /> {label}

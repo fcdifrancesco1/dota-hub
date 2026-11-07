@@ -20,12 +20,12 @@ const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '9
 // Tokens semânticos de superfície (substituem os hex fixos como bg-[#0C0E14])
 const SURFACE_TOKENS = {
   //             escuro       claro
-  canvas:      ['#0A0C10', '#FBF7F0'], // fundo da página Pearl/Pergaminho no claro
-  surface:     ['#0C0E14', '#FFFFFF'], // cards
-  'surface-2': ['#141824', '#F4F6F9'], // painéis internos, inputs, cabeçalhos de tabela
-  'surface-3': ['#1C2230', '#EAEFF5'], // hover / elevação
-  line:        ['#212838', '#E2E8F0'], // bordas
-  'line-strong': ['#262F44', '#CBD5E1'],
+  canvas:      ['#0B0E12', '#FBF7F0'], // fundo da página (grafite azulado do cliente do Dota)
+  surface:     ['#12171D', '#FFFFFF'], // cards
+  'surface-2': ['#1A2028', '#F4F6F9'], // painéis internos, inputs, cabeçalhos de tabela
+  'surface-3': ['#232A34', '#EAEFF5'], // hover / elevação
+  line:        ['#2A323D', '#E2E8F0'], // bordas
+  'line-strong': ['#3A4450', '#CBD5E1'],
   'on-accent': ['#FFFFFF', '#FFFFFF'] // texto sobre preenchimento colorido (vermelho, roxo...)
 };
 

@@ -116,7 +116,7 @@ export default function AnimatedHeroCard() {
                 onClick={() => handleSelectHero(h)}
                 title={position ? `Pos ${position.n} · ${position.label}` : undefined}
                 className={`px-2.5 py-1 rounded-lg transition-[color,background-color,border-color,opacity,transform] ${
-                  selectedId === h.id ? 'bg-blue-600 text-on-accent shadow-sm font-semibold' : 'text-gray-400 hover:text-white hover:bg-surface-3'
+                  selectedId === h.id ? 'bg-amber-500 text-black shadow-sm font-semibold' : 'text-gray-400 hover:text-white hover:bg-surface-3'
                 }`}
               >
                 {position && <span className="opacity-70 mr-1">{position.n}</span>}

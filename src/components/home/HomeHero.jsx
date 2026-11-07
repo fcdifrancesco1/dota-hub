@@ -129,7 +129,7 @@ export default function HomeHero() {
             ) : (
               <Link
                 to="/ao-vivo"
-                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-on-accent font-semibold text-xs transition-[color,background-color,border-color,opacity,transform]"
+                className="btn-dota flex items-center gap-2.5 px-6 py-3.5 rounded text-xs"
               >
                 <Radio className="w-4 h-4 text-on-accent" />
                 <span>Central ao vivo</span>
