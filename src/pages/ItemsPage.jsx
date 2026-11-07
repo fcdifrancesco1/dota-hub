@@ -147,6 +147,7 @@ function ItemDetails({ item, byName, onSelect }) {
   const { constants } = useApp();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [attempt, setAttempt] = useState(0); // muda para buscar de novo após uma falha
 
   useEffect(() => {
     if (!item) return undefined;
@@ -156,13 +157,18 @@ function ItemDetails({ item, byName, onSelect }) {
       if (!cancelled) { setData(d); setLoading(false); }
     });
     return () => { cancelled = true; };
-  }, [item]);
+  }, [item, attempt]);
 
   if (!item) return <p className="text-xs text-gray-400 text-center py-8">Escolha um item.</p>;
   if (loading || !data) {
     return (
       <div className="py-10 flex justify-center text-gray-400">
-        {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <span className="text-xs">Não foi possível carregar o item.</span>}
+        {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+          <div className="text-center space-y-3">
+            <p className="text-xs">Não foi possível carregar o item.</p>
+            <button type="button" onClick={() => setAttempt((n) => n + 1)} className="btn-dota rounded px-4 py-2 text-xs">Tentar novamente</button>
+          </div>
+        )}
       </div>
     );
   }

@@ -6,10 +6,16 @@ const DAY = 24 * 3600 * 1000;
 async function cachedFeed(key, query) {
   const cached = getCached(key, DAY);
   if (cached) return cached;
-  const res = await fetchWithTimeout(`/api/valve?${query}`, {}, 12000).catch(() => null);
-  const data = res?.ok ? await res.json().catch(() => null) : null;
-  if (data?.result?.data) setCache(key, data.result.data);
-  return data?.result?.data || null;
+  // A Valve às vezes recusa ou demora um pedido isolado: tenta mais uma vez antes de desistir
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetchWithTimeout(`/api/valve?${query}`, {}, 12000).catch(() => null);
+    const data = res?.ok ? await res.json().catch(() => null) : null;
+    if (data?.result?.data) {
+      setCache(key, data.result.data);
+      return data.result.data;
+    }
+  }
+  return null;
 }
 
 /** Heróis da Valve por id: { complexity, name_loc, primary_attr }. */
