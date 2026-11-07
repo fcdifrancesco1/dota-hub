@@ -18,8 +18,10 @@ import {
   GitBranch,
   UserCheck,
   Shield,
-  Crown
+  Crown,
+  Radio
 } from 'lucide-react';
+import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
 import { fetchTournaments, fetchTournamentArchive, fetchTournamentByPage, fetchLeagueSeries, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName, isSameTeamMatch } from '../services/api';
 import TournamentPlayers from '../components/TournamentPlayers';
@@ -203,8 +205,9 @@ export default function TournamentDetailPage() {
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const pageParam = searchParams.get('p');
-  const { tournamentsList, finishedSeries, upcomingMatches, constants } = useApp();
+  const { tournamentsList, finishedSeries, upcomingMatches, liveGames, constants } = useApp();
   const openSeries = useOpenSeries();
+  const openLiveMatch = useOpenLiveMatch();
   const { theme } = useTheme();
   const [tournament, setTournament] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -379,6 +382,13 @@ export default function TournamentDetailPage() {
     return names.some((n) => tn.startsWith(n) || n.startsWith(tn));
   });
 
+  // Jogos ao vivo: pela liga da Valve; sem ela, pelo nome do campeonato
+  const live = (liveGames || []).filter((g) => {
+    if (t.leagueId && g.league_id) return String(g.league_id) === String(t.leagueId);
+    const ln = norm(g.league_name);
+    return ln.length >= 4 && names.some((n) => ln.startsWith(n) || n.startsWith(ln));
+  });
+
   const tabs = [
     { id: 'matches', label: 'Partidas', icon: Swords },
     ...(teams.length ? [{ id: 'teams', label: 'Equipes', icon: Shield }] : []),
@@ -501,44 +511,64 @@ export default function TournamentDetailPage() {
       {/* ABA: CHAVEAMENTO */}
       {activeTab === 'bracket' && brackets.length > 0 && <TournamentBracket brackets={brackets} />}
 
-      {/* ABA: PARTIDAS */}
+      {/* ABA: PARTIDAS — ao vivo | encerradas | próximas */}
       {activeTab === 'matches' && (
-        <div className="space-y-8">
-          {scheduled.length > 0 && (
-            <section>
-              <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" /> Próximas partidas
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {scheduled.map((m, idx) => (
-                  <div key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`} className="tilt-card glass-panel border border-line rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
-                      <span className="truncate text-blue-600 dark:text-amber-400 font-semibold">{m.tourneyName}</span>
-                      <span className="font-mono font-medium text-white">{m.startTime || 'A definir'} · {m.formato}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-6 h-6" />
-                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
-                      </div>
-                      <span className="text-[11px] font-semibold text-gray-400 px-2">VS</span>
-                      <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
-                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
-                        <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-6 h-6" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <section>
+            <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
+              <Radio className="w-4 h-4 text-red-500" /> Ao vivo
+              {live.length > 0 && <span className="px-1.5 py-0.5 rounded bg-red-600 text-white text-[11px] font-semibold">{live.length}</span>}
+            </h2>
+            {live.length === 0 ? (
+              <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
+                Nenhuma partida ao vivo agora.
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="space-y-2">
+                {live.map((g, idx) => {
+                  const radName = g.radiant_name || g.team1 || 'Radiant';
+                  const direName = g.dire_name || g.team2 || 'Dire';
+                  const sec = Math.floor(g.duration || 0);
+                  return (
+                    <button
+                      key={g.match_id || idx}
+                      onClick={() => openLiveMatch(g)}
+                      className="w-full glass-panel hover:bg-surface-2 border border-red-500/30 hover:border-red-500/60 rounded-2xl p-3.5 text-left transition-[color,background-color,border-color,opacity,transform]"
+                    >
+                      <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
+                        <span className="flex items-center gap-1.5 text-red-500 font-semibold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Ao vivo
+                        </span>
+                        <span className="font-mono font-medium text-white">{Math.floor(sec / 60)}:{String(sec % 60).padStart(2, '0')}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <TeamLogo teamName={radName} teamId={g.radiant_team?.team_id || g.radiant_team_id} logoUrl={g.radiant_logo} className="w-6 h-6 shrink-0" />
+                          <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{radName}</span>
+                        </div>
+                        <span className="font-mono font-semibold text-sm px-2.5 py-0.5 rounded-lg bg-surface-2 shrink-0">
+                          <span className="text-emerald-500">{g.radiant_score ?? g.score1 ?? 0}</span>
+                          <span className="text-gray-400"> : </span>
+                          <span className="text-red-500">{g.dire_score ?? g.score2 ?? 0}</span>
+                        </span>
+                        <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                          <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{direName}</span>
+                          <TeamLogo teamName={direName} teamId={g.dire_team?.team_id || g.dire_team_id} logoUrl={g.dire_logo} className="w-6 h-6 shrink-0" />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
 
           <section>
             <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-              <Swords className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Séries concluídas
+              <Swords className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Encerradas
             </h2>
             {series.length === 0 ? (
-              <div className="glass-panel border border-line rounded-2xl p-8 text-center text-xs text-gray-400">
+              <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
                 {t.status === 'upcoming'
                   ? 'O campeonato ainda não começou.'
                   : t.leagueId && (leagueSeries === null || (shared && participants === null))
@@ -554,24 +584,61 @@ export default function TournamentDetailPage() {
                     <button
                       key={s.series_id || idx}
                       onClick={() => openSeries(s, t.name)}
-                      className="w-full tilt-card glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-2xl p-3.5 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-4 transition-[color,background-color,border-color,opacity,transform] group text-left shadow-sm"
+                      className="w-full glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-2xl p-3.5 transition-[color,background-color,border-color,opacity,transform] group text-left"
                     >
-                      <span className="text-[11px] font-mono text-gray-400 w-full sm:w-20 shrink-0">{s.dateStr || ''}</span>
-                      <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                        <span className={`text-xs font-medium leading-tight break-words line-clamp-2 ${aWon ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>{s.timeA}</span>
-                        <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} logoUrl={s.logoA} className="w-6 h-6 shrink-0" />
+                      <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
+                        <span className="font-mono">{s.dateStr || ''}</span>
+                        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-amber-400 shrink-0" />
                       </div>
-                      <span className="font-mono font-semibold text-sm px-2.5 sm:px-3.5 py-1 rounded-xl bg-surface-2 border border-line text-white shrink-0 whitespace-nowrap shadow-inner">
-                        {s.scoreA} : {s.scoreB}
-                      </span>
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} logoUrl={s.logoB} className="w-6 h-6 shrink-0" />
-                        <span className={`text-xs font-medium leading-tight break-words line-clamp-2 ${bWon ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>{s.timeB}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <TeamLogo teamName={s.timeA} teamId={s.preferredIdA} logoUrl={s.logoA} className="w-6 h-6 shrink-0" />
+                          <span className={`text-xs font-medium leading-tight break-words line-clamp-2 ${aWon ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>{s.timeA}</span>
+                        </div>
+                        <span className="font-mono font-semibold text-sm px-2.5 py-0.5 rounded-lg bg-surface-2 border border-line text-white shrink-0 whitespace-nowrap">
+                          {s.scoreA} : {s.scoreB}
+                        </span>
+                        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+                          <span className={`text-xs font-medium leading-tight break-words line-clamp-2 text-right ${bWon ? 'text-blue-600 dark:text-amber-400 font-semibold' : 'text-white'}`}>{s.timeB}</span>
+                          <TeamLogo teamName={s.timeB} teamId={s.preferredIdB} logoUrl={s.logoB} className="w-6 h-6 shrink-0" />
+                        </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-amber-400 shrink-0" />
                     </button>
                   );
                 })}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-cyan-400" /> Próximas
+            </h2>
+            {scheduled.length === 0 ? (
+              <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
+                Nenhuma partida agendada.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {scheduled.map((m, idx) => (
+                  <div key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`} className="glass-panel border border-line rounded-2xl p-3.5">
+                    <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
+                      <span className="truncate text-blue-600 dark:text-amber-400 font-semibold">{m.tourneyName}</span>
+                      <span className="font-mono font-medium text-white shrink-0 ml-2">{m.startTime || 'A definir'} · {m.formato}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-6 h-6 shrink-0" />
+                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-gray-400 px-2">VS</span>
+                      <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
+                        <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-6 h-6 shrink-0" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </section>
