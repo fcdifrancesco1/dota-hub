@@ -205,6 +205,21 @@ body {
   animation: fadeIn 0.25s ease-out forwards;
 }
 
+/* Elevador: o dia seguinte entra por baixo, o anterior por cima */
+@keyframes elevatorUp {
+  from { transform: translateY(60%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes elevatorDown {
+  from { transform: translateY(-60%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.elevator-up { animation: elevatorUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.elevator-down { animation: elevatorDown 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .elevator-up, .elevator-down { animation: none; }
+}
+
 /* Utilitários */
 .line-clamp-2 {
   display: -webkit-box;

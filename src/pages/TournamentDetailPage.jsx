@@ -19,8 +19,10 @@ import {
   UserCheck,
   Shield,
   Crown,
-  Radio
+  Radio,
+  ChevronLeft
 } from 'lucide-react';
+import { isSeriesOngoing } from '../utils/seriesStatus';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
 import { fetchTournaments, fetchTournamentArchive, fetchTournamentByPage, fetchLeagueSeries, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName, isSameTeamMatch } from '../services/api';
@@ -28,7 +30,7 @@ import TournamentPlayers from '../components/TournamentPlayers';
 import TournamentStandings from '../components/TournamentStandings';
 import TournamentBracket from '../components/TournamentBracket';
 import TournamentTeams from '../components/TournamentTeams';
-import { useApp } from '../context/AppContext';
+import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import BackButton from '../components/BackButton';
 import { rememberAliases } from '../utils/teamAliases';
@@ -389,6 +391,13 @@ export default function TournamentDetailPage() {
     return ln.length >= 4 && names.some((n) => ln.startsWith(n) || n.startsWith(ln));
   });
 
+  // Série ainda sem vencedor (ex.: 1:0 numa MD3) não está encerrada: fica em "Ao vivo"
+  const ongoing = series.filter(isSeriesOngoing);
+  const finished = series.filter((x) => !isSeriesOngoing(x));
+  const seriesOfLive = (g) => ongoing.find((x) => findLiveGameFor(x, [g]));
+  const betweenMaps = ongoing.filter((x) => !findLiveGameFor(x, live));
+  const liveCount = live.length + betweenMaps.length;
+
   const tabs = [
     { id: 'matches', label: 'Partidas', icon: Swords },
     ...(teams.length ? [{ id: 'teams', label: 'Equipes', icon: Shield }] : []),
@@ -517,9 +526,9 @@ export default function TournamentDetailPage() {
           <section>
             <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
               <Radio className="w-4 h-4 text-red-500" /> Ao vivo
-              {live.length > 0 && <span className="px-1.5 py-0.5 rounded bg-red-600 text-white text-[11px] font-semibold">{live.length}</span>}
+              {liveCount > 0 && <span className="px-1.5 py-0.5 rounded bg-red-600 text-white text-[11px] font-semibold">{liveCount}</span>}
             </h2>
-            {live.length === 0 ? (
+            {liveCount === 0 ? (
               <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
                 Nenhuma partida ao vivo agora.
               </div>
@@ -529,6 +538,9 @@ export default function TournamentDetailPage() {
                   const radName = g.radiant_name || g.team1 || 'Radiant';
                   const direName = g.dire_name || g.team2 || 'Dire';
                   const sec = Math.floor(g.duration || 0);
+                  const sr = seriesOfLive(g);
+                  // A série pode estar com os times na ordem inversa da partida (Radiant/Dire)
+                  const flip = sr && (norm(sr.timeB) === norm(radName) || norm(sr.timeA) === norm(direName));
                   return (
                     <button
                       key={g.match_id || idx}
@@ -538,6 +550,7 @@ export default function TournamentDetailPage() {
                       <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
                         <span className="flex items-center gap-1.5 text-red-500 font-semibold">
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Ao vivo
+                          {sr && <span className="text-gray-400 font-medium">· Série {flip ? sr.scoreB : sr.scoreA}:{flip ? sr.scoreA : sr.scoreB}{sr.formato ? ` · ${sr.formato}` : ''}</span>}
                         </span>
                         <span className="font-mono font-medium text-white">{Math.floor(sec / 60)}:{String(sec % 60).padStart(2, '0')}</span>
                       </div>
@@ -559,6 +572,29 @@ export default function TournamentDetailPage() {
                     </button>
                   );
                 })}
+                {betweenMaps.map((x, idx) => (
+                  <button
+                    key={x.series_id || `bm-${idx}`}
+                    onClick={() => openSeries(x, t.name)}
+                    className="w-full glass-panel hover:bg-surface-2 border border-amber-500/30 hover:border-amber-500/60 rounded-2xl p-3.5 text-left transition-[color,background-color,border-color,opacity,transform]"
+                  >
+                    <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
+                      <span className="text-amber-500 font-semibold">Entre mapas</span>
+                      <span className="font-mono font-medium text-white">{x.formato}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <TeamLogo teamName={x.timeA} teamId={x.preferredIdA} logoUrl={x.logoA} className="w-6 h-6 shrink-0" />
+                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{x.timeA}</span>
+                      </div>
+                      <span className="font-mono font-semibold text-sm px-2.5 py-0.5 rounded-lg bg-surface-2 border border-line text-white shrink-0">{x.scoreA} : {x.scoreB}</span>
+                      <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{x.timeB}</span>
+                        <TeamLogo teamName={x.timeB} teamId={x.preferredIdB} logoUrl={x.logoB} className="w-6 h-6 shrink-0" />
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
           </section>
@@ -567,9 +603,11 @@ export default function TournamentDetailPage() {
             <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
               <Swords className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Encerradas
             </h2>
-            {series.length === 0 ? (
+            {finished.length === 0 ? (
               <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
-                {t.status === 'upcoming'
+                {series.length > 0
+                  ? 'Nenhuma série encerrada ainda.'
+                  : t.status === 'upcoming'
                   ? 'O campeonato ainda não começou.'
                   : t.leagueId && (leagueSeries === null || (shared && participants === null))
                   ? 'Carregando as séries do campeonato...'
@@ -577,7 +615,7 @@ export default function TournamentDetailPage() {
               </div>
             ) : (
               <div className="space-y-2">
-                {series.map((s, idx) => {
+                {finished.map((s, idx) => {
                   const aWon = s.scoreA > s.scoreB;
                   const bWon = s.scoreB > s.scoreA;
                   return (
@@ -614,33 +652,7 @@ export default function TournamentDetailPage() {
             <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4 text-cyan-400" /> Próximas
             </h2>
-            {scheduled.length === 0 ? (
-              <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
-                Nenhuma partida agendada.
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {scheduled.map((m, idx) => (
-                  <div key={`${m.timeA}-${m.timeB}-${m.timestamp || idx}`} className="glass-panel border border-line rounded-2xl p-3.5">
-                    <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
-                      <span className="truncate text-blue-600 dark:text-amber-400 font-semibold">{m.tourneyName}</span>
-                      <span className="font-mono font-medium text-white shrink-0 ml-2">{m.startTime || 'A definir'} · {m.formato}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-6 h-6 shrink-0" />
-                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
-                      </div>
-                      <span className="text-[11px] font-semibold text-gray-400 px-2">VS</span>
-                      <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
-                        <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
-                        <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-6 h-6 shrink-0" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <UpcomingByDay matches={scheduled} />
           </section>
         </div>
       )}
@@ -779,6 +791,110 @@ function TournamentHeroes({ heroStats, constants }) {
           </div>
         </section>
       ))}
+    </div>
+  );
+}
+
+// Dia e hora no fuso de Brasília (a agenda mostra os horários em BRT)
+const BRT_DAY = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit' });
+const BRT_WEEKDAY = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'short' });
+const BRT_TIME = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+
+function dayLabel(day) {
+  if (day.key === 'tbd') return 'Data a definir';
+  const now = Date.now();
+  if (day.key === BRT_DAY.format(now)) return `Hoje · ${day.key}`;
+  if (day.key === BRT_DAY.format(now + 86400000)) return `Amanhã · ${day.key}`;
+  const wd = BRT_WEEKDAY.format(day.ts * 1000).replace('.', '');
+  return `${wd.charAt(0).toUpperCase()}${wd.slice(1)} · ${day.key}`;
+}
+
+/** Próximas partidas, um dia por vez; trocar de dia sobe ou desce a lista como um elevador. */
+function UpcomingByDay({ matches }) {
+  const days = useMemo(() => {
+    const map = new Map();
+    for (const m of matches) {
+      const key = m.timestamp ? BRT_DAY.format(m.timestamp * 1000) : 'tbd';
+      if (!map.has(key)) map.set(key, { key, ts: m.timestamp || Infinity, list: [] });
+      map.get(key).list.push(m);
+    }
+    return [...map.values()].sort((a, b) => a.ts - b.ts);
+  }, [matches]);
+  // dir: 1 = dia seguinte (a lista sobe), -1 = anterior (desce), 0 = sem animação
+  const [sel, setSel] = useState({ key: null, dir: 0 });
+  const idx = Math.max(0, days.findIndex((d) => d.key === sel.key));
+  const day = days[idx];
+
+  if (!day) {
+    return (
+      <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
+        Nenhuma partida agendada.
+      </div>
+    );
+  }
+
+  const go = (i) => { if (i >= 0 && i < days.length && i !== idx) setSel({ key: days[i].key, dir: i > idx ? 1 : -1 }); };
+  const anim = sel.dir > 0 ? 'elevator-up' : sel.dir < 0 ? 'elevator-down' : '';
+  const arrow = 'p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 disabled:opacity-30 disabled:hover:bg-transparent transition-[color,background-color,border-color,opacity,transform]';
+
+  return (
+    <div>
+      <div className="glass-panel border border-line rounded-2xl p-2 mb-2">
+        <div className="flex items-center justify-between gap-2">
+          <button onClick={() => go(idx - 1)} disabled={idx === 0} className={arrow} aria-label="Dia anterior">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="overflow-hidden h-5 flex-1 text-center">
+            <div key={day.key} className={`text-xs font-semibold text-white ${anim}`}>
+              {dayLabel(day)} <span className="text-gray-400 font-medium">· {day.list.length} {day.list.length === 1 ? 'partida' : 'partidas'}</span>
+            </div>
+          </div>
+          <button onClick={() => go(idx + 1)} disabled={idx === days.length - 1} className={arrow} aria-label="Próximo dia">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+        {days.length > 1 && (
+          <div className="flex gap-1 mt-2 overflow-x-auto">
+            {days.map((d, i) => (
+              <button
+                key={d.key}
+                onClick={() => go(i)}
+                className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium transition-[color,background-color,border-color,opacity,transform] ${
+                  i === idx ? 'bg-amber-500 text-black' : 'text-gray-400 hover:text-white hover:bg-surface-2'
+                }`}
+              >
+                {d.key === 'tbd' ? 'A definir' : d.key}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="overflow-hidden">
+        <div key={day.key} className={`space-y-2 ${anim}`}>
+          {day.list.map((m, i) => (
+            <div key={`${m.timeA}-${m.timeB}-${m.timestamp || i}`} className="glass-panel border border-line rounded-2xl p-3.5">
+              <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
+                <span className="truncate text-blue-600 dark:text-amber-400 font-semibold">{m.tourneyName}</span>
+                <span className="font-mono font-medium text-white shrink-0 ml-2">
+                  {m.timestamp ? `${BRT_TIME.format(m.timestamp * 1000)} BRT` : 'A definir'} · {m.formato}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <TeamLogo teamName={m.timeA} logoUrl={m.logoA} className="w-6 h-6 shrink-0" />
+                  <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2">{m.timeA}</span>
+                </div>
+                <span className="text-[11px] font-semibold text-gray-400 px-2">VS</span>
+                <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                  <span className="text-xs font-medium text-white leading-tight break-words line-clamp-2 text-right">{m.timeB}</span>
+                  <TeamLogo teamName={m.timeB} logoUrl={m.logoB} className="w-6 h-6 shrink-0" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
