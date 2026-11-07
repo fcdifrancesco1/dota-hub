@@ -649,9 +649,6 @@ export default function TournamentDetailPage() {
           </section>
 
           <section>
-            <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-cyan-400" /> Próximas
-            </h2>
             <UpcomingByDay matches={scheduled} />
           </section>
         </div>
@@ -825,51 +822,46 @@ function UpcomingByDay({ matches }) {
   const idx = Math.max(0, days.findIndex((d) => d.key === sel.key));
   const day = days[idx];
 
+  const go = (i) => { if (i >= 0 && i < days.length && i !== idx) setSel({ key: days[i].key, dir: i > idx ? 1 : -1 }); };
+  const anim = sel.dir > 0 ? 'elevator-up' : sel.dir < 0 ? 'elevator-down' : '';
+  const arrow = 'p-1.5 -m-1 rounded text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 transition-[color,background-color,border-color,opacity,transform]';
+
+  // Título da coluna com o seletor de dia discreto à direita
+  const heading = (
+    <div className="mb-3 flex items-center justify-between gap-2">
+      <h2 className="text-xs font-semibold text-white flex items-center gap-2">
+        <Clock className="w-4 h-4 text-cyan-400" /> Próximas
+      </h2>
+      {day && (
+        <div className="flex items-center gap-1 text-[11px] text-gray-400">
+          <button onClick={() => go(idx - 1)} disabled={idx === 0} className={arrow} aria-label="Dia anterior">
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <span className="overflow-hidden h-4 min-w-[84px] text-center">
+            <span key={day.key} className={`block font-medium ${anim}`}>{dayLabel(day)}</span>
+          </span>
+          <button onClick={() => go(idx + 1)} disabled={idx === days.length - 1} className={arrow} aria-label="Próximo dia">
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   if (!day) {
     return (
-      <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
-        Nenhuma partida agendada.
-      </div>
+      <>
+        {heading}
+        <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
+          Nenhuma partida agendada.
+        </div>
+      </>
     );
   }
 
-  const go = (i) => { if (i >= 0 && i < days.length && i !== idx) setSel({ key: days[i].key, dir: i > idx ? 1 : -1 }); };
-  const anim = sel.dir > 0 ? 'elevator-up' : sel.dir < 0 ? 'elevator-down' : '';
-  const arrow = 'p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-surface-2 disabled:opacity-30 disabled:hover:bg-transparent transition-[color,background-color,border-color,opacity,transform]';
-
   return (
     <div>
-      <div className="glass-panel border border-line rounded-2xl p-2 mb-2">
-        <div className="flex items-center justify-between gap-2">
-          <button onClick={() => go(idx - 1)} disabled={idx === 0} className={arrow} aria-label="Dia anterior">
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <div className="overflow-hidden h-5 flex-1 text-center">
-            <div key={day.key} className={`text-xs font-semibold text-white ${anim}`}>
-              {dayLabel(day)} <span className="text-gray-400 font-medium">· {day.list.length} {day.list.length === 1 ? 'partida' : 'partidas'}</span>
-            </div>
-          </div>
-          <button onClick={() => go(idx + 1)} disabled={idx === days.length - 1} className={arrow} aria-label="Próximo dia">
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-        {days.length > 1 && (
-          <div className="flex gap-1 mt-2 overflow-x-auto">
-            {days.map((d, i) => (
-              <button
-                key={d.key}
-                onClick={() => go(i)}
-                className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium transition-[color,background-color,border-color,opacity,transform] ${
-                  i === idx ? 'bg-amber-500 text-black' : 'text-gray-400 hover:text-white hover:bg-surface-2'
-                }`}
-              >
-                {d.key === 'tbd' ? 'A definir' : d.key}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
+      {heading}
       <div className="overflow-hidden">
         <div key={day.key} className={`space-y-2 ${anim}`}>
           {day.list.map((m, i) => (
