@@ -7,7 +7,7 @@ import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
 import { liquipediaImage } from '../../utils/liquipediaImage';
-import { fetchTournaments } from '../../services/api';
+import { fetchTournaments, getCachedTournaments } from '../../services/api';
 import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize, tournamentPath } from '../../utils/tournamentFormat';
 import MatchPreviewModal from '../MatchPreviewModal';
 
@@ -17,10 +17,10 @@ export default function HomeHero() {
   const { theme } = useTheme();
 
   // Campeonatos da Liquipedia (tier, premiação) — cache de 30 min
-  const [tournaments, setTournaments] = useState([]);
+  const [tournaments, setTournaments] = useState(getCachedTournaments);
   useEffect(() => {
     let active = true;
-    fetchTournaments().then((list) => { if (active) setTournaments(list || []); });
+    fetchTournaments().then((list) => { if (active && list?.length) setTournaments(list); });
     return () => { active = false; };
   }, []);
 

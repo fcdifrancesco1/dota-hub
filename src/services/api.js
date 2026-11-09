@@ -794,9 +794,18 @@ export function getCachedTournaments() {
   return getCachedFast(TOURNAMENTS_CACHE_KEY) || [];
 }
 
-export async function fetchTournaments() {
+// Várias telas pedem a lista ao mesmo tempo ao abrir o site: uma consulta só
+let tournamentsInFlight = null;
+export function fetchTournaments() {
   const cached = getCached(TOURNAMENTS_CACHE_KEY, 30 * 60 * 1000);
-  if (cached) return cached;
+  if (cached) return Promise.resolve(cached);
+  if (!tournamentsInFlight) {
+    tournamentsInFlight = loadTournaments().finally(() => { tournamentsInFlight = null; });
+  }
+  return tournamentsInFlight;
+}
+
+async function loadTournaments() {
   try {
     // A primeira consulta do servidor à Liquipedia pode levar ~10s
     const res = await fetchWithTimeout("/api/tournaments", {}, 20000);

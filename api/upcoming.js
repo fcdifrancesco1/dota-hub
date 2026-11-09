@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         !strictlyUpcoming.some((u) => u.timeA === m.timeA && u.timeB === m.timeB && u.timestamp === m.timestamp)
       );
 
-      res.setHeader('Cache-Control', 's-maxage=180, stale-while-revalidate=360');
+      res.setHeader('Cache-Control', 's-maxage=180, stale-while-revalidate=1800');
       return res.status(200).json([...strictlyUpcoming, ...recentCompleted]);
     }
 

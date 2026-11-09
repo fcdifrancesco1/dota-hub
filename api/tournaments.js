@@ -194,7 +194,8 @@ export default async function handler(req, res) {
 
     const result = await enrichEntries(entries);
 
-    res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=3600');
+    // A consulta à Liquipedia pode levar ~10s: a CDN entrega a cópia anterior por até 1 dia enquanto atualiza
+    res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=86400');
     return res.status(200).json(result);
   } catch (error) {
     console.error('[Tournaments API] Erro:', error.message);

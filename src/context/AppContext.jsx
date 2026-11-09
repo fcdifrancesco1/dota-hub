@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   fetchConstants,
   fetchProMatches,
@@ -201,6 +201,10 @@ export function AppProvider({ children }) {
   const [loading, setLoading] = useState(!cachedPro && cachedUpcoming.length === 0);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('');
+  // Últimas séries concluídas conhecidas: a agenda e o ao vivo saem antes da OpenDota responder
+  const finishedRef = useRef(cachedFinished);
+  // Só na primeira carga: nas atualizações de 30s a tela já tem dados e espera a versão completa
+  const firstLoadRef = useRef(true);
 
   // Modais globais
   const [selectedHero, setSelectedHero] = useState(null);
@@ -233,12 +237,23 @@ export function AppProvider({ children }) {
       const wikiPromise = fetchUpcomingMatches();
       const livePromise = fetchLiveGames();
 
+      // Agenda e jogos ao vivo vêm da nossa API (rápida): aparecem já, sem esperar
+      // a OpenDota (proMatches pode levar segundos); a versão completa vem depois
+      let complete = !firstLoadRef.current;
+      firstLoadRef.current = false;
+      Promise.all([wikiPromise, livePromise]).then(([wiki, gotv]) => {
+        if (complete) return;
+        applyLiveAndSchedule(wiki, gotv, finishedRef.current, []);
+        setLoading(false);
+      }).catch(() => {});
+
       const [proData, allWikiMatches, gotvLiveData] = await Promise.all([
         proPromise,
         wikiPromise,
         livePromise
       ]);
 
+      complete = true;
       const rawMatches = proData?.rawMatches || [];
 
       // Séries concluídas da OpenDota com os nomes da Liquipedia: usadas também para
@@ -256,6 +271,18 @@ export function AppProvider({ children }) {
         setTournamentsList((proData.tournaments || []).map((t) => (t.seriesList ? { ...t, seriesList: t.seriesList.map(fixSeries) } : t)));
       }
 
+      finishedRef.current = finished;
+      applyLiveAndSchedule(allWikiMatches, gotvLiveData, finished, rawMatches);
+    } catch (err) {
+      console.error('Erro ao sincronizar dados no AppProvider:', err);
+    } finally {
+      setLoading(false);
+      setLoadingRefresh(false);
+    }
+  }, []);
+
+  // Jogos ao vivo (sem os que a OpenDota já deu como encerrados) e agenda separada em próximas/em andamento
+  function applyLiveAndSchedule(allWikiMatches, gotvLiveData, finished, rawMatches) {
       // Detecta jogos em andamento
       const currentLive = withLeagueNames((gotvLiveData || []).map(applyAliasesToLiveGame).filter((g) => {
         const isFinished = rawMatches.some(
@@ -277,13 +304,7 @@ export function AppProvider({ children }) {
           second: '2-digit'
         })
       );
-    } catch (err) {
-      console.error('Erro ao sincronizar dados no AppProvider:', err);
-    } finally {
-      setLoading(false);
-      setLoadingRefresh(false);
-    }
-  }, []);
+  }
 
   // Intervalo de auto-refresh de 30 segundos (especificado no prompt)
   useEffect(() => {
