@@ -70,22 +70,51 @@ function parseTable(tableHtml) {
   return { title, rows };
 }
 
+// Formato novo (2026): <div class="table2 ... standings-group"> com uma linha por time e
+// data-position-status="up|down|stay". Colunas: posição, time, séries ("2 - 0"), mapas, saldo, desempate.
+function parseTable2(tableHtml) {
+  const title = decode(tableHtml.match(/table2__title"[^>]*>([\s\S]*?)<\/div>/)?.[1]) || null;
+  const pair = (v) => (/^\d+\s*-\s*\d+(\s*-\s*\d+)?$/.test(v) ? v.replace(/\s+/g, '') : null);
+  const rows = [];
+  for (const tr of tableHtml.match(/<tr[^>]*table2__row--body[\s\S]*?<\/tr>/g) || []) {
+    const cells = tr.match(/<td[\s\S]*?<\/td>/g) || [];
+    const teamIdx = cells.findIndex((c) => /block-team/.test(c));
+    if (teamIdx < 0) continue;
+    const slot = cells[teamIdx];
+    const name = cleanTeamName(decode(slot.match(/aria-label="([^"]+)"/)?.[1])
+      || decode(slot.match(/<span class="name[^"]*"[^>]*>([\s\S]*?)<\/span>/)?.[1]));
+    if (!name || name === 'TBD') continue;
+    const stats = cells.slice(teamIdx + 1).map((c) => decode(c));
+    const status = tr.match(/data-position-status="([a-z]+)"/)?.[1];
+    rows.push({
+      position: parseInt(decode(cells[teamIdx - 1] || ''), 10) || rows.length + 1,
+      team: name,
+      logo: teamLogos(slot),
+      record: pair(stats[0] || ''),
+      games: pair(stats[1] || ''),
+      status: STATUS_BY_BG[status] || null
+    });
+  }
+  return { title, rows };
+}
+
 /**
  * Retorna [{ stage, group, title, rows: [{ position, team, logo, record, games, status }] }]
  * na ordem em que aparecem na página.
  */
 export function parseLiquipediaStandings(html) {
   if (!html) return [];
+  html = html.replace(/&#95;/g, '_');
   const tables = [];
   // Percorre cabeçalhos (h2 = fase, h3 = grupo) e tabelas na ordem do documento
-  const re = /<h([23])[^>]*>([\s\S]*?)<\/h\1>|<table[^>]*class="[^"]*\bgrouptable\b[^"]*"[\s\S]*?<\/table>/g;
+  const re = /<h([23])[^>]*>([\s\S]*?)<\/h\1>|<table[^>]*class="[^"]*\bgrouptable\b[^"]*"[\s\S]*?<\/table>|<div[^>]*class="[^"]*\bstandings-group\b[^"]*"[\s\S]*?<\/table>/g;
   let stage = null;
   let group = null;
   let m;
   while ((m = re.exec(html))) {
     if (m[1] === '2') { stage = decode(m[2]); group = null; continue; }
     if (m[1] === '3') { group = decode(m[2]); continue; }
-    const { title, rows } = parseTable(m[0]);
+    const { title, rows } = m[0].startsWith('<div') ? parseTable2(m[0]) : parseTable(m[0]);
     if (rows.length) tables.push({ stage, group, title, rows });
   }
   return tables;

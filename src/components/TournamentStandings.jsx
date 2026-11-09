@@ -9,6 +9,7 @@ const translate = (s) => String(s || '')
   .replace(/^Group Stage$/i, 'Fase de grupos')
   .replace(/^Group\s+/i, 'Grupo ')
   .replace(/^Playoffs$/i, 'Playoffs')
+  .replace(/^Results$/i, 'Fase de grupos')
   .replace(/^Standings$/i, 'Classificação');
 
 const STATUS_STYLE = {
