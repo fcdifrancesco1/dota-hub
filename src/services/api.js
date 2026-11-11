@@ -2238,7 +2238,7 @@ function resolveTalentPT(valveTalent, valveAbilities, openDotaDname) {
 
 export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
   if (!heroId) return null;
-  const cacheKey = `hero_full_details_ptbr_v4_${heroId}`;
+  const cacheKey = `hero_full_details_ptbr_v5_${heroId}`;
   const cached = getCached(cacheKey, 60 * 60 * 1000);
   if (cached) return cached;
 
@@ -2448,7 +2448,11 @@ export async function fetchHeroFullDetails(heroId, heroInternalName = "") {
       health: [valveHero.max_health, valveHero.health_regen],
       mana: [valveHero.max_mana, valveHero.mana_regen],
       hype: cleanValveAbilityText(valveHero.hype_loc),
-      npe: valveHero.npe_desc_loc || ''
+      npe: valveHero.npe_desc_loc || '',
+      // História do herói: a Valve separa os parágrafos com <br><br>
+      bio: String(valveHero.bio_loc || '').split(/(?:<br\s*\/?>\s*){2,}/i)
+        .map((p) => p.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
     } : null;
 
     const result = {

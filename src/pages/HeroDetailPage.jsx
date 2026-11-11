@@ -10,7 +10,7 @@ import { ATTACK_LABELS, Diamonds, ROLE_LABELS } from '../components/HeroBits';
 // Cor de fundo atrás do herói, pelo atributo principal (como o palco do cliente)
 const ATTR_GLOW = { str: '178, 34, 34', agi: '34, 139, 70', int: '40, 110, 190', all: '120, 60, 170' };
 const ATTR_NAMES = { str: 'Força', agi: 'Agilidade', int: 'Inteligência', all: 'Universal' };
-const TABS = [['overview', 'Visão geral'], ['talents', 'Talentos'], ['pro', 'Profissional']];
+const TABS = [['overview', 'Visão geral'], ['talents', 'Talentos'], ['pro', 'Profissional'], ['lore', 'História']];
 
 const fmt = (n, digits = 1) => (n == null ? '—' : Number.isInteger(n) ? String(n) : n.toFixed(digits));
 
@@ -232,6 +232,8 @@ export default function HeroDetailPage() {
           <OverviewTab ability={selectedAbility} aghs={details.aghs} />
         ) : tab === 'talents' ? (
           <TalentsTab talents={details.talents} />
+        ) : tab === 'lore' ? (
+          <LoreTab name={heroName} bio={sheet?.bio} />
         ) : (
           <ProTab details={details} proData={proData} proLoading={proLoading} constants={constants} />
         )}
@@ -359,6 +361,21 @@ function TalentsTab({ talents = [] }) {
           </div>
         ))}
       </div>
+    </section>
+  );
+}
+
+function LoreTab({ name, bio = [] }) {
+  return (
+    <section className="glass-panel rounded-xl p-6 sm:p-8 max-w-3xl mx-auto">
+      <h2 className="dota-heading text-sm text-center mb-5">História{name ? ` de ${name}` : ''}</h2>
+      {bio.length === 0 ? (
+        <p className="text-sm text-gray-400 text-center">A história deste herói não está disponível agora.</p>
+      ) : (
+        <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
+          {bio.map((p, i) => <p key={i}>{p}</p>)}
+        </div>
+      )}
     </section>
   );
 }
