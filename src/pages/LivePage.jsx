@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Radio,
   RefreshCw,
@@ -14,7 +14,7 @@ import {
   Swords,
   ChevronRight
 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import BetweenMapsCard from '../components/BetweenMapsCard';
@@ -84,7 +84,44 @@ export default function LivePage() {
     return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
-  const isChannelLive = (s) => s.platform === 'youtube' && Boolean(youtubeLive?.[s.id]?.live);
+  // Canais da Twitch transmitindo agora, com a partida de cada um (/api/live?streams=1)
+  const [matchStreams, setMatchStreams] = useState([]);
+  const userPicked = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => fetch('/api/live?streams=1')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !Array.isArray(data?.streams)) return;
+        const found = data.streams.map((s) => ({
+          id: s.channel,
+          key: `tw-live-${s.channel}`,
+          name: s.channel,
+          platform: 'twitch',
+          lang: s.lang,
+          live: true,
+          title: s.title,
+          timeA: s.timeA,
+          timeB: s.timeB,
+          tournament: s.tournament
+        }));
+        setMatchStreams(found);
+        // Até a pessoa escolher um canal, abre o primeiro que está passando uma partida
+        if (!userPicked.current && found.length) setActiveStream(found[0]);
+      })
+      .catch(() => {});
+    load();
+    const timer = setInterval(load, 120000);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, []);
+
+  // Canais das partidas primeiro; os oficiais das organizadoras continuam como opção
+  const streams = [...matchStreams, ...DEFAULT_STREAMS.filter((d) => !matchStreams.some((m) => m.id === d.id))];
+  const pickStream = (s) => { userPicked.current = true; setActiveStream(s); };
+  const streamLabel = (s) => (s.timeA && s.timeB ? `${s.timeA} x ${s.timeB}` : s.name);
+  const streamsForGame = (game) => matchStreams.filter((s) => s.timeA && findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
+
+  const isChannelLive = (s) => Boolean(s.live) || (s.platform === 'youtube' && Boolean(youtubeLive?.[s.id]?.live));
   const embedUrl = streamEmbedUrl(activeStream, youtubeLive);
 
   // Auto-refresh a cada 30 segundos
@@ -111,7 +148,7 @@ export default function LivePage() {
             </h1>
           </div>
           <p className="text-gray-400 text-xs sm:text-sm">
-            Partidas profissionais em andamento, atualizadas a cada 30 segundos, com as transmissões oficiais da BLAST, ESL e PGL na Twitch e no YouTube.
+            Partidas profissionais em andamento, atualizadas a cada 30 segundos, com o canal da Twitch que está transmitindo cada partida.
           </p>
         </div>
 
@@ -149,9 +186,14 @@ export default function LivePage() {
               <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${activeStream.platform === 'youtube' ? 'bg-red-500' : 'bg-purple-500'}`}></span>
               <span className="font-medium text-white">Canal ativo:</span>
               <span className="text-purple-400 font-mono font-medium">{activeStream.name}</span>
-              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                {activeStream.lang}
-              </span>
+              {activeStream.lang && (
+                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  {activeStream.lang}
+                </span>
+              )}
+              {activeStream.timeA && (
+                <span className="text-gray-300">· {activeStream.timeA} x {activeStream.timeB}</span>
+              )}
               <a
                 href={streamPageUrl(activeStream)}
                 target="_blank"
@@ -171,8 +213,8 @@ export default function LivePage() {
                     key={p.id}
                     onClick={() => {
                       if (activeStream.platform === p.id) return;
-                      const options = DEFAULT_STREAMS.filter((s) => s.platform === p.id);
-                      setActiveStream(options.find(isChannelLive) || options[0]);
+                      const options = streams.filter((s) => s.platform === p.id);
+                      pickStream(options.find(isChannelLive) || options[0]);
                     }}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] ${
                       activeStream.platform === p.id
@@ -185,10 +227,11 @@ export default function LivePage() {
                 ))}
               </div>
 
-              {DEFAULT_STREAMS.filter((s) => s.platform === activeStream.platform).map((s) => (
+              {streams.filter((s) => s.platform === activeStream.platform).map((s) => (
                 <button
                   key={s.key}
-                  onClick={() => setActiveStream(s)}
+                  onClick={() => pickStream(s)}
+                  title={s.title || s.name}
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
                     activeStream.key === s.key
                       ? 'bg-purple-600 text-on-accent'
@@ -198,7 +241,8 @@ export default function LivePage() {
                   {isChannelLive(s) && (
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title="Ao vivo agora" />
                   )}
-                  {s.name}
+                  {streamLabel(s)}
+                  {s.live && s.lang && <span className="text-[11px] uppercase opacity-70">{s.lang}</span>}
                 </button>
               ))}
 
@@ -303,6 +347,27 @@ export default function LivePage() {
                         </span>
                       </div>
                     </div>
+
+                    {/* ONDE ASSISTIR: canais que estão transmitindo esta partida */}
+                    {streamsForGame(game).length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 -mt-2 mb-3 text-[11px]">
+                        <Tv className="w-3.5 h-3.5 text-purple-400" />
+                        {streamsForGame(game).map((s) => (
+                          <button
+                            key={s.key}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              pickStream(s);
+                              setShowStream(true);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="px-2 py-0.5 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-on-accent font-medium transition-[color,background-color,border-color,opacity,transform]"
+                          >
+                            Assistir · {s.name}{s.lang ? ` (${s.lang})` : ''}
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     {/* CONFRONTO PRINCIPAL & PLACAR */}
                     <div className="flex items-center justify-between gap-4 py-2">

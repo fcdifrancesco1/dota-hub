@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { getTournamentLeagueIds } from './_lib/tournamentLeagues.js';
+import { fetchLiquipediaApi } from './_lib/liquipediaClient.js';
+import { parseLiquipediaMatches } from './_lib/parseLiquipediaMatches.js';
+import { channelFromStreamUrl, twitchChannelsFromPage, parseTwitchPage, streamLanguage, matchForTitle } from './_lib/matchStreams.js';
 
 // Dicionário de Ligas Conhecidas (para exibir o nome real do torneio pelo league_id)
 const KNOWN_LEAGUES = {
@@ -812,8 +815,73 @@ async function handleYoutube(res) {
   return res.status(200).json({ channels: results });
 }
 
+async function fetchTwitchChannel(channel) {
+  try {
+    const r = await fetch(`https://www.twitch.tv/${channel}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en' },
+      signal: AbortSignal.timeout(6000)
+    });
+    return r.ok ? { channel, ...parseTwitchPage(await r.text()) } : { channel, live: false };
+  } catch {
+    return { channel, live: false };
+  }
+}
+
+/**
+ * GET /api/live?streams=1
+ * Canais da Twitch ao vivo agora com a partida que cada um transmite. Candidatos:
+ * o stream da agenda da Liquipedia e os canais da página de cada campeonato em
+ * andamento; a Twitch confirma se está ao vivo e o título diz qual partida é.
+ */
+async function handleStreams(res) {
+  const now = Date.now();
+  const lp = await fetchLiquipediaApi('Liquipedia:Matches', { ttlMs: 3 * 60 * 1000 });
+  const ms = (t) => (t > 1e12 ? t : t * 1000);
+  // Séries começadas (ou a 15 min de começar) e ainda sem vencedor
+  const active = parseLiquipediaMatches(lp?.html || '', { onlyUpcoming: true }).filter((m) =>
+    !m.isCompleted && !m.winner && m.timestamp &&
+    ms(m.timestamp) <= now + 15 * 60 * 1000 && now - ms(m.timestamp) < 8 * 3600 * 1000);
+
+  const fromAgenda = new Map(); // canal → partida que a agenda liga a ele
+  for (const m of active) {
+    const s = channelFromStreamUrl(m.streamUrl);
+    if (s?.platform === 'twitch' && !fromAgenda.has(s.channel)) fromAgenda.set(s.channel, m);
+  }
+  // Páginas dos campeonatos (cache de 6h): a fila da Liquipedia espaça os pedidos
+  const fromPage = new Map(); // canal → nome do campeonato
+  const pages = [...new Set(active.map((m) => m.tournamentPage).filter(Boolean))].slice(0, 5);
+  for (const page of pages) {
+    const r = await fetchLiquipediaApi(page, { ttlMs: 6 * 3600 * 1000 }).catch(() => null);
+    const name = active.find((m) => m.tournamentPage === page)?.torneio || null;
+    for (const ch of twitchChannelsFromPage(r?.html)) if (!fromPage.has(ch)) fromPage.set(ch, name);
+  }
+
+  const channels = [...new Set([...fromAgenda.keys(), ...fromPage.keys()])].slice(0, 16);
+  const checked = await Promise.all(channels.map(fetchTwitchChannel));
+  const streams = checked.filter((c) => c.live).map((c) => {
+    const match = matchForTitle(c.title, active) || fromAgenda.get(c.channel) || null;
+    return {
+      platform: 'twitch',
+      channel: c.channel,
+      title: c.title,
+      lang: streamLanguage(c.channel, c.title),
+      timeA: match?.timeA || null,
+      timeB: match?.timeB || null,
+      tournament: match?.torneio || fromPage.get(c.channel) || null
+    };
+  });
+  // Primeiro os canais com partida identificada
+  streams.sort((a, b) => Number(Boolean(b.timeA)) - Number(Boolean(a.timeA)));
+  res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=600');
+  return res.status(200).json({ streams });
+}
+
 export default async function handler(req, res) {
   if (req.query?.youtube) return handleYoutube(res);
+  if (req.query?.streams) return handleStreams(res).catch((err) => {
+    console.error('[Live API] Erro nos canais:', err.message);
+    return res.status(200).json({ streams: [] });
+  });
   try {
     const key = getSteamApiKey(req);
     const leagueId = req.query?.league_id;
