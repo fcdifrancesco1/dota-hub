@@ -20,37 +20,6 @@ import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import BetweenMapsCard from '../components/BetweenMapsCard';
 import { getHeroImg, getHeroName } from '../services/api';
 
-// Canais oficiais das organizadoras. No YouTube, o vídeo ao vivo de cada canal é
-// descoberto por /api/live?youtube=1 (o embed "live_stream?channel=" não é confiável).
-const DEFAULT_STREAMS = [
-  { id: 'esl_dota2br', key: 'tw-esl-br', name: 'ESL Dota 2 Brasil', platform: 'twitch', lang: 'pt-BR' },
-  { id: 'esl_dota2', key: 'tw-esl', name: 'ESL Dota 2', platform: 'twitch', lang: 'en' },
-  { id: 'blastdota', key: 'tw-blast', name: 'BLAST Dota', platform: 'twitch', lang: 'en' },
-  { id: 'pgl_dota2', key: 'tw-pgl', name: 'PGL Dota 2', platform: 'twitch', lang: 'en' },
-  { id: 'UCAvIC2XmBLLXFPdveirTrmw', key: 'yt-blast', name: 'BLAST SLAM Dota 2', platform: 'youtube', lang: 'en' },
-  { id: 'UCaYLBJfw6d8XqmNlL204lNg', key: 'yt-esl', name: 'ESL Dota 2', platform: 'youtube', lang: 'en' },
-  { id: 'UC7VWLs_Ivccq22rM2_xo0Rg', key: 'yt-pgl', name: 'PGL Dota 2', platform: 'youtube', lang: 'en' }
-];
-
-const PLATFORMS = [
-  { id: 'twitch', label: 'Twitch' },
-  { id: 'youtube', label: 'YouTube' }
-];
-
-function streamEmbedUrl(stream, youtubeLive) {
-  if (stream.platform === 'youtube') {
-    const videoId = youtubeLive?.[stream.id]?.videoId;
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0` : null;
-  }
-  return `https://player.twitch.tv/?channel=${stream.id}&parent=${window.location.hostname}&autoplay=false`;
-}
-
-function streamPageUrl(stream) {
-  return stream.platform === 'youtube'
-    ? `https://www.youtube.com/channel/${stream.id}/live`
-    : `https://www.twitch.tv/${stream.id}`;
-}
-
 export default function LivePage() {
   const {
     liveGames,
@@ -64,65 +33,46 @@ export default function LivePage() {
   const openLiveMatch = useOpenLiveMatch();
   // Mapas ao vivo + séries em andamento esperando o próximo mapa
   const liveTotal = (liveGames?.length || 0) + (betweenMaps?.length || 0);
-  const [activeStream, setActiveStream] = useState(DEFAULT_STREAMS[0]);
+  const [activeStream, setActiveStream] = useState(null);
   const [showStream, setShowStream] = useState(true);
   const [theaterMode, setTheaterMode] = useState(false);
-  // { [channelId]: { live, videoId, title } } — null enquanto carrega
-  const [youtubeLive, setYoutubeLive] = useState(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = () => fetch('/api/live?youtube=1')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (cancelled || !data?.channels) return;
-        setYoutubeLive(Object.fromEntries(data.channels.map((c) => [c.channelId, c])));
-      })
-      .catch(() => { if (!cancelled) setYoutubeLive((prev) => prev || {}); });
-    load();
-    const timer = setInterval(load, 120000);
-    return () => { cancelled = true; clearInterval(timer); };
-  }, []);
-
-  // Canais da Twitch transmitindo agora, com a partida de cada um (/api/live?streams=1)
-  const [matchStreams, setMatchStreams] = useState([]);
+  // Só os canais da Twitch que estão transmitindo uma partida agora (/api/live?streams=1);
+  // null enquanto carrega
+  const [matchStreams, setMatchStreams] = useState(null);
   const userPicked = useRef(false);
   useEffect(() => {
     let cancelled = false;
     const load = () => fetch('/api/live?streams=1')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (cancelled || !Array.isArray(data?.streams)) return;
-        const found = data.streams.map((s) => ({
+        if (cancelled) return;
+        const found = (data?.streams || []).filter((s) => s.timeA && s.timeB).map((s) => ({
           id: s.channel,
           key: `tw-live-${s.channel}`,
           name: s.channel,
-          platform: 'twitch',
           lang: s.lang,
-          live: true,
           title: s.title,
           timeA: s.timeA,
-          timeB: s.timeB,
-          tournament: s.tournament
+          timeB: s.timeB
         }));
         setMatchStreams(found);
-        // Até a pessoa escolher um canal, abre o primeiro que está passando uma partida
-        if (!userPicked.current && found.length) setActiveStream(found[0]);
+        // Até a pessoa escolher, fica no primeiro canal; se o escolhido saiu do ar, troca também
+        setActiveStream((cur) => {
+          const still = cur && found.find((s) => s.id === cur.id);
+          if (still && userPicked.current) return still;
+          userPicked.current = false;
+          return still || found[0] || null;
+        });
       })
-      .catch(() => {});
+      .catch(() => { if (!cancelled) setMatchStreams((prev) => prev || []); });
     load();
     const timer = setInterval(load, 120000);
     return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
-  // Canais das partidas primeiro; os oficiais das organizadoras continuam como opção
-  const streams = [...matchStreams, ...DEFAULT_STREAMS.filter((d) => !matchStreams.some((m) => m.id === d.id))];
   const pickStream = (s) => { userPicked.current = true; setActiveStream(s); };
-  const streamLabel = (s) => (s.timeA && s.timeB ? `${s.timeA} x ${s.timeB}` : s.name);
-  const streamsForGame = (game) => matchStreams.filter((s) => s.timeA && findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
-
-  const isChannelLive = (s) => Boolean(s.live) || (s.platform === 'youtube' && Boolean(youtubeLive?.[s.id]?.live));
-  const embedUrl = streamEmbedUrl(activeStream, youtubeLive);
+  const streamsForGame = (game) => (matchStreams || []).filter((s) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
 
   // Auto-refresh a cada 30 segundos
   useEffect(() => {
@@ -183,66 +133,47 @@ export default function LivePage() {
           {/* BARRA DE CANAIS DA TRANSMISSÃO */}
           <div className="p-3.5 bg-surface-2/80 border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${activeStream.platform === 'youtube' ? 'bg-red-500' : 'bg-purple-500'}`}></span>
+              <span className="w-2.5 h-2.5 rounded-full animate-pulse bg-purple-500"></span>
               <span className="font-medium text-white">Canal ativo:</span>
-              <span className="text-purple-400 font-mono font-medium">{activeStream.name}</span>
-              {activeStream.lang && (
-                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  {activeStream.lang}
-                </span>
+              {activeStream ? (
+                <>
+                  <span className="text-purple-400 font-mono font-medium">{activeStream.name}</span>
+                  {activeStream.lang && (
+                    <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      {activeStream.lang}
+                    </span>
+                  )}
+                  <span className="text-gray-300">· {activeStream.timeA} x {activeStream.timeB}</span>
+                  <a
+                    href={`https://www.twitch.tv/${activeStream.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-amber-400 transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Abrir no Twitch</span>
+                  </a>
+                </>
+              ) : (
+                <span className="text-gray-400">nenhum</span>
               )}
-              {activeStream.timeA && (
-                <span className="text-gray-300">· {activeStream.timeA} x {activeStream.timeB}</span>
-              )}
-              <a
-                href={streamPageUrl(activeStream)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-amber-400 transition-colors"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Abrir no {activeStream.platform === 'youtube' ? 'YouTube' : 'Twitch'}</span>
-              </a>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {/* Alternância de plataforma */}
-              <div className="flex items-center rounded-xl bg-surface border border-line p-0.5">
-                {PLATFORMS.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      if (activeStream.platform === p.id) return;
-                      const options = streams.filter((s) => s.platform === p.id);
-                      pickStream(options.find(isChannelLive) || options[0]);
-                    }}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] ${
-                      activeStream.platform === p.id
-                        ? (p.id === 'youtube' ? 'bg-red-600 text-on-accent' : 'bg-purple-600 text-on-accent')
-                        : 'text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-
-              {streams.filter((s) => s.platform === activeStream.platform).map((s) => (
+              {matchStreams?.map((s) => (
                 <button
                   key={s.key}
                   onClick={() => pickStream(s)}
                   title={s.title || s.name}
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
-                    activeStream.key === s.key
+                    activeStream?.key === s.key
                       ? 'bg-purple-600 text-on-accent'
                       : 'bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30'
                   }`}
                 >
-                  {isChannelLive(s) && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title="Ao vivo agora" />
-                  )}
-                  {streamLabel(s)}
-                  {s.live && s.lang && <span className="text-[11px] uppercase opacity-70">{s.lang}</span>}
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title="Ao vivo agora" />
+                  {s.timeA} x {s.timeB}
+                  {s.lang && <span className="text-[11px] uppercase opacity-70">{s.lang}</span>}
                 </button>
               ))}
 
@@ -258,10 +189,10 @@ export default function LivePage() {
 
           {/* PLAYER RESPONSIVO */}
           <div className={`w-full bg-black ${theaterMode ? 'aspect-[21/9] max-h-[70vh]' : 'aspect-video max-h-[580px]'}`}>
-            {embedUrl ? (
+            {activeStream ? (
               <iframe
-                key={embedUrl}
-                src={embedUrl}
+                key={activeStream.id}
+                src={`https://player.twitch.tv/?channel=${activeStream.id}&parent=${window.location.hostname}&autoplay=false`}
                 height="100%"
                 width="100%"
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -271,23 +202,13 @@ export default function LivePage() {
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center px-6">
-                {youtubeLive === null ? (
+                {matchStreams === null ? (
                   <RefreshCw className="w-6 h-6 text-gray-500 animate-spin" />
                 ) : (
                   <>
                     <Tv className="w-10 h-10 text-gray-600" />
-                    <p className="text-sm font-medium text-gray-200">{activeStream.name} não está ao vivo no YouTube agora</p>
-                    <p className="text-xs text-gray-500">
-                      Escolha outro canal ou veja a programação no canal oficial.
-                    </p>
-                    <a
-                      href={`https://www.youtube.com/channel/${activeStream.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Abrir canal no YouTube
-                    </a>
+                    <p className="text-sm font-medium text-gray-200">Nenhuma partida sendo transmitida agora</p>
+                    <p className="text-xs text-gray-500">Assim que um jogo começar, o canal dele aparece aqui.</p>
                   </>
                 )}
               </div>
