@@ -201,6 +201,10 @@ export default function LiveMatchDetail({
 
   const leagueName = matchData?.league_name || game.torneio || "Torneio profissional";
   const formatStr = game.formato || "BO3";
+  // Mapas já vencidos na série (o feed da Valve informa; ausente em jogo avulso)
+  const seriesA = pick(matchData, ['radiant_series_wins']) ?? game.radiant_series_wins;
+  const seriesB = pick(matchData, ['dire_series_wins']) ?? game.dire_series_wins;
+  const hasSeries = Number.isFinite(seriesA) && Number.isFinite(seriesB) && formatStr !== 'BO1';
 
   // Jogadores reais (apenas o que a API retorna)
   const rawPlayers = matchData?.players || [];
@@ -819,6 +823,11 @@ export default function LiveMatchDetail({
           <span className="text-gray-300 font-medium bg-surface-2 border border-line px-2.5 py-1 rounded-full">
             {leagueName} ({formatStr})
           </span>
+          {hasSeries && (
+            <span className="text-gray-200 font-semibold bg-surface-2 border border-line px-2.5 py-1 rounded-full">
+              Série <span className="text-emerald-400">{seriesA}</span> × <span className="text-rose-400">{seriesB}</span> · Mapa {seriesA + seriesB + 1}
+            </span>
+          )}
           {matchData?.spectators > 0 && (
             <span className="text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
               <Eye className="w-3 h-3" /> {matchData.spectators.toLocaleString()} assistindo na GOTV
