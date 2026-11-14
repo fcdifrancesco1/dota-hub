@@ -919,10 +919,10 @@ function registerStandingsLogos({ tables = [], brackets = [], teams = [] } = {})
 }
 
 // Classificação (fase de grupos) e chaveamentos de um campeonato da Liquipedia — ver api/tournaments.js
-// Retorna { tables, brackets }.
+// Retorna { tables, brackets, groupMatches, participants, teams }.
 export async function fetchTournamentStandings(page) {
-  if (!page) return { tables: [], brackets: [] };
-  const key = `tourney_standings_v5_${page}`;
+  if (!page) return { tables: [], brackets: [], groupMatches: [] };
+  const key = `tourney_standings_v6_${page}`;
   const cached = getCached(key, 5 * 60 * 1000);
   if (cached) {
     registerStandingsLogos(cached);
@@ -935,6 +935,7 @@ export async function fetchTournamentStandings(page) {
       const result = {
         tables: Array.isArray(data?.tables) ? data.tables : [],
         brackets: Array.isArray(data?.brackets) ? data.brackets : [],
+        groupMatches: Array.isArray(data?.groupMatches) ? data.groupMatches : [],
         participants: Array.isArray(data?.participants) ? data.participants : [],
         teams: Array.isArray(data?.teams) ? data.teams : []
       };
@@ -945,7 +946,7 @@ export async function fetchTournamentStandings(page) {
   } catch (err) {
     console.warn("Aviso ao buscar classificação do campeonato:", err);
   }
-  const fallback = getCachedFast(key) || { tables: [], brackets: [], participants: [], teams: [] };
+  const fallback = getCachedFast(key) || { tables: [], brackets: [], groupMatches: [], participants: [], teams: [] };
   registerStandingsLogos(fallback);
   return fallback;
 }

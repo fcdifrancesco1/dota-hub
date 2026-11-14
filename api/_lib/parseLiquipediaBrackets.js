@@ -108,6 +108,9 @@ function parseOpponent(entryHtml) {
   };
 }
 
+// Formato da série no popup da partida ("(Bo3)"); null se a página não disser
+const bestOfFrom = (popup) => Number(popup.match(/\(Bo(\d)\)/i)?.[1]) || null;
+
 function parseMatch(html, div) {
   const matchDiv = childDivs(html, div.innerStart, div.innerEnd).find((d) => has(d.cls, 'brkts-match'));
   if (!matchDiv) return null;
@@ -116,7 +119,7 @@ function parseMatch(html, div) {
   const popup = parts.find((d) => has(d.cls, 'brkts-popup'))?.outer || '';
   const timestamp = Number(popup.match(/data-timestamp="(\d+)"/)?.[1]) || null;
   const matchIds = [...new Set([...popup.matchAll(/(?:dotabuff|opendota|stratz)\.com\/matches\/(\d+)/g)].map((m) => m[1]))];
-  return { opponents, timestamp, matchIds };
+  return { opponents, timestamp, matchIds, bestOf: bestOfFrom(popup) };
 }
 
 function parseQualified(html, div) {
@@ -140,6 +143,38 @@ function parseBody(html, div) {
     }
   }
   return node;
+}
+
+/**
+ * Partidas das listas da fase de grupos ("brkts-matchlist"), no mesmo formato
+ * das partidas do chaveamento: [{ opponents, timestamp, matchIds }]. Os números
+ * dos mapas (links do Dotabuff) abrem a série antes de a OpenDota listá-la.
+ */
+export function parseLiquipediaMatchlists(html) {
+  if (!html) return [];
+  const out = [];
+  const re = /<div class="brkts-matchlist-match\b/g;
+  let m;
+  while ((m = re.exec(html))) {
+    const end = divEnd(html, m.index);
+    const div = { innerStart: html.indexOf('>', m.index) + 1, innerEnd: end - 6 };
+    const parts = childDivs(html, div.innerStart, div.innerEnd);
+    const cells = parts.filter((d) => has(d.cls, 'brkts-matchlist-opponent'));
+    const scores = parts.filter((d) => has(d.cls, 'brkts-matchlist-score'));
+    if (cells.length === 2) {
+      const opponents = cells.map((c, i) => {
+        const name = cleanTeamName(decode(c.outer.match(/aria-label="([^"]*)"/)?.[1])) || null;
+        const score = decode(scores[i]?.outer);
+        return { name, logo: name ? logos(c.outer) : null, score: score === '' ? null : score, winner: has(c.cls, 'brkts-matchlist-slot-winner') };
+      });
+      const popup = parts.find((d) => has(d.cls, 'brkts-popup'))?.outer || '';
+      const timestamp = Number(popup.match(/data-timestamp="(\d+)"/)?.[1]) || null;
+      const matchIds = [...new Set([...popup.matchAll(/(?:dotabuff|opendota|stratz)\.com\/matches\/(\d+)/g)].map((x) => x[1]))];
+      if (opponents.every((o) => o.name)) out.push({ opponents, timestamp, matchIds, bestOf: bestOfFrom(popup) });
+    }
+    re.lastIndex = end;
+  }
+  return out;
 }
 
 /**

@@ -93,7 +93,7 @@ function bracketMatches(brackets) {
     if (!node) return;
     const m = node.match;
     if (m?.matchIds?.length && m.opponents?.length === 2 && m.opponents.every((o) => o?.name)) {
-      out.push({ ids: new Set(m.matchIds.map(String)), idList: m.matchIds.map(String), a: m.opponents[0], b: m.opponents[1], timestamp: m.timestamp || null });
+      out.push({ ids: new Set(m.matchIds.map(String)), idList: m.matchIds.map(String), a: m.opponents[0], b: m.opponents[1], timestamp: m.timestamp || null, bestOf: m.bestOf || null });
     }
     (node.children || []).forEach(walk);
   };
@@ -169,7 +169,8 @@ function seriesFromBracket(brackets, known, stage) {
         series_id: null,
         fromBracket: true,
         stage,
-        formato: wins >= 3 ? 'BO5' : wins === 1 && scoreA + scoreB === 1 ? 'BO1' : 'BO3',
+        // Formato da Liquipedia; sem ele, deduzido do placar
+        formato: m.bestOf ? `BO${m.bestOf}` : wins >= 3 ? 'BO5' : wins === 1 && scoreA + scoreB === 1 ? 'BO1' : 'BO3',
         timeA: m.a.name,
         timeB: m.b.name,
         logoA: m.a.logo?.dark || null,
@@ -224,6 +225,8 @@ export default function TournamentDetailPage() {
   };
   const [standings, setStandings] = useState([]);
   const [brackets, setBrackets] = useState([]);
+  // Partidas das listas da fase de grupos (mesmo formato das do chaveamento)
+  const [groupMatches, setGroupMatches] = useState([]);
   const [heroStats, setHeroStats] = useState(null);
   const [heroLoading, setHeroLoading] = useState(false);
   const [playerStats, setPlayerStats] = useState(null);
@@ -268,6 +271,7 @@ export default function TournamentDetailPage() {
   useEffect(() => {
     setStandings([]);
     setBrackets([]);
+    setGroupMatches([]);
     setParticipants(null);
     setTeams([]);
     if (!standingsPage) return;
@@ -276,6 +280,7 @@ export default function TournamentDetailPage() {
       if (!active) return;
       setStandings(data?.tables || []);
       setBrackets(data?.brackets || []);
+      setGroupMatches(data?.groupMatches || []);
       setParticipants(allParticipants(data));
       setTeams(data?.teams || []);
     });
@@ -304,14 +309,16 @@ export default function TournamentDetailPage() {
     const known = new Set((leagueSeries || []).flatMap((x) => (x.games || []).map((g) => String(g.match_id))));
     const extra = recentSeries.filter((x) => !(x.games || []).some((g) => known.has(String(g.match_id))));
     const raw = [...(leagueSeries || []), ...extra].sort((x, y) => (y.startTime || 0) - (x.startTime || 0));
-    const { list: named, inBracket } = withLiquipediaNames(raw, brackets);
+    // Chaveamento + partidas da fase de grupos: as duas trazem os números dos mapas
+    const sources = [...brackets, { roots: groupMatches.map((match) => ({ match })) }];
+    const { list: named, inBracket } = withLiquipediaNames(raw, sources);
     // A lista da liga vem sem nome de campeonato: usa o desta página
     const all = named.map((x) => (x.stage && x.stage !== 'Torneio Profissional' ? x : { ...x, stage: t.name }));
     const own = !shared ? all : participants === null ? [] : filterOwnSeries(all, t, participants, inBracket);
     // Completa com as séries do chaveamento que a OpenDota ainda não listou
-    return [...own, ...seriesFromBracket(brackets, own, t.name)]
+    return [...own, ...seriesFromBracket(sources, own, t.name)]
       .sort((x, y) => (y.startTime || 0) - (x.startTime || 0));
-  }, [tournament, tournamentsList, finishedSeries, leagueSeries, shared, participants, brackets]);
+  }, [tournament, tournamentsList, finishedSeries, leagueSeries, shared, participants, brackets, groupMatches]);
 
   // Liga dividida: as estatísticas contam só os mapas deste campeonato, depois
   // de saber os participantes e as séries

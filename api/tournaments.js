@@ -1,7 +1,7 @@
 import { fetchLiquipediaQuery, fetchLiquipediaApi, USER_AGENT } from './_lib/liquipediaClient.js';
 import { parseTournamentList, parseInfobox, buildTournament, parseTournamentsListing } from './_lib/parseLiquipediaTournaments.js';
 import { parseLiquipediaStandings, parseLiquipediaParticipants, parseLiquipediaParticipantTeams } from './_lib/parseLiquipediaStandings.js';
-import { parseLiquipediaBrackets } from './_lib/parseLiquipediaBrackets.js';
+import { parseLiquipediaBrackets, parseLiquipediaMatchlists } from './_lib/parseLiquipediaBrackets.js';
 
 const TTL = 30 * 60 * 1000;
 
@@ -37,14 +37,15 @@ async function handleStandings(page, res) {
     const html = parsed?.html || '';
     const tables = parseLiquipediaStandings(html);
     const brackets = parseLiquipediaBrackets(html);
+    const groupMatches = parseLiquipediaMatchlists(html);
     const participants = parseLiquipediaParticipants(html);
     const teams = parseLiquipediaParticipantTeams(html);
     // Cada cópia da função tem a própria fila da Liquipedia: o cache da CDN é o que segura os pedidos
     res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=3600');
-    return res.status(200).json({ page, tables, brackets, participants, teams });
+    return res.status(200).json({ page, tables, brackets, groupMatches, participants, teams });
   } catch (error) {
     console.error('[Tournaments API] Erro na classificação:', error.message);
-    return res.status(200).json({ page, tables: [], brackets: [], participants: [], teams: [] });
+    return res.status(200).json({ page, tables: [], brackets: [], groupMatches: [], participants: [], teams: [] });
   }
 }
 

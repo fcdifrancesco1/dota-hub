@@ -10,7 +10,7 @@ import { fetchTournamentStandings, isSeriesMatch } from '../services/api';
 export async function findWikiSeriesMapIds(m) {
   const played = (m?.scoreA || 0) + (m?.scoreB || 0);
   if (!m?.tournamentPage || played === 0) return [];
-  const { brackets = [] } = await fetchTournamentStandings(m.tournamentPage);
+  const { brackets = [], groupMatches = [] } = await fetchTournamentStandings(m.tournamentPage);
   let found = null;
   const walk = (node) => {
     if (!node || found) return;
@@ -23,6 +23,8 @@ export async function findWikiSeriesMapIds(m) {
     (node.children || []).forEach(walk);
   };
   for (const bracket of brackets) (bracket.roots || []).forEach(walk);
+  // Fase de grupos: as partidas das listas de cada grupo
+  groupMatches.forEach((match) => walk({ match }));
   // Só os mapas já decididos (o seguinte pode estar em andamento)
   return found ? found.matchIds.slice(0, played).map(String) : [];
 }
