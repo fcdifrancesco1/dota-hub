@@ -80,24 +80,36 @@ export default function HeroDetailPage() {
       <div className="border-b border-black/60 bg-black/30">
         <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between gap-4 text-xs">
           {prevHero ? (
-            <Link to={`/herois/${prevHero.id}`} className="dota-tab flex items-center gap-2 min-w-0">
-              <ArrowLeft className="w-4 h-4 shrink-0" /><span className="truncate hidden sm:inline">{prevHero.localized_name}</span>
+            <Link to={`/herois/${prevHero.id}`} title="Herói anterior" className="dota-tab hidden sm:flex items-center gap-2 min-w-0">
+              <ArrowLeft className="w-4 h-4 shrink-0" /><span className="truncate">{prevHero.localized_name}</span>
             </Link>
-          ) : <span />}
-          <nav className="flex items-center gap-3 sm:gap-4" aria-label="Seções do herói">
+          ) : <span className="hidden sm:block" />}
+          {/* No celular as abas rolam de lado em vez de estourar a tela */}
+          <nav className="flex items-center gap-2 sm:gap-4 min-w-0 overflow-x-auto whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0" aria-label="Seções do herói">
             {TABS.map(([key, label], i) => (
               <React.Fragment key={key}>
                 {i > 0 && <span className="text-gray-600">/</span>}
-                <button type="button" onClick={() => setTab(key)} className={`dota-tab text-xs sm:text-sm ${tab === key ? 'is-active' : ''}`}>{label}</button>
+                <button type="button" onClick={() => setTab(key)} className={`dota-tab text-[11px] sm:text-sm max-sm:!tracking-wide shrink-0 ${tab === key ? 'is-active' : ''}`}>{label}</button>
               </React.Fragment>
             ))}
           </nav>
           {nextHero ? (
-            <Link to={`/herois/${nextHero.id}`} className="dota-tab flex items-center gap-2 min-w-0 justify-end">
-              <span className="truncate hidden sm:inline">{nextHero.localized_name}</span><ArrowRight className="w-4 h-4 shrink-0" />
+            <Link to={`/herois/${nextHero.id}`} title="Próximo herói" className="dota-tab hidden sm:flex items-center gap-2 min-w-0 justify-end">
+              <span className="truncate">{nextHero.localized_name}</span><ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
-          ) : <span />}
+          ) : <span className="hidden sm:block" />}
         </div>
+        {/* Celular: troca de herói numa linha própria, com os nomes */}
+        {prevHero && nextHero && (
+          <div className="sm:hidden grid grid-cols-2 border-t border-black/60 text-[11px]">
+            <Link to={`/herois/${prevHero.id}`} className="dota-tab flex items-center gap-2 min-w-0 px-4 py-2.5 border-r border-black/60">
+              <ArrowLeft className="w-4 h-4 shrink-0" /><span className="truncate">{prevHero.localized_name}</span>
+            </Link>
+            <Link to={`/herois/${nextHero.id}`} className="dota-tab flex items-center gap-2 min-w-0 px-4 py-2.5 justify-end">
+              <span className="truncate">{nextHero.localized_name}</span><ArrowRight className="w-4 h-4 shrink-0" />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Palco do herói */}
