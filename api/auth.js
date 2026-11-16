@@ -9,8 +9,8 @@ const STEAM_ID64_BASE = 76561197960265728n;
 const PROFILE_MAX_AGE = 30 * 24 * 3600; // 30 dias
 const ADMIN_MAX_AGE = 12 * 3600; // 12 horas
 
-// Único e-mail com acesso ao Admin (pode ser trocado por ADMIN_EMAIL na Vercel)
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'fcdifrancesco1@gmail.com').trim().toLowerCase();
+// Único e-mail com acesso ao Admin: vem só de ADMIN_EMAIL na Vercel (o repositório é público)
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 
 // Tentativas de login no Admin por IP (memória da instância; freia força bruta)
 const attempts = new Map();
@@ -81,7 +81,7 @@ async function steamLogin(req, res) {
 /** POST /api/auth?action=admin-login  { email, password } */
 async function adminLogin(req, res) {
   const password = process.env.ADMIN_PASSWORD;
-  if (!password) {
+  if (!password || !ADMIN_EMAIL) {
     return res.status(503).json({ ok: false, error: 'Login do Admin ainda não configurado no servidor' });
   }
   const ip = clientIp(req);
