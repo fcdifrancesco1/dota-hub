@@ -117,6 +117,8 @@ export function parseLiquipediaMatches(html, options = {}) {
       if (streamMatch) {
         streamUrl = `https://liquipedia.net${streamMatch[1]}`;
       }
+      // Todos os canais da partida (Twitch, YouTube, Kick), não só o primeiro
+      const streamUrls = [...new Set([...block.matchAll(/href="([^"]*Special:Stream\/[^"]+)"/g)].map((x) => `https://liquipedia.net${x[1]}`))];
 
       // 7. Detecção se a série já encerrou (Vencedor marcado ou placar final)
       const hasWinnerLeft = /match-info-header-opponent-left[^"]*match-info-header-winner/.test(block);
@@ -150,6 +152,7 @@ export function parseLiquipediaMatches(html, options = {}) {
           torneio,
           tournamentPage,
           streamUrl,
+          streamUrls,
           data: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
           timestamp,
           isCompleted,

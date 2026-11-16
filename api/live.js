@@ -3,7 +3,7 @@ import path from 'path';
 import { getTournamentLeagueIds } from './_lib/tournamentLeagues.js';
 import { fetchLiquipediaApi } from './_lib/liquipediaClient.js';
 import { parseLiquipediaMatches } from './_lib/parseLiquipediaMatches.js';
-import { channelFromStreamUrl, twitchChannelsFromPage, parseTwitchPage, streamLanguage, matchForTitle } from './_lib/matchStreams.js';
+import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from './_lib/matchStreams.js';
 
 // Dicionário de Ligas Conhecidas (para exibir o nome real do torneio pelo league_id)
 const KNOWN_LEAGUES = {
@@ -781,23 +781,49 @@ function normalizeFinishedMatch(m) {
   };
 }
 
-async function fetchTwitchChannel(channel) {
+const PAGE_HEADERS = { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en' };
+
+async function fetchTwitchChannel({ channel }) {
   try {
-    const r = await fetch(`https://www.twitch.tv/${channel}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'en' },
-      signal: AbortSignal.timeout(6000)
-    });
-    return r.ok ? { channel, ...parseTwitchPage(await r.text()) } : { channel, live: false };
+    const r = await fetch(`https://www.twitch.tv/${channel}`, { headers: PAGE_HEADERS, signal: AbortSignal.timeout(6000) });
+    return r.ok ? { platform: 'twitch', channel, embed: channel, ...parseTwitchPage(await r.text()) } : null;
   } catch {
-    return { channel, live: false };
+    return null;
   }
 }
 
+// Canal do YouTube: a página "/live" abre a transmissão em andamento (ou o vídeo que a Liquipedia indicou)
+async function fetchYoutubeChannel({ channel, video }) {
+  try {
+    const url = video ? `https://www.youtube.com/watch?v=${video}` : `https://www.youtube.com/${channel}/live`;
+    const r = await fetch(url, { headers: PAGE_HEADERS, signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return null;
+    const yt = parseYoutubeLive(await r.text());
+    return { platform: 'youtube', channel: channel.replace(/^(c|user|channel)\//, ''), embed: yt.videoId, live: yt.live, title: yt.title };
+  } catch {
+    return null;
+  }
+}
+
+// Kick: a API pública do canal diz se está ao vivo; testa os slugs prováveis até achar o canal
+async function fetchKickChannel({ channel, guess }) {
+  for (const slug of guess ? kickSlugCandidates(channel) : [channel]) {
+    try {
+      const r = await fetch(`https://kick.com/api/v2/channels/${slug}`, { headers: { ...PAGE_HEADERS, Accept: 'application/json' }, signal: AbortSignal.timeout(6000) });
+      if (r.ok) return { platform: 'kick', channel: slug, embed: slug, ...parseKickChannel(await r.json()) };
+    } catch { /* tenta o próximo */ }
+  }
+  return null;
+}
+
+const CHECKERS = { twitch: fetchTwitchChannel, youtube: fetchYoutubeChannel, kick: fetchKickChannel };
+
 /**
  * GET /api/live?streams=1
- * Canais da Twitch ao vivo agora com a partida que cada um transmite. Candidatos:
- * o stream da agenda da Liquipedia e os canais da página de cada campeonato em
- * andamento; a Twitch confirma se está ao vivo e o título diz qual partida é.
+ * Canais (Twitch, YouTube e Kick) ao vivo agora com a partida que cada um
+ * transmite. Candidatos: os streams da agenda da Liquipedia e os canais da
+ * página de cada campeonato em andamento; a plataforma confirma se está ao vivo
+ * e o título diz qual partida é.
  */
 async function handleStreams(res) {
   const now = Date.now();
@@ -808,32 +834,45 @@ async function handleStreams(res) {
     !m.isCompleted && !m.winner && m.timestamp &&
     ms(m.timestamp) <= now + 15 * 60 * 1000 && now - ms(m.timestamp) < 8 * 3600 * 1000);
 
-  const fromAgenda = new Map(); // canal → partida que a agenda liga a ele
+  const candidates = new Map(); // "plataforma:canal" → { platform, channel, video?, guess?, match?, tournament? }
+  const addCandidate = (c) => {
+    const key = `${c.platform}:${c.channel.toLowerCase()}`;
+    if (!candidates.has(key)) candidates.set(key, c);
+  };
   for (const m of active) {
-    const s = channelFromStreamUrl(m.streamUrl);
-    if (s?.platform === 'twitch' && !fromAgenda.has(s.channel)) fromAgenda.set(s.channel, m);
+    for (const url of m.streamUrls || [m.streamUrl]) {
+      const s = channelFromStreamUrl(url);
+      if (!s) continue;
+      if (s.platform === 'youtube') addCandidate({ platform: 'youtube', channel: youtubePathFromName(s.channel), video: s.video, match: m });
+      else addCandidate({ ...s, guess: s.platform === 'kick', match: m });
+    }
   }
   // Páginas dos campeonatos (cache de 6h): a fila da Liquipedia espaça os pedidos
-  const fromPage = new Map(); // canal → nome do campeonato
   const pages = [...new Set(active.map((m) => m.tournamentPage).filter(Boolean))].slice(0, 5);
   for (const page of pages) {
     const r = await fetchLiquipediaApi(page, { ttlMs: 6 * 3600 * 1000 }).catch(() => null);
-    const name = active.find((m) => m.tournamentPage === page)?.torneio || null;
-    for (const ch of twitchChannelsFromPage(r?.html)) if (!fromPage.has(ch)) fromPage.set(ch, name);
+    const tournament = active.find((m) => m.tournamentPage === page)?.torneio || null;
+    for (const c of streamChannelsFromPage(r?.html)) addCandidate({ ...c, tournament });
   }
 
-  const channels = [...new Set([...fromAgenda.keys(), ...fromPage.keys()])].slice(0, 16);
-  const checked = await Promise.all(channels.map(fetchTwitchChannel));
-  const streams = checked.filter((c) => c.live).map((c) => {
-    const match = matchForTitle(c.title, active) || fromAgenda.get(c.channel) || null;
+  // shortcut: no máximo 24 canais checados por vez; se faltar canal em dia cheio, aumentar ou priorizar a agenda
+  const list = [...candidates.values()].slice(0, 24);
+  const checked = await Promise.all(list.map(async (c) => {
+    const found = await CHECKERS[c.platform](c);
+    return found && { ...found, from: c };
+  }));
+  const seen = new Set();
+  const streams = checked.filter((c) => c?.live && c.embed && !seen.has(`${c.platform}:${c.embed}`) && seen.add(`${c.platform}:${c.embed}`)).map((c) => {
+    const match = matchForTitle(c.title, active) || c.from.match || null;
     return {
-      platform: 'twitch',
+      platform: c.platform,
       channel: c.channel,
+      embed: c.embed,
       title: c.title,
       lang: streamLanguage(c.channel, c.title),
       timeA: match?.timeA || null,
       timeB: match?.timeB || null,
-      tournament: match?.torneio || fromPage.get(c.channel) || null
+      tournament: match?.torneio || c.from.tournament || null
     };
   });
   // Primeiro os canais com partida identificada

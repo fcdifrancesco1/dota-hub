@@ -20,6 +20,25 @@ import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import BetweenMapsCard from '../components/BetweenMapsCard';
 import { getHeroImg, getHeroName } from '../services/api';
 
+// Player embutido e página de cada plataforma (embed = canal ou, no YouTube, o vídeo ao vivo)
+const PLATFORMS = {
+  twitch: {
+    label: 'Twitch',
+    player: (s) => `https://player.twitch.tv/?channel=${s.embed}&parent=${window.location.hostname}&autoplay=false`,
+    page: (s) => `https://www.twitch.tv/${s.embed}`
+  },
+  youtube: {
+    label: 'YouTube',
+    player: (s) => `https://www.youtube.com/embed/${s.embed}`,
+    page: (s) => `https://www.youtube.com/watch?v=${s.embed}`
+  },
+  kick: {
+    label: 'Kick',
+    player: (s) => `https://player.kick.com/${s.embed}?autoplay=false`,
+    page: (s) => `https://kick.com/${s.embed}`
+  }
+};
+
 export default function LivePage() {
   const {
     liveGames,
@@ -37,7 +56,7 @@ export default function LivePage() {
   const [showStream, setShowStream] = useState(true);
   const [theaterMode, setTheaterMode] = useState(false);
 
-  // Só os canais da Twitch que estão transmitindo uma partida agora (/api/live?streams=1);
+  // Só os canais (Twitch, YouTube, Kick) que estão transmitindo uma partida agora (/api/live?streams=1);
   // null enquanto carrega
   const [matchStreams, setMatchStreams] = useState(null);
   const userPicked = useRef(false);
@@ -48,8 +67,10 @@ export default function LivePage() {
       .then((data) => {
         if (cancelled) return;
         const found = (data?.streams || []).filter((s) => s.timeA && s.timeB).map((s) => ({
-          id: s.channel,
-          key: `tw-live-${s.channel}`,
+          id: `${s.platform || 'twitch'}:${s.embed || s.channel}`,
+          key: `live-${s.platform || 'twitch'}-${s.embed || s.channel}`,
+          platform: s.platform || 'twitch',
+          embed: s.embed || s.channel,
           name: s.channel,
           lang: s.lang,
           title: s.title,
@@ -98,7 +119,7 @@ export default function LivePage() {
             </h1>
           </div>
           <p className="text-gray-400 text-xs sm:text-sm">
-            Partidas profissionais em andamento, atualizadas a cada 30 segundos, com o canal da Twitch que está transmitindo cada partida.
+            Partidas profissionais em andamento, atualizadas a cada 30 segundos, com os canais da Twitch, do YouTube e da Kick que estão transmitindo cada partida.
           </p>
         </div>
 
@@ -145,13 +166,13 @@ export default function LivePage() {
                   )}
                   <span className="text-gray-300">· {activeStream.timeA} x {activeStream.timeB}</span>
                   <a
-                    href={`https://www.twitch.tv/${activeStream.id}`}
+                    href={PLATFORMS[activeStream.platform].page(activeStream)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-amber-400 transition-colors"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Abrir no Twitch</span>
+                    <span>Abrir no {PLATFORMS[activeStream.platform].label}</span>
                   </a>
                 </>
               ) : (
@@ -173,6 +194,7 @@ export default function LivePage() {
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title="Ao vivo agora" />
                   {s.timeA} x {s.timeB}
+                  <span className="text-[11px] opacity-70">{PLATFORMS[s.platform].label}</span>
                   {s.lang && <span className="text-[11px] uppercase opacity-70">{s.lang}</span>}
                 </button>
               ))}
@@ -192,7 +214,7 @@ export default function LivePage() {
             {activeStream ? (
               <iframe
                 key={activeStream.id}
-                src={`https://player.twitch.tv/?channel=${activeStream.id}&parent=${window.location.hostname}&autoplay=false`}
+                src={PLATFORMS[activeStream.platform].player(activeStream)}
                 height="100%"
                 width="100%"
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -284,7 +306,7 @@ export default function LivePage() {
                             }}
                             className="px-2 py-0.5 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-on-accent font-medium transition-[color,background-color,border-color,opacity,transform]"
                           >
-                            Assistir · {s.name}{s.lang ? ` (${s.lang})` : ''}
+                            Assistir · {s.name} · {PLATFORMS[s.platform].label}{s.lang ? ` (${s.lang})` : ''}
                           </button>
                         ))}
                       </div>

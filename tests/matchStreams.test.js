@@ -1,15 +1,36 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { channelFromStreamUrl, twitchChannelsFromPage, parseTwitchPage, streamLanguage, matchForTitle } from '../api/_lib/matchStreams.js';
+import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from '../api/_lib/matchStreams.js';
 
 test('nome do stream da Liquipedia vira canal', () => {
   assert.deepEqual(channelFromStreamUrl('https://liquipedia.net/dota2/Special:Stream/twitch/EPC_EN'), { platform: 'twitch', channel: 'epc_en' });
   assert.equal(channelFromStreamUrl('https://liquipedia.net/dota2/Torneio'), null);
 });
 
-test('canais da Twitch da página do campeonato, sem repetir', () => {
-  const html = '<a href="https://www.twitch.tv/1win_dota">x</a><a href="https://www.twitch.tv/1win_dota_ru">y</a><a href="https://www.twitch.tv/1win_dota">z</a><a href="https://www.twitch.tv/videos/123/">v</a>';
-  assert.deepEqual(twitchChannelsFromPage(html), ['1win_dota', '1win_dota_ru']);
+test('canais da Twitch, Kick e YouTube da página do campeonato, sem repetir', () => {
+  const html = '<a href="https://www.twitch.tv/1win_dota">x</a><a href="https://www.twitch.tv/1win_dota_ru">y</a><a href="https://www.twitch.tv/1win_dota">z</a><a href="https://www.twitch.tv/videos/123/">v</a>'
+    + '<a href="https://kick.com/epldota_en2">k</a><a href="https://www.youtube.com/ESLDota2/streams">y1</a><a href="https://www.youtube.com/@EPLDota/live">y2</a><a href="https://www.youtube.com/watch?v=abc">w</a>';
+  assert.deepEqual(streamChannelsFromPage(html), [
+    { platform: 'twitch', channel: '1win_dota' },
+    { platform: 'twitch', channel: '1win_dota_ru' },
+    { platform: 'kick', channel: 'epldota_en2' },
+    { platform: 'youtube', channel: 'ESLDota2' },
+    { platform: 'youtube', channel: '@EPLDota' }
+  ]);
+});
+
+test('stream do YouTube da Liquipedia com vídeo, e nomes da Kick e do YouTube', () => {
+  assert.deepEqual(channelFromStreamUrl('https://liquipedia.net/dota2/Special:Stream/youtube/ESL_Dota2/nlOP63nfkFM'), { platform: 'youtube', channel: 'esl_dota2', video: 'nlOP63nfkFM' });
+  assert.ok(kickSlugCandidates('EPL_Dota_EN2').includes('epldota_en2'));
+  assert.equal(youtubePathFromName('esl_dota2'), '@esldota2');
+});
+
+test('YouTube e Kick: ao vivo e título', () => {
+  const yt = '<link rel="canonical" href="https://www.youtube.com/watch?v=E60k_Zzs4NE"><meta name="title" content="Froglings vs Insanity - DreamLeague"><script>{"isLiveNow":true}</script>';
+  assert.deepEqual(parseYoutubeLive(yt), { live: true, videoId: 'E60k_Zzs4NE', title: 'Froglings vs Insanity - DreamLeague' });
+  assert.equal(parseYoutubeLive('<link rel="canonical" href="https://www.youtube.com/@x">').live, false);
+  assert.deepEqual(parseKickChannel({ livestream: { is_live: true, session_title: 'EPL | A vs B' } }), { live: true, title: 'EPL | A vs B' });
+  assert.equal(parseKickChannel({ livestream: null }).live, false);
 });
 
 test('página da Twitch: ao vivo e título sem o rodapé', () => {
