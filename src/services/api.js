@@ -922,7 +922,7 @@ function registerStandingsLogos({ tables = [], brackets = [], teams = [] } = {})
 // Retorna { tables, brackets, groupMatches, participants, teams }.
 export async function fetchTournamentStandings(page) {
   if (!page) return { tables: [], brackets: [], groupMatches: [] };
-  const key = `tourney_standings_v6_${page}`;
+  const key = `tourney_standings_v7_${page}`;
   const cached = getCached(key, 5 * 60 * 1000);
   if (cached) {
     registerStandingsLogos(cached);
@@ -937,7 +937,8 @@ export async function fetchTournamentStandings(page) {
         brackets: Array.isArray(data?.brackets) ? data.brackets : [],
         groupMatches: Array.isArray(data?.groupMatches) ? data.groupMatches : [],
         participants: Array.isArray(data?.participants) ? data.participants : [],
-        teams: Array.isArray(data?.teams) ? data.teams : []
+        teams: Array.isArray(data?.teams) ? data.teams : [],
+        placements: Array.isArray(data?.placements) ? data.placements : []
       };
       registerStandingsLogos(result);
       setCache(key, result);

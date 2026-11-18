@@ -186,3 +186,37 @@ export function parseLiquipediaParticipantTeams(html) {
   }
   return teams;
 }
+
+/**
+ * Colocação final dos times (tabela "Prize Pool" da página do campeonato):
+ * [{ place: '5-6', placeStart: 5, prize: '$1,500', name, logo }]. Colocações
+ * empatadas ocupam várias linhas com a célula do lugar só na primeira; vagas
+ * ainda "TBD" (campeonato em andamento) ficam de fora.
+ */
+export function parseLiquipediaPlacements(html) {
+  const text = String(html || '').replace(/&#95;/g, '_').replace(/&#45;/g, '-');
+  const start = text.indexOf('prizepooltable-placement');
+  if (start < 0) return [];
+  const table = text.slice(start, text.indexOf('</table>', start));
+  const out = [];
+  let place = null;
+  let prize = null;
+  for (const row of table.split('<tr').slice(1)) {
+    const placeCell = row.match(/class="prizepooltable-place"[^>]*>([\s\S]*?)<\/td>/);
+    if (placeCell) {
+      place = decode(placeCell[1]);
+      prize = null;
+    }
+    const team = row.match(/class="prizepooltable-col-team">([\s\S]*?)<\/td>/);
+    if (!team || !place) continue;
+    // Valor da premiação: primeira célula alinhada à direita da linha que abre a colocação
+    const money = row.match(/<td data-align="right"[^>]*>([\s\S]*?)<\/td>/);
+    if (money) prize = decode(money[1]);
+    const title = team[1].match(/<a [^>]*title="([^"]+)"/)?.[1]?.replace(/\s*\(page does not exist\)$/, '');
+    const span = team[1].match(/<span class="name"[^>]*>(?:<a[^>]*>)?([^<]+)/)?.[1];
+    const name = cleanTeamName(decode(title || span || ''));
+    if (!name || /^tbd$/i.test(name)) continue;
+    out.push({ place, placeStart: Number(place.match(/\d+/)?.[0]) || null, prize: prize && prize !== '-' ? prize : null, name, logo: teamLogos(team[1]) });
+  }
+  return out;
+}

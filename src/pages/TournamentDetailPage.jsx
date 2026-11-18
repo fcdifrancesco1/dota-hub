@@ -36,6 +36,7 @@ import BackButton from '../components/BackButton';
 import { rememberAliases } from '../utils/teamAliases';
 import { useTheme } from '../context/ThemeContext';
 import TeamLogo from '../utils/teamLogos';
+import { medalStyle } from '../utils/medals';
 import { liquipediaImage } from '../utils/liquipediaImage';
 import { formatDateRange, formatPrize, tierLabel, statusLabel, leagueFromDatabase } from '../utils/tournamentFormat';
 
@@ -234,6 +235,8 @@ export default function TournamentDetailPage() {
   const [shared, setShared] = useState(false);
   const [participants, setParticipants] = useState(null);
   const [teams, setTeams] = useState([]);
+  // Colocação final (tabela de premiação da Liquipedia)
+  const [placements, setPlacements] = useState([]);
 
   // 1. Campeonato: Liquipedia primeiro; ligas numéricas do Admin (Supabase) como alternativa
   useEffect(() => {
@@ -274,6 +277,7 @@ export default function TournamentDetailPage() {
     setGroupMatches([]);
     setParticipants(null);
     setTeams([]);
+    setPlacements([]);
     if (!standingsPage) return;
     let active = true;
     fetchTournamentStandings(standingsPage).then((data) => {
@@ -283,6 +287,7 @@ export default function TournamentDetailPage() {
       setGroupMatches(data?.groupMatches || []);
       setParticipants(allParticipants(data));
       setTeams(data?.teams || []);
+      setPlacements(data?.placements || []);
     });
     return () => { active = false; };
   }, [standingsPage]);
@@ -607,22 +612,19 @@ export default function TournamentDetailPage() {
           </section>
 
           <section>
-            <h2 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-              <Swords className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Encerradas
-            </h2>
-            {finished.length === 0 ? (
-              <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
-                {series.length > 0
+            <DayPager
+              items={finished}
+              getTs={seriesTs}
+              startLatest
+              title={<><Swords className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Encerradas</>}
+              empty={series.length > 0
                   ? 'Nenhuma série encerrada ainda.'
                   : t.status === 'upcoming'
                   ? 'O campeonato ainda não começou.'
                   : t.leagueId && (leagueSeries === null || (shared && participants === null))
                   ? 'Carregando as séries do campeonato...'
                   : 'Nenhuma série deste campeonato registrada na OpenDota.'}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {finished.map((s, idx) => {
+              renderItem={(s, idx) => {
                   const aWon = s.scoreA > s.scoreB;
                   const bWon = s.scoreB > s.scoreA;
                   return (
@@ -632,7 +634,8 @@ export default function TournamentDetailPage() {
                       className="w-full glass-panel hover:bg-surface-2 border border-line hover:border-blue-500/50 dark:hover:border-amber-500/40 rounded-2xl p-3.5 transition-[color,background-color,border-color,opacity,transform] group text-left"
                     >
                       <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
-                        <span className="font-mono">{s.dateStr || ''}</span>
+                        {/* O dia já está no seletor; aqui o horário e o formato */}
+                        <span className="font-mono">{seriesTs(s) ? `${BRT_TIME.format(seriesTs(s) * 1000)} BRT` : ''}{s.formato ? ` · ${s.formato}` : ''}</span>
                         <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-amber-400 shrink-0" />
                       </div>
                       <div className="flex items-center justify-between gap-2">
@@ -650,9 +653,8 @@ export default function TournamentDetailPage() {
                       </div>
                     </button>
                   );
-                })}
-              </div>
-            )}
+              }}
+            />
           </section>
 
           <section>
@@ -695,6 +697,7 @@ export default function TournamentDetailPage() {
 
       {/* ABA: INFORMAÇÕES */}
       {activeTab === 'info' && (
+        <div className="space-y-6">
         <div className="glass-panel border border-line rounded-3xl p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 text-sm shadow-xl">
           {[
             ['Nome oficial', t.name],
@@ -714,8 +717,38 @@ export default function TournamentDetailPage() {
             </div>
           ))}
         </div>
+        {placements.length > 0 && <FinalPlacements placements={placements} live={t.status !== 'finished'} />}
+        </div>
       )}
     </div>
+  );
+}
+
+/** Classificação final do campeonato; em andamento, só os times que já têm colocação. */
+function FinalPlacements({ placements, live }) {
+  return (
+    <section className="glass-panel border border-line rounded-3xl p-6 sm:p-8 shadow-xl">
+      <h2 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+        <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" /> Classificação final
+      </h2>
+      {live && <p className="text-[11px] text-gray-400 mb-3">Campeonato em andamento: aparecem só os times que já têm a colocação definida.</p>}
+      {/* Colunas de cima para baixo: 1º ao 8º à esquerda, o resto à direita */}
+      <ul className="mt-3 sm:columns-2 gap-x-10">
+        {placements.map((p) => (
+          <li key={`${p.place}-${p.name}`} className="flex items-center gap-3 py-2.5 border-b border-white/5 text-sm break-inside-avoid">
+            <span
+              className="w-12 shrink-0 text-center font-mono text-xs font-semibold rounded-md py-0.5 border border-line text-gray-300"
+              style={medalStyle(p.placeStart) || undefined}
+            >
+              {p.place}
+            </span>
+            <TeamLogo teamName={p.name} logoUrl={p.logo?.dark} className="w-6 h-6 shrink-0" />
+            <span className="flex-1 min-w-0 truncate font-medium text-white">{p.name}</span>
+            {p.prize && <span className="shrink-0 font-mono text-xs text-emerald-400">{/^\$[\d,]+$/.test(p.prize) ? `US$ ${Number(p.prize.replace(/\D/g, '')).toLocaleString('pt-BR')}` : p.prize}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -813,20 +846,25 @@ function dayLabel(day) {
   return `${wd.charAt(0).toUpperCase()}${wd.slice(1)} · ${day.key}`;
 }
 
-/** Próximas partidas, um dia por vez; trocar de dia sobe ou desce a lista como um elevador. */
-function UpcomingByDay({ matches }) {
+/**
+ * Lista de partidas um dia por vez; trocar de dia sobe ou desce a lista como um
+ * elevador. Começa no primeiro dia (próximas) ou no mais recente (encerradas).
+ */
+function DayPager({ items, getTs, title, empty, startLatest = false, renderItem }) {
   const days = useMemo(() => {
     const map = new Map();
-    for (const m of matches) {
-      const key = m.timestamp ? BRT_DAY.format(m.timestamp * 1000) : 'tbd';
-      if (!map.has(key)) map.set(key, { key, ts: m.timestamp || Infinity, list: [] });
+    for (const m of items) {
+      const ts = getTs(m);
+      const key = ts ? BRT_DAY.format(ts * 1000) : 'tbd';
+      if (!map.has(key)) map.set(key, { key, ts: ts || Infinity, list: [] });
       map.get(key).list.push(m);
     }
     return [...map.values()].sort((a, b) => a.ts - b.ts);
-  }, [matches]);
+  }, [items, getTs]);
   // dir: 1 = dia seguinte (a lista sobe), -1 = anterior (desce), 0 = sem animação
   const [sel, setSel] = useState({ key: null, dir: 0 });
-  const idx = Math.max(0, days.findIndex((d) => d.key === sel.key));
+  const found = days.findIndex((d) => d.key === sel.key);
+  const idx = found >= 0 ? found : startLatest ? Math.max(0, days.findLastIndex((d) => d.key !== 'tbd')) : 0;
   const day = days[idx];
 
   const go = (i) => { if (i >= 0 && i < days.length && i !== idx) setSel({ key: days[i].key, dir: i > idx ? 1 : -1 }); };
@@ -836,9 +874,7 @@ function UpcomingByDay({ matches }) {
   // Título da coluna com o seletor de dia discreto à direita
   const heading = (
     <div className="mb-3 flex items-center justify-between gap-2">
-      <h2 className="text-xs font-semibold text-white flex items-center gap-2">
-        <Clock className="w-4 h-4 text-cyan-400" /> Próximas
-      </h2>
+      <h2 className="text-xs font-semibold text-white flex items-center gap-2">{title}</h2>
       {day && (
         <div className="flex items-center gap-1 text-[11px] text-gray-400">
           <button onClick={() => go(idx - 1)} disabled={idx === 0} className={arrow} aria-label="Dia anterior">
@@ -860,7 +896,7 @@ function UpcomingByDay({ matches }) {
       <>
         {heading}
         <div className="glass-panel border border-line rounded-2xl p-6 text-center text-xs text-gray-400">
-          Nenhuma partida agendada.
+          {empty}
         </div>
       </>
     );
@@ -871,7 +907,25 @@ function UpcomingByDay({ matches }) {
       {heading}
       <div className="overflow-hidden">
         <div key={day.key} className={`space-y-2 ${anim}`}>
-          {day.list.map((m, i) => (
+          {day.list.map(renderItem)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const matchTs = (m) => m.timestamp;
+const seriesTs = (s) => s.startTime || s.lastMatchTime;
+
+/** Próximas partidas do campeonato, um dia por vez. */
+function UpcomingByDay({ matches }) {
+  return (
+    <DayPager
+      items={matches}
+      getTs={matchTs}
+      title={<><Clock className="w-4 h-4 text-cyan-400" /> Próximas</>}
+      empty="Nenhuma partida agendada."
+      renderItem={(m, i) => (
             <div key={`${m.timeA}-${m.timeB}-${m.timestamp || i}`} className="glass-panel border border-line rounded-2xl p-3.5">
               <div className="flex items-center justify-between text-[11px] text-gray-400 mb-2">
                 <span className="truncate text-blue-600 dark:text-amber-400 font-semibold">{m.tourneyName}</span>
@@ -891,9 +945,7 @@ function UpcomingByDay({ matches }) {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+      )}
+    />
   );
 }
