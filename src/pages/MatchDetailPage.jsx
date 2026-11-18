@@ -17,7 +17,10 @@ import {
   Trophy,
   Zap
 } from 'lucide-react';
-import { fetchMatchDetails, fetchLeagueSeries, fetchProBenchmarks, getHeroImg, getHeroName, getItemImg, normalizeTeamKey } from '../services/api';
+import { fetchMatchDetails, fetchLeagueSeries, fetchProBenchmarks, getHeroImg, getHeroName, getItemImg, normalizeTeamKey, fetchTournaments, getCachedTournaments } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
+import { liquipediaImage } from '../utils/liquipediaImage';
+import { findTournamentForMatch, tournamentPath } from '../utils/tournamentFormat';
 import { fetchCareerBest } from '../services/playerProfile';
 import { performanceRating, playerRow, statsFromMatchPlayers } from '../utils/proBenchmarks';
 import { RatingBadge } from '../components/PlayerPerformance';
@@ -193,46 +196,9 @@ export default function MatchDetailPage() {
   const openTeam = useOpenTeam();
   const match = activeMatchId ? withTeamNames(matchData[activeMatchId], series?.teamNames) : undefined;
 
-
-  return (
-    <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
-      {/* Volta para a página anterior; link direto volta para Partidas */}
-      <BackButton fallbackPath="/partidas" fallbackLabel="Partidas" />
-
-      {!series ? (
-        seriesError ? (
-          <div className="rounded-2xl bg-surface border border-line p-10 text-center max-w-xl mx-auto">
-            <AlertTriangle className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-            <h1 className="text-lg font-semibold text-white mb-2">Partida não encontrada</h1>
-            <p className="text-xs text-gray-400 mb-5">
-              Não foi possível carregar a partida #{id}. A OpenDota pode estar instável ou o replay ainda não foi processado.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link to="/partidas" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-on-accent text-xs font-semibold">
-                Ver resultados
-              </Link>
-              <a
-                href={`https://www.opendota.com/matches/${id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-2 border border-line text-gray-300 text-xs font-medium"
-              >
-                <ExternalLink className="w-3.5 h-3.5" /> Abrir no OpenDota
-              </a>
-            </div>
-          </div>
-        ) : (
-          <div className="py-24 flex flex-col items-center gap-3 text-gray-400">
-            <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-            <span className="text-xs font-semibold">Carregando partida #{id}...</span>
-          </div>
-        )
-      ) : (
-        <div className="space-y-6">
-          <SeriesHeader series={series} currentMap={currentMap} onOpenTeam={openTeam} />
-
-          {games.length > 1 && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+  // Botões dos mapas e da aba geral; na aba geral ficam dentro do card de totais
+  const mapTabs = series && games.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto min-w-0">
               {games.map((g, idx) => {
                 const active = !showOverview && idx === activeIndex;
                 const loaded = withTeamNames(matchData[g.match_id], series.teamNames);
@@ -280,10 +246,52 @@ export default function MatchDetailPage() {
                 </button>
               )}
             </div>
+  );
+
+
+  return (
+    <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
+      {/* Volta para a página anterior; link direto volta para Partidas */}
+      <BackButton fallbackPath="/partidas" fallbackLabel="Partidas" />
+
+      {!series ? (
+        seriesError ? (
+          <div className="rounded-2xl bg-surface border border-line p-10 text-center max-w-xl mx-auto">
+            <AlertTriangle className="w-10 h-10 text-gray-500 mx-auto mb-3" />
+            <h1 className="text-lg font-semibold text-white mb-2">Partida não encontrada</h1>
+            <p className="text-xs text-gray-400 mb-5">
+              Não foi possível carregar a partida #{id}. A OpenDota pode estar instável ou o replay ainda não foi processado.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link to="/partidas" className="inline-flex px-4 py-2 rounded-xl bg-amber-500 text-on-accent text-xs font-semibold">
+                Ver resultados
+              </Link>
+              <a
+                href={`https://www.opendota.com/matches/${id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-2 border border-line text-gray-300 text-xs font-medium"
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Abrir no OpenDota
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div className="py-24 flex flex-col items-center gap-3 text-gray-400">
+            <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+            <span className="text-xs font-semibold">Carregando partida #{id}...</span>
+          </div>
+        )
+      ) : (
+        <div className="space-y-6">
+          <SeriesHeader series={series} currentMap={currentMap} onOpenTeam={openTeam} />
+
+          {!showOverview && mapTabs && (
+            <div className="glass-panel border border-line p-3 rounded-2xl shadow-md">{mapTabs}</div>
           )}
 
           {showOverview ? (
-            <SeriesOverview series={series} games={games} matchData={matchData} constants={constants} benchmarks={benchmarks} />
+            <SeriesOverview tabs={mapTabs} series={series} games={games} matchData={matchData} constants={constants} benchmarks={benchmarks} />
           ) : match === undefined ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
               <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
@@ -313,6 +321,30 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
   const aAhead = series.scoreA > series.scoreB;
   const bAhead = series.scoreB > series.scoreA;
   const when = series.startTime || currentMap?.start_time;
+
+  // Campeonato da série na lista da Liquipedia (pela liga da Valve ou pelo nome): logo oficial e link
+  const { theme } = useTheme();
+  const [tournaments, setTournaments] = useState(getCachedTournaments);
+  useEffect(() => {
+    let active = true;
+    fetchTournaments().then((list) => { if (active && list?.length) setTournaments(list); });
+    return () => { active = false; };
+  }, []);
+  const tournament = (series.leagueId && tournaments.find((t) => String(t.leagueId) === String(series.leagueId)))
+    || findTournamentForMatch({ torneio: series.stage }, tournaments);
+  const tournamentLogo = tournament?.icon?.[theme] || tournament?.image?.[theme] || null;
+  const [logoFailed, setLogoFailed] = useState(false);
+  useEffect(() => { setLogoFailed(false); }, [tournamentLogo]);
+  const stageContent = (
+    <>
+      {tournamentLogo && !logoFailed && (
+        <img src={liquipediaImage(tournamentLogo)} alt="" referrerPolicy="no-referrer"
+          className="h-4 w-auto max-w-[48px] object-contain" onError={() => setLogoFailed(true)} />
+      )}
+      {tournament?.name || series.stage || 'Torneio profissional'}
+    </>
+  );
+  const stageClass = 'inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-amber-400 bg-surface-2 border border-line px-3 py-1 rounded-full shadow-sm';
   const dateLabel = when
     ? new Date(when * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' })
     : series.dateStr;
@@ -346,9 +378,13 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
   return (
     <section className="tilt-card glass-panel rounded-3xl border border-line p-6 sm:p-8 shadow-2xl relative overflow-hidden">
       <div className="flex flex-wrap items-center justify-center gap-2 mb-5 relative z-10">
-        <span className="text-xs font-semibold text-blue-600 dark:text-amber-400 bg-surface-2 border border-line px-3 py-1 rounded-full shadow-sm">
-          {series.stage || 'Torneio profissional'}
-        </span>
+        {tournament ? (
+          <Link to={tournamentPath(tournament)} className={`${stageClass} hover:border-amber-500/60 transition-colors`} title={`Ver campeonato ${tournament.name}`}>
+            {stageContent}
+          </Link>
+        ) : (
+          <span className={stageClass}>{stageContent}</span>
+        )}
         {series.formato && (
           <span className="text-xs font-mono font-semibold text-purple-600 dark:text-purple-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
             {series.formato}
@@ -867,14 +903,17 @@ function aggregateSeries(series, maps) {
   return { A: finish(teams.A), B: finish(teams.B), totalDuration, mapsCount: maps.length };
 }
 
-function SeriesOverview({ series, games, matchData, constants, benchmarks }) {
+function SeriesOverview({ tabs, series, games, matchData, constants, benchmarks }) {
   const ids = games.map((g) => String(g.match_id));
   const loaded = ids.map((mid) => matchData[mid]);
   if (loaded.some((m) => m === undefined)) {
     return (
-      <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-        <span className="text-xs font-semibold">Carregando os {ids.length} mapas da série...</span>
+      <div className="space-y-6">
+        {tabs && <div className="glass-panel border border-line p-3 rounded-2xl shadow-md">{tabs}</div>}
+        <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+          <span className="text-xs font-semibold">Carregando os {ids.length} mapas da série...</span>
+        </div>
       </div>
     );
   }
@@ -901,12 +940,9 @@ function SeriesOverview({ series, games, matchData, constants, benchmarks }) {
   return (
     <div className="space-y-6">
       {/* RESUMO DA SÉRIE */}
-      <div className="flex flex-wrap items-center justify-between gap-3 glass-panel border border-line p-4 sm:p-5 rounded-2xl text-xs shadow-md">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-blue-600 dark:text-amber-400" />
-          <span className="text-gray-400">Totais da série em {mapsCount} {mapsCount === 1 ? 'mapa' : 'mapas'}</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 glass-panel border border-line p-3 rounded-2xl text-xs shadow-md">
+        {tabs}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-xs px-2" title={`Totais da série em ${mapsCount} ${mapsCount === 1 ? 'mapa' : 'mapas'}`}>
           <span className="flex items-center gap-1.5">
             <Swords className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
             Abates: <strong className="text-white">{A.kills}</strong>
@@ -929,7 +965,7 @@ function SeriesOverview({ series, games, matchData, constants, benchmarks }) {
             <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
             <span>Destaques da série</span>
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-5 gap-3">
             {mvp?.rating && <MvpCard player={{ ...mvp, hero_id: mvp.heroes[0]?.hero_id }} rating={mvp.rating} constants={constants} label="MVP da série" />}
             {highlights.map(({ label, icon: Icon, field, color, fmt, player }) => (
               <div key={field} className="flex items-center gap-3 bg-surface-2 border border-line rounded-2xl p-3 shadow-sm">
