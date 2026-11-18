@@ -286,7 +286,8 @@ export default function MatchDetailPage() {
         <div className="space-y-6">
           <SeriesHeader series={series} currentMap={currentMap} onOpenTeam={openTeam} />
 
-          {!showOverview && mapTabs && (
+          {/* Com o mapa carregado, os botões ficam no card de resumo do mapa */}
+          {!showOverview && !match && mapTabs && (
             <div className="glass-panel border border-line p-3 rounded-2xl shadow-md">{mapTabs}</div>
           )}
 
@@ -299,6 +300,7 @@ export default function MatchDetailPage() {
             </div>
           ) : match ? (
             <MapDetail
+              tabs={mapTabs}
               match={match}
               benchmarks={benchmarks}
               mapNumber={currentMap?.mapNumber || activeIndex + 1}
@@ -465,7 +467,7 @@ function CareerRecords({ match }) {
   );
 }
 
-function MapDetail({ match, mapNumber, constants, onSelectHero, benchmarks }) {
+function MapDetail({ tabs, match, mapNumber, constants, onSelectHero, benchmarks }) {
   const radiant = radiantNameOf(match);
   const dire = direNameOf(match);
   const players = match.players || [];
@@ -480,13 +482,15 @@ function MapDetail({ match, mapNumber, constants, onSelectHero, benchmarks }) {
   return (
     <div className="space-y-6">
       {/* RESUMO DO MAPA */}
-      <div className="flex flex-wrap items-center justify-between gap-3 glass-panel border border-line p-4 sm:p-5 rounded-2xl text-xs shadow-md">
-        <div className="flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
-          <span className="text-gray-400">Vencedor do Jogo {mapNumber}:</span>
-          <strong className={match.radiant_win ? 'text-emerald-500 font-semibold' : 'text-rose-500 font-semibold'}>{winner}</strong>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-xs">
+      <div className={`flex flex-wrap items-center justify-between gap-3 glass-panel border border-line rounded-2xl text-xs shadow-md ${tabs ? 'p-3' : 'p-4 sm:p-5'}`}>
+        {tabs || (
+          <div className="flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-blue-600 dark:text-amber-400" />
+            <span className="text-gray-400">Vencedor do Jogo {mapNumber}:</span>
+            <strong className={match.radiant_win ? 'text-emerald-500 font-semibold' : 'text-rose-500 font-semibold'}>{winner}</strong>
+          </div>
+        )}
+        <div className={`flex flex-wrap items-center gap-x-5 gap-y-2 text-gray-400 font-mono text-xs ${tabs ? 'px-2' : ''}`}>
           <span className="flex items-center gap-1.5">
             <Swords className="w-3.5 h-3.5 text-blue-600 dark:text-amber-400" />
             Abates: <strong className="text-emerald-500">{match.radiant_score ?? '—'}</strong>
