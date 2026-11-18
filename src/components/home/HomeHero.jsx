@@ -8,7 +8,7 @@ import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
 import { liquipediaImage } from '../../utils/liquipediaImage';
 import { fetchTournaments, getCachedTournaments } from '../../services/api';
-import { pickFeaturedTournament, pickHeadlineMatch, tierLetter, formatPrize, tournamentPath } from '../../utils/tournamentFormat';
+import { pickHomeHighlight, tierLetter, formatPrize, tournamentPath } from '../../utils/tournamentFormat';
 import MatchPreviewModal from '../MatchPreviewModal';
 
 export default function HomeHero() {
@@ -24,15 +24,13 @@ export default function HomeHero() {
     return () => { active = false; };
   }, []);
 
-  // Próxima partida do campeonato de maior tier (S, depois A, B...); dentro do
-  // tier, a mais próxima — ver pickHeadlineMatch
-  const headline = pickHeadlineMatch(upcomingMatches, tournaments);
+  // Torneio em destaque e a próxima partida dele, sempre do mesmo campeonato — ver pickHomeHighlight
+  const headline = pickHomeHighlight(upcomingMatches, tournaments);
   const nextMatch = headline?.match || null;
   // Janela com as médias dos jogadores das duas equipes no campeonato até esta partida
   const [showPreview, setShowPreview] = useState(false);
 
-  // Torneio em destaque: o S/A-Tier em andamento; senão, o da partida em destaque
-  const featuredTournament = pickFeaturedTournament(tournaments) || headline?.tournament || null;
+  const featuredTournament = headline?.tournament || null;
   const featuredPrize = featuredTournament ? formatPrize(featuredTournament) : null;
   const featuredTier = featuredTournament ? tierLetter(featuredTournament.tier) : null;
   // Logo oficial do campeonato (versão do tema atual); se não houver ou não carregar, fica o nome em texto

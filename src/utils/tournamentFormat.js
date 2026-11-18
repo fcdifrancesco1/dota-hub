@@ -158,3 +158,21 @@ export function pickHeadlineMatch(upcoming, tournaments, nowMs = Date.now()) {
   scored.sort((a, b) => a.rank - b.rank || a.tbd - b.tbd || (a.m.timestamp || Infinity) - (b.m.timestamp || Infinity));
   return scored[0] ? { match: scored[0].m, tournament: scored[0].tournament } : null;
 }
+
+/**
+ * Destaque da Home: campeonato e partida sempre do mesmo evento. Primeiro a
+ * próxima partida do torneio em destaque; se ele não tiver jogo na agenda, o
+ * destaque passa a ser o campeonato da próxima grande partida.
+ */
+export function pickHomeHighlight(upcoming, tournaments, nowMs = Date.now()) {
+  const featured = pickFeaturedTournament(tournaments);
+  if (featured) {
+    const own = (upcoming || []).filter((m) => findTournamentForMatch(m, tournaments) === featured);
+    const mine = pickHeadlineMatch(own, tournaments, nowMs);
+    if (mine) return { tournament: featured, match: mine.match };
+  }
+  const headline = pickHeadlineMatch(upcoming, tournaments, nowMs);
+  if (headline?.tournament) return headline;
+  // Partida de campeonato desconhecido não vai ao lado de outro torneio
+  return { tournament: featured, match: featured ? null : headline?.match || null };
+}
