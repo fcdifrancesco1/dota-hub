@@ -17,10 +17,8 @@ import {
   Trophy,
   Zap
 } from 'lucide-react';
-import { fetchMatchDetails, fetchLeagueSeries, fetchProBenchmarks, getHeroImg, getHeroName, getItemImg, normalizeTeamKey, fetchTournaments, getCachedTournaments } from '../services/api';
-import { useTheme } from '../context/ThemeContext';
-import { liquipediaImage } from '../utils/liquipediaImage';
-import { findTournamentForMatch, tournamentPath } from '../utils/tournamentFormat';
+import { fetchMatchDetails, fetchLeagueSeries, fetchProBenchmarks, getHeroImg, getHeroName, getItemImg, normalizeTeamKey } from '../services/api';
+import TournamentChip from '../components/TournamentChip';
 import { fetchCareerBest } from '../services/playerProfile';
 import { performanceRating, playerRow, statsFromMatchPlayers } from '../utils/proBenchmarks';
 import { RatingBadge } from '../components/PlayerPerformance';
@@ -324,29 +322,6 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
   const bAhead = series.scoreB > series.scoreA;
   const when = series.startTime || currentMap?.start_time;
 
-  // Campeonato da série na lista da Liquipedia (pela liga da Valve ou pelo nome): logo oficial e link
-  const { theme } = useTheme();
-  const [tournaments, setTournaments] = useState(getCachedTournaments);
-  useEffect(() => {
-    let active = true;
-    fetchTournaments().then((list) => { if (active && list?.length) setTournaments(list); });
-    return () => { active = false; };
-  }, []);
-  const tournament = (series.leagueId && tournaments.find((t) => String(t.leagueId) === String(series.leagueId)))
-    || findTournamentForMatch({ torneio: series.stage }, tournaments);
-  const tournamentLogo = tournament?.icon?.[theme] || tournament?.image?.[theme] || null;
-  const [logoFailed, setLogoFailed] = useState(false);
-  useEffect(() => { setLogoFailed(false); }, [tournamentLogo]);
-  const stageContent = (
-    <>
-      {tournamentLogo && !logoFailed && (
-        <img src={liquipediaImage(tournamentLogo)} alt="" referrerPolicy="no-referrer"
-          className="h-4 w-auto max-w-[48px] object-contain" onError={() => setLogoFailed(true)} />
-      )}
-      {tournament?.name || series.stage || 'Torneio profissional'}
-    </>
-  );
-  const stageClass = 'inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-amber-400 bg-surface-2 border border-line px-3 py-1 rounded-full shadow-sm';
   const dateLabel = when
     ? new Date(when * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' })
     : series.dateStr;
@@ -380,13 +355,7 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
   return (
     <section className="tilt-card glass-panel rounded-3xl border border-line p-6 sm:p-8 shadow-2xl relative overflow-hidden">
       <div className="flex flex-wrap items-center justify-center gap-2 mb-5 relative z-10">
-        {tournament ? (
-          <Link to={tournamentPath(tournament)} className={`${stageClass} hover:border-amber-500/60 transition-colors`} title={`Ver campeonato ${tournament.name}`}>
-            {stageContent}
-          </Link>
-        ) : (
-          <span className={stageClass}>{stageContent}</span>
-        )}
+        <TournamentChip leagueId={series.leagueId} name={series.stage} />
         {series.formato && (
           <span className="text-xs font-mono font-semibold text-purple-600 dark:text-purple-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full shadow-sm">
             {series.formato}

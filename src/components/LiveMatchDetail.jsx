@@ -20,6 +20,7 @@ import {
   fetchMatchDetails
 } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
+import TournamentChip from './TournamentChip';
 
 // Lê o primeiro valor definido entre possíveis nomes de campo da API (sem inventar números)
 function pick(obj, keys) {
@@ -199,7 +200,9 @@ export default function LiveMatchDetail({
   const scoreB = pick(matchData, ['dire_score']) ?? game.gameScoreB ?? null;
   const hasScore = scoreA !== null && scoreB !== null;
 
-  const leagueName = matchData?.league_name || game.torneio || "Torneio profissional";
+  // Campeonato: o feed da Valve manda league_name/league_id; o replay da OpenDota (mapas encerrados), league.name/leagueid
+  const leagueName = matchData?.league_name || matchData?.league?.name || game.league_name || game.torneio || "Torneio profissional";
+  const leagueId = matchData?.league_id || matchData?.leagueid || game.league_id || game.leagueid || null;
   const formatStr = game.formato || "BO3";
   // Mapas já vencidos na série (o feed da Valve informa; ausente em jogo avulso)
   const seriesA = pick(matchData, ['radiant_series_wins']) ?? game.radiant_series_wins;
@@ -820,9 +823,7 @@ export default function LiveMatchDetail({
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
             Ao vivo {timeFormatted ? `· ${timeFormatted}` : ''}
           </span>
-          <span className="text-gray-300 font-medium bg-surface-2 border border-line px-2.5 py-1 rounded-full">
-            {leagueName} ({formatStr})
-          </span>
+          <TournamentChip leagueId={leagueId} name={leagueName} suffix={` (${formatStr})`} />
           {hasSeries && (
             <span className="text-gray-200 font-semibold bg-surface-2 border border-line px-2.5 py-1 rounded-full">
               Série <span className="text-emerald-400">{seriesA}</span> × <span className="text-rose-400">{seriesB}</span> · Mapa {seriesA + seriesB + 1}
