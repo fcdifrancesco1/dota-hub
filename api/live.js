@@ -794,12 +794,24 @@ async function fetchTwitchChannel({ channel }) {
 
 // Canal do YouTube: a página "/live" abre a transmissão em andamento (ou o vídeo que a Liquipedia indicou)
 async function fetchYoutubeChannel({ channel, video }) {
+  const name = channel.replace(/^(c|user|channel)\//, '');
   try {
     const url = video ? `https://www.youtube.com/watch?v=${video}` : `https://www.youtube.com/${channel}/live`;
     const r = await fetch(url, { headers: PAGE_HEADERS, signal: AbortSignal.timeout(6000) });
+    const yt = r.ok ? parseYoutubeLive(await r.text()) : null;
+    // Página normal do vídeo: ela diz se está ao vivo
+    if (yt?.videoId) return { platform: 'youtube', channel: name, embed: yt.videoId, live: yt.live, title: yt.title };
+    console.warn(`[Live API] YouTube sem a página do vídeo (${r.status}) para ${url}`);
+  } catch { /* tenta o oEmbed abaixo */ }
+  // O YouTube às vezes devolve consentimento/verificação ao servidor. Com o vídeo
+  // indicado pela Liquipedia numa partida em andamento, o oEmbed confirma que ele existe.
+  // shortcut: não sabe se o vídeo ainda está ao vivo; vale porque só entra vídeo de série em andamento
+  if (!video) return null;
+  try {
+    const r = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${video}`)}&format=json`, { signal: AbortSignal.timeout(6000) });
     if (!r.ok) return null;
-    const yt = parseYoutubeLive(await r.text());
-    return { platform: 'youtube', channel: channel.replace(/^(c|user|channel)\//, ''), embed: yt.videoId, live: yt.live, title: yt.title };
+    const o = await r.json();
+    return { platform: 'youtube', channel: name, embed: video, live: true, title: o.title || null };
   } catch {
     return null;
   }
