@@ -1,4 +1,4 @@
-// Layout da loja do jogo (scripts/shops.txt do Dota 2, cópia do d2vpkr de mar/2026):
+// Layout da loja do jogo (scripts/shops.txt do Dota 2, cópia do d2vpkr de nov/2026, patch 7.42):
 // cada categoria com os itens na ordem em que aparecem no cliente.
 // shortcut: lista fixa; quando a Valve mexer na loja, gerar de novo a partir do shops.txt
 export const SHOP_BASIC = [
@@ -54,11 +54,11 @@ export const SHOP_BASIC = [
       "chainmail",
       "broadsword",
       "blight_stone",
-      "blitz_knuckles",
+      "quarterstaff",
       "splintmail",
       "claymore",
       "orb_of_venom",
-      "javelin",
+      "blitz_knuckles",
       "helm_of_iron_will",
       "mithril_hammer"
     ]
@@ -120,15 +120,15 @@ export const SHOP_UPGRADES = [
       "power_treads",
       "soul_ring",
       "orb_of_corrosion",
-      "falcon_blade",
+      "bloodslinger",
       "phase_boots",
+      "falcon_blade",
       "pers",
-      "mask_of_madness",
       "oblivion_staff",
       "travel_boots",
+      "mask_of_madness",
       "hand_of_midas",
-      "moon_shard",
-      "soul_booster"
+      "moon_shard"
     ]
   },
   {
@@ -143,13 +143,13 @@ export const SHOP_UPGRADES = [
       "mekansm",
       "essence_distiller",
       "ancient_janggo",
-      "pavise",
+      "force_staff",
       "guardian_greaves",
       "spirit_vessel",
       "boots_of_bearing",
-      "solar_crest",
-      "glimmer_cape",
+      "caduceus",
       "holy_locket",
+      "glimmer_cape",
       "pipe"
     ]
   },
@@ -160,23 +160,23 @@ export const SHOP_UPGRADES = [
       "veil_of_discord",
       "rod_of_atos",
       "cyclone",
-      "phylactery",
+      "meteor_hammer",
       "bloodstone",
       "gungir",
       "wind_waker",
-      "angels_demise",
-      "force_staff",
+      "starforge",
       "aether_lens",
-      "meteor_hammer",
+      "phylactery",
       "dagon",
+      "orchid",
       "ultimate_scepter",
       "crellas_crozier",
       "octarine_core",
-      "orchid",
+      "bloodthorn",
+      "ultimate_scepter_2",
       "refresher",
       "ethereal_blade",
-      "sheepstick",
-      "bloodthorn"
+      "sheepstick"
     ]
   },
   {
@@ -184,14 +184,18 @@ export const SHOP_UPGRADES = [
     "label": "Armadura",
     "items": [
       "buckler",
+      "pavise",
       "vanguard",
+      "armlet",
+      "vladmir",
+      "solar_crest",
+      "crimson_guard",
+      "berserkers_sabatons",
+      "ristuls_devotion",
       "blade_mail",
       "helm_of_the_dominator",
-      "vladmir",
-      "crimson_guard",
-      "armlet",
-      "helm_of_the_overlord",
       "consecrated_wraps",
+      "soul_booster",
       "aeon_disk",
       "lotus_orb",
       "black_king_bar",
@@ -206,10 +210,6 @@ export const SHOP_UPGRADES = [
     "label": "Armas",
     "items": [
       "lesser_crit",
-      "mage_slayer",
-      "heavens_halberd",
-      "desolator",
-      "revenants_brooch",
       "basher",
       "maelstrom",
       "invis_sword",
@@ -217,14 +217,18 @@ export const SHOP_UPGRADES = [
       "abyssal_blade",
       "mjollnir",
       "silver_edge",
+      "mage_slayer",
+      "heavens_halberd",
+      "desolator",
       "bfury",
       "nullifier",
+      "skypiercer",
       "manta",
       "radiance",
-      "rapier",
       "monkey_king_bar",
+      "satanic",
       "butterfly",
-      "satanic"
+      "rapier"
     ]
   },
   {

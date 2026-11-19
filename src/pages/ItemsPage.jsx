@@ -7,8 +7,8 @@ import { SHOP_BASIC, SHOP_UPGRADES } from '../data/itemShop';
 import { fetchValveItem, fetchValveItemList, itemImg } from '../services/valveData';
 import { itemBonuses, itemDescriptionBlocks } from '../utils/valveText';
 
-// Classes de itens neutros e a partir de quando caem na partida
-const NEUTRAL_TIERS = [['Classe 1', '0:00+'], ['Classe 2', '15:00+'], ['Classe 3', '25:00+'], ['Classe 4', '35:00+'], ['Classe 5', '60:00+']];
+// Classes de itens neutros e a partir de quando caem na partida (patch 7.42; Madstone infinita aos 65:00)
+const NEUTRAL_TIERS = [['Classe 1', '0:00+'], ['Classe 2', '15:00+'], ['Classe 3', '30:00+'], ['Classe 4', '50:00+']];
 const GOLD_ICON = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/gold.png';
 
 /** Itens no layout da loja do cliente, com a ficha em português ao lado. */
