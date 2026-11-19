@@ -74,6 +74,12 @@ export default function ItemsPage() {
             {SHOP_BASIC.map((cat) => (
               <Category key={cat.key} label={cat.label}>{cat.items.map((n) => tile(byName[n], n))}</Category>
             ))}
+            {/* Ao lado da loja secreta: itens que só caem dos objetivos */}
+            <div className="space-y-4">
+              {OBJECTIVE_DROPS.map((d) => (
+                <Category key={d.label} label={d.label}>{d.items.map((n) => tile(byName[n], n))}</Category>
+              ))}
+            </div>
           </div>
         </ShopPanel>
 
@@ -95,12 +101,6 @@ export default function ItemsPage() {
             {enchantments.length > 0 && (
               <Category label="Encantamentos neutros" cols="grid-cols-6">{enchantments.map((i) => tile(i))}</Category>
             )}
-          </div>
-          <h2 className="dota-heading text-xs text-center mt-6 mb-4">Recompensas de objetivos</h2>
-          <div className="space-y-4">
-            {OBJECTIVE_DROPS.map((d) => (
-              <Category key={d.label} label={d.label} cols="grid-cols-6">{d.items.map((n) => tile(byName[n], n))}</Category>
-            ))}
           </div>
         </ShopPanel>
 
