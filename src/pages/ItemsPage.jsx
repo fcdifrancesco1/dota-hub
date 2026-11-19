@@ -9,6 +9,11 @@ import { itemBonuses, itemDescriptionBlocks } from '../utils/valveText';
 
 // Classes de itens neutros e a partir de quando caem na partida (patch 7.42; Madstone infinita aos 65:00)
 const NEUTRAL_TIERS = [['Classe 1', '0:00+'], ['Classe 2', '15:00+'], ['Classe 3', '30:00+'], ['Classe 4', '50:00+']];
+// Itens que não estão na loja: só caem dos objetivos do mapa (patch 7.42)
+const OBJECTIVE_DROPS = [
+  { label: 'Roshan', items: ['aegis', 'cheese', 'refresher_shard', 'roshans_banner'] },
+  { label: 'Tormentor', items: ['horn_of_battle_greater'] }
+];
 const GOLD_ICON = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/gold.png';
 
 /** Itens no layout da loja do cliente, com a ficha em português ao lado. */
@@ -90,6 +95,12 @@ export default function ItemsPage() {
             {enchantments.length > 0 && (
               <Category label="Encantamentos neutros" cols="grid-cols-6">{enchantments.map((i) => tile(i))}</Category>
             )}
+          </div>
+          <h2 className="dota-heading text-xs text-center mt-6 mb-4">Recompensas de objetivos</h2>
+          <div className="space-y-4">
+            {OBJECTIVE_DROPS.map((d) => (
+              <Category key={d.label} label={d.label} cols="grid-cols-6">{d.items.map((n) => tile(byName[n], n))}</Category>
+            ))}
           </div>
         </ShopPanel>
 
