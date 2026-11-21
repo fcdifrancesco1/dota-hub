@@ -114,6 +114,18 @@ const WINS_NEEDED = { BO1: 1, BO2: 2, BO3: 2, BO5: 3 };
 // Duração máxima de uma série a partir do horário marcado: a Liquipedia às vezes
 // demora a marcar a série como encerrada, e ela não pode ficar "ao vivo" para sempre
 const MAX_SERIES_HOURS = { BO1: 2, BO2: 3.5, BO3: 4.5, BO5: 7 };
+const BETWEEN_MAPS_MAX_MS = 30 * 60 * 1000;
+
+/**
+ * Série incompleta da OpenDota cujo último mapa acabou há mais de 30 min, sem mapa ao vivo:
+ * o intervalo entre mapas leva uns 15 min, então é a OpenDota que está atrasada e o placar
+ * dela (ex.: 0-1 "aguardando o mapa 2") já não vale.
+ */
+export function isStaleBetweenMaps(s, now = Date.now()) {
+  const last = (s?.games || []).at(-1);
+  const lastEnd = (Number(last?.start_time || s?.lastMatchTime) || 0) + (Number(last?.duration) || 0);
+  return Boolean(lastEnd) && now - lastEnd * 1000 > BETWEEN_MAPS_MAX_MS;
+}
 
 /**
  * Séries que já começaram e ainda não terminaram, mas sem mapa ao vivo agora
@@ -131,6 +143,7 @@ function seriesBetweenMaps(finishedSeries, ongoingSeries, liveGames, now = Date.
 
   for (const s of finishedSeries || []) {
     if (!isSeriesOngoing(s) || isLive(s.timeA, s.timeB)) continue;
+    if (isStaleBetweenMaps(s, now)) continue;
     list.push({
       key: `od-${s.series_id || `${s.timeA}-${s.timeB}-${s.startTime}`}`,
       timeA: s.timeA, timeB: s.timeB, idA: s.preferredIdA, idB: s.preferredIdB, logoA: s.logoA, logoB: s.logoB,

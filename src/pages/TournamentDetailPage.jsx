@@ -30,7 +30,7 @@ import TournamentPlayers from '../components/TournamentPlayers';
 import TournamentStandings from '../components/TournamentStandings';
 import TournamentBracket from '../components/TournamentBracket';
 import TournamentTeams from '../components/TournamentTeams';
-import { useApp, findLiveGameFor, isUpcomingFinished } from '../context/AppContext';
+import { useApp, findLiveGameFor, isUpcomingFinished, isStaleBetweenMaps } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import BackButton from '../components/BackButton';
 import { rememberAliases } from '../utils/teamAliases';
@@ -409,7 +409,7 @@ export default function TournamentDetailPage() {
   const ongoing = series.filter(isSeriesOngoing);
   const finished = series.filter((x) => !isSeriesOngoing(x));
   const seriesOfLive = (g) => ongoing.find((x) => findLiveGameFor(x, [g]));
-  const betweenMaps = ongoing.filter((x) => !findLiveGameFor(x, live));
+  const betweenMaps = ongoing.filter((x) => !findLiveGameFor(x, live) && !isStaleBetweenMaps(x));
   const liveCount = live.length + betweenMaps.length;
 
   const tabs = [
