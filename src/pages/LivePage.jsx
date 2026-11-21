@@ -12,7 +12,8 @@ import {
   Shield,
   Flame,
   Swords,
-  ChevronRight
+  ChevronRight,
+  LayoutGrid
 } from 'lucide-react';
 import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
@@ -40,6 +41,9 @@ const PLATFORMS = {
   }
 };
 
+// Quantos canais cabem lado a lado sem cada player ficar pequeno demais
+const MAX_SIDE_BY_SIDE = 4;
+
 export default function LivePage() {
   const {
     liveGames,
@@ -56,6 +60,9 @@ export default function LivePage() {
   const [activeStream, setActiveStream] = useState(null);
   const [showStream, setShowStream] = useState(true);
   const [theaterMode, setTheaterMode] = useState(false);
+  // Lado a lado: vários canais ao mesmo tempo (clicar num canal põe ou tira da tela)
+  const [multi, setMulti] = useState(false);
+  const [grid, setGrid] = useState([]);
 
   // Só os canais (Twitch, YouTube, Kick) que estão transmitindo uma partida agora (/api/live?streams=1);
   // null enquanto carrega
@@ -79,6 +86,8 @@ export default function LivePage() {
           timeB: s.timeB
         }));
         setMatchStreams(found);
+        // Lado a lado: tira da tela os canais que saíram do ar
+        setGrid((cur) => cur.map((g) => found.find((s) => s.id === g.id)).filter(Boolean));
         // Até a pessoa escolher, fica no primeiro canal; se o escolhido saiu do ar, troca também
         setActiveStream((cur) => {
           const still = cur && found.find((s) => s.id === cur.id);
@@ -93,7 +102,35 @@ export default function LivePage() {
     return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
-  const pickStream = (s) => { userPicked.current = true; setActiveStream(s); };
+  const pickStream = (s) => {
+    if (multi) {
+      setGrid((cur) => (cur.some((g) => g.id === s.id) ? cur.filter((g) => g.id !== s.id) : [...cur, s].slice(-MAX_SIDE_BY_SIDE)));
+      return;
+    }
+    userPicked.current = true;
+    setActiveStream(s);
+  };
+  const toggleMulti = () => {
+    if (multi) {
+      if (grid[0]) { userPicked.current = true; setActiveStream(grid[0]); }
+    } else {
+      setGrid(activeStream ? [activeStream] : []);
+    }
+    setMulti(!multi);
+  };
+  const isOnScreen = (s) => (multi ? grid.some((g) => g.id === s.id) : activeStream?.key === s.key);
+  const playerFor = (s) => (
+    <iframe
+      key={s.id}
+      src={PLATFORMS[s.platform].player(s)}
+      height="100%"
+      width="100%"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+      allowFullScreen
+      title={`${s.timeA} x ${s.timeB} · ${s.name}`}
+      className="w-full h-full border-0"
+    />
+  );
   const streamsForGame = (game) => (matchStreams || []).filter((s) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
 
   // Auto-refresh a cada 30 segundos
@@ -156,8 +193,12 @@ export default function LivePage() {
           <div className="p-3.5 bg-surface-2/80 border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full animate-pulse bg-purple-500"></span>
-              <span className="font-medium text-white">Canal ativo:</span>
-              {activeStream ? (
+              <span className="font-medium text-white">{multi ? 'Lado a lado:' : 'Canal ativo:'}</span>
+              {multi ? (
+                <span className="text-gray-300">
+                  {grid.length} de {MAX_SIDE_BY_SIDE} canais · clique num canal para pôr ou tirar da tela
+                </span>
+              ) : activeStream ? (
                 <>
                   <span className="text-purple-400 font-mono font-medium">{activeStream.name}</span>
                   {activeStream.lang && (
@@ -186,9 +227,10 @@ export default function LivePage() {
                 <button
                   key={s.key}
                   onClick={() => pickStream(s)}
+                  aria-pressed={isOnScreen(s)}
                   title={s.title || s.name}
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
-                    activeStream?.key === s.key
+                    isOnScreen(s)
                       ? 'bg-purple-600 text-on-accent'
                       : 'bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30'
                   }`}
@@ -201,6 +243,18 @@ export default function LivePage() {
               ))}
 
               <button
+                onClick={toggleMulti}
+                aria-pressed={multi}
+                title={multi ? 'Voltar para um canal' : 'Ver vários canais lado a lado'}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-medium ml-2 ${
+                  multi ? 'bg-purple-950/60 border-purple-700/60 text-purple-300' : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:border-amber-500/30'
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span>Lado a lado</span>
+              </button>
+
+              <button
                 onClick={() => setTheaterMode(!theaterMode)}
                 title={theaterMode ? 'Modo normal' : 'Modo teatro'}
                 className="p-1.5 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30 ml-2"
@@ -211,18 +265,29 @@ export default function LivePage() {
           </div>
 
           {/* PLAYER RESPONSIVO */}
+          {multi && grid.length > 0 ? (
+            <div className={`grid gap-1 bg-black ${grid.length > 1 ? 'md:grid-cols-2' : ''}`}>
+              {grid.map((s) => (
+                <div key={s.id} className="relative aspect-video bg-black">
+                  {playerFor(s)}
+                  <button
+                    onClick={() => pickStream(s)}
+                    className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-black/70 text-[11px] text-gray-200 hover:text-white"
+                    title="Tirar da tela"
+                  >
+                    {s.timeA} x {s.timeB} · {PLATFORMS[s.platform].label} ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
           <div className={`w-full bg-black ${theaterMode ? 'aspect-[21/9] max-h-[70vh]' : 'aspect-video max-h-[580px]'}`}>
-            {activeStream ? (
-              <iframe
-                key={activeStream.id}
-                src={PLATFORMS[activeStream.platform].player(activeStream)}
-                height="100%"
-                width="100%"
-                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                allowFullScreen
-                title="Dota 2 live stream"
-                className="w-full h-full border-0"
-              />
+            {!multi && activeStream ? playerFor(activeStream) : multi ? (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-center px-6">
+                <LayoutGrid className="w-10 h-10 text-gray-600" />
+                <p className="text-sm font-medium text-gray-200">Escolha os canais acima</p>
+                <p className="text-xs text-gray-500">Cada canal que você clicar abre ao lado dos outros, até {MAX_SIDE_BY_SIDE}.</p>
+              </div>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center px-6">
                 {matchStreams === null ? (
@@ -237,6 +302,7 @@ export default function LivePage() {
               </div>
             )}
           </div>
+          )}
         </div>
       )}
 
