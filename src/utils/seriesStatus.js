@@ -40,3 +40,38 @@ export function wikiScore(m) {
 
 /** Formato pelo series_type da Valve: 0 = MD1, 1 = MD3, 2 = MD5 (não é o número de mapas). */
 export const seriesTypeLabel = (type) => ['MD1', 'MD3', 'MD5'][type] || 'MD3';
+
+/**
+ * Placar da Liquipedia quando ela já registrou mais mapas que a OpenDota (que
+ * costuma atrasar horas): a série 1x1 da OpenDota vira o 1x2 final, com os mapas que faltam.
+ */
+export function withWikiScore(s, bm, straight) {
+  const a = Number(straight ? bm.a.score : bm.b.score);
+  const b = Number(straight ? bm.b.score : bm.a.score);
+  if (!Number.isFinite(a) || !Number.isFinite(b) || a + b <= (s.scoreA || 0) + (s.scoreB || 0)) return s;
+  const known = new Set((s.games || []).map((g) => String(g.match_id)));
+  const extra = bm.idList.slice(0, a + b).filter((id) => !known.has(id));
+  const games = [...(s.games || []), ...extra.map((id) => ({ match_id: id }))].map((g, i) => ({ ...g, mapNumber: i + 1 }));
+  return {
+    ...s,
+    scoreA: a,
+    scoreB: b,
+    formato: bm.bestOf ? `BO${bm.bestOf}` : s.formato,
+    games
+  };
+}
+
+/** Partidas do chaveamento da Liquipedia com os IDs dos mapas (links de replay). */
+export function bracketMatches(brackets) {
+  const out = [];
+  const walk = (node) => {
+    if (!node) return;
+    const m = node.match;
+    if (m?.matchIds?.length && m.opponents?.length === 2 && m.opponents.every((o) => o?.name)) {
+      out.push({ ids: new Set(m.matchIds.map(String)), idList: m.matchIds.map(String), a: m.opponents[0], b: m.opponents[1], timestamp: m.timestamp || null, bestOf: m.bestOf || null });
+    }
+    (node.children || []).forEach(walk);
+  };
+  for (const b of brackets || []) (b.roots || []).forEach(walk);
+  return out;
+}

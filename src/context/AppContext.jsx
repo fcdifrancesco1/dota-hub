@@ -8,6 +8,8 @@ import {
   getCachedFast,
   getCachedTournaments,
   fetchTournaments,
+  fetchTournamentStandings,
+  isSameTeamMatch,
   normalizeUpcomingList,
   UPCOMING_CACHE_KEY,
   PRO_MATCHES_CACHE_KEY
@@ -15,7 +17,9 @@ import {
 import { SITE_CONFIG } from '../config/siteConfig';
 import { loadTeamLogoRegistry } from '../utils/teamLogos';
 import { learnAliases, applyAliasesToSeries, applyAliasesToLiveGame } from '../utils/teamAliases';
-import { isSeriesOngoing } from '../utils/seriesStatus';
+import { isSeriesOngoing, withWikiScore, bracketMatches } from '../utils/seriesStatus';
+
+const seriesFixKey = (s) => String(s?.games?.[0]?.match_id || s?.series_id || '');
 
 const AppContext = createContext(null);
 
@@ -206,6 +210,13 @@ export function AppProvider({ children }) {
 
   const [constants, setConstants] = useState(cachedConstants || { heroes: {}, itemsById: {} });
   const [finishedSeries, setFinishedSeries] = useState(cachedFinished);
+  // Placar da Liquipedia para séries que a OpenDota ainda não fechou (ver efeito abaixo), por 1º mapa
+  const wikiFixRef = useRef(new Map());
+  const wikiTriedRef = useRef(new Map());
+  const applyWikiFix = (s) => {
+    const fx = wikiFixRef.current.get(seriesFixKey(s));
+    return fx ? { ...s, ...fx } : s;
+  };
   const [tournamentsList, setTournamentsList] = useState(cachedPro?.tournaments || []);
   const [liveGames, setLiveGames] = useState([]);
   const [upcomingMatches, setUpcomingMatches] = useState(initialSplit.upcoming);
@@ -279,7 +290,7 @@ export function AppProvider({ children }) {
         const allSeries = [...proData.finishedSeries, ...(proData.tournaments || []).flatMap((t) => t.seriesList || [])];
         learnAliases(allSeries, allWikiMatches);
         const fixSeries = (s) => withWikiFormat(applyAliasesToSeries(s), allWikiMatches);
-        finished = proData.finishedSeries.map(fixSeries);
+        finished = proData.finishedSeries.map(fixSeries).map(applyWikiFix);
         setFinishedSeries(finished);
         setTournamentsList((proData.tournaments || []).map((t) => (t.seriesList ? { ...t, seriesList: t.seriesList.map(fixSeries) } : t)));
       }
@@ -327,6 +338,41 @@ export function AppProvider({ children }) {
     }, 30000);
     return () => clearInterval(interval);
   }, [loadData]);
+
+  // A OpenDota atrasa horas para registrar os últimos mapas (a série fica em 1x1 depois de
+  // acabar em 1x2). Para as séries paradas assim, o placar vem da página do campeonato na
+  // Liquipedia (a mesma da classificação), achada pelos IDs dos mapas.
+  useEffect(() => {
+    const now = Date.now();
+    const pending = finishedSeries.filter((s) => s.leagueId && isSeriesOngoing(s) && isStaleBetweenMaps(s, now) &&
+      !wikiFixRef.current.has(seriesFixKey(s)) && now - (wikiTriedRef.current.get(seriesFixKey(s)) || 0) > 5 * 60 * 1000);
+    if (!pending.length) return;
+    pending.forEach((s) => wikiTriedRef.current.set(seriesFixKey(s), now));
+    let active = true;
+    (async () => {
+      const tournaments = await fetchTournaments();
+      const pages = [...new Set(pending.map((s) => tournaments.find((t) => String(t.leagueId) === String(s.leagueId))?.page).filter(Boolean))];
+      const data = await Promise.all(pages.slice(0, 3).map((p) => fetchTournamentStandings(p).catch(() => null)));
+      const matches = bracketMatches(data.flatMap((d) => [...(d?.brackets || []), { roots: (d?.groupMatches || []).map((match) => ({ match })) }]));
+      let changed = false;
+      for (const s of pending) {
+        const bm = matches.find((m) => (s.games || []).some((g) => m.ids.has(String(g.match_id))));
+        if (!bm) continue;
+        const straight = isSameTeamMatch(s.timeA, bm.a.name) || isSameTeamMatch(s.timeB, bm.b.name) ? true
+          : isSameTeamMatch(s.timeA, bm.b.name) || isSameTeamMatch(s.timeB, bm.a.name) ? false : null;
+        if (straight === null) continue;
+        const fixed = withWikiScore(s, bm, straight);
+        if (fixed === s) continue;
+        wikiFixRef.current.set(seriesFixKey(s), {
+          scoreA: fixed.scoreA, scoreB: fixed.scoreB, formato: fixed.formato, games: fixed.games,
+          winner: fixed.scoreA > fixed.scoreB ? s.timeA : fixed.scoreB > fixed.scoreA ? s.timeB : s.winner
+        });
+        changed = true;
+      }
+      if (active && changed) setFinishedSeries((prev) => prev.map(applyWikiFix));
+    })();
+    return () => { active = false; };
+  }, [finishedSeries]);
 
   // Séries em andamento esperando o próximo mapa também contam como ao vivo
   const betweenMaps = useMemo(

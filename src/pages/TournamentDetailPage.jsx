@@ -22,7 +22,7 @@ import {
   Radio,
   ChevronLeft
 } from 'lucide-react';
-import { isSeriesOngoing } from '../utils/seriesStatus';
+import { isSeriesOngoing, withWikiScore, bracketMatches } from '../utils/seriesStatus';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import { fetchLeagueById, isSupabaseConfigured } from '../services/supabase';
 import { fetchTournaments, fetchTournamentArchive, fetchTournamentByPage, fetchLeagueSeries, fetchTournamentHeroStats, fetchTournamentPlayerStats, fetchTournamentStandings, getHeroImg, getHeroName, isSameTeamMatch } from '../services/api';
@@ -87,21 +87,6 @@ function allParticipants(data) {
   return [...names];
 }
 
-/** Partidas do chaveamento da Liquipedia com os IDs dos mapas (links de replay). */
-function bracketMatches(brackets) {
-  const out = [];
-  const walk = (node) => {
-    if (!node) return;
-    const m = node.match;
-    if (m?.matchIds?.length && m.opponents?.length === 2 && m.opponents.every((o) => o?.name)) {
-      out.push({ ids: new Set(m.matchIds.map(String)), idList: m.matchIds.map(String), a: m.opponents[0], b: m.opponents[1], timestamp: m.timestamp || null, bestOf: m.bestOf || null });
-    }
-    (node.children || []).forEach(walk);
-  };
-  for (const b of brackets || []) (b.roots || []).forEach(walk);
-  return out;
-}
-
 /**
  * Troca os nomes da OpenDota pelos da Liquipedia quando a série está no
  * chaveamento (ex.: o time "Skyreavers" está registrado na Valve como "The Bot^$").
@@ -131,7 +116,10 @@ function withLiquipediaNames(list, brackets) {
     const [nameA, nameB] = straight ? [bm.a.name, bm.b.name] : [bm.b.name, bm.a.name];
     if (s.preferredIdA) idToName[s.preferredIdA] = nameA;
     if (s.preferredIdB) idToName[s.preferredIdB] = nameB;
-    return { ...s, timeA: nameA, timeB: nameB };
+    const scored = withWikiScore(s, bm, straight);
+    const winner = scored === s ? s.winner
+      : scored.scoreA > scored.scoreB ? nameA : scored.scoreB > scored.scoreA ? nameB : s.winner;
+    return { ...scored, timeA: nameA, timeB: nameB, winner };
   });
   // Séries fora do chaveamento (ex.: fase de grupos) com um time já identificado
   const renamed = aligned.map((s) => {
