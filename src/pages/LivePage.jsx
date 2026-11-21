@@ -75,7 +75,8 @@ export default function LivePage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (cancelled) return;
-        const found = (data?.streams || []).filter((s) => s.timeA && s.timeB).map((s) => ({
+        // Canais sem partida identificada ficam: o título ainda pode apontar um jogo ao vivo (ver streams)
+        const found = (data?.streams || []).map((s) => ({
           id: `${s.platform || 'twitch'}:${s.embed || s.channel}`,
           key: `live-${s.platform || 'twitch'}-${s.embed || s.channel}`,
           platform: s.platform || 'twitch',
@@ -94,7 +95,7 @@ export default function LivePage() {
           const still = cur && found.find((s) => s.id === cur.id);
           if (still && userPicked.current) return still;
           userPicked.current = false;
-          return still || found[0] || null;
+          return still || found.find((s) => s.timeA) || null;
         });
       })
       .catch(() => { if (!cancelled) setMatchStreams((prev) => prev || []); });
@@ -139,12 +140,16 @@ export default function LivePage() {
     if (!matchStreams) return matchStreams;
     const live = (liveGames || []).map((g) => ({ timeA: g.radiant_name || g.team1, timeB: g.dire_name || g.team2 }));
     return matchStreams.map((s) => {
-      if (findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, liveGames)) return s;
+      if (s.timeA && findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, liveGames)) return s;
       const now = matchForTitle(s.title, live);
       return now ? { ...s, timeA: now.timeA, timeB: now.timeB } : s;
-    });
+    }).filter((s) => s.timeA && s.timeB);
   }, [matchStreams, liveGames]);
   const current = (s) => (s && streams?.find((x) => x.id === s.id)) || s;
+  // Sem canal escolhido (todos chegaram sem partida e só o título os identificou): abre o primeiro
+  useEffect(() => {
+    if (!activeStream && streams?.length) setActiveStream(streams[0]);
+  }, [activeStream, streams]);
   const streamsForGame = (game) => (streams || []).filter((s) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
 
   // Auto-refresh a cada 30 segundos

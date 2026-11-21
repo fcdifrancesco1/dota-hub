@@ -841,10 +841,10 @@ async function handleStreams(res) {
   const now = Date.now();
   const lp = await fetchLiquipediaApi('Liquipedia:Matches', { ttlMs: 3 * 60 * 1000 });
   const ms = (t) => (t > 1e12 ? t : t * 1000);
-  // Séries começadas (ou a 15 min de começar) e ainda sem vencedor
+  // Séries começadas (ou a até 1h do horário: o jogo adianta quando o anterior acaba cedo) e ainda sem vencedor
   const active = parseLiquipediaMatches(lp?.html || '', { onlyUpcoming: true }).filter((m) =>
     !m.isCompleted && !m.winner && m.timestamp &&
-    ms(m.timestamp) <= now + 15 * 60 * 1000 && now - ms(m.timestamp) < 8 * 3600 * 1000);
+    ms(m.timestamp) <= now + 60 * 60 * 1000 && now - ms(m.timestamp) < 8 * 3600 * 1000);
 
   const candidates = new Map(); // "plataforma:canal" → { platform, channel, video?, guess?, match?, tournament? }
   const addCandidate = (c) => {
