@@ -86,7 +86,7 @@ function withLeagueNames(games, wikiMatches) {
  * reencontram (ex.: abertura e partida decisiva), e a série antiga não pode
  * apagar o confronto de hoje.
  */
-function isUpcomingFinished(m, finishedSeries) {
+export function isUpcomingFinished(m, finishedSeries) {
   const scheduled = Number(m.timestamp) || 0; // segundos
   return (finishedSeries || []).some((s) => {
     if (!isSeriesMatch(m.timeA, m.timeB, s.timeA, s.timeB)) return false;

@@ -30,7 +30,7 @@ import TournamentPlayers from '../components/TournamentPlayers';
 import TournamentStandings from '../components/TournamentStandings';
 import TournamentBracket from '../components/TournamentBracket';
 import TournamentTeams from '../components/TournamentTeams';
-import { useApp, findLiveGameFor } from '../context/AppContext';
+import { useApp, findLiveGameFor, isUpcomingFinished } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import BackButton from '../components/BackButton';
 import { rememberAliases } from '../utils/teamAliases';
@@ -389,11 +389,13 @@ export default function TournamentDetailPage() {
   const prize = formatPrize(t);
 
 
-  // Partidas agendadas (Liquipedia), pelo nome do campeonato ("BLAST SLAM VIII - Group B")
+  // Partidas agendadas (Liquipedia), pelo nome do campeonato ("BLAST SLAM VIII - Group B").
+  // Sai da agenda a série que esta página já tem jogada: a Liquipedia às vezes deixa
+  // a partida como "próxima" com 0:0 depois do fim, e a lista geral da OpenDota atrasa.
   const names = [norm(t.name), norm(t.shortName)].filter((n) => n.length >= 4);
   const scheduled = (upcomingMatches || []).filter((m) => {
     const tn = norm(m.tourneyName || m.torneio);
-    return names.some((n) => tn.startsWith(n) || n.startsWith(tn));
+    return names.some((n) => tn.startsWith(n) || n.startsWith(tn)) && !isUpcomingFinished(m, series);
   });
 
   // Jogos ao vivo: pela liga da Valve; sem ela, pelo nome do campeonato
