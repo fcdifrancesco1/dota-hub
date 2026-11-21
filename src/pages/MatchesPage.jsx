@@ -5,7 +5,7 @@ import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
-import { isSeriesOngoing, wikiScore } from '../utils/seriesStatus';
+import { isSeriesOngoing, wikiScore, seriesTypeLabel } from '../utils/seriesStatus';
 import MatchPreviewModal from '../components/MatchPreviewModal';
 import { useOpenWikiSeries } from '../utils/wikiSeries';
 
@@ -188,7 +188,7 @@ export default function MatchesPage() {
             const inProgress = !isUpcoming && isSeriesOngoing(s);
             const isWinnerA = !isUpcoming && !inProgress && scoreA > scoreB;
             const isWinnerB = !isUpcoming && !inProgress && scoreB > scoreA;
-            const formatLabel = s.formato || s.stage || (s.series_type ? `MD${s.series_type}` : 'MD3');
+            const formatLabel = s.formato || s.stage || seriesTypeLabel(s.series_type);
             const hasStarted = isUpcoming && Boolean(s.timestamp) && s.timestamp * 1000 <= Date.now();
 
             const cardContent = (

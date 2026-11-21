@@ -18,6 +18,7 @@ import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import BetweenMapsCard from '../components/BetweenMapsCard';
+import { seriesTypeLabel } from '../utils/seriesStatus';
 import { getHeroImg, getHeroName } from '../services/api';
 
 // Player embutido e página de cada plataforma (embed = canal ou, no YouTube, o vídeo ao vivo)
@@ -283,7 +284,9 @@ export default function LivePage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-gray-400 font-mono text-xs bg-surface-2 px-2.5 py-0.5 rounded-lg border border-line">
-                          {game.series_type ? `MD${game.series_type}` : 'MD3'}
+                          {seriesTypeLabel(game.series_type)}
+                          {Number.isFinite(game.radiant_series_wins) && Number.isFinite(game.dire_series_wins) && game.radiant_series_wins + game.dire_series_wins > 0 &&
+                            ` · Série ${game.radiant_series_wins}:${game.dire_series_wins}`}
                         </span>
                         <span className="font-mono text-white font-semibold bg-surface-2 px-3 py-0.5 rounded-lg border border-line">
                           {durationMin}:{durationSec}

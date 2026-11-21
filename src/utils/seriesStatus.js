@@ -37,3 +37,6 @@ export function wikiScore(m) {
   }
   return { a: scoreA, b: scoreB, winA: scoreA > scoreB, winB: scoreB > scoreA, walkover: false };
 }
+
+/** Formato pelo series_type da Valve: 0 = MD1, 1 = MD3, 2 = MD5 (não é o número de mapas). */
+export const seriesTypeLabel = (type) => ['MD1', 'MD3', 'MD5'][type] || 'MD3';
