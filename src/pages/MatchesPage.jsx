@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Swords, Filter, Calendar, Search, Trophy, ChevronRight, Clock, Radio } from 'lucide-react';
-import { useApp, findLiveGameFor } from '../context/AppContext';
+import { useApp, findLiveGameFor, isStaleBetweenMaps } from '../context/AppContext';
 import { useOpenSeries } from '../utils/matchRoute';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
@@ -186,6 +186,8 @@ export default function MatchesPage() {
             const tourney = s.league_name || s.tourneyName || s.stage || 'Torneio oficial';
             // Série da OpenDota ainda incompleta (ex.: 1x0 numa MD3): sem vencedor
             const inProgress = !isUpcoming && isSeriesOngoing(s);
+            // Parada há mais de 30 min sem mapa ao vivo: a OpenDota atrasou o resultado
+            const waiting = inProgress && isStaleBetweenMaps(s) && !findLiveGameFor(s, liveGames);
             const isWinnerA = !isUpcoming && !inProgress && scoreA > scoreB;
             const isWinnerB = !isUpcoming && !inProgress && scoreB > scoreA;
             const formatLabel = s.formato || s.stage || seriesTypeLabel(s.series_type);
@@ -236,9 +238,9 @@ export default function MatchesPage() {
                     </>
                   ) : (
                     <>
-                      <span className={inProgress ? 'text-red-500 font-medium flex items-center gap-1.5' : 'text-gray-400'}>
-                        {inProgress && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
-                        {inProgress ? 'Em andamento' : s.startTime ? new Date(s.startTime * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Recentemente'}
+                      <span className={inProgress && !waiting ? 'text-red-500 font-medium flex items-center gap-1.5' : 'text-gray-400'}>
+                        {inProgress && !waiting && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+                        {inProgress ? (waiting ? 'Aguardando resultado' : 'Em andamento') : s.startTime ? new Date(s.startTime * 1000).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Recentemente'}
                       </span>
                       <span className="text-blue-600 dark:text-amber-400 font-medium group-hover:translate-x-1 transition-transform flex items-center gap-1">
                         <span>Ver replay & draft</span>

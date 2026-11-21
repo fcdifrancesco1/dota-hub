@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Trophy, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useApp, findLiveGameFor } from '../../context/AppContext';
+import { useApp, findLiveGameFor, isStaleBetweenMaps } from '../../context/AppContext';
 import { useOpenSeries } from '../../utils/matchRoute';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import TeamLogo from '../../utils/teamLogos';
@@ -82,9 +82,12 @@ export default function RecentResultsHome() {
 
               // Série da Liquipedia: abre a partida ao vivo (se houver) ou as estatísticas dos jogadores
               const liveGame = series.fromWiki ? findLiveGameFor(series, liveGames) : null;
+              // Série da OpenDota parada há mais de 30 min sem mapa ao vivo: a OpenDota atrasou o resultado
+              const waiting = !series.fromWiki && !isDone(series) && isStaleBetweenMaps(series) && !findLiveGameFor(series, liveGames);
               const wikiStatus = series.fromWiki
                 ? (liveGame ? 'Ao vivo' : isDone(series) ? 'Encerrada' : 'Em andamento')
-                : (!isDone(series) ? 'Em andamento' : null);
+                : (!isDone(series) ? (waiting ? 'Aguardando resultado' : 'Em andamento') : null);
+              const hot = !isDone(series) && !waiting;
               const onClick = !series.fromWiki
                 ? () => openSeries(series)
                 : liveGame
@@ -96,7 +99,7 @@ export default function RecentResultsHome() {
                   key={series.series_id || series.id || `${teamAName}-${teamBName}-${series.sortTime || idx}`}
                   onClick={onClick}
                   className={`rounded-xl px-3 py-3 transition-colors group ${
-                    !isDone(series) ? 'bg-red-500/[0.06]' : ''
+                    hot ? 'bg-red-500/[0.06]' : ''
                   } ${onClick ? 'cursor-pointer hover:bg-surface-2/80' : ''}`}
                 >
                   <div className="flex items-center justify-between text-[11px] text-gray-400 mb-1.5">
@@ -104,8 +107,8 @@ export default function RecentResultsHome() {
                       {tourney}
                     </span>
                     {wikiStatus ? (
-                      <span className={`flex items-center gap-1 font-medium ${isDone(series) ? 'text-gray-400' : 'text-red-500'}`}>
-                        {!isDone(series) && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+                      <span className={`flex items-center gap-1 font-medium ${hot ? 'text-red-500' : 'text-gray-400'}`}>
+                        {hot && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
                         {wikiStatus}
                       </span>
                     ) : (

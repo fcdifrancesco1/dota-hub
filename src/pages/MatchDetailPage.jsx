@@ -24,7 +24,7 @@ import { performanceRating, playerRow, statsFromMatchPlayers } from '../utils/pr
 import { RatingBadge } from '../components/PlayerPerformance';
 import TeamLogo from '../utils/teamLogos';
 import AdvantageGraph from '../components/AdvantageGraph';
-import { useApp } from '../context/AppContext';
+import { useApp, findLiveGameFor, isStaleBetweenMaps } from '../context/AppContext';
 import { seriesKey } from '../utils/matchRoute';
 import BackButton from '../components/BackButton';
 import { aliasMap, applyAliasesToSeries } from '../utils/teamAliases';
@@ -316,6 +316,9 @@ export default function MatchDetailPage() {
 
 function SeriesHeader({ series, currentMap, onOpenTeam }) {
   const finished = seriesStatus(series) === 'finished';
+  // Parada há mais de 30 min sem mapa ao vivo: a OpenDota atrasou o resultado
+  const { liveGames } = useApp();
+  const waiting = !finished && isStaleBetweenMaps(series) && !findLiveGameFor(series, liveGames);
   const aWon = finished && series.scoreA > series.scoreB;
   const bWon = finished && series.scoreB > series.scoreA;
   const aAhead = series.scoreA > series.scoreB;
@@ -369,6 +372,10 @@ function SeriesHeader({ series, currentMap, onOpenTeam }) {
         {finished ? (
           <span className="text-xs font-semibold text-gray-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full">
             Finalizado
+          </span>
+        ) : waiting ? (
+          <span className="text-xs font-semibold text-gray-400 bg-surface-2 border border-line px-2.5 py-1 rounded-full" title="A OpenDota ainda não registrou os mapas que faltam">
+            Aguardando resultado
           </span>
         ) : (
           <span className="text-xs font-semibold text-red-500 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-full">
