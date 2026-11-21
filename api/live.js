@@ -848,7 +848,8 @@ async function handleStreams(res) {
 
   const candidates = new Map(); // "plataforma:canal" → { platform, channel, video?, guess?, match?, tournament? }
   const addCandidate = (c) => {
-    const key = `${c.platform}:${c.channel.toLowerCase()}`;
+    // O mesmo canal do YouTube pode ter um vídeo por stream (BLAST "Stream A" e "Stream B")
+    const key = `${c.platform}:${c.channel.toLowerCase()}${c.video ? `:${c.video}` : ''}`;
     if (!candidates.has(key)) candidates.set(key, c);
   };
   for (const m of active) {

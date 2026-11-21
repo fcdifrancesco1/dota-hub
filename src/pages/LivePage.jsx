@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Radio,
   RefreshCw,
@@ -21,6 +21,7 @@ import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
 import BetweenMapsCard from '../components/BetweenMapsCard';
 import { seriesTypeLabel } from '../utils/seriesStatus';
 import { getHeroImg, getHeroName } from '../services/api';
+import { matchForTitle } from '../../api/_lib/matchStreams.js';
 
 // Player embutido e página de cada plataforma (embed = canal ou, no YouTube, o vídeo ao vivo)
 const PLATFORMS = {
@@ -131,7 +132,20 @@ export default function LivePage() {
       className="w-full h-full border-0"
     />
   );
-  const streamsForGame = (game) => (matchStreams || []).filter((s) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
+  // A Liquipedia põe o link só na 1ª partida de cada stream, e o título cita várias
+  // ("Aurora vs Astra, Yandex vs NAVI"): se a partida ligada ao canal não está ao vivo,
+  // fica a do título que a Valve mostra ao vivo agora.
+  const streams = useMemo(() => {
+    if (!matchStreams) return matchStreams;
+    const live = (liveGames || []).map((g) => ({ timeA: g.radiant_name || g.team1, timeB: g.dire_name || g.team2 }));
+    return matchStreams.map((s) => {
+      if (findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, liveGames)) return s;
+      const now = matchForTitle(s.title, live);
+      return now ? { ...s, timeA: now.timeA, timeB: now.timeB } : s;
+    });
+  }, [matchStreams, liveGames]);
+  const current = (s) => (s && streams?.find((x) => x.id === s.id)) || s;
+  const streamsForGame = (game) => (streams || []).filter((s) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
 
   // Auto-refresh a cada 30 segundos
   useEffect(() => {
@@ -206,7 +220,7 @@ export default function LivePage() {
                       {activeStream.lang}
                     </span>
                   )}
-                  <span className="text-gray-300">· {activeStream.timeA} x {activeStream.timeB}</span>
+                  <span className="text-gray-300">· {current(activeStream).timeA} x {current(activeStream).timeB}</span>
                   <a
                     href={PLATFORMS[activeStream.platform].page(activeStream)}
                     target="_blank"
@@ -223,7 +237,7 @@ export default function LivePage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {matchStreams?.map((s) => (
+              {streams?.map((s) => (
                 <button
                   key={s.key}
                   onClick={() => pickStream(s)}
@@ -275,7 +289,7 @@ export default function LivePage() {
                     className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-black/70 text-[11px] text-gray-200 hover:text-white"
                     title="Tirar da tela"
                   >
-                    {s.timeA} x {s.timeB} · {PLATFORMS[s.platform].label} ✕
+                    {current(s).timeA} x {current(s).timeB} · {PLATFORMS[s.platform].label} ✕
                   </button>
                 </div>
               ))}
