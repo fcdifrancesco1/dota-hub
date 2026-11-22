@@ -44,7 +44,7 @@ export default function LiveTickerStrip() {
             to="/ao-vivo"
             className="text-amber-500 hover:text-amber-400 font-medium text-xs flex items-center gap-1 transition-colors"
           >
-            <span>Ver central ao vivo</span>
+            <span>Central ao vivo</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -69,7 +69,7 @@ export default function LiveTickerStrip() {
             to="/ao-vivo"
             className="text-xs font-medium text-amber-500 hover:text-amber-400 flex items-center gap-1 transition-colors"
           >
-            <span>Central multitela</span>
+            <span>Central ao vivo</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>

@@ -75,3 +75,6 @@ export function bracketMatches(brackets) {
   for (const b of brackets || []) (b.roots || []).forEach(walk);
   return out;
 }
+
+/** "BO3" → "MD3" (o termo usado no site); sem formato, MD3. */
+export const formatLabel = (f) => String(f || 'BO3').toUpperCase().replace(/^BO/, 'MD');

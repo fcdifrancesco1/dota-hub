@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Radio, ArrowRight, Clock, Flame, Calendar, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp, findLiveGameFor } from '../../context/AppContext';
+import { formatLabel } from '../../utils/seriesStatus';
 import { useTheme } from '../../context/ThemeContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
@@ -165,7 +166,7 @@ export default function HomeHero() {
             </span>
             {nextMatch && (
               <span className="text-amber-500 font-mono font-medium text-xs bg-surface-2 px-2 py-0.5 rounded-md">
-                {nextMatch.formato || 'BO3'}
+                {formatLabel(nextMatch.formato)}
               </span>
             )}
           </div>
@@ -227,7 +228,7 @@ export default function HomeHero() {
             ) : (
             <>
             <div className="text-[11px] text-gray-400 text-center mb-2 font-semibold">
-              Inicia em ({nextMatch.startTime}):
+              Começa em {nextMatch.startTime}
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-surface-2 rounded-xl py-2">

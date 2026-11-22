@@ -147,7 +147,7 @@ export default function NewsPanel() {
       )}
 
       <p className="mt-4 text-[11px] text-gray-500 text-center">
-        {tab === 'news' ? 'Fontes: Valve (Steam) e blog do Dotabuff. Clique para ler a matéria completa.' : 'Fonte: Liquipedia.'}
+        {tab === 'news' ? 'Fontes: Valve (Steam) e blog do Dotabuff. As matérias abrem no site de origem, em inglês.' : 'Fonte: Liquipedia.'}
       </p>
     </aside>
   );

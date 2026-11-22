@@ -150,7 +150,7 @@ export default function RecentResultsHome() {
       </div>
 
       <div className="mt-3 px-3 text-xs text-gray-500">
-        Clique em qualquer série para conferir o draft completo e a tabela de jogadores.
+        Escolha uma série para ver o draft completo e a tabela de jogadores.
       </div>
 
       {preview && <MatchPreviewModal match={preview} onClose={() => setPreview(null)} />}

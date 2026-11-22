@@ -85,7 +85,7 @@ export default function HomeStatsCards() {
       iconColor: 'text-red-400'
     },
     {
-      title: 'Maior winrate',
+      title: 'Maior taxa de vitória',
       ...heroCard(bestWinrate),
       subtitle: bestWinrate
         ? `${Math.round(bestWinrate.winRate)}% (${bestWinrate.picks} jogos)`

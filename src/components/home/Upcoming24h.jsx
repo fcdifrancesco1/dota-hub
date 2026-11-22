@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import TeamLogo from '../../utils/teamLogos';
 import MatchPreviewModal from '../MatchPreviewModal';
+import { formatLabel } from '../../utils/seriesStatus';
 
 export default function Upcoming24h() {
   const { upcomingMatches, loading } = useApp();
@@ -84,7 +85,7 @@ export default function Upcoming24h() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="font-mono text-amber-500 bg-surface-2 px-1.5 py-0.5 rounded text-[11px] font-medium">
-                        {m.formato}
+                        {formatLabel(m.formato)}
                       </span>
                       <span className="font-mono text-white bg-surface-2 px-1.5 py-0.5 rounded font-medium">
                         {dayLabel ? `${dayLabel} ` : ''}{formattedTime} BRT
@@ -115,7 +116,7 @@ export default function Upcoming24h() {
       </div>
 
       <div className="mt-3 px-3 text-xs text-gray-500">
-        Toque em uma partida para ver as estatísticas dos jogadores no torneio.
+        Escolha uma partida para ver as estatísticas dos jogadores no torneio.
       </div>
 
       {selected && <MatchPreviewModal match={selected} onClose={() => setSelected(null)} />}
