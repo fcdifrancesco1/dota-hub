@@ -796,7 +796,7 @@ async function fetchTwitchChannel({ channel }) {
 // Cookies de consentimento já aceito: sem eles o YouTube pode devolver a tela de consentimento
 const YOUTUBE_HEADERS = { ...PAGE_HEADERS, Cookie: 'CONSENT=YES+cb.20210328-17-p0.en+FX+667; SOCS=CAI' };
 
-async function fetchYoutubeChannel({ channel, video, match }) {
+async function fetchYoutubeChannel({ channel, video, match, tournament }) {
   const name = channel.replace(/^(c|user|channel)\//, '');
   try {
     const url = video ? `https://www.youtube.com/watch?v=${video}` : `https://www.youtube.com/${channel}/live`;
@@ -806,9 +806,10 @@ async function fetchYoutubeChannel({ channel, video, match }) {
     // Página normal do vídeo: ela diz se está ao vivo
     if (yt.videoId) return { platform: 'youtube', channel: name, embed: yt.videoId, live: yt.live, title: yt.title };
     // Sem o vídeo mas com o canal: o player oficial "ao vivo do canal" toca a transmissão atual.
-    // shortcut: não confirma que está ao vivo; só vale para canal ligado pela agenda a uma partida em andamento
+    // shortcut: não confirma que está ao vivo; só vale para canal de uma partida em andamento
+    // (pela agenda) ou de um campeonato com partida em andamento (pela página do campeonato)
     const channelId = youtubeChannelId(html);
-    if (!video && channelId && match) {
+    if (!video && channelId && (match || tournament)) {
       return { platform: 'youtube', channel: name, embed: `live_stream?channel=${channelId}`, live: true, title: null };
     }
     const pageTitle = html.match(/<title>([^<]*)/)?.[1]?.slice(0, 80) || '';
@@ -886,8 +887,14 @@ async function handleStreams(res) {
     return found && { ...found, from: c };
   }));
   const seen = new Set();
-  const streams = checked.filter((c) => c?.live && c.embed && !seen.has(`${c.platform}:${c.embed}`) && seen.add(`${c.platform}:${c.embed}`)).map((c) => {
-    const match = matchForTitle(c.title, active) || c.from.match || null;
+  const live = checked.filter((c) => c?.live && c.embed && !seen.has(`${c.platform}:${c.embed}`) && seen.add(`${c.platform}:${c.embed}`));
+  const matchOf = (c) => matchForTitle(c.title, active) || c.from.match || null;
+  // Canal do YouTube sem título (o servidor recebe a página sem os dados da live): vale a partida
+  // do canal de mesmo nome na Twitch ou na Kick ("@BLASTDota" é o "blastdota")
+  const bare = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const sibling = (c) => live.find((o) => o !== c && o.platform !== 'youtube' && bare(o.channel) === bare(c.channel) && matchOf(o));
+  const streams = live.map((c) => {
+    const match = matchOf(c) || (c.platform === 'youtube' && !c.title ? matchOf(sibling(c) || { from: {} }) : null);
     return {
       platform: c.platform,
       channel: c.channel,
