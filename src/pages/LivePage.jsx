@@ -5,17 +5,14 @@ import {
   Tv,
   Maximize2,
   Minimize2,
-  Calendar,
-  Clock,
   ExternalLink,
-  Shield,
-  Swords,
   ChevronRight,
-  LayoutGrid
+  LayoutGrid,
+  X
 } from 'lucide-react';
 import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
-import TeamLogo, { getTeamLogo } from '../utils/teamLogos';
+import TeamLogo from '../utils/teamLogos';
 import BetweenMapsCard from '../components/BetweenMapsCard';
 import { seriesTypeLabel } from '../utils/seriesStatus';
 import { getHeroImg, getHeroName } from '../services/api';
@@ -42,6 +39,8 @@ const PLATFORMS = {
 
 // Quantos canais cabem lado a lado sem cada player ficar pequeno demais
 const MAX_SIDE_BY_SIDE = 4;
+// Foco visível de teclado em todos os controles da página
+const FOCUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400';
 
 export default function LivePage() {
   const {
@@ -50,7 +49,8 @@ export default function LivePage() {
     loadingRefresh,
     refreshData,
     upcomingMatches,
-    constants
+    constants,
+    loading
   } = useApp();
 
   const openLiveMatch = useOpenLiveMatch();
@@ -136,17 +136,21 @@ export default function LivePage() {
   // fica a do título que a Valve mostra ao vivo agora.
   const streams = useMemo(() => {
     if (!matchStreams) return matchStreams;
+    // Nenhum jogo ao vivo nem série entre mapas: o que sobrar é gravação (o oEmbed do YouTube não diz se ainda está ao vivo)
+    if (!loading && liveTotal === 0) return [];
     const live = (liveGames || []).map((g) => ({ timeA: g.radiant_name || g.team1, timeB: g.dire_name || g.team2 }));
     return matchStreams.map((s) => {
       if (s.timeA && findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, liveGames)) return s;
       const now = matchForTitle(s.title, live);
       return now ? { ...s, timeA: now.timeA, timeB: now.timeB } : s;
     }).filter((s) => s.timeA && s.timeB);
-  }, [matchStreams, liveGames]);
+  }, [matchStreams, liveGames, liveTotal, loading]);
   const current = (s) => (s && streams?.find((x) => x.id === s.id)) || s;
-  // Sem canal escolhido (todos chegaram sem partida e só o título os identificou): abre o primeiro
+  // O canal na tela tem que estar na lista: sem escolha (ou se o escolhido saiu dela), abre o primeiro ou nenhum
   useEffect(() => {
-    if (!activeStream && streams?.length) setActiveStream(streams[0]);
+    if (!streams) return;
+    if (!activeStream || !streams.some((x) => x.id === activeStream.id)) setActiveStream(streams[0] || null);
+    setGrid((cur) => (cur.every((g) => streams.some((x) => x.id === g.id)) ? cur : cur.filter((g) => streams.some((x) => x.id === g.id))));
   }, [activeStream, streams]);
   const streamsForGame = (game) => (streams || []).filter((s) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
 
@@ -165,9 +169,9 @@ export default function LivePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-line">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <span className="relative flex h-3.5 w-3.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500"></span>
+            <span className="relative flex h-3.5 w-3.5" aria-hidden="true">
+              {liveTotal > 0 && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>}
+              <span className={`relative inline-flex rounded-full h-3.5 w-3.5 ${liveTotal > 0 ? 'bg-red-500' : 'bg-gray-600'}`}></span>
             </span>
             <h1 className="text-2xl sm:text-3xl font-semibold text-white font-serif tracking-tight">
               Central ao vivo
@@ -181,8 +185,10 @@ export default function LivePage() {
         {/* CONTROLES DO TOPO */}
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => setShowStream(!showStream)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
+            aria-pressed={showStream}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-medium transition-colors ${FOCUS} ${
               showStream
                 ? 'bg-purple-950/60 border-purple-800/60 text-purple-300'
                 : 'bg-surface-2 border-line text-gray-400 hover:text-white'
@@ -193,9 +199,10 @@ export default function LivePage() {
           </button>
 
           <button
+            type="button"
             onClick={refreshData}
             disabled={loadingRefresh}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-2 border border-line hover:border-amber-500/40 text-xs font-medium text-gray-300 hover:text-white transition-[color,background-color,border-color,opacity,transform] disabled:opacity-50"
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-2 border border-line hover:border-line-strong text-xs font-medium text-gray-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait ${FOCUS}`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loadingRefresh ? 'animate-spin text-amber-400' : ''}`} />
             <span>Atualizar</span>
@@ -205,11 +212,11 @@ export default function LivePage() {
 
       {/* REPRODUTOR DE STREAM INTEGRADO (TWITCH / EMBED) */}
       {showStream && (
-        <div className="mb-8 rounded-3xl overflow-hidden glass-panel border border-line shadow-2xl transition-[color,background-color,border-color,opacity,transform]">
+        <div className="mb-8 rounded-3xl overflow-hidden glass-panel">
           {/* BARRA DE CANAIS DA TRANSMISSÃO */}
           <div className="p-3.5 bg-surface-2/80 border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full animate-pulse bg-purple-500"></span>
+              <span className={`w-2.5 h-2.5 rounded-full ${activeStream || grid.length ? 'animate-pulse bg-purple-500' : 'bg-gray-600'}`} aria-hidden="true"></span>
               <span className="font-medium text-white">{multi ? 'Lado a lado:' : 'Canal ativo:'}</span>
               {multi ? (
                 <span className="text-gray-300">
@@ -243,16 +250,17 @@ export default function LivePage() {
               {streams?.map((s) => (
                 <button
                   key={s.key}
+                  type="button"
                   onClick={() => pickStream(s)}
                   aria-pressed={isOnScreen(s)}
                   title={s.title || s.name}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium transition-[color,background-color,border-color,opacity,transform] ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-medium transition-colors ${FOCUS} ${
                     isOnScreen(s)
-                      ? 'bg-purple-600 text-on-accent'
-                      : 'bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30'
+                      ? 'bg-purple-600 border-purple-600 text-on-accent'
+                      : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:border-line-strong'
                   }`}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" title="Ao vivo agora" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" aria-hidden="true" />
                   {s.timeA} x {s.timeB}
                   <span className="text-[11px] opacity-70">{PLATFORMS[s.platform].label}</span>
                   {s.lang && <span className="text-[11px] uppercase opacity-70">{s.lang}</span>}
@@ -260,11 +268,12 @@ export default function LivePage() {
               ))}
 
               <button
+                type="button"
                 onClick={toggleMulti}
                 aria-pressed={multi}
                 title={multi ? 'Voltar para um canal' : 'Ver vários canais lado a lado'}
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-medium ml-2 ${
-                  multi ? 'bg-purple-950/60 border-purple-700/60 text-purple-300' : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:border-amber-500/30'
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-medium transition-colors ${FOCUS} ${
+                  multi ? 'bg-purple-950/60 border-purple-700/60 text-purple-300' : 'bg-surface-2 border-line text-gray-400 hover:text-white hover:border-line-strong'
                 }`}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -272,11 +281,14 @@ export default function LivePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setTheaterMode(!theaterMode)}
-                title={theaterMode ? 'Modo normal' : 'Modo teatro'}
-                className="p-1.5 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-amber-500/30 ml-2"
+                aria-pressed={theaterMode}
+                aria-label={theaterMode ? 'Sair do modo teatro' : 'Modo teatro'}
+                title={theaterMode ? 'Sair do modo teatro' : 'Modo teatro'}
+                className={`p-1.5 rounded-xl bg-surface-2 border border-line text-gray-400 hover:text-white hover:border-line-strong transition-colors ${FOCUS}`}
               >
-                {theaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                {theaterMode ? <Minimize2 className="w-4 h-4" aria-hidden="true" /> : <Maximize2 className="w-4 h-4" aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -288,22 +300,24 @@ export default function LivePage() {
                 <div key={s.id} className="relative aspect-video bg-black">
                   {playerFor(s)}
                   <button
+                    type="button"
                     onClick={() => pickStream(s)}
-                    className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-black/70 text-[11px] text-gray-200 hover:text-white"
-                    title="Tirar da tela"
+                    aria-label={`Tirar da tela: ${current(s).timeA} x ${current(s).timeB}, ${PLATFORMS[s.platform].label}`}
+                    className={`absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-black/70 text-[11px] text-gray-200 hover:text-white ${FOCUS}`}
                   >
-                    {current(s).timeA} x {current(s).timeB} · {PLATFORMS[s.platform].label} ✕
+                    {current(s).timeA} x {current(s).timeB} · {PLATFORMS[s.platform].label}
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
               ))}
             </div>
           ) : (
-          <div className={`w-full bg-black ${theaterMode ? 'aspect-[21/9] max-h-[70vh]' : 'aspect-video max-h-[580px]'}`}>
+          <div className={`w-full bg-black ${!multi && !activeStream && streams?.length === 0 ? 'py-10' : theaterMode ? 'aspect-[21/9] max-h-[70vh]' : 'aspect-video max-h-[580px]'}`}>
             {!multi && activeStream ? playerFor(activeStream) : multi ? (
               <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-center px-6">
-                <LayoutGrid className="w-10 h-10 text-gray-600" />
+                <LayoutGrid className="w-10 h-10 text-gray-600" aria-hidden="true" />
                 <p className="text-sm font-medium text-gray-200">Escolha os canais acima</p>
-                <p className="text-xs text-gray-500">Cada canal que você clicar abre ao lado dos outros, até {MAX_SIDE_BY_SIDE}.</p>
+                <p className="text-xs text-gray-400">Cada canal que você clicar abre ao lado dos outros, até {MAX_SIDE_BY_SIDE}.</p>
               </div>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center px-6">
@@ -311,9 +325,9 @@ export default function LivePage() {
                   <RefreshCw className="w-6 h-6 text-gray-500 animate-spin" />
                 ) : (
                   <>
-                    <Tv className="w-10 h-10 text-gray-600" />
-                    <p className="text-sm font-medium text-gray-200">Nenhuma partida sendo transmitida agora</p>
-                    <p className="text-xs text-gray-500">Assim que um jogo começar, o canal dele aparece aqui.</p>
+                    <Tv className="w-8 h-8 text-gray-600" aria-hidden="true" />
+                    <p className="text-sm font-medium text-gray-200">Nenhum canal transmitindo agora</p>
+                    <p className="text-xs text-gray-400">Assim que um jogo começar, o canal dele aparece aqui.</p>
                   </>
                 )}
               </div>
@@ -328,14 +342,19 @@ export default function LivePage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="dota-heading text-xs flex items-center gap-2.5">
             <span>Partidas ao vivo</span>
-            <span className="font-mono tracking-normal text-[11px] text-white bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-full">{liveTotal}</span>
+            <span className={`font-mono tracking-normal text-[11px] px-2 py-0.5 rounded-full border ${liveTotal > 0 ? 'text-white bg-red-500/15 border-red-500/30' : 'text-gray-400 bg-surface-2 border-line'}`}>{liveTotal}</span>
           </h2>
           <span className="text-[11px] text-gray-400">
             Atualiza a cada 30 segundos
           </span>
         </div>
 
-        {liveTotal > 0 ? (
+        {liveTotal === 0 && loading ? (
+          <div className="rounded-2xl glass-panel p-8 flex items-center justify-center gap-3 text-xs text-gray-400" role="status">
+            <RefreshCw className="w-4 h-4 animate-spin text-amber-400" aria-hidden="true" />
+            Buscando os jogos ao vivo...
+          </div>
+        ) : liveTotal > 0 ? (
           <div className="flex flex-col gap-4">
             {/* Um jogo por linha: a barra do jogo na largura toda, como a transmissão acima */}
             {liveGames.map((game, idx) => (
@@ -362,9 +381,9 @@ export default function LivePage() {
           </div>
         ) : (
           /* ESTADO VAZIO AMIGÁVEL */
-          <div className="rounded-3xl glass-panel p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-xl border border-line">
+          <div className="rounded-2xl glass-panel p-8 sm:p-12 text-center max-w-2xl mx-auto">
             <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line flex items-center justify-center mx-auto mb-4">
-              <Radio className="w-8 h-8 text-amber-400" />
+              <Radio className="w-8 h-8 text-amber-400" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-semibold text-white tracking-tight mb-2">
               Nenhuma partida ao vivo no momento
@@ -377,12 +396,12 @@ export default function LivePage() {
             {upcomingMatches && upcomingMatches.length > 0 && (
               <div className="bg-surface-2 border border-line rounded-2xl p-4 text-left">
                 <span className="text-[11px] font-semibold text-amber-400 block mb-2">
-                  Próxima partida agendada:
+                  Próxima partida
                 </span>
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-white">{upcomingMatches[0].timeA}</span>
-                    <span className="text-gray-400 font-mono">vs</span>
+                    <span className="text-gray-400">x</span>
                     <span className="font-medium text-white">{upcomingMatches[0].timeB}</span>
                   </div>
                   <span className="font-mono text-amber-400 font-medium">
@@ -459,13 +478,10 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
   const dire = sideHeroes(game.dire_players, game.dire_picks || game.picks?.dire);
 
   return (
-    <div
-      role="link"
-      tabIndex={0}
+    <article
       onClick={onOpen}
-      onKeyDown={(e) => { if (e.key === 'Enter') onOpen(); }}
-      aria-label={`${radName} ${radKills} x ${direKills} ${direName}, ver partida`}
-      className="tilt-card glass-panel rounded-2xl p-4 sm:p-5 cursor-pointer group flex flex-col gap-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+      aria-label={`${radName} ${radKills} x ${direKills} ${direName}`}
+      className="tilt-card glass-panel rounded-2xl p-4 sm:p-5 cursor-pointer group flex flex-col gap-4"
     >
       {/* Campeonato, formato e série */}
       <div className="flex items-center justify-between gap-3 text-xs">
@@ -527,20 +543,24 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
               key={st.key}
               type="button"
               onClick={(e) => { e.stopPropagation(); onWatch(st); }}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-on-accent transition-colors"
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-on-accent transition-colors ${FOCUS}`}
             >
               <Tv className="w-3 h-3" aria-hidden="true" />
               {PLATFORMS[st.platform].label}{st.lang ? ` ${st.lang.toUpperCase()}` : ''}
             </button>
           )) : (
-            <span className="text-[11px] text-gray-500">Sem transmissão encontrada</span>
+            <span className="text-[11px] text-gray-400">Sem transmissão encontrada</span>
           )}
         </div>
-        <span className="shrink-0 flex items-center gap-1 text-xs font-semibold text-amber-400">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onOpen(); }}
+          className={`shrink-0 flex items-center gap-1 rounded-lg text-xs font-semibold text-amber-400 hover:text-amber-300 ${FOCUS}`}
+        >
           Ver partida
           <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-        </span>
+        </button>
       </div>
-    </div>
+    </article>
   );
 }
