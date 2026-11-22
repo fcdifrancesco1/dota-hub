@@ -80,8 +80,8 @@ export default function HomeHero() {
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Lado Esquerdo: Informações do Torneio em Destaque */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-white text-xs font-medium">
-            <Trophy className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-2 border border-line text-gray-200 text-xs font-medium">
+            <Trophy className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
             <span>{featuredTournament ? `Torneio em destaque${featuredTier ? ` • ${featuredTier}` : ''}` : 'Dota 2 Competitivo'}</span>
           </div>
 
@@ -156,7 +156,7 @@ export default function HomeHero() {
             onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPreview(true); } }
           } : {})}
           className={`lg:col-span-5 min-w-0 bg-surface rounded-[20px] p-5 sm:p-6 ring-1 ring-line/50 transition-[color,background-color,border-color,opacity,transform] ${
-            nextMatch ? 'cursor-pointer hover:bg-surface/90 hover:ring-blue-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500' : ''
+            nextMatch ? 'cursor-pointer hover:bg-surface/90 hover:ring-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400' : ''
           }`}
         >
           <div className="flex items-center justify-between pb-3 border-b border-line/60 text-xs">
@@ -238,13 +238,13 @@ export default function HomeHero() {
                 <span className="text-[11px] text-gray-400 font-medium">Horas</span>
               </div>
               <div className="bg-surface-2 rounded-xl py-2">
-                <span className="block font-mono text-xl font-semibold text-amber-500">
+                <span className="block font-mono text-xl font-semibold text-white">
                   {String(timeLeft.minutes).padStart(2, '0')}
                 </span>
                 <span className="text-[11px] text-gray-400 font-medium">Minutos</span>
               </div>
               <div className="bg-surface-2 rounded-xl py-2">
-                <span className="block font-mono text-xl font-semibold text-red-500">
+                <span className="block font-mono text-xl font-semibold text-white">
                   {String(timeLeft.seconds).padStart(2, '0')}
                 </span>
                 <span className="text-[11px] text-gray-400 font-medium">Segundos</span>
@@ -254,7 +254,7 @@ export default function HomeHero() {
             )}
           </div>
 
-          <div className="pt-3 mt-3 border-t border-line/60 text-center text-xs font-medium text-blue-600">
+          <div className="pt-3 mt-3 border-t border-line/60 text-center text-xs font-medium text-amber-400">
             Ver médias dos jogadores no campeonato →
           </div>
           </>

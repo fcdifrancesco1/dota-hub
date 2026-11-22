@@ -25,8 +25,8 @@ function timeAgo(ms) {
 const fmtDate = (iso) => (iso ? new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '');
 
 const SOURCE_STYLE = {
-  Valve: 'bg-red-500/10 text-red-400 border-red-500/30',
-  Dotabuff: 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+  Valve: 'bg-surface-2 text-gray-300 border-line',
+  Dotabuff: 'bg-surface-2 text-gray-300 border-line'
 };
 
 function TeamTag({ side }) {

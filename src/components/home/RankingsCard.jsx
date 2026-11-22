@@ -25,7 +25,7 @@ function RankBadge({ rank }) {
   return (
     <span
       className={`w-6 h-6 shrink-0 rounded-lg flex items-center justify-center text-xs font-semibold font-mono ${style ? 'border' : 'bg-surface-2 text-gray-400'}`}
-      style={style || undefined}
+      style={style ? { ...style, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)' } : undefined}
     >
       {rank}
     </span>

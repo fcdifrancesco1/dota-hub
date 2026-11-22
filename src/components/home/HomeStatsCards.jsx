@@ -53,36 +53,28 @@ export default function HomeStatsCards() {
       value: stats.totalMatches,
       subtitle: stats.matchesToday ? `${stats.matchesToday} hoje` : 'No campeonato',
       icon: Swords,
-      color: 'from-amber-500/20 to-amber-600/5',
-      borderColor: 'border-amber-500/30',
-      iconColor: 'text-amber-400'
+      iconColor: 'text-gray-300'
     },
     {
       title: 'Duração média',
       value: fmtDuration(stats.avgDurationSec),
       subtitle: 'Tempo de mapa',
       icon: Clock,
-      color: 'from-blue-500/20 to-blue-600/5',
-      borderColor: 'border-blue-500/30',
-      iconColor: 'text-blue-400'
+      iconColor: 'text-gray-300'
     },
     {
       title: 'Mais escolhido',
       ...heroCard(mostPicked),
       subtitle: mostPicked ? `${mostPicked.picks} picks (${Math.round(mostPicked.winRate)}% de vitórias)` : '',
       icon: Sparkles,
-      color: 'from-emerald-500/20 to-emerald-600/5',
-      borderColor: 'border-emerald-500/30',
-      iconColor: 'text-emerald-400'
+      iconColor: 'text-gray-300'
     },
     {
       title: 'Mais banido',
       ...heroCard(mostBanned?.bans ? mostBanned : null),
       subtitle: mostBanned?.bans ? `${mostBanned.bans} bans` : '',
       icon: Ban,
-      color: 'from-red-500/20 to-red-600/5',
-      borderColor: 'border-red-500/30',
-      iconColor: 'text-red-400'
+      iconColor: 'text-gray-300'
     },
     {
       title: 'Maior taxa de vitória',
@@ -91,9 +83,7 @@ export default function HomeStatsCards() {
         ? `${Math.round(bestWinrate.winRate)}% (${bestWinrate.picks} jogos)`
         : `Mínimo de ${minPicks} jogos`,
       icon: TrendingUp,
-      color: 'from-purple-500/20 to-purple-600/5',
-      borderColor: 'border-purple-500/30',
-      iconColor: 'text-purple-400'
+      iconColor: 'text-gray-300'
     }
   ];
 

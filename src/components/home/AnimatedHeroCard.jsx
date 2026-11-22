@@ -165,7 +165,7 @@ export default function AnimatedHeroCard() {
             <div className="sm:col-span-8 space-y-2.5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="inline-flex items-center gap-1 mb-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                  <div className="inline-flex items-center gap-1 mb-1 text-[11px] font-semibold text-gray-400">
                     <Flame className="w-3 h-3" />
                     {selected.position
                       ? `Mais disputado na Pos ${selected.position.n} · ${selected.position.label}`
@@ -177,7 +177,7 @@ export default function AnimatedHeroCard() {
                   </span>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-lg font-semibold text-emerald-500 font-mono block">{selectedHero.proWinRate}%</span>
+                  <span className="text-lg font-semibold text-white font-mono block">{selectedHero.proWinRate}%</span>
                   <span className="text-[11px] text-gray-400 font-medium">Vitórias (pro)</span>
                 </div>
               </div>
@@ -203,7 +203,7 @@ export default function AnimatedHeroCard() {
               <div className="flex flex-wrap items-center gap-2">
                 <Link
                   to={`/herois/${selectedHero.id}`}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] text-on-accent bg-blue-600 hover:bg-blue-700 shadow-md"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] text-gray-200 bg-surface-2 border border-line hover:text-white hover:border-line-strong"
                 >
                   <span>Ver {selectedHero.name}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
