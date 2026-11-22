@@ -1050,6 +1050,24 @@ export default async function handler(req, res) {
       }
     }
 
+    // 3. A lista de ligas da Valve às vezes fica sem os jogos dos campeonatos e a OpenDota cai (520).
+    // GetTopLiveGame é a fonte que a própria OpenDota usa no /live (mesmos campos); cada "partner" traz um lote.
+    if (!games.length && key && !matchId) {
+      const lists = await Promise.all([0, 1, 2, 3].map((partner) =>
+        fetch(`https://api.steampowered.com/IDOTA2Match_570/GetTopLiveGame/v1/?key=${encodeURIComponent(key)}&partner=${partner}`, { signal: AbortSignal.timeout(4500) })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => d?.game_list || [])
+          .catch(() => [])));
+      const byId = new Map(lists.flat().filter((g) => g?.match_id).map((g) => [String(g.match_id), g]));
+      const pro = [...byId.values()].filter((g) =>
+        (!leagueId || String(g.league_id) === String(leagueId)) &&
+        isProGame(g.league_id, g.team_name_radiant, g.team_name_dire, leagues));
+      if (pro.length) {
+        games = filterAndDeduplicateLiveGames(pro.map(normalizeOpenDotaLive).filter(Boolean));
+        source = "steam_top_live";
+      }
+    }
+
     res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=60");
     return res.status(200).json({
       result: {
