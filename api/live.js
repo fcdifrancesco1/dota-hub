@@ -139,6 +139,8 @@ function resolveVerifiedTeamLogo(teamName, teamId, explicitUrl) {
 // completa tem ~1 MB, então guardamos só os IDs em memória por 6 horas.
 const PRO_LEAGUE_TIERS = new Set(['premium', 'professional']);
 let proLeagueCache = { ids: null, expiresAt: 0 };
+// Última lista de jogos ao vivo não vazia (instância quente da função)
+let lastLiveGames = { games: [], at: 0 };
 // Nome oficial de cada liga profissional (leagueid -> nome), da mesma lista
 const LEAGUE_NAMES = new Map();
 
@@ -1066,6 +1068,12 @@ export default async function handler(req, res) {
         games = filterAndDeduplicateLiveGames(pro.map(normalizeOpenDotaLive).filter(Boolean));
         source = "steam_top_live";
       }
+    }
+
+    // As fontes às vezes voltam vazias por uns minutos com os jogos rolando: segura a última lista cheia
+    if (!matchId && !leagueId) {
+      if (games.length) lastLiveGames = { games, at: Date.now() };
+      else if (Date.now() - lastLiveGames.at < 4 * 60 * 1000) { games = lastLiveGames.games; source = "last_known"; }
     }
 
     res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=60");

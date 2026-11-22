@@ -751,18 +751,29 @@ export async function fetchProBenchmarks() {
 }
 
 // 6. Buscar Partidas Ao Vivo
+// Última lista com jogos: a Valve e a OpenDota às vezes devolvem a lista vazia por alguns minutos
+// com os jogos ainda rolando. Lista vazia logo depois de uma cheia é tratada como falha da fonte.
+let lastLive = { games: [], at: 0 };
+const LIVE_GRACE_MS = 4 * 60 * 1000;
+
 export async function fetchLiveGames() {
+  let list = null;
   try {
     const res = await fetchWithTimeout("/api/live", {}, 3500);
     if (res.ok) {
       const data = await res.json();
-      const list = (data && data.result && data.result.games) || (Array.isArray(data) ? data : []);
-      return list.filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
+      list = ((data && data.result && data.result.games) || (Array.isArray(data) ? data : []))
+        .filter(g => g && (g.radiant_team || g.scoreboard?.radiant) && (g.dire_team || g.scoreboard?.dire));
     }
   } catch (e) {
     // Timeout ou erro de rede não trava a UI
   }
-  return [];
+  if (list?.length) {
+    lastLive = { games: list, at: Date.now() };
+    return list;
+  }
+  // shortcut: um jogo que acabou bem na hora da falha fica até 4 min a mais; some quando a OpenDota registra a partida
+  return Date.now() - lastLive.at < LIVE_GRACE_MS ? lastLive.games : [];
 }
 
 // Campeonatos atuais da Liquipedia (próximos, em andamento e encerrados
