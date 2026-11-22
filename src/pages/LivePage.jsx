@@ -8,7 +8,9 @@ import {
   ExternalLink,
   ChevronRight,
   LayoutGrid,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
@@ -536,12 +538,12 @@ function StreamOnlyCard({ match, onWatch }) {
   );
 }
 
-// Mapas vencidos na série, como os pontos amarelos do placar dentro do jogo
-function SeriesPips({ wins, total, className = '' }) {
+// Mapas vencidos na série: os traços amarelos inclinados nos cantos de cima do relógio, como no jogo
+function SeriesTicks({ wins, total, side }) {
   return (
-    <span className={`flex gap-1 ${className}`} aria-hidden="true">
+    <span className={`absolute top-1 flex gap-0.5 ${side === 'left' ? 'left-2 flex-row-reverse' : 'right-2'}`} aria-hidden="true">
       {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={`h-2 w-2 rotate-45 ${i < (wins || 0) ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]' : 'border border-gray-600'}`} />
+        <span key={i} className={`h-3.5 w-1.5 ${side === 'left' ? '-skew-x-[18deg]' : 'skew-x-[18deg]'} ${i < (wins || 0) ? 'bg-amber-300 shadow-[0_0_6px_rgba(252,211,77,0.6)]' : 'bg-white/10'}`} />
       ))}
     </span>
   );
@@ -553,9 +555,16 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
   const radKills = game.radiant_score ?? game.score1 ?? 0;
   const direKills = game.dire_score ?? game.score2 ?? 0;
   const goldLead = game.radiant_lead || game.gold_lead || 0;
-  const goldText = goldLead > 0 ? <><span className="text-emerald-400">+{(goldLead / 1000).toFixed(1)}k</span> ouro</>
-    : goldLead < 0 ? <><span className="text-rose-400">+{(Math.abs(goldLead) / 1000).toFixed(1)}k</span> ouro</>
-    : 'Ouro igual';
+  // Ciclo do jogo: 5 min de dia, 5 de noite, começando de dia
+  const night = game.duration > 0 && Math.floor(game.duration / 300) % 2 === 1;
+  // Vantagem de ouro como no jogo: "▲ 1.2k" embaixo do lado que está na frente
+  const goldChip = goldLead !== 0 && (
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/50 font-semibold text-[11px] text-amber-300 tabular-nums">
+      <span className="text-emerald-400 text-[9px]" aria-hidden="true">▲</span>
+      {(Math.abs(goldLead) / 1000).toFixed(1)}k
+      <span className="sr-only"> de ouro a mais</span>
+    </span>
+  );
   // MD3 → 2 vitórias, MD5 → 3; MD1 não tem pontos
   const winsNeeded = [1, 2, 3][game.series_type] ?? 2;
   const radiant = sideHeroes(game.radiant_players, game.radiant_picks || game.picks?.radiant);
@@ -583,19 +592,27 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
         <div className="col-span-2 sm:col-span-1 sm:order-1 grid grid-cols-5 gap-1 p-1 rounded-md bg-gradient-to-r from-transparent to-emerald-500/10">
           {radiant.map((p, i) => <HeroSlot key={`r${i}`} p={p} constants={constants} />)}
         </div>
-        <div className="col-span-2 sm:col-span-1 order-first sm:order-2 flex flex-col items-center justify-center px-4 lg:px-8 py-2 lg:py-3 rounded-xl bg-surface-2 border border-line">
-          {/* Como o placar do jogo: abates dos lados do relógio, mapas vencidos em pontos amarelos embaixo */}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 font-mono font-semibold leading-none">
-            <span className="text-right text-4xl lg:text-5xl text-emerald-400">{radKills}</span>
-            <time className="px-2 py-1 rounded-md bg-black/40 text-sm font-medium text-white">{fmtClock(game.duration)}</time>
-            <span className="text-left text-4xl lg:text-5xl text-rose-400">{direKills}</span>
+        {/* Placar como o do jogo: abates em branco dos lados da placa do relógio, série nos cantos da placa */}
+        <div className="col-span-2 sm:col-span-1 order-first sm:order-2 grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 lg:gap-x-4 gap-y-1">
+          <span className="text-right font-sans font-bold text-4xl lg:text-5xl leading-none text-white tabular-nums [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">{radKills}</span>
+          <div className="relative">
+            <div
+              className="w-24 lg:w-28 pt-2.5 pb-3 flex flex-col items-center gap-0.5 bg-gradient-to-b from-slate-700/80 to-slate-950 border-t border-white/10"
+              style={{ clipPath: 'polygon(0 0, 100% 0, 88% 100%, 12% 100%)' }}
+            >
+              {night ? <Moon className="w-4 h-4 text-sky-200" aria-label="Noite" /> : <Sun className="w-4 h-4 text-amber-200" aria-label="Dia" />}
+              <time className="font-sans font-bold text-sm text-white tabular-nums">{fmtClock(game.duration)}</time>
+            </div>
             {winsNeeded > 1 && <>
-              <SeriesPips wins={game.radiant_series_wins} total={winsNeeded} className="justify-end" />
+              <SeriesTicks wins={game.radiant_series_wins} total={winsNeeded} side="left" />
+              <SeriesTicks wins={game.dire_series_wins} total={winsNeeded} side="right" />
               <span className="sr-only">Série {game.radiant_series_wins || 0} a {game.dire_series_wins || 0}</span>
-              <SeriesPips wins={game.dire_series_wins} total={winsNeeded} className="justify-start" />
             </>}
           </div>
-          <span className="sm:hidden mt-0.5 font-mono text-[11px] text-gray-400">{goldText}</span>
+          <span className="text-left font-sans font-bold text-4xl lg:text-5xl leading-none text-white tabular-nums [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">{direKills}</span>
+          <span className="flex justify-end min-h-[20px]">{goldLead > 0 && goldChip}</span>
+          <span />
+          <span className="flex justify-start min-h-[20px]">{goldLead < 0 && goldChip}</span>
         </div>
         <div className="col-span-2 sm:col-span-1 sm:order-3 grid grid-cols-5 gap-1 p-1 rounded-md bg-gradient-to-l from-transparent to-rose-500/10">
           {dire.map((p, i) => <HeroSlot key={`d${i}`} p={p} constants={constants} />)}
@@ -603,7 +620,7 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
       </div>
 
       {/* Times */}
-      <div className="grid grid-cols-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+      <div className="grid grid-cols-2 items-center gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <TeamLogo teamName={radName} teamId={game.team_id_radiant || game.radiant_team_id || game.radiant_team?.team_id}
             logoUrl={game.radiant_logo || game.logoA} className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
@@ -612,7 +629,6 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
             <div className="text-[11px] font-medium text-emerald-400">Radiant</div>
           </div>
         </div>
-        <span className="hidden sm:block font-mono text-[11px] text-gray-400 text-center whitespace-nowrap">{goldText}</span>
         <div className="flex items-center gap-2.5 min-w-0 flex-row-reverse text-right">
           <TeamLogo teamName={direName} teamId={game.team_id_dire || game.dire_team_id || game.dire_team?.team_id}
             logoUrl={game.dire_logo || game.logoB} className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
