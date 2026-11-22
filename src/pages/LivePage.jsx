@@ -536,6 +536,17 @@ function StreamOnlyCard({ match, onWatch }) {
   );
 }
 
+// Mapas vencidos na série, como os pontos amarelos do placar dentro do jogo
+function SeriesPips({ wins, total, className = '' }) {
+  return (
+    <span className={`flex gap-1 ${className}`} aria-hidden="true">
+      {Array.from({ length: total }, (_, i) => (
+        <span key={i} className={`h-2 w-2 rotate-45 ${i < (wins || 0) ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]' : 'border border-gray-600'}`} />
+      ))}
+    </span>
+  );
+}
+
 function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
   const radName = game.radiant_name || game.team1 || 'Radiant';
   const direName = game.dire_name || game.team2 || 'Dire';
@@ -545,8 +556,8 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
   const goldText = goldLead > 0 ? <><span className="text-emerald-400">+{(goldLead / 1000).toFixed(1)}k</span> ouro</>
     : goldLead < 0 ? <><span className="text-rose-400">+{(Math.abs(goldLead) / 1000).toFixed(1)}k</span> ouro</>
     : 'Ouro igual';
-  const hasSeries = Number.isFinite(game.radiant_series_wins) && Number.isFinite(game.dire_series_wins) &&
-    game.radiant_series_wins + game.dire_series_wins > 0;
+  // MD3 → 2 vitórias, MD5 → 3; MD1 não tem pontos
+  const winsNeeded = [1, 2, 3][game.series_type] ?? 2;
   const radiant = sideHeroes(game.radiant_players, game.radiant_picks || game.picks?.radiant);
   const dire = sideHeroes(game.dire_players, game.dire_picks || game.picks?.dire);
 
@@ -564,7 +575,6 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
         </span>
         <span className="shrink-0 font-mono text-[11px] text-gray-400 bg-surface-2 border border-line px-2 py-0.5 rounded-full">
           {seriesTypeLabel(game.series_type)}
-          {hasSeries && ` · Série ${game.radiant_series_wins}:${game.dire_series_wins}`}
         </span>
       </div>
 
@@ -574,12 +584,17 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
           {radiant.map((p, i) => <HeroSlot key={`r${i}`} p={p} constants={constants} />)}
         </div>
         <div className="col-span-2 sm:col-span-1 order-first sm:order-2 flex flex-col items-center justify-center px-4 lg:px-8 py-2 lg:py-3 rounded-xl bg-surface-2 border border-line">
-          <div className="flex items-baseline gap-3 font-mono font-semibold text-4xl lg:text-5xl leading-none">
-            <span className="text-emerald-400">{radKills}</span>
-            <span className="text-xl text-gray-500">:</span>
-            <span className="text-rose-400">{direKills}</span>
+          {/* Como o placar do jogo: abates dos lados do relógio, mapas vencidos em pontos amarelos embaixo */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 font-mono font-semibold leading-none">
+            <span className="text-right text-4xl lg:text-5xl text-emerald-400">{radKills}</span>
+            <time className="px-2 py-1 rounded-md bg-black/40 text-sm font-medium text-white">{fmtClock(game.duration)}</time>
+            <span className="text-left text-4xl lg:text-5xl text-rose-400">{direKills}</span>
+            {winsNeeded > 1 && <>
+              <SeriesPips wins={game.radiant_series_wins} total={winsNeeded} className="justify-end" />
+              <span className="sr-only">Série {game.radiant_series_wins || 0} a {game.dire_series_wins || 0}</span>
+              <SeriesPips wins={game.dire_series_wins} total={winsNeeded} className="justify-start" />
+            </>}
           </div>
-          <time className="mt-1.5 font-mono text-sm font-medium text-white">{fmtClock(game.duration)}</time>
           <span className="sm:hidden mt-0.5 font-mono text-[11px] text-gray-400">{goldText}</span>
         </div>
         <div className="col-span-2 sm:col-span-1 sm:order-3 grid grid-cols-5 gap-1 p-1 rounded-md bg-gradient-to-l from-transparent to-rose-500/10">
