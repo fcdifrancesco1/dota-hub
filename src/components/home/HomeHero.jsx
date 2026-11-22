@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Radio, ArrowRight, Clock, Flame, Calendar, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useApp } from '../../context/AppContext';
+import { useApp, findLiveGameFor } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
 import { SITE_CONFIG } from '../../config/siteConfig';
@@ -220,7 +220,10 @@ export default function HomeHero() {
             {!timeLeft ? (
               <div className="text-xs text-gray-400 text-center font-semibold py-2">Horário a definir</div>
             ) : (timeLeft.hours + timeLeft.minutes + timeLeft.seconds) === 0 ? (
-              <div className="text-xs text-red-500 text-center font-semibold py-2">Em andamento / começando</div>
+              // Vermelho só com o jogo no feed ao vivo; antes disso o horário passou mas nada confirma
+              findLiveGameFor(nextMatch, liveGames)
+                ? <div className="text-xs text-red-500 text-center font-semibold py-2">Ao vivo agora</div>
+                : <div className="text-xs text-gray-400 text-center font-semibold py-2">Começando</div>
             ) : (
             <>
             <div className="text-[11px] text-gray-400 text-center mb-2 font-semibold">
