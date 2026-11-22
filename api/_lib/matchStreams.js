@@ -57,6 +57,18 @@ export function youtubeChannelId(html) {
     || null;
 }
 
+/**
+ * Feed RSS de um canal do YouTube (/feeds/videos.xml?channel_id=UC…) → [{ videoId, title, published (ms) }].
+ * Lista também as lives do canal, inclusive as que rodam ao mesmo tempo (BLAST "Stream A" e "Stream B").
+ */
+export function parseYoutubeFeed(xml) {
+  return [...String(xml || '').matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(([, e]) => ({
+    videoId: e.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/)?.[1] || null,
+    title: decodeHtml(e.match(/<title>([^<]*)<\/title>/)?.[1] || '').trim(),
+    published: Date.parse(e.match(/<published>([^<]*)<\/published>/)?.[1] || '') || 0
+  })).filter((v) => v.videoId);
+}
+
 /** Resposta de kick.com/api/v2/channels/{slug} → { live, title }. */
 export function parseKickChannel(json) {
   const ls = json?.livestream;

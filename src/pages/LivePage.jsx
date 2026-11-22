@@ -28,10 +28,7 @@ const PLATFORMS = {
   youtube: {
     label: 'YouTube',
     player: (s) => `https://www.youtube.com/embed/${s.embed}`,
-    // embed é o vídeo ou, sem ele, "live_stream?channel=UC…" (o player do canal ao vivo)
-    page: (s) => (s.embed.startsWith('live_stream')
-      ? `https://www.youtube.com/channel/${s.embed.split('channel=')[1]}/live`
-      : `https://www.youtube.com/watch?v=${s.embed}`)
+    page: (s) => `https://www.youtube.com/watch?v=${s.embed}`
   },
   kick: {
     label: 'Kick',

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, youtubeChannelId, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from '../api/_lib/matchStreams.js';
+import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, youtubeChannelId, parseYoutubeFeed, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from '../api/_lib/matchStreams.js';
 
 test('nome do stream da Liquipedia vira canal', () => {
   assert.deepEqual(channelFromStreamUrl('https://liquipedia.net/dota2/Special:Stream/twitch/EPC_EN'), { platform: 'twitch', channel: 'epc_en' });
@@ -64,4 +64,15 @@ test('ID do canal do YouTube: o do próprio canal antes dos citados na página',
   assert.equal(youtubeChannelId('{"channelId":"' + own + '"} {"browseId":"' + other + '"}'), own);
   assert.equal(youtubeChannelId('{"channelId":"' + other + '"} {"externalId":"' + own + '"}'), own);
   assert.equal(youtubeChannelId('<html>consent.youtube.com</html>'), null);
+});
+
+test('feed RSS do YouTube: ID, título e data de cada vídeo, lives simultâneas incluídas', () => {
+  const entry = (id, t, p) => '<entry><yt:videoId>' + id + '</yt:videoId><title>' + t + '</title><published>' + p + '</published></entry>';
+  const xml = '<feed>' + entry('DbB3ddYBBsU', '[B] Day 3 - LEGION vs DO KONCA', '2026-11-21T21:53:25+00:00')
+    + entry('JyCfpjXEknw', '[A] Day 3 - PARIVISION vs Liquid &amp; more', '2026-11-21T23:31:52+00:00') + '</feed>';
+  const feed = parseYoutubeFeed(xml);
+  assert.deepEqual(feed.map((v) => v.videoId), ['DbB3ddYBBsU', 'JyCfpjXEknw']);
+  assert.equal(feed[1].title, '[A] Day 3 - PARIVISION vs Liquid & more');
+  assert.equal(feed[0].published, Date.parse('2026-11-21T21:53:25Z'));
+  assert.deepEqual(parseYoutubeFeed('<html>erro</html>'), []);
 });

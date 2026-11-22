@@ -3,7 +3,7 @@ import path from 'path';
 import { getTournamentLeagueIds } from './_lib/tournamentLeagues.js';
 import { fetchLiquipediaApi } from './_lib/liquipediaClient.js';
 import { parseLiquipediaMatches } from './_lib/parseLiquipediaMatches.js';
-import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, youtubeChannelId, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from './_lib/matchStreams.js';
+import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, youtubeChannelId, parseYoutubeFeed, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from './_lib/matchStreams.js';
 
 // Dicionário de Ligas Conhecidas (para exibir o nome real do torneio pelo league_id)
 const KNOWN_LEAGUES = {
@@ -796,7 +796,7 @@ async function fetchTwitchChannel({ channel }) {
 // Cookies de consentimento já aceito: sem eles o YouTube pode devolver a tela de consentimento
 const YOUTUBE_HEADERS = { ...PAGE_HEADERS, Cookie: 'CONSENT=YES+cb.20210328-17-p0.en+FX+667; SOCS=CAI' };
 
-async function fetchYoutubeChannel({ channel, video, match, tournament }) {
+async function fetchYoutubeChannel({ channel, video, match, tournament }, active = []) {
   const name = channel.replace(/^(c|user|channel)\//, '');
   try {
     const url = video ? `https://www.youtube.com/watch?v=${video}` : `https://www.youtube.com/${channel}/live`;
@@ -805,12 +805,24 @@ async function fetchYoutubeChannel({ channel, video, match, tournament }) {
     const yt = parseYoutubeLive(html);
     // Página normal do vídeo: ela diz se está ao vivo
     if (yt.videoId) return { platform: 'youtube', channel: name, embed: yt.videoId, live: yt.live, title: yt.title };
-    // Sem o vídeo mas com o canal: o player oficial "ao vivo do canal" toca a transmissão atual.
-    // shortcut: não confirma que está ao vivo; só vale para canal de uma partida em andamento
-    // (pela agenda) ou de um campeonato com partida em andamento (pela página do campeonato)
+    // O servidor recebe a página do canal sem os dados da live. O feed RSS do canal lista as lives,
+    // inclusive as simultâneas (BLAST "Stream A" e "Stream B"): entra cada vídeo das últimas 36 h
+    // cujo título cita uma partida em andamento, com o próprio ID (o player "ao vivo do canal" não
+    // toca quando o canal tem duas lives).
+    // shortcut: o feed não diz se o vídeo ainda está ao vivo; a Central só mostra canais com jogo ao vivo
     const channelId = youtubeChannelId(html);
     if (!video && channelId && (match || tournament)) {
-      return { platform: 'youtube', channel: name, embed: `live_stream?channel=${channelId}`, live: true, title: null };
+      const feed = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, { signal: AbortSignal.timeout(6000) })
+        .then((f) => (f.ok ? f.text() : '')).catch(() => '');
+      const recent = parseYoutubeFeed(feed).filter((v) => Date.now() - v.published < 36 * 3600 * 1000);
+      // Uma live por partida: a mais nova que cita os times
+      const byMatch = new Map();
+      for (const v of recent.sort((a, b) => b.published - a.published)) {
+        const m = matchForTitle(v.title, active);
+        const key = m && `${m.timeA}|${m.timeB}`;
+        if (key && !byMatch.has(key)) byMatch.set(key, { platform: 'youtube', channel: name, embed: v.videoId, live: true, title: v.title });
+      }
+      if (byMatch.size) return [...byMatch.values()];
     }
     const pageTitle = html.match(/<title>([^<]*)/)?.[1]?.slice(0, 80) || '';
     console.warn(`[Live API] YouTube sem a página do vídeo (${r.status}, ${html.length} bytes, título "${pageTitle}", canal ${channelId || 'não achado'}) para ${url}`);
@@ -882,10 +894,11 @@ async function handleStreams(res) {
 
   // shortcut: no máximo 24 canais checados por vez; se faltar canal em dia cheio, aumentar ou priorizar a agenda
   const list = [...candidates.values()].slice(0, 24);
-  const checked = await Promise.all(list.map(async (c) => {
-    const found = await CHECKERS[c.platform](c);
-    return found && { ...found, from: c };
-  }));
+  // Um canal do YouTube pode render várias lives (uma por partida), por isso o flat
+  const checked = (await Promise.all(list.map(async (c) => {
+    const found = await CHECKERS[c.platform](c, active);
+    return [].concat(found || []).map((x) => ({ ...x, from: c }));
+  }))).flat();
   const seen = new Set();
   const live = checked.filter((c) => c?.live && c.embed && !seen.has(`${c.platform}:${c.embed}`) && seen.add(`${c.platform}:${c.embed}`));
   const matchOf = (c) => matchForTitle(c.title, active) || c.from.match || null;
