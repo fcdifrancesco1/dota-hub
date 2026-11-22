@@ -17,7 +17,7 @@ import {
 import { SITE_CONFIG } from '../config/siteConfig';
 import { loadTeamLogoRegistry } from '../utils/teamLogos';
 import { learnAliases, applyAliasesToSeries, applyAliasesToLiveGame } from '../utils/teamAliases';
-import { isSeriesOngoing, withWikiScore, bracketMatches } from '../utils/seriesStatus';
+import { isSeriesOngoing, isIncompleteSeries, withWikiScore, bracketMatches } from '../utils/seriesStatus';
 
 const seriesFixKey = (s) => String(s?.games?.[0]?.match_id || s?.series_id || '');
 
@@ -344,7 +344,8 @@ export function AppProvider({ children }) {
   // Liquipedia (a mesma da classificação), achada pelos IDs dos mapas.
   useEffect(() => {
     const now = Date.now();
-    const pending = finishedSeries.filter((s) => s.leagueId && isSeriesOngoing(s) && isStaleBetweenMaps(s, now) &&
+    const pending = finishedSeries.filter((s) => s.leagueId && isIncompleteSeries(s) && isStaleBetweenMaps(s, now) &&
+      now - (Number(s.lastMatchTime || s.startTime) || 0) * 1000 < 2 * 86400000 &&
       !wikiFixRef.current.has(seriesFixKey(s)) && now - (wikiTriedRef.current.get(seriesFixKey(s)) || 0) > 5 * 60 * 1000);
     if (!pending.length) return;
     pending.forEach((s) => wikiTriedRef.current.set(seriesFixKey(s), now));

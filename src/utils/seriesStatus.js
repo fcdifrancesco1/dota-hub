@@ -78,3 +78,13 @@ export function bracketMatches(brackets) {
 
 /** "BO3" → "MD3" (o termo usado no site); sem formato, MD3. */
 export const formatLabel = (f) => String(f || 'BO3').toUpperCase().replace(/^BO/, 'MD');
+
+/**
+ * Série que ainda não tem vencedor pelo formato (ex.: MD3 em 1-1). Depois de 6 horas o
+ * seriesStatus a dá como encerrada, mas o placar está incompleto: a OpenDota não registrou
+ * os últimos mapas. MD2 pode terminar empatada, então fica de fora.
+ */
+export function isIncompleteSeries(series) {
+  const needed = { BO1: 1, BO3: 2, BO5: 3 }[String(series?.formato || '').toUpperCase()];
+  return Boolean(needed) && Math.max(series?.scoreA || 0, series?.scoreB || 0) < needed;
+}

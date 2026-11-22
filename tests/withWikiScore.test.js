@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { withWikiScore, seriesStatus } from '../src/utils/seriesStatus.js';
+import { withWikiScore, seriesStatus, isIncompleteSeries } from '../src/utils/seriesStatus.js';
 
 // Série da OpenDota com 2 mapas (1x1) e a partida da Liquipedia já com o 3º mapa (1x2)
 const od = {
@@ -29,4 +29,12 @@ test('lados trocados na Liquipedia: o placar segue o lado de cada time', () => {
 test('OpenDota igual ou à frente, ou W.O. na Liquipedia: mantém a série da OpenDota', () => {
   assert.equal(withWikiScore(od, { ...bm, b: { ...bm.b, score: '1' } }, true), od);
   assert.equal(withWikiScore(od, { ...bm, a: { ...bm.a, score: 'W' }, b: { ...bm.b, score: 'FF' } }, true), od);
+});
+
+test('série sem vencedor pelo formato fica incompleta mesmo depois de 6 horas', () => {
+  const old = { ...od, lastMatchTime: Math.floor(Date.now() / 1000) - 10 * 3600 };
+  assert.equal(seriesStatus(old), 'finished');
+  assert.equal(isIncompleteSeries(old), true);
+  assert.equal(isIncompleteSeries({ ...old, scoreB: 2 }), false);
+  assert.equal(isIncompleteSeries({ ...old, formato: 'BO2' }), false);
 });
