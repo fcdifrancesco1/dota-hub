@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from '../api/_lib/matchStreams.js';
+import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, youtubeChannelId, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from '../api/_lib/matchStreams.js';
 
 test('nome do stream da Liquipedia vira canal', () => {
   assert.deepEqual(channelFromStreamUrl('https://liquipedia.net/dota2/Special:Stream/twitch/EPC_EN'), { platform: 'twitch', channel: 'epc_en' });
@@ -56,4 +56,12 @@ test('acha a partida pelo título da transmissão', () => {
   assert.equal(matchForTitle('EPC S3 | potn9ki vs Team Synapse | BO3', matches), matches[1]);
   assert.equal(matchForTitle('[RU] InterActive Philippines vs Lynx', matches), matches[2]);
   assert.equal(matchForTitle('Analysis desk', matches), null);
+});
+
+test('ID do canal do YouTube: o do próprio canal antes dos citados na página', () => {
+  const own = 'UCAvIC2XmBLLXFPdveirTrmw';
+  const other = 'UC-F4GLIh32rqi2868FGqZeg';
+  assert.equal(youtubeChannelId('{"channelId":"' + own + '"} {"browseId":"' + other + '"}'), own);
+  assert.equal(youtubeChannelId('{"channelId":"' + other + '"} {"externalId":"' + own + '"}'), own);
+  assert.equal(youtubeChannelId('<html>consent.youtube.com</html>'), null);
 });

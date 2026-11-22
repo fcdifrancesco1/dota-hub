@@ -48,6 +48,15 @@ export function parseYoutubeLive(html) {
   return { live: live && Boolean(videoId), videoId, title };
 }
 
+/** ID do canal (UC…) numa página do YouTube: o do próprio canal antes dos citados na página. */
+export function youtubeChannelId(html) {
+  const text = String(html || '');
+  return text.match(/"externalId":"(UC[\w-]{22})"/)?.[1]
+    || text.match(/itemprop="channelId" content="(UC[\w-]{22})"/)?.[1]
+    || text.match(/"channelId":"(UC[\w-]{22})"/)?.[1]
+    || null;
+}
+
 /** Resposta de kick.com/api/v2/channels/{slug} → { live, title }. */
 export function parseKickChannel(json) {
   const ls = json?.livestream;

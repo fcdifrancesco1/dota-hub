@@ -3,7 +3,7 @@ import path from 'path';
 import { getTournamentLeagueIds } from './_lib/tournamentLeagues.js';
 import { fetchLiquipediaApi } from './_lib/liquipediaClient.js';
 import { parseLiquipediaMatches } from './_lib/parseLiquipediaMatches.js';
-import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from './_lib/matchStreams.js';
+import { channelFromStreamUrl, streamChannelsFromPage, parseTwitchPage, parseYoutubeLive, youtubeChannelId, parseKickChannel, kickSlugCandidates, youtubePathFromName, streamLanguage, matchForTitle } from './_lib/matchStreams.js';
 
 // Dicionário de Ligas Conhecidas (para exibir o nome real do torneio pelo league_id)
 const KNOWN_LEAGUES = {
@@ -793,15 +793,26 @@ async function fetchTwitchChannel({ channel }) {
 }
 
 // Canal do YouTube: a página "/live" abre a transmissão em andamento (ou o vídeo que a Liquipedia indicou)
-async function fetchYoutubeChannel({ channel, video }) {
+// Cookies de consentimento já aceito: sem eles o YouTube pode devolver a tela de consentimento
+const YOUTUBE_HEADERS = { ...PAGE_HEADERS, Cookie: 'CONSENT=YES+cb.20210328-17-p0.en+FX+667; SOCS=CAI' };
+
+async function fetchYoutubeChannel({ channel, video, match }) {
   const name = channel.replace(/^(c|user|channel)\//, '');
   try {
     const url = video ? `https://www.youtube.com/watch?v=${video}` : `https://www.youtube.com/${channel}/live`;
-    const r = await fetch(url, { headers: PAGE_HEADERS, signal: AbortSignal.timeout(6000) });
-    const yt = r.ok ? parseYoutubeLive(await r.text()) : null;
+    const r = await fetch(url, { headers: YOUTUBE_HEADERS, signal: AbortSignal.timeout(6000) });
+    const html = r.ok ? await r.text() : '';
+    const yt = parseYoutubeLive(html);
     // Página normal do vídeo: ela diz se está ao vivo
-    if (yt?.videoId) return { platform: 'youtube', channel: name, embed: yt.videoId, live: yt.live, title: yt.title };
-    console.warn(`[Live API] YouTube sem a página do vídeo (${r.status}) para ${url}`);
+    if (yt.videoId) return { platform: 'youtube', channel: name, embed: yt.videoId, live: yt.live, title: yt.title };
+    // Sem o vídeo mas com o canal: o player oficial "ao vivo do canal" toca a transmissão atual.
+    // shortcut: não confirma que está ao vivo; só vale para canal ligado pela agenda a uma partida em andamento
+    const channelId = youtubeChannelId(html);
+    if (!video && channelId && match) {
+      return { platform: 'youtube', channel: name, embed: `live_stream?channel=${channelId}`, live: true, title: null };
+    }
+    const pageTitle = html.match(/<title>([^<]*)/)?.[1]?.slice(0, 80) || '';
+    console.warn(`[Live API] YouTube sem a página do vídeo (${r.status}, ${html.length} bytes, título "${pageTitle}", canal ${channelId || 'não achado'}) para ${url}`);
   } catch { /* tenta o oEmbed abaixo */ }
   // O YouTube às vezes devolve consentimento/verificação ao servidor. Com o vídeo
   // indicado pela Liquipedia numa partida em andamento, o oEmbed confirma que ele existe.
