@@ -298,7 +298,12 @@ export default function LivePage() {
 
           {/* PLAYER RESPONSIVO */}
           {multi && grid.length > 0 ? (
-            <div className={`grid gap-1 bg-black ${grid.length > 1 ? 'md:grid-cols-2' : ''}`}>
+            <div className="bg-black">
+            <div
+              className={`grid gap-1 mx-auto ${grid.length > 1 ? 'md:grid-cols-2' : ''}`}
+              // Cabe na tela: a grade inteira (1 linha até 2 canais, 2 linhas com 3 ou 4) fica em até 75% da altura
+              style={{ maxWidth: `calc(${grid.length > 1 ? 2 : 1} * (75vh / ${grid.length > 2 ? 2 : 1}) * 16 / 9)` }}
+            >
               {grid.map((s) => (
                 <div key={s.id} className="relative aspect-video bg-black">
                   {playerFor(s)}
@@ -313,6 +318,7 @@ export default function LivePage() {
                   </button>
                 </div>
               ))}
+            </div>
             </div>
           ) : (
           <div className={`w-full bg-black ${!multi && !activeStream && streams?.length === 0 ? 'py-10' : theaterMode ? 'aspect-[21/9] max-h-[70vh]' : 'aspect-video max-h-[580px]'}`}>
