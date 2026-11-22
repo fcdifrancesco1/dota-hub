@@ -137,8 +137,8 @@ export default function LivePage() {
   // fica a do título que a Valve mostra ao vivo agora.
   const streams = useMemo(() => {
     if (!matchStreams) return matchStreams;
-    // Nenhum jogo ao vivo nem série entre mapas: o que sobrar é gravação (o oEmbed do YouTube não diz se ainda está ao vivo)
-    if (!loading && liveTotal === 0) return [];
+    // Vale mesmo sem jogo na Valve (ela às vezes some com os jogos por minutos): a API só devolve canal
+    // ao vivo na Twitch/Kick ou live do dia no YouTube de partida da agenda começada e sem vencedor
     const live = (liveGames || []).map((g) => ({ timeA: g.radiant_name || g.team1, timeB: g.dire_name || g.team2 }));
     return matchStreams.map((s) => {
       if (s.timeA && findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, liveGames)) return s;
@@ -146,8 +146,8 @@ export default function LivePage() {
       return now ? { ...s, timeA: now.timeA, timeB: now.timeB } : s;
     }).filter((s, i, all) => s.timeA && s.timeB
       // Duas partidas do mesmo stream trocadas para o jogo ao vivo viram um botão só
-      && all.findIndex((o) => o.platform === s.platform && o.embed === s.embed && o.timeA === s.timeA) === i);
-  }, [matchStreams, liveGames, liveTotal, loading]);
+      && all.findIndex((o) => o.platform === s.platform && o.embed === s.embed && findLiveGameFor({ timeA: o.timeA, timeB: o.timeB }, [{ radiant_name: s.timeA, dire_name: s.timeB }])) === i);
+  }, [matchStreams, liveGames]);
   const current = (s) => (s && streams?.find((x) => x.id === s.id)) || s;
   // O canal na tela tem que estar na lista: sem escolha (ou se o escolhido saiu dela), abre o primeiro ou nenhum
   useEffect(() => {
@@ -155,6 +155,21 @@ export default function LivePage() {
     if (!activeStream || !streams.some((x) => x.id === activeStream.id)) setActiveStream(streams[0] || null);
     setGrid((cur) => (cur.every((g) => streams.some((x) => x.id === g.id)) ? cur : cur.filter((g) => streams.some((x) => x.id === g.id))));
   }, [activeStream, streams]);
+  // Partidas no ar pelos canais que a Valve não está listando: uma por confronto
+  const streamOnlyMatches = useMemo(() => {
+    const byMatch = new Map();
+    for (const s of streams || []) {
+      if ((liveGames || []).some((g) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [g]))) continue;
+      const key = [s.timeA, s.timeB].map((t) => t.toLowerCase()).sort().join('|');
+      if (!byMatch.has(key)) byMatch.set(key, { key, timeA: s.timeA, timeB: s.timeB, streams: [] });
+      byMatch.get(key).streams.push(s);
+    }
+    return [...byMatch.values()];
+  }, [streams, liveGames]);
+  // Série "entre mapas" que está no ar num canal: vale o card do canal (sem a Valve toda série cai aqui)
+  const quietBetween = (betweenMaps || []).filter((b) => !streamOnlyMatches.some((m) =>
+    findLiveGameFor({ timeA: m.timeA, timeB: m.timeB }, [{ radiant_name: b.timeA, dire_name: b.timeB }])));
+  const onAir = (liveGames?.length || 0) + quietBetween.length + streamOnlyMatches.length;
   const streamsForGame = (game) => (streams || []).filter((s) => findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, [game]));
 
   // Auto-refresh a cada 30 segundos
@@ -173,8 +188,8 @@ export default function LivePage() {
         <div>
           <div className="flex items-center gap-2.5 mb-1">
             <span className="relative flex h-3.5 w-3.5" aria-hidden="true">
-              {liveTotal > 0 && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>}
-              <span className={`relative inline-flex rounded-full h-3.5 w-3.5 ${liveTotal > 0 ? 'bg-red-500' : 'bg-gray-600'}`}></span>
+              {onAir > 0 && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>}
+              <span className={`relative inline-flex rounded-full h-3.5 w-3.5 ${onAir > 0 ? 'bg-red-500' : 'bg-gray-600'}`}></span>
             </span>
             <h1 className="text-2xl sm:text-3xl font-semibold text-white font-serif tracking-tight">
               Central ao vivo
@@ -351,20 +366,31 @@ export default function LivePage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="dota-heading text-xs flex items-center gap-2.5">
             <span>Partidas ao vivo</span>
-            <span className={`font-mono tracking-normal text-[11px] px-2 py-0.5 rounded-full border ${liveTotal > 0 ? 'text-white bg-red-500/15 border-red-500/30' : 'text-gray-400 bg-surface-2 border-line'}`}>{liveTotal}</span>
+            <span className={`font-mono tracking-normal text-[11px] px-2 py-0.5 rounded-full border ${onAir > 0 ? 'text-white bg-red-500/15 border-red-500/30' : 'text-gray-400 bg-surface-2 border-line'}`}>{onAir}</span>
           </h2>
           <span className="text-[11px] text-gray-400">
             Atualiza a cada 30 segundos
           </span>
         </div>
 
-        {liveTotal === 0 && loading ? (
+        {onAir === 0 && loading ? (
           <div className="rounded-2xl glass-panel p-8 flex items-center justify-center gap-3 text-xs text-gray-400" role="status">
             <RefreshCw className="w-4 h-4 animate-spin text-amber-400" aria-hidden="true" />
             Buscando os jogos ao vivo...
           </div>
-        ) : liveTotal > 0 ? (
+        ) : onAir > 0 ? (
           <div className="flex flex-col gap-4">
+            {streamOnlyMatches.map((m) => (
+              <StreamOnlyCard
+                key={m.key}
+                match={m}
+                onWatch={(st) => {
+                  pickStream(st);
+                  setShowStream(true);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            ))}
             {/* Um jogo por linha: a barra do jogo na largura toda, como a transmissão acima */}
             {liveGames.map((game, idx) => (
               <LiveHudCard
@@ -380,9 +406,9 @@ export default function LivePage() {
                 }}
               />
             ))}
-            {(betweenMaps || []).length > 0 && (
+            {quietBetween.length > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {betweenMaps.map((item) => (
+                {quietBetween.map((item) => (
                   <BetweenMapsCard key={item.key} item={item} large />
                 ))}
               </div>
@@ -472,6 +498,44 @@ function HeroSlot({ p, constants }) {
  * Jogo ao vivo no formato da barra do topo do cliente: heróis do Radiant à esquerda,
  * abates e relógio no centro, heróis do Dire à direita.
  */
+// Partida no ar pelos canais, sem os dados da Valve: times e onde assistir
+function StreamOnlyCard({ match, onWatch }) {
+  return (
+    <article className="glass-panel rounded-2xl p-4 lg:p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <TeamLogo teamName={match.timeA} className="w-8 h-8 shrink-0" />
+          <span className="text-sm lg:text-base font-semibold text-white truncate">{match.timeA}</span>
+        </div>
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-red-400 shrink-0">
+          <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
+          No ar
+        </span>
+        <div className="flex items-center gap-2.5 min-w-0 flex-row-reverse text-right">
+          <TeamLogo teamName={match.timeB} className="w-8 h-8 shrink-0" />
+          <span className="text-sm lg:text-base font-semibold text-white truncate">{match.timeB}</span>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-line">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {match.streams.map((st) => (
+            <button
+              key={st.key}
+              type="button"
+              onClick={() => onWatch(st)}
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-on-accent transition-colors ${FOCUS}`}
+            >
+              <Tv className="w-3 h-3" aria-hidden="true" />
+              {PLATFORMS[st.platform].label}{st.lang ? ` ${st.lang.toUpperCase()}` : ''}
+            </button>
+          ))}
+        </div>
+        <span className="text-[11px] text-gray-400">Placar volta quando a Valve enviar os dados do jogo</span>
+      </div>
+    </article>
+  );
+}
+
 function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
   const radName = game.radiant_name || game.team1 || 'Radiant';
   const direName = game.dire_name || game.team2 || 'Dire';
