@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-21T23:48:38Z",
+  "title": "Design System: DotaHub Brasil",
+  "extensions": {
+    "colorMeta": {
+      "canvas": { "role": "neutral", "displayName": "Grafite do cliente", "tonalRamp": ["#05070A", "#0B0E12", "#12171D", "#1A2028", "#232A34", "#2A323D", "#3A4450", "#4F5A68"] },
+      "surface": { "role": "neutral", "displayName": "Superfície", "tonalRamp": ["#0B0E12", "#12171D", "#1A2028", "#232A34", "#2A323D", "#3A4450", "#4F5A68", "#6B7684"] },
+      "surface-raised": { "role": "neutral", "displayName": "Superfície elevada" },
+      "surface-hover": { "role": "neutral", "displayName": "Superfície de hover" },
+      "line": { "role": "neutral", "displayName": "Linha" },
+      "line-strong": { "role": "neutral", "displayName": "Linha forte" },
+      "panel-top": { "role": "neutral", "displayName": "Painel (topo)" },
+      "panel-bottom": { "role": "neutral", "displayName": "Painel (base)" },
+      "ink": { "role": "neutral", "displayName": "Tinta" },
+      "ink-bright": { "role": "neutral", "displayName": "Tinta forte" },
+      "ink-muted": { "role": "neutral", "displayName": "Tinta apagada" },
+      "heading-silver": { "role": "neutral", "displayName": "Prata de título" },
+      "tab-idle": { "role": "neutral", "displayName": "Aba em repouso" },
+      "aegis-amber": { "role": "primary", "displayName": "Âmbar da Aegis", "tonalRamp": ["#78350F", "#92400E", "#B45309", "#D97706", "#F59E0B", "#FBBF24", "#FCD34D", "#FEF3C7"] },
+      "aegis-amber-text": { "role": "primary", "displayName": "Âmbar da Aegis (texto)" },
+      "radiant-green": { "role": "secondary", "displayName": "Verde Radiant", "tonalRamp": ["#064E3B", "#065F46", "#047857", "#059669", "#10B981", "#34D399", "#6EE7B7", "#D1FAE5"] },
+      "dire-red": { "role": "secondary", "displayName": "Vermelho Dire", "tonalRamp": ["#881337", "#9F1239", "#BE123C", "#E11D48", "#F43F5E", "#FB7185", "#FDA4AF", "#FFE4E6"] },
+      "live-red": { "role": "secondary", "displayName": "Vermelho ao vivo", "tonalRamp": ["#7F1D1D", "#991B1B", "#B91C1C", "#DC2626", "#EF4444", "#F87171", "#FCA5A5", "#FEE2E2"] },
+      "stream-purple": { "role": "tertiary", "displayName": "Roxo de transmissão", "tonalRamp": ["#581C87", "#6B21A8", "#7E22CE", "#9333EA", "#A855F7", "#C084FC", "#D8B4FE", "#F3E8FF"] },
+      "info-cyan": { "role": "tertiary", "displayName": "Ciano informativo", "tonalRamp": ["#164E63", "#155E75", "#0E7490", "#0891B2", "#06B6D4", "#22D3EE", "#67E8F9", "#CFFAFE"] },
+      "play-green-top": { "role": "tertiary", "displayName": "Verde de jogar (topo)" },
+      "play-green-bottom": { "role": "tertiary", "displayName": "Verde de jogar (base)" },
+      "play-green-rim": { "role": "tertiary", "displayName": "Verde de jogar (aro)" },
+      "play-green-ink": { "role": "tertiary", "displayName": "Verde de jogar (texto)" },
+      "light-canvas": { "role": "neutral", "displayName": "Bege do tema claro" },
+      "light-accent-navy": { "role": "primary", "displayName": "Azul-marinho do tema claro" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Título de página, no corte Display da Segoe UI Variable." },
+      "headline": { "displayName": "Headline", "purpose": "Nomes de times no cabeçalho de uma partida." },
+      "title": { "displayName": "Title", "purpose": "Nomes de times em cartões e títulos de tabela." },
+      "body": { "displayName": "Body", "purpose": "Texto padrão do site, 12px de propósito (tela densa)." },
+      "label": { "displayName": "Label", "purpose": "Selos, metadados, plataformas e colunas (11px)." },
+      "section-heading": { "displayName": "Section heading", "purpose": "Títulos de seção em caixa alta espaçada, cor prata." },
+      "scoreboard": { "displayName": "Scoreboard", "purpose": "Placar do mapa e da série, algarismos de largura fixa." }
+    },
+    "shadows": [
+      { "name": "panel", "value": "inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px rgba(0,0,0,0.35)", "purpose": "Todo painel grande: fio de luz no topo e sombra difusa." },
+      { "name": "float", "value": "0 8px 24px -12px rgba(0,0,0,0.6)", "purpose": "Cartões da faixa ao vivo da Home." },
+      { "name": "float-hover", "value": "0 14px 32px -14px rgba(0,0,0,0.75)", "purpose": "Hover dos cartões da faixa ao vivo." },
+      { "name": "play-bevel", "value": "inset 0 1px 0 rgba(255,255,255,0.18), 0 0 0 1px rgba(0,0,0,0.55)", "purpose": "Chanfro de luz e aro escuro do botão de jogar." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Curva única de todas as transições: sai rápido, assenta suave." },
+      { "name": "duration-hover", "value": "150ms", "purpose": "Hover de bordas, cores e brilho." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão de jogar",
+      "kind": "button",
+      "refersTo": "button-play",
+      "description": "Ação principal de uma tela, no estilo do JOGAR DOTA do cliente.",
+      "html": "<button class=\"ds-btn-play\">Assistir agora</button>",
+      "css": ".ds-btn-play { background: linear-gradient(180deg, #3E7F38, #2A5A27); border: 1px solid #5E9E52; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 0 0 1px rgba(0,0,0,0.55); color: #EAF6E4; text-transform: uppercase; letter-spacing: 0.18em; font: 600 12px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: filter 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-play:hover { filter: brightness(1.12); } .ds-btn-play:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão selecionado",
+      "kind": "button",
+      "refersTo": "button-selected",
+      "description": "Aba, mapa ou filtro ativo: o único âmbar da barra.",
+      "html": "<button class=\"ds-btn-selected\">Jogo 2 <span>26:15</span></button>",
+      "css": ".ds-btn-selected { background: #F59E0B; color: #000; border: 1px solid #F59E0B; border-radius: 16px; padding: 10px 16px; font: 600 12px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; } .ds-btn-selected span { font-variant-numeric: tabular-nums; opacity: 0.9; margin-left: 6px; } .ds-btn-selected:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão em repouso",
+      "kind": "button",
+      "refersTo": "button-idle",
+      "description": "Os demais itens de uma barra de seleção.",
+      "html": "<button class=\"ds-btn-idle\">Jogo 1 <span>31:45</span></button>",
+      "css": ".ds-btn-idle { background: #1A2028; color: #9CA3AF; border: 1px solid #2A323D; border-radius: 16px; padding: 10px 16px; font: 600 12px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1), background-color 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-idle span { font-variant-numeric: tabular-nums; margin-left: 6px; } .ds-btn-idle:hover { background: #232A34; color: #FFFFFF; } .ds-btn-idle:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip de campeonato",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Selo de metadado; o do campeonato é link e leva a logo oficial.",
+      "html": "<a class=\"ds-chip\" href=\"#\">DreamLeague Division 2 Series 5</a> <span class=\"ds-chip ds-chip-live\"><i></i>Ao vivo · 18:38</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; background: #1A2028; border: 1px solid #2A323D; border-radius: 9999px; padding: 4px 12px; color: #FBBF24; font: 600 12px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; text-decoration: none; transition: border-color 150ms cubic-bezier(0.22, 1, 0.36, 1); } a.ds-chip:hover { border-color: rgba(245,158,11,0.6); } .ds-chip-live { color: #F87171; background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); } .ds-chip-live i { width: 8px; height: 8px; border-radius: 50%; background: #EF4444; }"
+    },
+    {
+      "name": "Painel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Painel grande no estilo do cliente: degrau de tom, linha fina e fio de luz.",
+      "html": "<section class=\"ds-panel\"><h3 class=\"ds-heading\">Destaques da série</h3><p>Stojkov · MVP da série</p></section>",
+      "css": ".ds-panel { background: linear-gradient(180deg, rgba(27,33,41,0.96), rgba(17,21,27,0.97)); border: 1px solid rgba(255,255,255,0.07); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px rgba(0,0,0,0.35); border-radius: 16px; padding: 20px; color: #E1E6F0; font: 400 12px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; transition: border-color 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-panel:hover { border-color: rgba(255,255,255,0.2); } .ds-heading { text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600; font-size: 12px; color: #C9CED6; margin: 0 0 10px; }"
+    },
+    {
+      "name": "Abas da navegação",
+      "kind": "nav",
+      "refersTo": "nav-tab",
+      "description": "Barra do topo em caixa alta espaçada; a ativa fica branca com traço âmbar.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-tab\" href=\"#\">Início</a><a class=\"ds-tab is-active\" href=\"#\">Ao vivo <b>3</b></a><a class=\"ds-tab\" href=\"#\">Campeonatos</a></nav>",
+      "css": ".ds-nav { display: flex; background: #0B0E12; border-bottom: 1px solid #2A323D; } .ds-tab { display: inline-flex; align-items: center; gap: 8px; padding: 18px 16px; color: #8B94A1; text-transform: uppercase; letter-spacing: 0.16em; font: 600 12px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; text-decoration: none; border-bottom: 2px solid transparent; transition: color 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-tab:hover { color: #E6E9EE; } .ds-tab.is-active { color: #FFFFFF; border-bottom-color: #F59E0B; } .ds-tab b { background: #EF4444; color: #fff; border-radius: 9999px; font-size: 10px; letter-spacing: 0; padding: 1px 6px; } .ds-tab:focus-visible { outline: 2px solid #FBBF24; outline-offset: -2px; }"
+    },
+    {
+      "name": "Placar da partida",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Times nas pontas e o placar com algarismos fixos no centro; o lado na frente em âmbar.",
+      "html": "<div class=\"ds-score\"><span class=\"ds-team\">Froglings</span><span class=\"ds-board\"><b>2</b><i>:</i><em>0</em></span><span class=\"ds-team ds-team-dim\">PlayTime</span></div>",
+      "css": ".ds-score { display: flex; align-items: center; justify-content: space-between; gap: 24px; background: linear-gradient(180deg, rgba(27,33,41,0.96), rgba(17,21,27,0.97)); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; padding: 24px 32px; font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; } .ds-team { font-size: 24px; font-weight: 600; color: #FFFFFF; } .ds-team-dim { color: #9CA3AF; } .ds-board { background: #1A2028; border: 1px solid #2A323D; border-radius: 16px; padding: 10px 28px; font-size: 36px; font-weight: 600; font-variant-numeric: tabular-nums; } .ds-board b { color: #FBBF24; font-weight: 600; } .ds-board i { color: #9CA3AF; font-style: normal; margin: 0 8px; } .ds-board em { color: #9CA3AF; font-style: normal; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O cliente do Dota",
+    "overview": "O DotaHub tem a cara de uma extensão do próprio jogo. Quem abre o site com a transmissão ao lado deve reconhecer a sala de espera do cliente: painéis grafite sobre a arte dos heróis, um fio de luz no topo de cada painel, abas e títulos em caixa alta espaçada, e o verde do botão de jogar marcando a ação principal. O site herda o material do cliente (metal escuro, chanfros, brilho contido) para parecer parte do Dota.\n\nA tela é densa porque o fã acompanha vários jogos ao mesmo tempo. O texto corrido fica pequeno (12px) e os números grandes ficam para o que importa agora: o placar do mapa e da série. A cor de ação é o âmbar, e o verde e o vermelho pertencem aos lados do mapa (Radiant e Dire), nunca à decoração. Daqui para frente, cartões e botões novos ganham a textura do jogo (chanfro, fio de luz, gradiente de metal), mas o comportamento continua sóbrio: no hover a borda clareia, sem pulo nem brilho.\n\nO tema escuro é a identidade. O tema claro (bege com azul-marinho no lugar do âmbar) existe por preferência e acessibilidade, funciona pelos mesmos tokens, mas não define o visual.",
+    "keyCharacteristics": [
+      "Grafite azulado sobre a arte dos heróis, com um véu escuro mais forte atrás do conteúdo.",
+      "Painéis com degrau de tom de cima para baixo, linha fina e fio de luz no topo.",
+      "Caixa alta espaçada para abas e títulos de seção, como no cliente.",
+      "Âmbar como cor de ação; verde e vermelho só para Radiant, Dire e estados de jogo.",
+      "Números com algarismos de largura fixa em placares e tabelas.",
+      "Densidade alta: texto de 11 a 12px, números grandes só no placar."
+    ],
+    "rules": [
+      { "name": "The Two Sides Rule", "body": "Verde e vermelho são Radiant e Dire (ou ganho e perda). Nunca usar esses tons como decoração, fundo de seção ou cor de marca.", "section": "colors" },
+      { "name": "The One Amber Rule", "body": "Só o item selecionado ganha o fundo âmbar. Numa barra de abas ou de mapas, um único botão é âmbar por vez.", "section": "colors" },
+      { "name": "The Live Red Rule", "body": "O vermelho #EF4444 com ponto pulsando significa \"acontecendo agora\". Uma série parada ou atrasada fica em cinza, nunca em vermelho.", "section": "colors" },
+      { "name": "The Tabular Score Rule", "body": "Todo número que se compara com outro (placar, abates, ouro, tempo) usa algarismos de largura fixa.", "section": "typography" },
+      { "name": "The Client Caps Rule", "body": "Caixa alta espaçada só em abas, títulos de seção e no botão de jogar. Texto corrido e nomes de times nunca vão em caixa alta.", "section": "typography" },
+      { "name": "The Light Thread Rule", "body": "Painel e botão principal têm um fio de luz de 1px no topo (inset branco a 4 a 18%). É o detalhe que faz a peça parecer metal do cliente, não um cartão genérico.", "section": "elevation" },
+      { "name": "The Quiet Hover Rule", "body": "Hover não levanta nem brilha: a borda clareia (até rgba(255,255,255,0.2)) ou o fundo sobe um degrau. O botão de jogar só clareia (brightness 1.12).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do colocar painéis grandes sobre o gradiente #1B2129 → #11151B, com linha de 1px e o fio de luz no topo.",
+      "Do usar caixa alta com 0.14 a 0.18em de espaçamento em abas, títulos de seção e no botão de jogar.",
+      "Do usar algarismos de largura fixa em placares, abates, ouro e tempos.",
+      "Do dar a componentes novos a textura do jogo: chanfro de luz, gradiente vertical de metal e aro escuro.",
+      "Do manter o texto padrão em 12px e o de apoio em 11px; números grandes só no placar."
+    ],
+    "donts": [
+      "Don't usar verde ou vermelho fora de Radiant, Dire, ganho, perda e ao vivo.",
+      "Don't deixar mais de um item âmbar selecionado na mesma barra.",
+      "Don't pular, escalar ou brilhar no hover; só a borda clareia ou o fundo sobe um degrau.",
+      "Don't mostrar uma série atrasada ou parada em vermelho de ao vivo; ela fica em cinza.",
+      "Don't criar telas que só funcionem no tema claro; o escuro é a referência."
+    ]
+  }
+}
