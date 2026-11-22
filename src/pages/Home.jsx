@@ -34,12 +34,8 @@ export default function Home() {
 
             <Divider />
 
-            {/* 2.5 Destaque do meta: heróis mais disputados nas partidas profissionais */}
-            <AnimatedHeroCard />
-
-            <Divider />
-
-            {/* 3. Próximas Partidas (24h) e Resultados Recentes, lado a lado com uma linha entre eles */}
+            {/* 3. Próximas Partidas (24h) e Resultados Recentes, logo abaixo do destaque: é o que o fã
+                volta para ver. Lado a lado com uma linha entre eles */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-0 lg:divide-x divide-line/60">
               <div className="lg:pr-5"><Upcoming24h /></div>
               <div className="lg:pl-5"><RecentResultsHome /></div>
@@ -47,6 +43,11 @@ export default function Home() {
 
             {/* 4. Estatísticas do campeonato em destaque (some quando não há torneio) */}
             <div className="home-stats empty:hidden px-1 sm:px-3"><HomeStatsCards /></div>
+
+            <Divider />
+
+            {/* 5. Destaque do meta: heróis mais disputados nas partidas profissionais (conteúdo de apoio) */}
+            <AnimatedHeroCard />
           </div>
 
           {/* 5. Notícias e transferências: a coluna estica (linha divisória até o fim) e o

@@ -227,10 +227,14 @@ export default function HomeHero() {
                 : <div className="text-xs text-gray-400 text-center font-semibold py-2">Começando</div>
             ) : (
             <>
-            <div className="text-[11px] text-gray-400 text-center mb-2 font-semibold">
+            <div className="text-[11px] text-gray-400 text-center sm:mb-2 font-semibold">
               Começa em {nextMatch.startTime}
+              {/* Celular: a contagem numa linha só, sem as três caixas */}
+              <span className="sm:hidden font-mono text-white">
+                {' · em '}{timeLeft.hours > 0 ? `${timeLeft.hours}h${String(timeLeft.minutes).padStart(2, '0')}` : `${timeLeft.minutes} min`}
+              </span>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="hidden sm:grid grid-cols-3 gap-2 text-center">
               <div className="bg-surface-2 rounded-xl py-2">
                 <span className="block font-mono text-xl font-semibold text-white">
                   {String(timeLeft.hours).padStart(2, '0')}
