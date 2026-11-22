@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trophy, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
+import { Trophy, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp, findLiveGameFor, isStaleBetweenMaps } from '../../context/AppContext';
 import { useOpenSeries } from '../../utils/matchRoute';

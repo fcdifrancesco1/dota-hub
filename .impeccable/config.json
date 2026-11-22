@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "theme('fontfamily.sans')",
+        "createdAt": "2026-11-22T01:48:32.510Z",
+        "reason": "Agent: theme('fontFamily.sans') resolves to the Segoe UI Variable stack that DESIGN.md typography declares"
+      }
+    ]
+  }
+}

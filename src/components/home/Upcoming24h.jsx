@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, ChevronRight, ExternalLink } from 'lucide-react';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import TeamLogo from '../../utils/teamLogos';

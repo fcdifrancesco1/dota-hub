@@ -103,10 +103,6 @@ body {
   margin: 2rem -0.75rem;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08) 12%, rgba(255, 255, 255, 0.08) 88%, transparent);
 }
-/* Fundo do destaque principal: um degrau de superfície, sem moldura */
-.home-hero-bg {
-  background: rgba(255, 255, 255, 0.03);
-}
 /* Cards da faixa ao vivo */
 .home-float {
   box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6);

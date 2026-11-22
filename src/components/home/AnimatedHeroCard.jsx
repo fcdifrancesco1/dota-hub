@@ -137,7 +137,7 @@ export default function AnimatedHeroCard() {
         /* CARD 3D COM VÍDEO DO PERSONAGEM EM LOOP */
         <div
           onClick={handleCardClick}
-          className="rounded-[20px] p-4 sm:p-5 relative overflow-hidden group cursor-pointer transition-colors hover:bg-surface-2/60"
+          className="rounded-2xl p-4 sm:p-5 relative overflow-hidden group cursor-pointer transition-colors hover:bg-surface-2/60"
         >
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center relative z-20">
             {/* VÍDEO ANIMADO (VALVE WEBM RENDER) */}

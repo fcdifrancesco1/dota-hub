@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Radio, ArrowRight, Clock, Flame, Calendar, Award } from 'lucide-react';
+import { Trophy, Radio, ArrowRight, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp, findLiveGameFor } from '../../context/AppContext';
 import { formatLabel } from '../../utils/seriesStatus';
 import { useTheme } from '../../context/ThemeContext';
 import { useOpenLiveMatch } from '../../utils/liveMatchRoute';
-import { SITE_CONFIG } from '../../config/siteConfig';
 import TeamLogo from '../../utils/teamLogos';
 import { liquipediaImage } from '../../utils/liquipediaImage';
 import { fetchTournaments, getCachedTournaments } from '../../services/api';
@@ -74,8 +73,7 @@ export default function HomeHero() {
   const hasLive = liveGames && liveGames.length > 0;
 
   return (
-    <div className="relative overflow-clip rounded-[22px] home-hero-bg p-6 sm:p-8">
-      {/* Aurora Ambient Glows */}
+    <div className="relative py-2 sm:py-4 sm:px-2">
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Lado Esquerdo: Informações do Torneio em Destaque */}
@@ -155,7 +153,7 @@ export default function HomeHero() {
             onClick: () => setShowPreview(true),
             onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPreview(true); } }
           } : {})}
-          className={`lg:col-span-5 min-w-0 bg-surface rounded-[20px] p-5 sm:p-6 ring-1 ring-line/50 transition-[color,background-color,border-color,opacity,transform] ${
+          className={`lg:col-span-5 min-w-0 bg-surface rounded-2xl p-5 sm:p-6 ring-1 ring-line transition-[color,background-color,border-color,opacity,transform] ${
             nextMatch ? 'cursor-pointer hover:bg-surface/90 hover:ring-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400' : ''
           }`}
         >
