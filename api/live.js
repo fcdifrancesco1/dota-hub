@@ -166,14 +166,14 @@ async function getProLeagueIds() {
 
 // Partida profissional: liga de um campeonato acompanhado pela Liquipedia (ver
 // _lib/tournamentLeagues.js). Sem essa lista, liga premium/professional da
-// OpenDota com os dois times cadastrados; sem nenhuma lista, só os dois times.
+// OpenDota com os dois times cadastrados; sem nenhuma lista, nada (a Valve lista
+// centenas de ligas amadoras com times cadastrados, ex.: "Liga 19868").
 function isProGame(leagueId, radiantName, direName, { tournamentIds, proLeagueIds }) {
   const id = Number(leagueId);
   if (!id) return false;
   if (tournamentIds) return tournamentIds.has(id);
-  const hasTeams = Boolean(radiantName && direName);
-  if (proLeagueIds) return proLeagueIds.has(id) && hasTeams;
-  return hasTeams;
+  if (proLeagueIds) return proLeagueIds.has(id) && Boolean(radiantName && direName);
+  return false;
 }
 
 // Lê chave de ambiente ou arquivo local (.env.local / .env)

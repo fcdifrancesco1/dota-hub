@@ -23,6 +23,7 @@ export async function getTournamentLeagueIds(req) {
     const list = r.ok ? await r.json() : null;
     const ids = new Set((Array.isArray(list) ? list : []).map((t) => Number(t.leagueId)).filter(Boolean));
     if (ids.size > 0) cache = { ids, expiresAt: Date.now() + 30 * 60 * 1000 };
+    else console.warn(`[Ligas] Lista de campeonatos sem IDs de liga (status ${r.status})`);
   } catch (err) {
     console.warn('[Ligas] Falha ao carregar os campeonatos da Liquipedia:', err.message);
   }
