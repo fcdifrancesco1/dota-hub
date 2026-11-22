@@ -25,7 +25,8 @@ function RankBadge({ rank }) {
   return (
     <span
       className={`w-6 h-6 shrink-0 rounded-lg flex items-center justify-center text-xs font-semibold font-mono ${style ? 'border' : 'bg-surface-2 text-gray-400'}`}
-      style={style ? { ...style, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)' } : undefined}
+      // Fio de luz no lugar do brilho; no bronze o número escurece para passar de 4,5:1
+      style={style ? { ...style, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)', ...(rank === 3 ? { color: '#1a0b02' } : {}) } : undefined}
     >
       {rank}
     </span>
@@ -98,7 +99,7 @@ export default function RankingsCard() {
               role="tab"
               aria-selected={view === id}
               onClick={() => choose(id)}
-              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`flex items-center justify-center gap-1.5 py-2.5 sm:py-1.5 rounded-lg text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 ${
                 view === id ? 'bg-amber-500 text-black shadow-sm' : 'text-gray-400 hover:text-white hover:bg-surface-3'
               }`}
             >
@@ -143,7 +144,7 @@ export default function RankingsCard() {
               <Link to="/times" className="mt-2 flex items-center justify-center gap-1 text-xs font-medium text-blue-600 dark:text-amber-500 hover:underline py-1.5">
                 Ranking completo <ChevronRight className="w-3.5 h-3.5" />
               </Link>
-              <p className="text-[11px] text-gray-500 text-center">Fonte: Liquipedia</p>
+              <p className="text-[11px] text-gray-400 text-center">Fonte: Liquipedia</p>
             </>
           )
         ) : (
@@ -154,7 +155,7 @@ export default function RankingsCard() {
                   key={d.id}
                   type="button"
                   onClick={() => { setDivision(d.id); setCycle((c) => c + 1); }}
-                  className={`px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors ${
+                  className={`px-2.5 py-2 sm:px-2 sm:py-0.5 rounded-md text-[11px] font-medium border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 ${
                     division === d.id ? 'bg-surface-3 text-white border-line' : 'text-gray-400 border-transparent hover:text-white'
                   }`}
                 >
@@ -180,7 +181,7 @@ export default function RankingsCard() {
                     </li>
                   ))}
                 </ol>
-                <p className="mt-2 text-[11px] text-gray-500 text-center">Fonte: Ranking oficial da Valve (Imortais)</p>
+                <p className="mt-2 text-[11px] text-gray-400 text-center">Fonte: Ranking oficial da Valve (Imortais)</p>
               </>
             )}
           </>

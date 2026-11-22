@@ -30,7 +30,7 @@ const SOURCE_STYLE = {
 };
 
 function TeamTag({ side }) {
-  if (!side?.name) return <span className="text-gray-500 italic">sem time</span>;
+  if (!side?.name) return <span className="text-gray-400 italic">sem time</span>;
   const path = teamPath(null, side.name);
   return (
     <Link to={path} className="inline-flex items-center gap-1 min-w-0 hover:text-amber-400" title={side.name}>
@@ -62,7 +62,7 @@ export default function NewsPanel() {
             key={id}
             type="button"
             onClick={() => setTab(id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] ${
+            className={`flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-xl text-xs font-semibold transition-[color,background-color,border-color,opacity,transform] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 ${
               tab === id ? 'bg-amber-500 text-black' : 'text-gray-400 hover:text-white hover:bg-surface-2'
             }`}
           >
@@ -78,7 +78,7 @@ export default function NewsPanel() {
         </div>
       ) : tab === 'news' ? (
         news.length === 0 ? (
-          <p className="py-8 text-center text-xs text-gray-500">Não foi possível carregar as notícias agora.</p>
+          <p className="py-8 text-center text-xs text-gray-400">Não foi possível carregar as notícias agora.</p>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-1">
             {news.map((n) => (
@@ -101,13 +101,13 @@ export default function NewsPanel() {
                     />
                   ) : (
                     <div className="w-20 h-14 rounded-lg bg-surface-2 shrink-0 flex items-center justify-center">
-                      <Newspaper className="w-5 h-5 text-gray-500" />
+                      <Newspaper className="w-5 h-5 text-gray-400" />
                     </div>
                   )}
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 text-[11px] mb-0.5">
                       <span className={`px-1.5 py-px rounded border font-medium ${SOURCE_STYLE[n.source] || 'bg-white/5 text-gray-400 border-line'}`}>{n.source}</span>
-                      <span className="text-gray-500">{timeAgo(n.date)}</span>
+                      <span className="text-gray-400">{timeAgo(n.date)}</span>
                     </div>
                     <div className="text-xs font-medium text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">
                       {n.title}
@@ -119,12 +119,12 @@ export default function NewsPanel() {
           </ul>
         )
       ) : transfers.length === 0 ? (
-        <p className="py-8 text-center text-xs text-gray-500">Não foi possível carregar as transferências agora.</p>
+        <p className="py-8 text-center text-xs text-gray-400">Não foi possível carregar as transferências agora.</p>
       ) : (
         <ul className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-1 2xl:divide-y 2xl:divide-line/50">
           {transfers.map((t, idx) => (
             <li key={`${t.date}-${idx}`} className="py-2.5 border-b border-line/50 2xl:border-b-0">
-              <div className="flex items-center justify-between gap-2 text-[11px] text-gray-500 mb-1">
+              <div className="flex items-center justify-between gap-2 text-[11px] text-gray-400 mb-1">
                 <span>{fmtDate(t.date)}</span>
                 {t.ref && (
                   <a href={t.ref} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-0.5 hover:text-amber-400" title="Fonte do anúncio">
@@ -138,7 +138,7 @@ export default function NewsPanel() {
               </div>
               <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-300 min-w-0">
                 <TeamTag side={t.from} />
-                <span className="text-gray-500 shrink-0">→</span>
+                <span className="text-gray-400 shrink-0">→</span>
                 <TeamTag side={t.to} />
               </div>
             </li>
@@ -146,7 +146,7 @@ export default function NewsPanel() {
         </ul>
       )}
 
-      <p className="mt-4 text-[11px] text-gray-500 text-center">
+      <p className="mt-4 text-[11px] text-gray-400 text-center">
         {tab === 'news' ? 'Fontes: Valve (Steam) e blog do Dotabuff. As matérias abrem no site de origem, em inglês.' : 'Fonte: Liquipedia.'}
       </p>
     </aside>

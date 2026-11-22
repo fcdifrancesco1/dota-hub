@@ -48,9 +48,9 @@ export default function RecentResultsHome() {
         <div className="flex items-center justify-between gap-3 px-3 mb-2">
           <div className="flex items-center gap-2 min-w-0">
             <Trophy className="w-4 h-4 text-amber-500" />
-            <h3 className="text-sm font-semibold text-white whitespace-nowrap">
+            <h2 className="text-sm font-semibold text-white whitespace-nowrap">
               Resultados Recentes
-            </h3>
+            </h2>
           </div>
           <Link
             to="/partidas"
@@ -94,13 +94,14 @@ export default function RecentResultsHome() {
                   ? () => openLiveMatch(liveGame)
                   : () => openWikiSeries(series, setPreview);
 
+              const Row = onClick ? 'button' : 'div';
               return (
-                <div
+                <Row
                   key={series.series_id || series.id || `${teamAName}-${teamBName}-${series.sortTime || idx}`}
-                  onClick={onClick}
-                  className={`rounded-xl px-3 py-3 transition-colors group ${
+                  {...(onClick ? { type: 'button', onClick } : {})}
+                  className={`block w-full text-left rounded-xl px-3 py-3 transition-colors group ${
                     hot ? 'bg-red-500/[0.06]' : ''
-                  } ${onClick ? 'cursor-pointer hover:bg-surface-2/80' : ''}`}
+                  } ${onClick ? `cursor-pointer hover:bg-surface-2/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400` : ''}`}
                 >
                   <div className="flex items-center justify-between text-[11px] text-gray-400 mb-1.5">
                     <span className="font-semibold truncate max-w-[200px] text-amber-500">
@@ -142,14 +143,14 @@ export default function RecentResultsHome() {
                       <TeamLogo teamName={teamBName} teamId={series.team2_id || series.preferredIdB} logoUrl={series.team2_logo || series.logoB} className="w-5 h-5 shadow-sm" />
                     </div>
                   </div>
-                </div>
+                </Row>
               );
             })}
           </div>
         )}
       </div>
 
-      <div className="mt-3 px-3 text-xs text-gray-500">
+      <div className="mt-3 px-3 text-xs text-gray-400">
         Escolha uma série para ver o draft completo e a tabela de jogadores.
       </div>
 

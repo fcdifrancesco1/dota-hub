@@ -53,6 +53,8 @@ export default function AnimatedHeroCard() {
   const [highlights, setHighlights] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [videoError, setVideoError] = useState(false);
+  // Quem pede menos movimento vê a imagem parada no lugar do vídeo em loop
+  const reduceMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const [specialists, setSpecialists] = useState({});
   const navigate = useNavigate();
 
@@ -104,7 +106,7 @@ export default function AnimatedHeroCard() {
       <div className="flex items-center justify-between px-1 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500" />
-          <span className="text-xs font-semibold text-white">Destaque do meta</span>
+          <h2 className="text-xs font-semibold text-white">Destaque do meta</h2>
         </div>
 
         {highlights && (
@@ -115,7 +117,7 @@ export default function AnimatedHeroCard() {
                 type="button"
                 onClick={() => handleSelectHero(h)}
                 title={position ? `Pos ${position.n} · ${position.label}` : undefined}
-                className={`px-2.5 py-1 rounded-lg transition-[color,background-color,border-color,opacity,transform] ${
+                className={`px-2.5 py-2 sm:py-1 rounded-lg transition-[color,background-color,border-color,opacity,transform] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 ${
                   selectedId === h.id ? 'bg-amber-500 text-black shadow-sm font-semibold' : 'text-gray-400 hover:text-white hover:bg-surface-3'
                 }`}
               >
@@ -140,7 +142,7 @@ export default function AnimatedHeroCard() {
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center relative z-20">
             {/* VÍDEO ANIMADO (VALVE WEBM RENDER) */}
             <div className="sm:col-span-4 relative w-full h-32 sm:h-36 md:h-40 flex items-center justify-center overflow-hidden">
-              {!videoError && key ? (
+              {!videoError && key && !reduceMotion ? (
                 <video
                   key={key}
                   autoPlay
@@ -171,7 +173,7 @@ export default function AnimatedHeroCard() {
                       ? `Mais disputado na Pos ${selected.position.n} · ${selected.position.label}`
                       : 'Mais disputado no profissional'}
                   </div>
-                  <h4 className="text-xl font-semibold tracking-tight text-white truncate">{selectedHero.name}</h4>
+                  <h3 className="text-xl font-semibold tracking-tight text-white truncate">{selectedHero.name}</h3>
                   <span className="text-xs font-semibold text-gray-400">
                     {[selectedHero.roles?.[0], selectedHero.primaryAttr].filter(Boolean).join(' • ')}
                   </span>
@@ -196,7 +198,7 @@ export default function AnimatedHeroCard() {
                     {specialist.name || `Jogador ${specialist.account_id}`} ({specialist.games} {specialist.games === 1 ? 'partida' : 'partidas'})
                   </Link>
                 ) : (
-                  <span className="text-gray-500">—</span>
+                  <span className="text-gray-400">—</span>
                 )}
               </div>
 

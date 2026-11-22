@@ -37,9 +37,9 @@ export default function Upcoming24h() {
         <div className="flex items-center justify-between gap-3 px-3 mb-2">
           <div className="flex items-center gap-2 min-w-0">
             <Calendar className="w-4 h-4 text-amber-500" />
-            <h3 className="text-sm font-semibold text-white whitespace-nowrap">
+            <h2 className="text-sm font-semibold text-white whitespace-nowrap">
               Próximas 24h <span className="hidden sm:inline">(Brasília)</span>
-            </h3>
+            </h2>
           </div>
           <Link
             to="/partidas?aba=agenda"
@@ -115,7 +115,7 @@ export default function Upcoming24h() {
         )}
       </div>
 
-      <div className="mt-3 px-3 text-xs text-gray-500">
+      <div className="mt-3 px-3 text-xs text-gray-400">
         Escolha uma partida para ver as estatísticas dos jogadores no torneio.
       </div>
 

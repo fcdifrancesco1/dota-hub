@@ -33,7 +33,7 @@ export default function LiveTickerStrip() {
             <span className="font-semibold text-white">{loading ? 'Buscando os jogos ao vivo...' : 'Nenhum jogo ao vivo agora'}</span>
             {!loading && next && (
               <Link to="/partidas" className="min-w-0 hover:text-white transition-colors">
-                <span className="text-gray-500" aria-hidden="true">· </span>
+                <span className="text-gray-400" aria-hidden="true">· </span>
                 Próximo: <span className="text-white font-medium">{next.timeA} x {next.timeB}</span>
                 {next.tourneyName ? <span> · {next.tourneyName}</span> : null}
                 <span className="font-mono"> · {next.startTime} ({timeUntil(next.timestamp)})</span>
