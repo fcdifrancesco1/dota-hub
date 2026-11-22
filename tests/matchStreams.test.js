@@ -76,3 +76,12 @@ test('feed RSS do YouTube: ID, título e data de cada vídeo, lives simultâneas
   assert.equal(feed[0].published, Date.parse('2026-11-21T21:53:25Z'));
   assert.deepEqual(parseYoutubeFeed('<html>erro</html>'), []);
 });
+
+test('feed do YouTube: VOD de ontem com um time só e shorts não viram a live', () => {
+  const entry = (id, title, link = 'watch?v=') => `<entry><yt:videoId>${id}</yt:videoId><title>${title}</title><link rel="alternate" href="https://www.youtube.com/${link}${id}"/><published>2026-11-22T10:00:00+00:00</published></entry>`;
+  const feed = parseYoutubeFeed(entry('aaaaaaaaaaa', 'LEGION got baited', 'shorts/') + entry('bbbbbbbbbbb', '[A] Day 2 - Aurora vs Astra Invicta') + entry('ccccccccccc', '[B] Day 3 - LEGION vs DO KONCA, Astra Invicta vs LGD'));
+  assert.deepEqual(feed.map((v) => v.short), [true, false, false]);
+  const active = [{ timeA: 'LGD Gaming', timeB: 'Astra Invicta' }];
+  assert.equal(matchForTitle(feed[1].title, active, 2), null);
+  assert.equal(matchForTitle(feed[2].title, active, 2), active[0]);
+});

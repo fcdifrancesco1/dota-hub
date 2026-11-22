@@ -814,13 +814,17 @@ async function fetchYoutubeChannel({ channel, video, match, tournament }, active
     if (!video && channelId && (match || tournament)) {
       const feed = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, { signal: AbortSignal.timeout(6000) })
         .then((f) => (f.ok ? f.text() : '')).catch(() => '');
-      const recent = parseYoutubeFeed(feed).filter((v) => Date.now() - v.published < 36 * 3600 * 1000);
+      // Fora shorts e melhores momentos; o VOD de ontem cita um time só ("Aurora vs Astra Invicta"),
+      // a live de hoje cita a partida inteira ("Astra Invicta vs LGD"), então exige os dois times
+      const recent = parseYoutubeFeed(feed).filter((v) => !v.short && !/highlights|recap/i.test(v.title) && Date.now() - v.published < 36 * 3600 * 1000);
       // Uma live por partida: a mais nova que cita os times
       const byMatch = new Map();
       for (const v of recent.sort((a, b) => b.published - a.published)) {
-        const m = matchForTitle(v.title, active);
-        const key = m && `${m.timeA}|${m.timeB}`;
-        if (key && !byMatch.has(key)) byMatch.set(key, { platform: 'youtube', channel: name, embed: v.videoId, live: true, title: v.title });
+        // A live do dia cita todas as partidas daquele stream: o vídeo vale para cada uma
+        for (const m of active.filter((a) => matchForTitle(v.title, [a], 2))) {
+          const key = `${m.timeA}|${m.timeB}`;
+          if (!byMatch.has(key)) byMatch.set(key, { platform: 'youtube', channel: name, embed: v.videoId, live: true, title: v.title, match: m });
+        }
       }
       if (byMatch.size) return [...byMatch.values()];
     }
@@ -900,8 +904,8 @@ async function handleStreams(res) {
     return [].concat(found || []).map((x) => ({ ...x, from: c }));
   }))).flat();
   const seen = new Set();
-  const live = checked.filter((c) => c?.live && c.embed && !seen.has(`${c.platform}:${c.embed}`) && seen.add(`${c.platform}:${c.embed}`));
-  const matchOf = (c) => matchForTitle(c.title, active) || c.from.match || null;
+  const live = checked.filter((c) => c?.live && c.embed && !seen.has(`${c.platform}:${c.embed}:${c.match?.timeA}`) && seen.add(`${c.platform}:${c.embed}:${c.match?.timeA}`));
+  const matchOf = (c) => c.match || matchForTitle(c.title, active) || c.from.match || null;
   // Canal do YouTube sem título (o servidor recebe a página sem os dados da live): vale a partida
   // do canal de mesmo nome na Twitch ou na Kick ("@BLASTDota" é o "blastdota")
   const bare = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');

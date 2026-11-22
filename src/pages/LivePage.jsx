@@ -75,8 +75,9 @@ export default function LivePage() {
         if (cancelled) return;
         // Canais sem partida identificada ficam: o título ainda pode apontar um jogo ao vivo (ver streams)
         const found = (data?.streams || []).map((s) => ({
-          id: `${s.platform || 'twitch'}:${s.embed || s.channel}`,
-          key: `live-${s.platform || 'twitch'}-${s.embed || s.channel}`,
+          // O mesmo vídeo do YouTube pode servir a duas partidas do mesmo stream
+          id: `${s.platform || 'twitch'}:${s.embed || s.channel}:${s.timeA || ''}`,
+          key: `live-${s.platform || 'twitch'}-${s.embed || s.channel}-${s.timeA || ''}`,
           platform: s.platform || 'twitch',
           embed: s.embed || s.channel,
           name: s.channel,
@@ -143,7 +144,9 @@ export default function LivePage() {
       if (s.timeA && findLiveGameFor({ timeA: s.timeA, timeB: s.timeB }, liveGames)) return s;
       const now = matchForTitle(s.title, live);
       return now ? { ...s, timeA: now.timeA, timeB: now.timeB } : s;
-    }).filter((s) => s.timeA && s.timeB);
+    }).filter((s, i, all) => s.timeA && s.timeB
+      // Duas partidas do mesmo stream trocadas para o jogo ao vivo viram um botão só
+      && all.findIndex((o) => o.platform === s.platform && o.embed === s.embed && o.timeA === s.timeA) === i);
   }, [matchStreams, liveGames, liveTotal, loading]);
   const current = (s) => (s && streams?.find((x) => x.id === s.id)) || s;
   // O canal na tela tem que estar na lista: sem escolha (ou se o escolhido saiu dela), abre o primeiro ou nenhum

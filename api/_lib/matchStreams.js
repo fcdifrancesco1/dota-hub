@@ -65,7 +65,8 @@ export function parseYoutubeFeed(xml) {
   return [...String(xml || '').matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(([, e]) => ({
     videoId: e.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/)?.[1] || null,
     title: decodeHtml(e.match(/<title>([^<]*)<\/title>/)?.[1] || '').trim(),
-    published: Date.parse(e.match(/<published>([^<]*)<\/published>/)?.[1] || '') || 0
+    published: Date.parse(e.match(/<published>([^<]*)<\/published>/)?.[1] || '') || 0,
+    short: /youtube\.com\/shorts\//.test(e)
   })).filter((v) => v.videoId);
 }
 
@@ -117,15 +118,18 @@ function teamInTitle(team, titleNorm) {
   const n = norm(team);
   if (n.length >= 3 && titleNorm.includes(n)) return true;
   const short = norm(String(team || '').replace(/^team\s+/i, ''));
-  return short.length >= 4 && titleNorm.includes(short);
+  if (short.length >= 4 && titleNorm.includes(short)) return true;
+  // "LGD Gaming" no título vem como "LGD"
+  const base = norm(String(team || '').replace(/\s+(gaming|esports?|team|club)$/i, ''));
+  return base.length >= 3 && base !== n && titleNorm.includes(base);
 }
 
-/** Partida que o título da transmissão anuncia (os dois times valem mais que um). */
-export function matchForTitle(title, matches) {
+/** Partida que o título da transmissão anuncia (os dois times valem mais que um; minTeams: 2 exige os dois). */
+export function matchForTitle(title, matches, minTeams = 1) {
   const t = norm(title);
   if (!t) return null;
   let best = null;
-  let bestScore = 0;
+  let bestScore = minTeams - 1;
   for (const m of matches || []) {
     const score = (teamInTitle(m.timeA, t) ? 1 : 0) + (teamInTitle(m.timeB, t) ? 1 : 0);
     if (score > bestScore) { best = m; bestScore = score; }
