@@ -21,6 +21,7 @@ import {
 } from '../services/api';
 import TeamLogo from '../utils/teamLogos';
 import TournamentChip from './TournamentChip';
+import HudScore from './HudScore';
 
 // Lê o primeiro valor definido entre possíveis nomes de campo da API (sem inventar números)
 function pick(obj, keys) {
@@ -861,26 +862,11 @@ export default function LiveMatchDetail({
 
           <div className="flex flex-col items-center shrink-0">
             {hasScore ? (
-              <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-7 py-2 sm:py-3 rounded-2xl bg-surface-2/90 border border-rose-500/40 font-mono text-3xl sm:text-6xl font-semibold">
-                <span className="text-emerald-400">{scoreA}</span>
-                <span className="text-gray-400 text-2xl sm:text-4xl">:</span>
-                <span className="text-rose-400">{scoreB}</span>
-              </div>
+              <HudScore large radKills={scoreA} direKills={scoreB} duration={durationSec} goldLead={matchData?.radiant_lead || 0}
+                radWins={seriesA} direWins={seriesB} winsNeeded={{ BO1: 1, BO3: 2, BO5: 3 }[formatStr] ?? 2} />
             ) : (
               <div className="px-4 py-2 rounded-xl bg-surface-2 border border-line font-mono text-sm font-medium text-gray-400">
                 Aguardando dados
-              </div>
-            )}
-            <span className="text-[11px] sm:text-[11px] text-gray-400 font-mono mt-1.5">Placar de abates</span>
-
-            {matchData?.radiant_lead !== undefined && matchData?.radiant_lead !== null && matchData?.radiant_lead !== 0 && (
-              <div className={`mt-2 text-[11px] sm:text-xs font-mono font-medium px-3 py-1 rounded-full flex items-center gap-1.5 border ${
-                matchData.radiant_lead > 0
-                  ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                  : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
-              }`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                {matchData.radiant_lead > 0 ? teamAName : teamBName} +{(Math.abs(matchData.radiant_lead) / 1000).toFixed(1)}k de ouro
               </div>
             )}
           </div>

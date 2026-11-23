@@ -8,15 +8,14 @@ import {
   ExternalLink,
   ChevronRight,
   LayoutGrid,
-  X,
-  Sun,
-  Moon
+  X
 } from 'lucide-react';
 import { useApp, findLiveGameFor } from '../context/AppContext';
 import { useOpenLiveMatch } from '../utils/liveMatchRoute';
 import TeamLogo from '../utils/teamLogos';
 import BetweenMapsCard from '../components/BetweenMapsCard';
 import { seriesTypeLabel } from '../utils/seriesStatus';
+import HudScore from '../components/HudScore';
 import { getHeroImg, getHeroName } from '../services/api';
 import { matchForTitle } from '../../api/_lib/matchStreams.js';
 
@@ -455,11 +454,6 @@ export default function LivePage() {
 }
 
 
-const fmtClock = (secs) => {
-  const s = Math.max(0, Math.floor(secs || 0));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-};
-
 // Os 5 heróis de um lado, na ordem do placar da Valve; sem jogadores, cai para os picks
 function sideHeroes(players, picks) {
   const list = (players || []).filter((p) => p?.hero_id).slice(0, 5);
@@ -538,33 +532,12 @@ function StreamOnlyCard({ match, onWatch }) {
   );
 }
 
-// Mapas vencidos na série: os traços amarelos inclinados nos cantos de cima do relógio, como no jogo
-function SeriesTicks({ wins, total, side }) {
-  return (
-    <span className={`absolute top-1 flex gap-0.5 ${side === 'left' ? 'left-2 flex-row-reverse' : 'right-2'}`} aria-hidden="true">
-      {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={`h-3.5 w-1.5 ${side === 'left' ? '-skew-x-[18deg]' : 'skew-x-[18deg]'} ${i < (wins || 0) ? 'bg-amber-300 shadow-[0_0_6px_rgba(252,211,77,0.6)]' : 'bg-white/10'}`} />
-      ))}
-    </span>
-  );
-}
-
 function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
   const radName = game.radiant_name || game.team1 || 'Radiant';
   const direName = game.dire_name || game.team2 || 'Dire';
   const radKills = game.radiant_score ?? game.score1 ?? 0;
   const direKills = game.dire_score ?? game.score2 ?? 0;
   const goldLead = game.radiant_lead || game.gold_lead || 0;
-  // Ciclo do jogo: 5 min de dia, 5 de noite, começando de dia
-  const night = game.duration > 0 && Math.floor(game.duration / 300) % 2 === 1;
-  // Vantagem de ouro como no jogo: "▲ 1.2k" embaixo do lado que está na frente
-  const goldChip = goldLead !== 0 && (
-    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/50 font-semibold text-[11px] text-amber-300 tabular-nums">
-      <span className="text-emerald-400 text-[9px]" aria-hidden="true">▲</span>
-      {(Math.abs(goldLead) / 1000).toFixed(1)}k
-      <span className="sr-only"> de ouro a mais</span>
-    </span>
-  );
   // MD3 → 2 vitórias, MD5 → 3; MD1 não tem pontos
   const winsNeeded = [1, 2, 3][game.series_type] ?? 2;
   const radiant = sideHeroes(game.radiant_players, game.radiant_picks || game.picks?.radiant);
@@ -592,27 +565,9 @@ function LiveHudCard({ game, constants, streams, onOpen, onWatch }) {
         <div className="col-span-2 sm:col-span-1 sm:order-1 grid grid-cols-5 gap-1 p-1 rounded-md bg-gradient-to-r from-transparent to-emerald-500/10">
           {radiant.map((p, i) => <HeroSlot key={`r${i}`} p={p} constants={constants} />)}
         </div>
-        {/* Placar como o do jogo: abates em branco dos lados da placa do relógio, série nos cantos da placa */}
-        <div className="col-span-2 sm:col-span-1 order-first sm:order-2 grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 lg:gap-x-4 gap-y-1">
-          <span className="text-right font-sans font-bold text-4xl lg:text-5xl leading-none text-white tabular-nums [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">{radKills}</span>
-          <div className="relative">
-            <div
-              className="w-24 lg:w-28 pt-2.5 pb-3 flex flex-col items-center gap-0.5 bg-gradient-to-b from-slate-700/80 to-slate-950 border-t border-white/10"
-              style={{ clipPath: 'polygon(0 0, 100% 0, 88% 100%, 12% 100%)' }}
-            >
-              {night ? <Moon className="w-4 h-4 text-sky-200" aria-label="Noite" /> : <Sun className="w-4 h-4 text-amber-200" aria-label="Dia" />}
-              <time className="font-sans font-bold text-sm text-white tabular-nums">{fmtClock(game.duration)}</time>
-            </div>
-            {winsNeeded > 1 && <>
-              <SeriesTicks wins={game.radiant_series_wins} total={winsNeeded} side="left" />
-              <SeriesTicks wins={game.dire_series_wins} total={winsNeeded} side="right" />
-              <span className="sr-only">Série {game.radiant_series_wins || 0} a {game.dire_series_wins || 0}</span>
-            </>}
-          </div>
-          <span className="text-left font-sans font-bold text-4xl lg:text-5xl leading-none text-white tabular-nums [text-shadow:0_2px_6px_rgba(0,0,0,0.6)]">{direKills}</span>
-          <span className="flex justify-end min-h-[20px]">{goldLead > 0 && goldChip}</span>
-          <span />
-          <span className="flex justify-start min-h-[20px]">{goldLead < 0 && goldChip}</span>
+        <div className="col-span-2 sm:col-span-1 order-first sm:order-2">
+          <HudScore radKills={radKills} direKills={direKills} duration={game.duration} goldLead={goldLead}
+            radWins={game.radiant_series_wins} direWins={game.dire_series_wins} winsNeeded={winsNeeded} />
         </div>
         <div className="col-span-2 sm:col-span-1 sm:order-3 grid grid-cols-5 gap-1 p-1 rounded-md bg-gradient-to-l from-transparent to-rose-500/10">
           {dire.map((p, i) => <HeroSlot key={`d${i}`} p={p} constants={constants} />)}
